@@ -1,0 +1,106 @@
+﻿@model List<KGERP.Service.ServiceModel.SaleReturnDetailModel>
+<table class="table">
+    <tr style="background-color:#4CAF50;color:#FFFFFF">
+        <th>Code</th>
+        <th>Product Name</th>
+        <th>Unit</th>
+        <th>Base</th>
+        <th>Cash</th>
+        <th>Carrying</th>
+        <th>Special</th>
+        <th>Addition</th>
+        <th>Delivered Qty</th>
+        <th>Ready to Return</th>
+        <th>Sale Rate</th>
+        <th>Actual Rate</th>
+        <th>Return Amount</th>
+    </tr>
+    @for (int i = 0; i < Model.Count(); i++)
+    {
+    <tr>
+        <td>
+            @Html.Hidden("SaleReturnDetails.Index", (@i))
+            @Html.Hidden("SaleReturnDetails[" + i + "].ProductId", Model[i].ProductId)
+            @Html.Hidden("SaleReturnDetails[" + i + "].COGSRate", Model[i].COGSRate)
+            @Html.Hidden("SaleReturnDetails[" + i + "].ProductId", Model[i].ProductId)
+            @Html.Hidden("SaleReturnDetails[" + i + "].Rate", Model[i].Rate)
+            @Html.DisplayFor(model => model[i].ProductCode)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model[i].ProductName)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model[i].Unit)
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].BaseCommission", Model[i].BaseCommission, new { @readonly = "readonly", @class = "form-control", @style = "width:70px;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].CashCommission", Model[i].CashCommission, new { @readonly = "readonly", @class = "form-control", @style = "width:70px;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].CarryingCommission", Model[i].CarryingCommission, new { @readonly = "readonly", @class = "form-control", @style = "width:70px;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].SpecialDiscount", Model[i].SpecialDiscount, new { @readonly = "readonly", @class = "form-control", @style = "width:70px;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].AdditionPrice", Model[i].AdditionPrice, new { @readonly = "readonly", @class = "form-control", @style = "width:70px;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].DeliveredQty", Model[i].DeliveredQty, new { @readonly = "readonly", @class = "form-control", @style = "width:70px;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].Qty", Model[i].Qty, new { @id = "SaleReturnDetails_" + i + "__Qty", @onkeyup = "changeRemainingQty(" + i + ")", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver form-control", @style = "width:100px;font-weight:bold;color:green" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].Rate", Model[i].Rate, new { @id = "SaleReturnDetails_" + i + "__Rate", @type = "textbox", @autocomplete = "off", @readonly = "readonly", @class = "readyToDeliver form-control", @style = "width:100px;font-weight:bold;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].ActualRate", Model[i].ActualRate, new { @id = "SaleReturnDetails_" + i + "__ActualRate", @type = "textbox", @autocomplete = "off", @readonly = "readonly", @class = "readyToDeliver form-control", @style = "width:100px;font-weight:bold;" })
+        </td>
+        <td>
+            @Html.TextBox("SaleReturnDetails[" + i + "].Amount", Model[i].Amount, new { @id = "SaleReturnDetails_" + i + "__Amount", @type = "textbox", @autocomplete = "off", @readonly = "readonly", @class = "readyToDeliver form-control", @style = "width:100px;font-weight:bold;" })
+        </td>
+    </tr>
+
+    }
+
+    <tr>
+        <td colspan="13">
+            <input type="submit" value="Submit" onclick='return confirm("Are you sure you want to submit?");' class="btn btn-success" data-toggle="modal" style="float:right; margin-left:2px" />
+            <a href="@Url.Action("Index","SaleReturn",new {companyId=Session["CompanyId"]})" class="btn btn-danger" style="float:right">
+                Close <i class="fa fa-close" aria-hidden="true"></i>
+            </a>
+            &nbsp;
+        </td>
+    </tr>
+
+</table>
+
+
+
+
+<script>
+
+
+
+    function changeRemainingQty(id) {
+        var idQty = 'SaleReturnDetails_' + id + '__Qty';
+        var idActualRate = 'SaleReturnDetails_' + id + '__ActualRate';
+        var idDeliveredQty = 'SaleReturnDetails_' + id + '__DeliveredQty';
+        var idAmount = 'SaleReturnDetails_' + id + '__Amount';
+
+
+        var returnQty = $('#' + idQty).val();
+        var deliveredQty = $('#' + idDeliveredQty).val();
+
+        $('#' + idAmount).val(parseFloat($('#' + idQty).val()) * parseFloat($('#' + idActualRate).val()));
+
+        if (parseFloat(returnQty) > parseFloat(deliveredQty)) {
+            alert("Return Limit Exceeded !");
+            $('#' + idQty).val("");
+            $('#' + idAmount).val(0);
+        }
+    }
+</script>

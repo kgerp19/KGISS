@@ -1,0 +1,167 @@
+﻿
+
+
+@{
+    ViewData["Title"] = "Store In";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string collapsedBox = "";
+
+}
+
+@model KGERP.Services.WareHouse.VMWareHousePOReceivingSlave
+<section class="content-header">
+    <h1>
+        Return History of @Model.POCID
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li><a href="~/WareHouse/WareHousePOReceivingSlave">Store In</a></li>
+        <li class="active">Store in Information</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="box-danger">
+                <div class="box-header">
+
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+
+
+                    <div class="col-md-1"> </div>
+                    <div class="col-md-10">
+                        <table class="table">
+
+                            <tr>
+                                <td><b>Purchase Order</b></td>
+                                <td>:</td>
+                                <td>@Model.POCID</td>
+
+                                <td><b>PO Date</b></td>
+                                <td>:</td>
+                                <td>@Model.PODate.Value.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <td><b>Supplier Name</b></td>
+                                <td>:</td>
+                                <td>@Model.SupplierName</td>
+
+                                <td><b>Delivery Address</b></td>
+                                <td>:</td>
+                                <td>@Model.DeliveryAddress</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-1"> </div>
+
+
+
+                    <!--Body Will by Start Here-->
+
+                    <div class="table-responsive col-md-12 text-nowrap">
+                        <table id="tableReceiving" style="width: 100%; font-size: 12px;" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Challan CID</th>
+                                    <th>Supplier Challan</th>
+                                    <th>Challan Date</th>
+
+
+                                    <th>Item Name </th>
+                                    <th>Item Description</th>
+                                    <th style="text-align:center;">PO Quantity</th>
+                                    <th style="text-align:center;">Return Quantity</th>
+                                    <th style="text-align:center;">Total Received</th>
+                                    @*<th style="text-align:center;">Total Return</th>*@
+                                    <th style="text-align:center;">Remaining Quantity</th>
+
+                                    <th style="text-align:center;">Loss Quantity</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in Model.DataListSlave)
+                                {
+                                    <tr style="border-bottom:1px solid">
+                                        <td><a title="Store In Information of @item.ChallanCID" href="~/WareHouse/WareHousePurchaseReturnSlave?companyId=@Model.CompanyFK&materialReceiveId=@item.MaterialReceiveId" target="_blank">@item.ChallanCID</a></td>
+                                        <td><a title="Store In Report of @item.Challan" href="~/WareHouse/WareHousePurchaseReturnSlaveReport?companyId=@Model.CompanyFK&materialReceiveId=@item.MaterialReceiveId" target="_blank">@item.Challan</a></td>
+
+
+                                        <td>@item.ChallanDate.Value.ToString("dd/MM/yyyy")</td>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.ProductDescription</td>
+                                        <td style="text-align:center;">@item.POQuantity</td>
+                                        <td style="text-align:center;"><b>@item.ReceivedQuantity</b></td>
+                                        <td style="text-align:center;">@item.PriviousReceivedQuantity</td>
+                                        @*<td style="text-align:center;">@item.ReturnQuantity</td>*@
+
+                                        <td style="text-align:center;">@item.RemainingQuantity</td>
+                                        <td style="text-align:center;">@item.StockLossQuantity</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @if (Model.ID > 0)
+                    {
+                        <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+@section scripts {
+
+    <script>
+        $(function () {
+            $("#tableReceiving").DataTable({
+                "ordering": false
+
+            });
+            SummerizeTable('#tableReceiving', 0);
+            SummerizeTable('#tableReceiving', 1);
+            SummerizeTable('#tableReceiving', 2);
+        });
+        function SummerizeTable(table, indexno) {
+            $(table).each(function () {
+                $(table).find('td').each(function () {
+                    var $this = $(this);
+                    var col = indexno;
+                    var html = $this.html();
+                    var row = $(this).parent()[0].rowIndex;
+                    var span = 1;
+                    var cell_above = $($this.parent().prev().children()[col]);
+
+                    // look for cells one above another with the same text
+                    while (cell_above.html() === html) { // if the text is the same
+                        span += 1; // increase the span
+                        cell_above_old = cell_above; // store this cell
+                        cell_above = $(cell_above.parent().prev().children()[col]); // and go to the next cell above
+                    }
+
+                    // if there are at least two columns with the same value,
+                    // set a new span to the first and hide the other
+                    if (span > 1) {
+                        // console.log(span);
+                        $(cell_above_old).attr('rowspan', span);
+                        $this.hide();
+                    }
+
+                });
+            });
+        }
+    </script>
+}

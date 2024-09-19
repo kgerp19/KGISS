@@ -1,0 +1,262 @@
+﻿@model KGERP.Service.ServiceModel.ConvertedProductModel
+
+@{
+    ViewBag.Title = "CreateOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <h3>
+        Product Conversion
+    </h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+        <li class="active"><a href="@Url.Action("Index", new { companyId = Model.CompanyId })">Product Conversion List</a></li>
+    </ol>
+</section>
+
+@using (Html.BeginForm("CreateOrEdit", "ConvertedProduct", FormMethod.Post, new { id = "issueSlaveFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyFK" })
+                <div class="box-danger">
+                    <div class="box-body">
+                        @if (Model.ConvertedProductId > 0)
+                        {
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <th style="width:18%">
+                                            Invoice No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.InvoiceNo</label>
+                                        </td>
+                                        <th style="width:18%"> Converted Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.ConvertedDate.ToString("dd-MMM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Convert From</th>
+                                        <th>:</th>
+                                        <td>@Model.ProductFromName</td>
+                                        <th>Convert To</th>
+                                        <th>:</th>
+                                        <td>@Model.ProductToName</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Converted Quantity</th>
+                                        <th>:</th>
+                                        <td>@Model.ConvertedQty</td>
+                                        <th></th>
+                                        <th></th>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+                        else
+                        {
+                            <div class="row mb-2">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="txtIssueDate" class="form-control-label">Invoice No</label>
+                                        <div class="">
+                                            @Html.EditorFor(model => model.InvoiceNo, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(model => model.InvoiceNo, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Convert From</label>
+                                        <div class="">
+                                            @Html.EditorFor(model => model.ProductFromName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductFromName" } })
+                                            @Html.HiddenFor(model => model.ConvertFrom, new { id = "ddlProductFromFK" })
+                                            @Html.HiddenFor(model => model.ConvertFromUnitPrice, new { id = "unitPriceFrom" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Stock Available Qty</label>
+                                        <div class="">
+                                            @Html.EditorFor(model => model.StockAvailableQty, new { htmlAttributes = new { @id = "stockAvailableQty", @class = "form-control", @readonly = "readonly" } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="txtIssueDate" class="form-control-label">Convert To</label>
+                                        <div class="">
+                                            @Html.EditorFor(model => model.ProductToName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductToName" } })
+                                            @Html.HiddenFor(model => model.ConvertTo, new { id = "ddlProductToFK" })
+                                            @Html.HiddenFor(model => model.ConvertedUnitPrice, new { id = "unitPriceTo" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Converted Qty</label>
+                                        <div class="">
+                                            @Html.EditorFor(model => model.ConvertedQty, new { htmlAttributes = new { @onkeyup = "checkAvailablity()", @id = "convertedQty", @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.ConvertedQty, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Converted Date</label>
+                                        <div class="">
+                                            @Html.EditorFor(model => model.ConvertedDate, new { htmlAttributes = new { @class = "datepicker", @id = "convertedDate" ,@autocomplete = "off" } })
+                                            @Html.ValidationMessageFor(model => model.ConvertedDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("Index","ConvertedProduct",new { companyId=Model.CompanyId})" class="btn btn-warning">
+                                        <i class="fa fa-arrow-circle-o-left" aria-hidden="true"></i>  Back List
+                                    </a>
+                                </div>
+                                <div class="col-md-3"></div>
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-success">Submit</button>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts
+{
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+
+    function checkAvailablity() {
+        var stockAvailableQty = $("#stockAvailableQty").val()
+        var convertedQty = $("#convertedQty").val()
+        if (parseFloat(convertedQty) > parseFloat(stockAvailableQty)) {
+            $("#convertedQty").val(0);
+            alert("Stock limit exceeded !")
+        }
+    }
+
+
+
+    $(function () {
+        $("#txtProductFromName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Products/AutoComplete/',
+                    data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                    dataType: "json",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }))
+                    },
+                    error: function (response) {
+                    },
+                    failure: function (response) {
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#ddlProductFromFK").val(i.item.val);
+                $("#unitPriceFrom").val(i.item.CostingPrice);
+
+            },
+            minLength: 1,
+            change: function (event, ui) {
+                loadStockAvailableQuantity(ui.item.val);
+            }
+
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+    });
+
+ 
+  
+         function loadStockAvailableQuantity(productId) {
+
+                var stockIdForm = 2;
+                var companyId = $('#CompanyFK').val();
+                var date = $('#convertedDate').val();
+
+            $.ajax({
+                url: "/ConvertedProduct/GetStockAvailableQuantity/",
+                dataType: "json",
+                data: {
+                    companyId: companyId, productId: productId, stockFrom: stockIdForm,  selectedDate:date
+                    },
+                type: "GET",
+                async: true,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#stockAvailableQty').val(result);
+                    if (result < 0) {
+                        $("#stockAvailableQty").css('color', 'red');
+                        $("#stockAvailableQty").css('font-weight', 'bold');
+                    }
+                    else {
+                        $("#stockAvailableQty").css('color', 'green');
+                        $("#stockAvailableQty").css('font-weight', 'bold');
+                    }
+                },
+                error: function (xhr) {
+                }
+            });
+        }
+
+    $(function () {
+        $("#txtProductToName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Products/AutoComplete/',
+                    data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                    dataType: "json",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }))
+                    },
+                    error: function (response) {
+                    },
+                    failure: function (response) {
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#ddlProductToFK").val(i.item.val);
+                $("#unitPriceTo").val(i.item.CostingPrice);
+            },
+            minLength: 1
+
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+    });
+</script>
+}

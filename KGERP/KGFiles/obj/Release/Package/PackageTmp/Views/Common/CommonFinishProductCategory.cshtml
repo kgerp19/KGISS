@@ -1,0 +1,205 @@
+﻿
+
+@{
+    ViewData["Title"] = "Product Category";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.ServiceModel.ProductCategoryModel
+<script src="~/bower_components/jquery/dist/jquery.min.js"></script>
+
+<section class="content-header">
+    <h1>
+        Category
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Category</li>
+    </ol>
+</section>
+@using (Html.BeginForm("CommonFinishProductCategory", "Common", FormMethod.Post, new { id = "commonProductCategoryFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-3">
+                    <div class="box">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="box-danger">
+                            <div class="box-header">
+                                <h4>Add Category</h4>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                @Html.HiddenFor(model => model.ProductCategoryId, new { id = "productCategoryId" })
+                                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+
+                                <div class="form-group">
+                                    @Html.TextBoxFor(model => model.Name, new { id = "txtProductCategoryName", @class = "form-control input-sm", @placeholder = "Category Name", required = "true" })
+                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.TextAreaFor(model => model.Remarks, new { id = "txtRemarks", @class = "form-control input-sm", @placeholder = "Remarks" })
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="box">
+
+                        <div class="box-danger">
+                            <div class="box-header">
+                                <h4>Category List</h4>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+
+                                <div class="table-responsive col-md-12">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>Name</th>
+                                                <th>Remarks</th>
+
+                                                <th style="text-align:center;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td id="tdProductCategoryName_@item.ProductCategoryId">@item.Name</td>
+                                                    <td id="tdRemarks_@item.ProductCategoryId">@item.Remarks</td>
+
+
+                                                    <td style="text-align:center;">
+
+                                                        <a id="@item.ProductCategoryId" onclick="makeEditble(this);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+
+                                                        <a id="@item.ProductCategoryId" onclick="makeDeletable(@item.ProductCategoryId);" class="linkPointer" data-toggle="modal" data-target="#productCategoryDeleteModal" title="Delete"
+                                                           data-placement="top">
+                                                            <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                        </a>
+
+                                                        <a href="~/Configuration/CommonProductSubCategory/@item.ProductCategoryId" class="btn btn-success btn-sm">Subcategory</a>
+                                                        <a href="~/Configuration/CommonProduct/0/@item.ProductCategoryId" class="btn btn-warning btn-sm">Product Style</a>
+
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+}
+
+
+@using (Html.BeginForm("CommonFinishProductCategory", "Common", FormMethod.Post, new { id = "commonProductCategoryDeleteFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.ProductCategoryId, new { Value = "", id = "productCategoryIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.CompanyId)
+
+    <div class="modal fade" id="productCategoryDeleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Category Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+        });
+
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#productCategoryId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#txtProductCategoryName').val($('#tdProductCategoryName_' + rowId).text().trim());
+                $('#txtRemarks').val($('#tdRemarks_' + rowId).text().trim());
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            }
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#productCategoryIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+
+            }
+        }
+        function resetForm() {
+            $('#commonProductCategoryFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+    </script>
+}
+
+
+
+
+

@@ -1,0 +1,122 @@
+﻿@model KGERP.Service.Implementation.TaskManagment.TaskManagementEvolutionVM
+@{
+    ViewBag.Title = "Task Create";
+}
+
+<section class="content-header">
+    <h3>
+        Task Create
+    </h3>
+   
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("AllTask", "TaskManagementEvolution")" class="btn btn-primary btn-xs " title="Task List">
+                <i class="fa fa-plus" style="font-size:15px;" aria-hidden="true">Task List</i>
+            </a>
+        </li>
+    </ol>
+</section>
+
+<div id="MessageDiv" style="text-align: center; background-color: #007bff;color:#fff;">
+    @Html.Raw(TempData["FeedbackMessage"] as string)
+</div>
+
+@using (Html.BeginForm("TaskCreateOrUpdate", "TaskManagementEvolution", FormMethod.Post, new { id = "taskCreateForm", @class = "formValidator" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    @Html.HiddenFor(model => model.WorkId)
+
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="message-text" class="col-form-label">Reporting Manager</label>
+            @Html.EditorFor(model => model.Manager, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", required = "required" } })
+            @Html.HiddenFor(model => model.ManagerId)
+            @Html.ValidationMessageFor(model => model.Manager, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            @Html.LabelFor(model => model.TaskTitle, htmlAttributes: new { @class = "control-label" })
+            @Html.TextBoxFor(model => model.TaskTitle, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.TaskTitle, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="form-group">
+            @Html.LabelFor(model => model.ExpectedEndDate, htmlAttributes: new { @class = "control-label" })
+            <div style="display:flex">
+                @Html.EditorFor(model => model.ExpectedEndDate, new { htmlAttributes = new { @autocomplete = "off", @class = "datepicker form-control", @data_val = "true" } })
+            </div>
+            @Html.ValidationMessageFor(x => x.ExpectedEndDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-group">
+            @Html.LabelFor(model => model.TaskDescription, htmlAttributes: new { @class = "control-label" })
+            @Html.TextAreaFor(model => model.TaskDescription, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.TaskDescription, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="col-md-12" style="display:none;">
+        <div class="form-group">
+            @Html.HiddenFor(model => model.TaskStatusID, new { @class = "form-control", Value = 5 })
+        </div>
+    </div>
+    <div class="col-md-2">
+        @if (Model.WorkId == 0)
+        {
+            <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-plus">&nbsp; Add Task</button>
+        }
+        else
+        {
+            <button type="submit" id="btnUpdate" style="width:100%" class="btn btn-primary fa fa-plus">&nbsp; Update Task</button>
+        }
+    </div>
+}
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        ToggleShowHide();
+        $(function () {
+            $("#Manager").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                        dataType: "json",
+                        data: { prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.Name, value: item.Name, id: item.Id };
+                            }));
+                        },
+                        error: function (e) {
+                        }
+                    });
+                },
+                minLength: 1,
+                delay: 500,
+                autoFocus: true,
+                select: function (event, ui) {
+                    $("#ManagerId").val(ui.item.id);
+                }
+            });
+        });
+    });
+    function ToggleShowHide() {
+        var success = $("#MessageDiv").html();
+        if (!(success == '')) {
+            setTimeout(function () {
+                $("#MessageDiv").toggle("hide");
+            },
+                5000);
+        }
+    };
+</script>

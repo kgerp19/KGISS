@@ -1,0 +1,1448 @@
+﻿@model KGERP.Data.CustomModel.CrmScheduleListVm
+@{
+    ViewBag.Title = "Client Details";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+    int sl = 0;
+}
+
+<div class="row mb-3">
+    <a class="btn hvr-sweep-to-bottom  text-dark border " href="@Url.Action("AddNewClient","Crms", new {companyId=Model.ClientData.CompanyId})"><i class="fa-plus"></i> &nbsp; New Client</a>
+    <a class="btn btn-warning" href="@Model.ReturnUrl">Back to List</a>
+    <a class="btn btn-info " href="@Url.Action("UpdateClientById", "Crms" , new {companyId= @Model.ClientData.CompanyId,@Model.ClientData.ClientId})">Edit</a>
+    <button class="btn btn-sm btn-secondary" onclick="refreshWindow()">
+        <i class="fa fa-sync"></i> &nbsp; Refresh
+    </button>
+</div>
+
+@Html.Partial("_ErrorMessage")
+<div class="row">
+    <div class="col-md-4">
+        <table class="table">
+            
+            <tbody>
+
+                <tr>
+                    <td class="p-1" colspan="3">
+                        <strong><i>Client - Personal Information</i></strong>
+                    </td>
+                    <td class="p-1">
+
+                        <a id="EditBtn" onclick="editSection(@Model.ClientData.ClientId)"
+                           class="btn btn-sm btn-primary "><i class="fa fa-edit"></i></a>
+
+
+
+                        <button type="button" class="btn btn-primary ml-5 d-none" id="FirstSection">Save</button>
+                        <button class=" d-none ml-5  btn btn-sm btn-secondary" id="rfrsh" style="width:58px;" onclick="refreshWindow()">
+                            <i class="fa fa-sync"></i> &nbsp;
+                        </button>
+                    </td>
+
+                </tr>
+                <tr class="d-none">
+                    <td class="d-none">
+                        <input id="mobb" value="@Model.ClientData.MobileNo" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="pb-1" style="width:30%;">Name</td>
+                    <td class="pb-1" style="width:1%;">:</td>
+                    <td class="pb-1" id="TxtName" style="width:69%;">@Model.ClientData.Name</td>
+                    <td class="pb-1 d-none " id="EditTxtName" style="width:69%;"> <input id="InName" class="form-control" value="@Model.ClientData.Name" /></td>
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Gender</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtGender">@Model.ClientData.GenderText</td>
+                    <td class="pb-1 d-none" id="EditTxtGender">
+                        <select required class=" form-control col-md-12  " asp-for="staff.GenderId" name="GenderId" id="Gender">
+                            <option value="0">---Select Gender  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.GenderList)
+                                {
+                                    if (item.Id == Model.ClientData.GenderId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+
+
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Religion</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtReligion">@Model.ClientData.ReligionText</td>
+                    <td class="pb-1 d-none" id="EditReligion">
+                        <select required class=" form-control col-md-12  " name="ReligionId" id="Religion">
+                            <option value="0">---Select Religion  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.ReligionList)
+                                {
+                                    if (item.Id == Model.ClientData.ReligionId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Date of Birth</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtDob">@Model.ClientData.DateofBirthText</td>
+                    <td class="pb-1 d-none" id="EdittxtDob"><input id="dob" class="form-control" value="@Model.ClientData.DateofBirthText" />  </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Mobile</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtMobile">@Model.ClientData.MobileNo</td>
+                    <td class="pb-1 d-none" id="EditTxtMobile"> <input id="mobilenum" class="form-control" value="@Model.ClientData.MobileNo" />     </td>
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Mobile(2)</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtMobile2">@Model.ClientData.MobileNo2</td>
+                    <td class="pb-1 d-none" id="EditMobile2"><input id="mob2" class="form-control" value="@Model.ClientData.MobileNo2" />  </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Email</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtEmail">
+                        @Model.ClientData.Email
+                    </td>
+                    <td class="pb-1 d-none" id="EditTxtEmail">
+                        <input id="email" class="form-control" value=" @Model.ClientData.Email" />
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Eamil(2)</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtEmail2">
+                        @Model.ClientData.Email2
+                    </td>
+                    <td class="pb-1 d-none" id="EditTxtEmail2">
+                        <input class="form-control" id="email2" value="@Model.ClientData.Email2" />
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Job Title</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1 " id="txtjobtitle">@Model.ClientData.JobTitle</td>
+                    <td class="pb-1 d-none" id="EditJobtitle"><input id="job" class="form-control" value=" @Model.ClientData.JobTitle" /></td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Organization</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1 " id="TextOrganzition">@Model.ClientData.OrganizationText</td>
+                    <td class="pb-1 d-none" id="EditOrganization"> <input id="org" class="form-control" value="@Model.ClientData.OrganizationText" /></td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Date OF First Meet</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="dt">
+                        @if (Model.ClientData.DateOfContact == null)
+                        {
+                            @Model.ClientData.DateOfContact
+                        }
+                        else
+                        {
+                            @Model.ClientData.DateOfContact.Value.ToString("dd-MMM-yyy")
+                        }
+
+                        @*<td class="pb-1 d-none" id="EditRemarks">
+                    <input class="form-control" id="Remarks" value=" @Model.ClientData.Remarks" />
+                </td>*@
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Remarks</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="TxtRemarks">
+                        @Model.ClientData.Remarks
+                        </td>
+
+                    <td class="pb-1 d-none" id="EditRemarks">
+                        <input class="form-control" id="Remarks" value=" @Model.ClientData.Remarks" />
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Create date</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" >
+                        @Model.ClientData.CreatedDate.ToString("dd/MM/yyyy")
+                        </td>
+
+
+                </tr>
+                <tr>
+                    <td class="p-1" colspan="3">
+                        <strong><i>Service Information</i></strong>
+                    </td>
+                    <td class="p-1" colspan="3">
+                        <a id="EditBtn3" onclick="editSection3(@Model.ClientData.ClientId)"
+                           class="btn btn-sm btn-primary "><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-primary ml-5 d-none" id="ThirdSection">Save</button>
+                        <button class=" d-none ml-5  btn btn-sm btn-secondary" id="rfrsh2" style="width:58px;" onclick="refreshWindow()">
+                            <i class="fa fa-sync"></i> &nbsp;
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Dealing Officer</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="resposible">
+                        @Model.ClientData.ResponsibleOfficeName
+                    </td>
+                    <td class="pb-1 d-none" id="EditResposibleOfcr">
+                        <select required class=" form-control col-md-12  " name="ResponsibleOfficerId" id="ResponsibleOfficerId">
+                            <option value="0">---Select Dealing Officer --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.DealingOfficerList)
+                                {
+                                    if (item.Id == Model.ClientData.ResponsibleOfficerId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+
+
+
+
+                </tr>
+
+                <tr>
+                    <td class="pb-1">Project</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="txtproject">
+                        @Model.ClientData.ProjectText
+                    </td>
+                    <td class="pb-1 d-none" id="EditProject">
+                        <select required class=" form-control col-md-12  " name="ProjectId" id="ProjectId">
+                            <option value="0">---Select Dealing Officer --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.ProjectList)
+                                {
+                                    if (item.Id == Model.ClientData.ProjectId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Type of Interest</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="typeofinterest">
+                        @Model.ClientData.TypeofInterestText
+                    </td>
+
+                    <td class="pb-1 d-none" id="EditTypeOfInterest">
+                        <select required class=" form-control col-md-12  " name="TypeofInterestId" id="TypeofInterestId">
+                            <option value="0">---Select Type Of Interest --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.TypeofInterestList)
+                                {
+                                    if (item.Id == Model.ClientData.TypeofInterestId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+
+
+
+
+
+                </tr>
+
+
+                <tr>
+                    <td class="pb-1">Service Note</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="">
+                        <a class="btn btn-primary" id="NoteBox" onclick="RemarksView(@Model.ClientData.ClientId)" data-toggle="modal" data-target="#NoteModal3">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        @(Model.NoteObjS==null?"": Model.NoteObjS.Notes)
+                        <br />
+                        @(Model.NoteObjS==null?"" : Model.NoteObjS.ModiifyDate.ToString("dd-MMM-yyyy"))
+
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td class="p-1" colspan="3">
+                        <strong><i>Marketing Information</i></strong>
+                    </td>
+                    <td class="p-1" colspan="3">
+                        <a id="EditBtn2" onclick="editSection2(@Model.ClientData.ClientId)"
+                           class="btn btn-sm btn-primary "><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-primary ml-5 d-none" id="SecondSection">Save</button>
+                        <button class=" d-none ml-5  btn btn-sm btn-secondary" style="width:58px;" id="rfrsh3" onclick="refreshWindow()">
+                            <i class="fa fa-sync"></i> &nbsp;
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Source of Media</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="Sourcemedia">
+                        @Model.ClientData.SourceofMediaText
+                    </td>
+
+                    <td class="pb-1 d-none" id="EditSourceOfMarketing">
+                        <select required class=" form-control col-md-12  " name="SourceOfMediaId" id="SourceOfMedia">
+                            <option value="0">---Select SourceOfMedia  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.SourceofMediaList)
+                                {
+                                    if (item.Id == Model.ClientData.SourceofMediaId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Campaign Name</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="CampainName">
+                        @Model.ClientData.CampaignText
+                    </td>
+                    <td class="pb-1 d-none" id="EditCampainName">
+                        <input class="form-control" id="Campaigntxt" value="@Model.ClientData.CampaignText" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Promotional Offer</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="promotion">
+                        @Model.ClientData.OfferText
+                    </td>
+                    <td class="pb-1 d-none" id="EditPromotionTxt">
+                        <select required class=" form-control col-md-12  " name="PromotionalOfferId" id="PromotionOffer">
+                            <option value="0">---Select Promotional Offer  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.PromotionalOfferList)
+                                {
+                                    if (item.Id == Model.ClientData.OfferId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Choice of Area</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" id="ChoiseOfarea">
+                        @Model.ClientData.ChoiceAreaText
+                    </td>
+
+                    <td class="pb-1 d-none" id="EditChoiceTxt">
+                        <select required class=" form-control col-md-12  " name="ChoieceAreaId" id="ChoieceArea">
+                            <option value="0">---Select Choice Area --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.ChoiceofAreaList)
+                                {
+                                    if (item.Id == Model.ClientData.ChoiceAreaId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+
+
+                </tr>
+
+
+
+
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th colspan="5">
+                        Client Serivce
+                        &nbsp; @Model.ClientData.StatusText
+                        <a data-target="#serviceStatusModal" class="btn btn-sm btn-primary" onclick="changeServiceStatus(@Model.ClientData.ClientId, @Model.ClientData.CompanyId)"
+                           data-toggle="modal" data-placement="top" title="Change Service Status">
+                            <i class="fa fa-sync"></i> change Status
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ServiceStatusHistList != null)
+                {
+                    foreach (var s in Model.ServiceStatusHistList)
+                    {
+                        <tr>
+                            <td> @Html.Raw(s.HistoryText)</td>
+                            <td>
+                                @*<a data-target="#EditStatusModal"
+                                   onclick="editServiceStatus(@s.KgreHistoryId)"
+                                   data-toggle="modal" data-placement="top"
+                                   class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>*@
+                                <a class="btn btn-sm btn-danger" onclick="removeStatus(@s.KgreHistoryId)"><i class="fa fa-times"></i></a>
+                            </td>
+                        </tr>
+                    }
+
+                }
+
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th colspan="5">
+                        Client Schedule List
+                        &nbsp;
+                        <button class="btn btn-sm btn-primary" data-target="#scheduleModal" onclick="changeSchedule(@Model.ClientData.ClientId)"
+                                data-toggle="modal" data-placement="top">
+                            <i class="fa fa-sync"></i> &nbsp; Add Schedule
+                        </button>
+                    </th>
+                </tr>
+                <tr>
+                    <th>S.L</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Note</th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.DataList)
+                {
+                    sl = sl + 1;
+                    <tr>
+                        <td>@{ @sl}</td>
+                        <td>@s.ScheduleType</td>
+                        <td>@s.ScheduleDate.ToShortDateString()</td>
+                        <td>@s.ScheduleTime</td>
+                        <td colspan="2"><p>  @Html.Raw(@s.Note)</p></td>
+                        <td>
+                            @*<a data-target="#EditScheduleModal"
+                                onclick="editClientSchedule(@s.ScheduleId)"
+                                data-toggle="modal" data-placement="top"
+                                class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>*@
+                            <a class="btn btn-sm border" onclick="removeSchedule(@s.ScheduleId)"><i class="fa fa-times"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="EditStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" >
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Edit Service Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label">Note</label>
+                            <textarea type="text" class="form-control" id="txtStatusNoteEdit"></textarea>
+                            <input type="hidden" id="kgreHistoryId" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="updateServiceNote()" class="btn btn-primary">Update Note</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="serviceStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Service Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClientName">
+                            <input type="hidden" class="" id="clientId">
+                            <input type="hidden" class="" id="companyId">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Present Service Status</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClient">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Change Service Status</label>
+                            <select class="form-control" id="ServiceStatusList">
+                                <option value="">--select Service Status--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 ">
+                            <label class="form-label">Project</label>
+                            <input type="text" class="form-control" readonly id="txtProject">
+                        </div>
+                        <div class="col-6 ">
+                            <label class="form-label">Change Project</label>
+                            <select class="form-control" id="ProListId">
+                                <option value="0">--Select Project--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label">Note</label>
+                            <textarea type="text" class="form-control" id="txtStatusNoteClient"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row ">
+                        <div class="col-12 text-right">
+                            <button type="button" class="btn btn-secondary  " data-dismiss="modal">Close</button>
+                            <button type="button" onclick="switchServiceStatus()" class="btn btn-primary">Change Status</button>
+                        </div>
+
+                    </div>
+                </form>
+                <table id="serviceHistListId">
+
+                    <tr><td>History</td></tr>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="EditScheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Edit Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleFormId">
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Date</label>
+
+                            <input id="txtscheduleEditDate" class="datepicker form-control" style="width:80%; display:revert !important">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Time</label>
+                            <div class="input-group">
+                                <input id="txtScheduleEditTime" type="time" class="timepicker form-control" />
+                                <input id="hidClientId" type="hidden" />
+                                <input id="hidScheduleId" type="hidden" />
+
+                                <div class="input-group-addon">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Type</label>
+                            <div class="input-group">
+                                <select class="form-control" id="txtScheduleEditType">
+                                    <option value="Follow Up">Follow Up</option>
+                                    <option value="Client Visit">Client Visit</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Note</label>
+                            <textarea class="form-control" id="txtScheduleEditNote"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="updateSchedule()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleFormId">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtclientName">
+                            <input type="hidden" class="" id="txtclientId">
+                            <input type="hidden" class="" id="txtCompanyId">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtclientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Date</label>
+
+                            <input id="txtscheduleDate" class="datepicker form-control" style="width:80%; display:revert !important">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Time</label>
+                            <div class="input-group">
+                                <input id="txtScheduleTime" type="time" class=" form-control" />
+                                <div class="input-group-addon">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Type</label>
+                            <div class="input-group">
+                                <select class="form-control" id="txtScheduleType">
+                                    <option value="Follow Up">Follow Up</option>
+                                    <option value="Client Visit">Client Visit</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Note</label>
+                            <textarea class="form-control" id="txtScheduleNote"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="makeSchedule()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*---Note---*@
+<!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<!--<div class="modal fade" id="NoteModal" tabindex="-1"  role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:121%">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modallllll title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+          
+
+            <div class="modal-body ">
+                <h5>Change Schedule</h5>
+                <div class="card-body px-2 py-2 " id="tbl" >
+                    <table class="table table-bordered " id="EduInfo">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col">Serial</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Note</th>
+
+                            </tr>
+                        </thead>
+                        <tbody class="text-right">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                @*<button type="button" class="btn btn-primary">Save changes</button>*@
+            <!--</div>
+        </div>
+    </div>
+</div>-->
+<div class="modal fade" id="NoteModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:121%">
+            <div class="modal-header">
+                <h5 class="modal-title" id="Clientname"></h5>
+               
+            </div>
+         
+
+            <div class="modal-body ">
+                <h5>Schedule Remarks</h5>
+                <div class="card-body px-2 py-2 " id="tbl">
+                    <table class="table table-bordered " id="NoteRemarks">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col">Serial</th>                           
+                                <th scope="col">Date</th>
+                                <th scope="col">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-right">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+        //$('.timepicker').timepicker({
+        //    showInputs: false
+        //});
+
+   
+
+
+
+    function removeSchedule(id) {
+        var v={
+            'ScheduleId': id
+        }
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+                  $.ajax({
+                type: "POST",
+                url: "@Url.Action("RemoveScheduleById", "Crms")",
+                datatype: "Json",
+                      data: { model: v },
+                      success: function (data) {
+                          location.reload();
+                    }
+                    })
+
+                    }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+    }
+    function editClientSchedule(a) {
+        var dt = new Date();
+        var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetClientScheduleById", "Crms")",
+            datatype: "Json",
+            data: { scheduleId: a },
+            success: function (data) {
+                console.log(data);
+                var scheduleDate = DateCustom(data.ScheduleDate);
+                $('#txtscheduleEditDate').val(scheduleDate);
+                var scheduleTime = customTimeConverter(data.ScheduleTime);
+
+                $('#txtScheduleEditTime').val(scheduleTime);
+                $('#hidClientId').val(data.ClientId);
+                $('#hidScheduleId').val(data.ScheduleId);
+                $('#txtScheduleEditType').val(data.ScheduleType);
+                $('#txtScheduleEditNote').val(data.Note);
+
+            }
+            });
+        }
+        function customTimeConverter(inputTime) {
+            var hours = inputTime.Hours;
+            var minutes = inputTime.Minutes;
+            var seconds = inputTime.Seconds;
+
+            return hours + ':' + minutes + ':' + seconds;
+        }
+    function updateSchedule() {
+
+        var vm = {
+            'Note': $('#txtScheduleEditNote').val(),
+            //'ScheduleDate': $('#txtscheduleEditDate').val(),
+            //'ScheduleTime': $('#txtScheduleEditTime').val(),
+            'ClientId': $('#hidClientId').val(),
+            'ScheduleId': $('#hidScheduleId').val(),
+            'ScheduleType': $('#txtScheduleEditType').val()
+        }
+        console.log(vm);
+
+             $.ajax({
+                 type: "post",
+                 url: "@Url.Action("EditScheduleNote", "Crms")",
+                 datatype: "json",
+                 data: { model: vm },
+                 success: function (data) {
+                     $('#EditScheduleModal').modal('hide');
+                     location.reload();
+                    }
+             });
+
+        }
+    function removeStatus(id) {
+        var v={
+            'KgreHistoryId': id
+        }
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+                  $.ajax({
+                type: "POST",
+                url: "@Url.Action("RemoveServiceStatusById", "Crms")",
+                datatype: "Json",
+                      data: { model: v },
+                      success: function (data) {
+                          location.reload();
+
+                }
+             })
+
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+        }
+    function editServiceStatus(a) {
+
+
+        $.ajax({
+                type: "GET",
+            url: "@Url.Action("GetServiceHistoryById", "Crms")",
+
+                datatype: "Json",
+                data: { KgreHistoryId: a },
+                success: function (data) {
+                    $('#txtStatusNoteEdit').val(data.HistoryText);
+                    $('#kgreHistoryId').val(data.KgreHistoryId);
+                }
+            });
+    }
+
+
+    function updateServiceNote() {
+        var note = $('#txtStatusNoteClient').val();
+
+        var group = JSON.stringify($('#txtStatusNoteClient').val());
+        var vm = {
+            'KgreHistoryId': $('#kgreHistoryId').val(),
+            'HistoryText': $('#txtStatusNoteClient').val() + " "
+        }
+
+             $.ajax({
+                 type: "post",
+                 url: "@Url.Action("EditStatusNote", "Crms")",
+                 datatype: "json",
+/*                 traditional: true,*/
+                 data: { model: vm },
+                 success: function (data) {
+
+                     $('#EditStatusModal').modal('hide');
+                    /* location.reload();*/
+                     if (data.HasMessage) {
+                         setTimeout(() => {
+                             const box = document.getElementById('messageId');
+                             box.style.display = 'none';
+                         }, 5000);
+                     }
+                    }
+                });
+        }
+         function changeServiceStatus(a,b) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    console.log(data);
+                    $('#txtServiceStatusClientName').val(data.Name);
+                    $("#txtServiceStatusClientMobile").val(data.MobileNo);
+                    $('#txtServiceStatusClient').val(data.StatusText);
+                    $('#clientId').val(data.ClientId);
+                    $('#companyId').val(data.CompanyId);
+                    $('#txtProject').val(data.ProjectText);
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllServiceStatus", "Crms")",
+                data: { companyId: b },
+                success: function (i) {
+                    console.log(i.Datalist);
+                    var select = $("#ServiceStatusList");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('--Select service status--'));
+                    $(i.Datalist).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.StatusId + "'>").val(item.StatusId).text(item.StatusText));
+
+                    });
+                    return false;
+
+                }
+            });
+                        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllProjectList", "Crms")",
+                data: { companyId: b },
+                success: function (i) {
+                    console.log(i.ProjectList);
+                    var select = $("#ProListId");
+                    select.children().remove();
+                    select.append($("<option>").val('0').text('--Select Project--'));
+                    $(i.ProjectList).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.ProjectId + "'>").val(item.ProjectId).text(item.ProjectName));
+
+                    });
+                    return false;
+
+                }
+            });
+
+
+              $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetClientStatusHistories", "Crms")",
+                data: { clientId: a },
+                  success: function (data) {
+                      $("#serviceHistListId tbody").empty();
+                     $("#serviceHistoryId").show();
+                     var z = 1;
+                     let rows = "";
+                     for (var i = 0; i < data.length; i++) {
+                         rows += "<tr><td>" + z + "</td><td style='text-align: left;'>" + data[i].HistoryText + "</td></tr>";
+                         z++;
+                     }
+
+                     $("#serviceHistListId tbody").append(rows);
+                  }
+
+            });
+    }
+
+  
+
+
+        function switchServiceStatus() {
+            var statusId = $('#ServiceStatusList').find(":selected").val();
+            var clientId = $('#clientId').val();
+            var statusNote = $('#txtStatusNoteClient').val();
+            var projectid = $('#ProListId').find(":selected").val();
+          
+            
+
+            if (statusId == "") {
+                alert("Please Select Servise Status")
+            } else {
+                var v = {
+                    'Id': clientId,
+                    'CustomId': statusId,
+                    'Note': statusNote,
+                    'CustomeId2': projectid
+
+                }
+
+                $.ajax({
+
+                    type: "Post",
+
+                    url: "@Url.Action("SwitchServiceStatus", "Crms")",
+                    datatype: "Json",
+                    data: { model: v },
+                    success: function (data) {
+                        $('#serviceStatusModal').modal('hide');
+                        location.reload();
+                    }
+                });
+
+            }
+
+
+        }
+    function changeSchedule(a) {
+        var dt = new Date();
+        var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("GetClientById", "Crms")",
+                    datatype: "Json",
+                    data: { clientId: a },
+                    success: function (data) {
+
+                        $("#txtclientName").val(data.Name);
+                        $('#txtclientMobile').val(data.MobileNo);
+                        $('#txtclientId').val(data.ClientId);
+                        $('#txtCompanyId').val(data.CompanyId);
+                        var scheduleDate = DateCustom(data.CreatedDate);
+                        $('#txtscheduleDate').val(scheduleDate);
+                        $('#txtScheduleTime').val(time);
+
+                    }
+
+                });
+         }
+        function makeSchedule() {
+
+            var v = {
+                'ScheduleTimeText': $('#txtScheduleTime').val(),
+                'ScheduleDate': $('#txtscheduleDate').val(),
+                'ScheduleType': $('#txtScheduleType').val(),
+                'Note': $('#txtScheduleNote').val(),
+                'ClientId': $('#txtclientId').val(),
+                'CompanyId': $('#txtCompanyId').val()
+            };
+            console.log(v);
+            $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("MakeSchedule", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    $('#scheduleModal').modal('hide');
+                    $('#txtScheduleTime').val('');
+                    $('#txtscheduleDate').val('');
+                    $('#txtScheduleType').val('');
+                    $('#txtScheduleNote').val('');
+                    $('#txtCompanyId').val('');
+                    location.reload();
+                }
+            });
+        }
+
+    
+
+   
+
+
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+    }
+
+    function editSection(ClientId) {
+        $("#TxtName").addClass("d-none");
+        $("#TxtDob").addClass("d-none");
+        $("#TxtMobile").addClass("d-none");
+        $("#TxtMobile2").addClass("d-none");
+        $("#TxtEmail").addClass("d-none");
+
+        $("#TxtEmail2").addClass("d-none");
+        $("#TxtRemarks").addClass("d-none");
+        $("#TxtGender").addClass("d-none");
+        $("#TxtReligion").addClass("d-none");
+        $("#txtjobtitle").addClass("d-none");
+        $("#TextOrganzition").addClass("d-none");
+        $("#EditBtn").addClass("d-none");
+
+
+
+        $("#EditTxtName").removeClass("d-none");
+        $("#EdittxtDob").removeClass("d-none");
+        $("#EditTxtMobile").removeClass("d-none");
+        $("#EditMobile2").removeClass("d-none");
+        $("#EditTxtEmail").removeClass("d-none");
+        $("#EditTxtEmail2").removeClass("d-none");
+        $("#EditRemarks").removeClass("d-none");
+        $("#EditTxtGender").removeClass("d-none");
+        $("#EditReligion").removeClass("d-none");
+        $("#EditJobtitle").removeClass("d-none");
+        $("#EditOrganization").removeClass("d-none");
+        $("#FirstSection").removeClass("d-none");
+        $("#rfrsh").removeClass("d-none");
+
+    }
+
+
+
+
+
+    function editSection2(ClientId) {
+
+        $("#EditBtn2").addClass("d-none");
+        $("#Sourcemedia").addClass("d-none");
+        $("#CampainName").addClass("d-none");
+        $("#promotion").addClass("d-none");
+        $("#ChoiseOfarea").addClass("d-none");
+
+        $("#SecondSection").removeClass("d-none");
+        $("#rfrsh3").removeClass("d-none");
+        $("#EditSourceOfMarketing").removeClass("d-none");
+        $("#EditCampainName").removeClass("d-none");
+        $("#EditPromotionTxt").removeClass("d-none");
+        $("#EditChoiceTxt").removeClass("d-none");
+
+    }
+
+    $("#SecondSection").click(function () {
+
+ var v = {
+
+           /* 'Name': $('#InName').val(),*/
+
+           'CompanyId': '@Model.ClientData.CompanyId',
+            'ClientId': @Model.ClientData.ClientId,
+     'SourceofMediaId': $('#SourceOfMedia').find(":selected").val(),
+     'OfferId': $('#PromotionOffer').find(":selected").val(),
+     'OfferId': $('#PromotionOffer').find(":selected").val(),
+     'ChoiceAreaId': $('#ChoieceArea').find(":selected").val(),
+     'CampaignText': $('#Campaigntxt').val(),
+            'SectionEdit':2,
+
+        };
+
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateSectionClient", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    location.reload();
+                    }
+                });
+
+        });
+
+    $("#SecondSection").click(function () {
+
+ var v = {
+
+           /* 'Name': $('#InName').val(),*/
+
+           'CompanyId': '@Model.ClientData.CompanyId',
+            'ClientId': @Model.ClientData.ClientId,
+     'SourceofMediaId': $('#SourceOfMedia').find(":selected").val(),
+     'OfferId': $('#PromotionOffer').find(":selected").val(),
+     'ChoiceAreaId': $('#ChoieceArea').find(":selected").val(),
+     'CampaignText': $('#Campaigntxt').val(),
+            'SectionEdit':2,
+
+
+        };
+
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateSectionClient", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    location.reload();
+                    }
+                });
+
+
+    });
+
+
+
+
+
+
+    function editSection3(ClientId) {
+
+        $("#EditBtn3").addClass("d-none");
+        $("#resposible").addClass("d-none");
+        $("#txtproject").addClass("d-none");
+        $("#typeofinterest").addClass("d-none");
+        //$("#ChoiseOfarea").addClass("d-none");
+
+        $("#ThirdSection").removeClass("d-none");
+        $("#rfrsh2").removeClass("d-none");
+
+        $("#EditResposibleOfcr").removeClass("d-none");
+        $("#EditProject").removeClass("d-none");
+        $("#EditTypeOfInterest").removeClass("d-none");
+
+    }
+
+     $("#ThirdSection").click(function () {
+
+ var v = {
+
+           /* 'Name': $('#InName').val(),*/
+
+           'CompanyId': '@Model.ClientData.CompanyId',
+            'ClientId': @Model.ClientData.ClientId,
+     'ResponsibleOfficerId': $('#ResponsibleOfficerId').find(":selected").val(),
+     'ProjectId': $('#ProjectId').find(":selected").val(),
+     'TypeofInterestId': $('#TypeofInterestId').find(":selected").val(),
+
+
+         };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateSectionClient", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    location.reload();
+                    }
+                });
+     });
+
+    $("#FirstSection").click(function () {
+
+        var mob = $("#mobb").val();
+        var mobileNo = $("#mobilenum").val();
+
+        if (mobileNo == "") {
+            alert("Mobile Number can not be empty!!");
+            $("#mobilenum").val(mob);
+        }
+        else {
+
+            $.ajax({
+            type: "GET",
+            url: "@Url.Action("MobileNoValidationAndUpdate", "KGRECRM")",
+            datatype: "Json",
+            data: {
+                mobileNo: mobileNo,
+                companyId: '@Model.ClientData.CompanyId',
+                id:'@Model.ClientData.ClientId'
+            },
+            success: function (data) {
+                console.log('onion',data);
+                if (data == 'null') {
+                      var v = {
+
+             'Name': $('#InName').val(),
+             'MobileNo': $('#mobilenum').val(),
+             'DateofBirth': $('#dob').val(),
+             'CompanyId': '@Model.ClientData.CompanyId',
+             'ClientId': @Model.ClientData.ClientId,
+             'GenderId': $('#Gender').find(":selected").val(),
+             'ReligionId': $('#Religion').find(":selected").val(),
+             'MobileNo2': $('#mob2').val(),
+             'Email': $('#email').val(),
+             'Email2': $('#email2').val(),
+             'JobTitle': $('#job').val(),
+             'Organization': $('#org').val(),
+             'Remarks': $('#Remarks').val(),
+             'SectionEdit':1,
+        };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateSectionClient", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    location.reload();
+                    }
+                });
+                }
+                else {
+                    alert(data);
+                    //  $("#addClientSaveBtnId").attr("disabled",true);
+                    $("#mobilenum").val(mob);
+                }
+
+                //  $("#mobileMessage").innerHTML = data;
+
+            }
+        });
+        }
+
+
+    });
+
+
+    function RemarksView(ClientId) {
+
+
+        $('#NoteRemarks tbody').empty();
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("RemarksView", "Crms")",
+             datatype: "Json",
+             data: { ClientId: ClientId },
+             success: function (data) {
+                 console.log(data);
+                 $("#NoteRemarks").show();
+                 var z = 1;
+                 let rows = "";
+                 $("#Clientname").append(" Client Name: " +data[0].name);
+                 for (var i = 0; i < data.length; i++) {
+                     var not = "";
+                     if (data[i].Notes == null) {
+                        not = " "
+                     } else {
+                         not = data[i].Notes;
+                     }
+                     var modidate = DateCustom(data[i].ModiifyDate);
+                     rows += "<tr><td>" + z + "</td><td>" + modidate + "</td><td>" + not + "</td></tr>";
+                     z++;
+                 }
+
+                 $("#NoteRemarks tbody").append(rows);
+
+             }
+
+                });
+
+    };
+
+
+</script>
+}
+

@@ -1,0 +1,209 @@
+﻿@model KGERP.Service.ServiceModel.DemandModel
+
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("CreateOrEdit", "Demand", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x=>x.CompanyId)
+    <div class="row">
+        <table class="table table-bordered">
+            <tr style="background-color:#3c8dbc;color:#FFFFFF">
+                <td colspan="6">
+                    <b>Raw Material Demand</b>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.DemandDate, htmlAttributes: new { @class = "control-label" })
+                        <br />
+                        @Html.EditorFor(model => model.DemandDate, new { htmlAttributes = new { @id = "demandDate", @class = "datepicker", @onchange = "getDemandNo()" } })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.DemandDate, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.DemandNo, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.DemandNo, new { htmlAttributes = new {@id="txtDemandNo", @class = "form-control", @readonly = "readonly" } })
+                    </div>
+
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.Remarks, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+    <div class="row details">
+        <table class="table table-responsive">
+            <tr style="background-color:#3c8dbc;color:#ffffff">
+                <th>Finish Product</th>
+                <th>Production Quantity (KG)</th>
+                <th>Action</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+                <td width="40%">
+                    <input type="text" id="product" name="product" class="form-control" style="width:270px" />
+                    <input type="hidden" id="hfProductId" name="productId" />
+                </td>
+                <td width="40%"> 
+                    <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid quantity required</span>
+                </td>
+
+                <td width="20%">
+                    <button type="button" id="add" onclick="addItemToGrid()" class="btn btn-primary pull-left"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp; Add</button>
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems">
+            <table class="table table-striped" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:#3c8dbc;color:#ffffff;font-weight:bold">
+                        <th>Sl</th>
+                        <th>Finish Product</th>
+                        <th>Production Quantity (KG)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" style="color:red"></span>
+        </div>
+
+
+        <div class="col-md-12">
+            <div>
+                <input id="submit" type="submit" data-confirm="Are you sure to submit?" value="Submit" class="btn btn-success pull-right" />
+                <a href="@Url.Action("Index","Demand",new { companyId=Model.CompanyId})" class="btn btn-danger pull-right" style="margin-right:15px">
+                    Close <i class="fa fa-close" aria-hidden="true"></i>
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+}
+
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/DemandEntry.js"></script>
+@*<script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>*@
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+       
+        function getDemandNo() {
+            var strDemandDate = $("#demandDate").val();
+            if (strDemandDate === undefined) {
+                alert("Please select Demand Date");
+                return false;
+            }
+            
+            $.ajax({
+                url: '/Demand/GetNewDemandNo?strDemandDate=' + strDemandDate,
+                type: "Post",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (response) {
+                    $('#txtDemandNo').val(response);
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+
+        }
+
+
+        function stopRKey(evt) {
+            var evt = (evt) ? evt : ((event) ? event : null);
+            var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+            if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
+        }
+        document.onkeypress = stopRKey;
+
+
+        jQuery(document).ready(function () {
+            jQuery('[data-confirm]').click(function (e) {
+                if (!confirm(jQuery(this).attr("data-confirm"))) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+
+
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+
+
+    </script>
+}

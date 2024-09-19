@@ -1,0 +1,130 @@
+﻿
+@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.OfficerAssignModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = TempData["message"];
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <span style="font-size:20px;font-family:Arial"><b>Zone Wise Marketing Officers List</b></span>
+    </div>
+    <div class="col-md-4">
+        @using (Html.BeginForm("Index", "OfficerAssign", FormMethod.Get, new { @class = "example" }))
+        {
+            <input type="hidden" value="@Request.QueryString["companyId"]" name="companyId" />
+            <input type="text" placeholder="Search.." autocomplete="off" name="searchText">
+            <button type="submit"><i class="fa fa-search"></i></button>
+
+        }
+    </div>
+
+    <div class="col-md-2">
+        <a href="@Url.Action("CreateOrEdit",new { id=0 })" class="btn btn-primary pull-right">
+            <span class="glyphicon glyphicon-plus-sign"></span> Add Marketing Officer
+        </a>
+    </div>
+</div>
+
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ZoneId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EmpId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Remarks)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().IsActive)
+            </th>
+            <th class="text-center">Action</th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Zone.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Employee.Name)
+                </td>
+
+                <td>
+                    @if (item.Data.StartDate.HasValue)
+                    {
+                        @item.Data.StartDate.Value.ToString("dd MMM yyyy")
+                    }
+                </td>
+                <td>
+                    @if (item.Data.EndDate.HasValue)
+                    {
+                        @item.Data.EndDate.Value.ToString("dd MMM yyyy")
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Remarks)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.IsActive)
+                </td>
+                <td class="text-center">
+                    <a href="@Url.Action("CreateOrEdit", new {id = item.Data.OfficerAssignId})" title="Edit" class="btn btn-info btn-xs">
+                        <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+                    <a href="@Url.Action("DeleteOfficerAssign", new { id = item.Data.OfficerAssignId})" title="Delete" onclick="return confirm('Are you sure to delete this ?');" class="btn btn-danger btn-xs">
+                        <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success" style="margin-top:-10px">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox" style="margin-top:-10px">
+            @Html.PagedListPager(Model, Page_No => Url.Action("Index", "OfficerAssign",
+                                                             new { companyId = Request.QueryString["companyId"], Page_No, Sorting_Order = Request.QueryString["Search"], SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        var message = '@message';
+        if(message){
+            alert(message);
+        }
+    </script>
+
+}

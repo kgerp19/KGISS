@@ -1,0 +1,365 @@
+﻿@model KGERP.Services.WareHouse.VMSaleReturn
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Sales Return List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Sales Return List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Sales Return List</li>
+    </ol>
+</section>
+@using (Html.BeginForm("WareHouseSalesReturnList", "WareHouse", FormMethod.Post, new { id = "wareHouseSalesReturnListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                        <div class="row">
+
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                            </div>
+                        </div>
+
+
+                        <hr />
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="table-responsive col-md-12">
+                                <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Sale Return No</th>
+                                            <th>Return Date</th>
+                                            <th>Reason</th>
+                                            <th>Order No</th>
+                                            <th>Delivery Challan</th>
+                                            <th>Customer</th>
+                                            <th>Status</th>
+
+                                            <th>Detail</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.DataList)
+                                        {
+
+
+                                            <tr>
+                                                <th>@(++sl)</th>
+                                                <td>
+                                                    <a target="_blank" href="~/WareHouse/WareHousSaleReturnSlaveReport?companyId=@item.CompanyFK&saleReturnId=@item.SaleReturnId">@item.SaleReturnNo</a>
+                                                </td>
+
+                                                <td>@item.ReturnDate</td>
+                                                <td>@item.Reason</td>
+                                                <td>@item.OrderNo</td>
+                                                <td>@item.ChallanNo</td>
+
+                                                <td>@item.CustomerName</td>
+                                                <td>
+                                                    @if (item.IsFinalized)
+                                                    {
+                                                        <span>Submited</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Draft</span>
+
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    @if (item.OrderDeliverId != null)
+                                                    {
+                                                        <a href="~/WareHouse/WareHouseSalesReturnSlave?companyId=@item.CompanyFK&saleReturnId=@item.SaleReturnId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
+                                                        {
+                                                            <a href="~/WareHouse/WareHouseSalesReturnByProduct?companyId=@item.CompanyFK&saleReturnId=@item.SaleReturnId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <a href="~/WareHouse/GCCLWareHouseSalesReturnByProduct?companyId=@item.CompanyFK&saleReturnId=@item.SaleReturnId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                                        }
+
+                                                    }
+
+                                                </td>
+
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            @*@if (Model.ID > 0)
+                                {
+                                    <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                                }*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    @*<div class="modal fade modal-lg" id="editPOModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog modal-lg ui-front" role="document">
+                <div class="modal-content">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="modal-header">
+                                <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title"><b>Purchase Order Edit (<span id="pPOCIDText"></span>)</b></h4>
+                            </div>
+                            <div class="modal-body">
+
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.ActionId, new { id = "POEditActionId" })
+                                @Html.HiddenFor(model => model.CompanyFK, new { id = "POEditCompanyFK" })
+
+                                @Html.HiddenFor(model => model.PurchaseOrderId, new { id = "hidPOID" })
+
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label>PO Date</label>
+                                            <input name="OrderDate" asp-for="OrderDate" type="text" value="@Model.OrderDate.Value.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtOrderDate" placeholder="Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.OrderDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="form-group">
+                                            <label>Payment Method</label>
+                                            @Html.DropDownListFor(model => model.SupplierPaymentMethodEnumFK, Model.POPaymentMethodList as SelectList, "==Payment Method==", new { id = "ddlSupplierPaymentMethodEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.SupplierPaymentMethodEnumFK, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="form-group" style="padding:0px">
+                                            <label>Supplier</label>
+                                            @Html.EditorFor(model => model.SupplierName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Supplier Name", @id = "txtSupplierName" } })
+
+                                            @Html.HiddenFor(model => model.Common_SupplierFK, new { id = "ddlCommon_SupplierFK" })
+                                            @Html.ValidationMessageFor(model => model.Common_SupplierFK, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-7">
+                                        <div class="form-group">
+                                            <label for="txtDescription" class="col-form-label">Description:</label>
+                                            @Html.TextAreaFor(model => model.Description, new { id = "txtDescription", placeholder = "Description", @class = "form-control", rows = 1 })
+                                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+
+
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label>Delivery Date</label>
+                                            <input name="DeliveryDate" asp-for="DeliveryDate" type="text" required="required" class="datePicker form-control" id="txtDeliveryDate" placeholder="Delivery Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.DeliveryDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="form-group">
+                                            <label>Delivery Address</label>
+                                            @Html.EditorFor(model => model.DeliveryAddress, new { htmlAttributes = new { id = "txtDeliveryAddress", @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.DeliveryAddress, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <div class="col-md-8">
+                                    <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+}
+@*@using (Html.BeginForm("DeleteProcurementPurchaseOrder", "Procurement", FormMethod.Post))
+    {
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="deleteProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+                        <h5 class="modal-title"><b>Delete Purchase Order</b></h5>
+                    </div>
+                    <div class="modal-body">
+                        @Html.HiddenFor(model => model.PurchaseOrderId, new { id = "hidProcurementPurchaseOrderId" })
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "POdeleteCompanyFK" })
+
+                        @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div style="text-align:center">
+                            <h3>Are you sure to Delete this Purchase Order?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }*@
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+            function makeEditble(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+
+                            $('#pPOCIDText').text(data.CID);
+                            $("#hidPOID").val(data.PurchaseOrderId);
+                            $('#POEditActionId').val(2);
+                            //$("#POEditCompanyFK").val(data.CompanyFK);
+
+                            var orderDate = DateCustom(data.OrderDate);
+
+                            $('#txtOrderDate').val(orderDate);
+                            $('#txtDescription').val(data.Description);
+                            $('#ddlSupplierPaymentMethodEnumFK').val(data.SupplierPaymentMethodEnumFK).change();
+
+                            $('#txtDeliveryAddress').val(data.DeliveryAddress);
+                            var deliveryDate = DateCustom( data.DeliveryDate);
+                            $('#txtDeliveryDate').val(deliveryDate);
+                            $('#ddlCommon_SupplierFK').val(data.Common_SupplierFK);
+                            $('#txtSupplierName').val(data.SupplierName);
+
+
+
+                            //$('#ddlPOTypeEnumFK').val(data.poTypeEnumFK).change();
+                            //$('#ddlProcurementOriginTypeEnumFK').val(data.procurementOriginTypeEnumFK).change();
+                            //$('#ddlCommon_CurrencyFK').val(data.common_CurrencyFK).change();
+
+                        }
+                 });
+            }
+
+
+    </script>
+}
+

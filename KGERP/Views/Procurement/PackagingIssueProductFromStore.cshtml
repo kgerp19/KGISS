@@ -1,0 +1,580 @@
+﻿@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "Packaging Issue Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            Issue Product From Store
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Issue Product From Store</li>
+    </ol>
+</section>
+@using (Html.BeginForm("PackagingIssueProductFromStore", "Procurement", FormMethod.Post, new { id = "procurementRequisitionFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+
+                        <div class="box-body">
+                            @if (Model.IssueMasterId == 0)
+                            {
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Issue Date</label>
+                                            <div class="form-group" style="display:flex">
+                                                @Html.EditorFor(model => model.IssueDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off", value = "" } })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label>Requisition No</label>
+                                            @Html.EditorFor(model => model.RequisitionNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Supplier Name", @id = "txtRequisitionNo" } })
+
+                                            @Html.HiddenFor(model => model.RequisitionId, new { id = "ddlRequisitionId" })
+                                            @Html.ValidationMessageFor(model => model.RequisitionId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="RequisitionMasteData" class="hidden">
+
+                                    <table class="table table-striped">
+                                        <tr>
+                                            <td>Job Order No</td>
+                                            <td>:</td>
+                                            <td>
+                                                <span id="txtJobOrderNo">
+                                                </span>
+                                            </td>
+                                            <td>Order Date</td>
+                                            <td>:</td>
+
+                                            <td>
+                                                <span id="txtOrderDate">
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Job No</td>
+                                            <td>:</td>
+
+                                            <td>
+                                                <span id="txtOrderMasterNo">
+                                                </span>
+                                            </td>
+                                            <td>Quantity</td>
+                                            <td>:</td>
+
+                                            <td>
+                                                <span id="txtQty">
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Structure</td>
+                                            <td>:</td>
+
+                                            <td>
+                                                <span id="txtStucture">
+                                                </span>
+                                            </td>
+                                            <td>Product Name</td>
+                                            <td>:</td>
+
+                                            <td>
+                                                <span id="txtProductName">
+                                                </span>
+                                            </td>
+                                        </tr>
+
+
+
+                                        <tr>
+                                            <td>Remarks</td>
+                                            <td>:</td>
+                                            <td colspan="4">
+                                                <span id="txtRemarks">
+                                                </span>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+
+
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label>Requisition Date</label>
+                                            <div class="form-group" style="display:flex">
+                                                @Html.EditorFor(model => model.RequisitionDate, new { htmlAttributes = new { @class = "form-control", @style = "width:95%", @autocomplete = "off", @disabled = "disabled" } })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+
+                                                <label>From Requisition</label>
+                                                @Html.DropDownListFor(model => model.FromDepartmentReqId, Model.DDLStockDepartmetn, "Select From Department", new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                                @Html.ValidationMessageFor(model => model.FromDepartmentReqId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>To Requisition</label>
+                                                @Html.DropDownListFor(model => model.ToDepartmentReqId, Model.DDLStockDepartmetn, "Select To Department", new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                                @Html.ValidationMessageFor(model => model.ToDepartmentReqId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Issue By</label>
+                                                @Html.EditorFor(model => model.IssueBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Title", @id = "txtEmployeeKGId", @style = "max-width: 100%" } })
+                                                @Html.HiddenFor(model => model.IssueById, new { id = "ddlREmployeeKGId" })
+                                                @Html.ValidationMessageFor(model => model.IssueBy, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+
+                                                <label>Issue From</label>
+                                                @Html.DropDownListFor(model => model.FromDepartmentIssueId, Model.DDLStockDepartmetn, "Select Please", new { @class = "form-control form-control-sm" })
+                                                @Html.ValidationMessageFor(model => model.FromDepartmentIssueId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Issue To</label>
+                                                @Html.DropDownListFor(model => model.ToDepartmentIssueId, Model.DDLStockDepartmetn, "Select Please", new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                                @Html.HiddenFor(model => model.ToDepartmentIssueId, new { id = "hdnToDepartmentIssueId" })
+                                                @Html.ValidationMessageFor(model => model.ToDepartmentIssueId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+
+                            <div class="box-body">
+
+                                <div id="PackagingPurchaseOrderSlaveData"></div>
+                                <div class="row">
+                                    <div class="col-md-8">
+
+                                    </div>
+                                    <div class="col-lg-4 col-md-4">
+
+                                        @{
+                                            if (Model.IssueMasterId.Equals(0))
+                                            {
+                                                <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block hidden">
+                                                    <i class='fa fa-plus'></i>
+                                                    <span>Create New </span>
+                                                </button>
+                                            }
+                                        }
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
+                        @if (Model.IssueMasterId > 0)
+                        {
+
+
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+
+                                    <tr>
+                                        <th>Issue No</th>
+                                        <th>:</th>
+                                        <td>@Model.IssueNo</td>
+                                        <th>Issue Date</th>
+                                        <th>:</th>
+                                        <td>@Model.IssueDate.ToShortDateString()</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Issue By</th>
+                                        <th>:</th>
+                                        <td>@Model.IssueBy</td>
+                                        <th>Requisition By</th>
+                                        <th>:</th>
+                                        <td>@Model.RequisitionBy</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Issue From</th>
+                                        <th>:</th>
+                                        <td>@Model.FromDepartmentIssueName</td>
+                                        <th>Issue To</th>
+                                        <th>:</th>
+                                        <td>@Model.ToDepartmentIssueName</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%"> RequisitionNo</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.RequisitionNo</td>
+
+                                        <th style="width:18%"> RequisitionDate</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.RequisitionDate.Value.ToShortDateString()</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Achknowlagement</th>
+                                        <th>:</th>
+                                        <td>
+                                            @if (@Model.AchknolagementIs == "Pending")
+                                            {
+                                                <span class="text-danger">@Model.AchknolagementIs</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">@Model.AchknolagementIs</span>
+                                            }
+                                        </td>
+                                        <th>Achknolagement By</th>
+                                        <th>:</th>
+                                        <td>@Model.AchknologeByName</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Achknolagement Date</th>
+                                        <th>:</th>
+                                        <td>
+                                            @if (Model.AcknologeDate.HasValue)
+                                            {
+                                                @(Model.AcknologeDate.Value.ToShortDateString())
+                                            }
+                                            else
+                                            {
+
+                                            }
+                                        </td>
+                                        <th>Company</th>
+                                        <th>:</th>
+                                        <td>@Model.CompanyName</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+                        @{
+                            decimal total = 0;
+                            decimal totalAlo = 0;
+                            decimal totalCosting = 0;
+                            decimal totalBal = 0;
+
+                            if (Model.IssueMasterId > 0)
+                            {
+                                <div class="table-responsive col-md-12  text-nowrap">
+                                    <table id="KgErpDataTable" class="table table-striped">
+
+                                        <thead>
+                                                                    <tr>
+                                                                        <th>SL</th>
+                                                                        <th>Item</th>
+                                                                        <th>Allocated Quantity</th>
+                                                                        <th>Issue Quantity</th>
+                                                                        <th>Balance</th>
+                                                                        <th>Costing Rate</th>
+                                                                        <th>Total Costing</th>
+
+                                                                    </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                            <tr>
+                                                <td style="padding:5px">@(++sl)</td>
+                                                <td>@item.ProductName</td>
+                                                <td>@item.AllocatedQuantity</td>
+                                                <td>@item.IssueQty</td>
+                                                <td>@( item.AllocatedQuantity - item.IssueQty)</td>
+                                                <td>@item.CostingPrice</td>
+                                                <td>@(item.IssueQty * item.CostingPrice)</td>
+
+
+                                            </tr>
+                                                total += item.IssueQty??0;
+                                                totalAlo += item.AllocatedQuantity??0;
+                                                totalBal += ((item.AllocatedQuantity ?? 0) - (item.IssueQty ?? 0));
+                                                totalCosting += item.IssueQty * item.CostingPrice??0;
+                                            }
+                                        </tbody>
+
+                                        <tfoot>
+                                            <tr>
+                                                <th></th>
+
+                                                <th class="text-center"> Total: </th>
+                                                <th>@totalAlo</th>
+                                                <th>@total</th>
+                                                <th>@totalBal</th>
+                                                <th></th>
+                                                <th>@totalCosting</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-8">
+                                         
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a class="btn btn-info" href="~/Report/PackagingIssueProductReport?IssuedMasterId=@Model.IssueMasterId" target="_blank" style="width:100%">Show Report </a>
+
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                       
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        location.reload(true);
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+
+    let RequisitionMasterGETData = (requisitionId) => {
+
+        let rData = HttpRequest.AjaxData("POST", '/Procurement/GetResuisitionDataByRequisitionId', { 'requisitionId': requisitionId });
+        if (rData != null) {
+            $(".ui-datepicker-trigger").addClass("hidden");
+            $("#RequisitionDate").val(rData.RequisitionDateMsg);
+            $("#FromDepartmentReqId").val(rData.FromRequisitionId);
+            $("#ToDepartmentReqId").val(rData.ToRequisitionId);
+            $("#ToDepartmentIssueId").val(rData.FromRequisitionId);
+            $("#hdnToDepartmentIssueId").val(rData.FromRequisitionId);
+
+
+            $("#txtJobOrderNo").text(rData.JobOrderNo)
+            $("#txtQty").text(rData.Qty)
+            $("#txtStucture").text(rData.Structure);
+            var ppppODate = DateCustom(rData.OrderDate);
+            $('#txtOrderDate').text(ppppODate);
+            $("#txtRemarks").text(rData.Description);
+            $("#txtOrderMasterNo").text(rData.OrderNo);
+            $("#txtProductName").text(rData.ProductName);
+
+        }
+    }
+
+        const makeDeletale = (issuedDetailId) => {
+            alert(issuedDetailId);
+            let model = {
+                IssueDetailsId: issuedDetailId
+            }
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/Procurement/KPLRequisitionIssuedDetailsDelete', { "model": model }, saveSuccess, true);
+                }
+            });
+        }
+
+
+        function updatePackagingData(requisitionId) {
+                // Set the value of the dropdown
+            $("#ddlRequisitionId").val(requisitionId);
+
+            // Call the function that handles getting data for the requisition
+            RequisitionMasterGETData(requisitionId);
+
+            // Make the AJAX request to fetch and display packaging data
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("PackagingProductionStoreDataList", "Procurement")",
+                data: { RequisitionId: requisitionId },
+                success: function(response) {
+                    // Update the HTML of the target element with the response
+                    $("#PackagingPurchaseOrderSlaveData").html(response);
+
+                    // Remove the 'hidden' class from buttons and other elements
+                    $("#poCreateBtn").removeClass("hidden");
+                    $("#RequisitionMasteData").removeClass("hidden");
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error occurred while fetching packaging data:", error);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+
+            if (@Model.RequisitionId> 0) {
+                var RequisitionNo = HttpRequest.AjaxData("POST", '/Procurement/GetRequisitionNoByRequsitionId', { requisitionId: '@Model.RequisitionId', companyId: 20 });
+                $('#txtRequisitionNo').val(RequisitionNo);
+                $('#txtRequisitionNo').prop('disabled', true);
+                updatePackagingData(@Model.RequisitionId);
+            }
+
+
+
+
+            $("#txtRequisitionNo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteOrderNoGetRequsitionId", "Procurement")",
+                        data: { prefix: request.term, companyId:20 },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                        },
+                        failure: function (response) {
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    updatePackagingData(i.item.val);
+                    @*debugger
+                    let reqId = $("#ddlRequisitionId").val(i.item.val);
+                    RequisitionMasterGETData(i.item.val);
+
+
+                    $.ajax({
+                    type: "POST",
+                    url:"@Url.Action("PackagingProductionStoreDataList", "Procurement")",
+                          data: { RequisitionId: i.item.val },
+                        success: function (response) {
+                        $("#PackagingPurchaseOrderSlaveData").html(response);
+                        $("#poCreateBtn").removeClass("hidden");
+                        $("#RequisitionMasteData").removeClass("hidden");
+                        },
+                    });*@
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+
+            $("#txtEmployeeKGId").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url:"@Url.Action("getallEmployeeId", "Configuration")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        console.log('data', data);
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    },
+                    error: function (response) {
+                        // Handle error
+                        //alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        // Handle failure
+                        //alert(response.responseText);
+                    }
+                });
+            },
+            select: function (e, i) {
+                console.log(i);
+                $("#ddlREmployeeKGId").val(i.item.val);
+                $('#ddlREmployeeKGId').focus();
+            }
+            });
+
+
+
+
+        });
+
+
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+        }
+</script>
+
+}

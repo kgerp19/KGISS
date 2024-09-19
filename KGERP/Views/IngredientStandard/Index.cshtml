@@ -1,0 +1,102 @@
+﻿@model IEnumerable<System.Linq.IGrouping<string, KGERP.Service.ServiceModel.IngredientStandardModel>>
+@{
+    ViewBag.Title = "Index";
+    var message = TempData["message"];
+}
+<style>
+    .table > thead > tr > th,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        padding: 2px 2px 2px 2px;
+    }
+</style>
+
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+<div class="row">
+    @using (Html.BeginForm("Index", "IngredientStandard", FormMethod.Get, new { @class = "example" }))
+    {
+        <div class="col-md-6">
+            @Html.Label("Ingredient Standards", new { @style = "font-size:20px" })
+        </div>
+        <div class="col-md-4">
+            @Html.Hidden("companyId")
+            @Html.Hidden("productType")
+            @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..", @style = "width:100%" } })
+            <button type="submit"><i class="fa fa-search "></i></button>
+        </div>
+        <div class="col-md-2">
+            <a href="@Url.Action("CreateOrEdit",new {ingredientStandardId=0})" class="btn btn-primary pull-right">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add Material
+            </a>
+        </div>
+    }
+</div>
+
+
+
+<div class="row">
+    <hr style="border-color:#32527B; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th width="20%">
+                    <span style="font-size:20px;color:#006600">@item.Key</span>
+                </th>
+                <td width="80%">
+                    <table class="table table-striped">
+                        <tr style="background-color:#4CAF50;color:#FFFFFF">
+                            <th class="text-center">
+                                SL
+                            </th>
+                            <th>
+                                Code
+                            </th>
+                            <th>
+                                Product Name
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                        @foreach (var ingredientStandard in item.Select((x, i) => new { Data = x, Index = i }))
+                        {
+                        <tr>
+                            <td width="5%" class="text-center">
+                                @(ingredientStandard.Index + 1)
+                            </td>
+                            <td width="10%">@ingredientStandard.Data.ProductCode</td>
+                            <td width="30%">@ingredientStandard.Data.ProductName</td>
+                            <td width="5%">
+                                <a href="@Url.Action("IngredientStandardDetails", new { ingredientStandardId = ingredientStandard.Data.IngredientStandardId })" class="btn btn-warning btn-xs">
+                                    @*<i class="fa fa-edit" aria-hidden="true"></i>*@ Details
+                                </a>
+                            </td>
+                        </tr>
+
+                        }
+                    </table>
+                </td>
+            </tr>
+
+        }
+    </table>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        var message = '@message';
+        if(message){
+            alert(message);
+        }
+    </script>
+
+}

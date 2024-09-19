@@ -1,0 +1,106 @@
+﻿
+@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.GeneralLedgerModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var message = TempData["successMessage"];
+}
+@using (Html.BeginForm("Index", "GeneralLedgers", FormMethod.Get))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <h4><b>Voucher List</b></h4>
+        </div>
+        <div class="col-md-4">
+            <div class="col-md-10">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search..." })</div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <a href="@Url.Action("Create", new { id = 0,companyId=Request.QueryString["companyId"] })" title="New Voucher" class="btn btn-primary pull-right">
+                <span class="glyphicon glyphicon-user"></span> Add
+            </a>
+        </div>
+    </div>
+}
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+
+<table class="table table-striped">
+    <tr style="background-color:#009270;color:#FFFFFF">
+        <th>
+            SL
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().VoucherNo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().VoucherDate)
+        </th>
+
+
+        <th style="width:70px;">Report</th>
+    </tr>
+
+    @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+    {
+        <tr>
+            <td>
+                @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.VoucherNo)
+            </td>
+            <td>
+                @if (item.Data.VoucherDate.HasValue)
+                {
+                    @item.Data.VoucherDate.Value.ToString("dd MMM yyyy")
+                }
+            </td>
+
+            <td>
+                <a href="@Url.Action("GetVoucherReport","Report", new {companyId=item.Data.CompanyId,voucherNo=item.Data.VoucherNo,reportName="VoucherReport"})" target="_blank" class="btn btn-warning btn-xs">
+                    Download
+                </a>
+                @*<a href="@Url.Action("Create", new { id = item.Data.VoucherNo })" title="Edit Client" class="btn btn-success btn-xs">
+                        <i class="fa fa-pencil" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+                    <a href="@Url.Action("Details", new { id = item.Data.VoucherNo })" title="Details of Client" class="btn btn-info btn-xs">
+                        <i class="fa fa-eye" style="font-size:15px; color:darkgreen" aria-hidden="true"></i>
+                    </a>*@
+            </td>
+        </tr>
+    }
+
+</table>
+@if (Model.PageCount > 1)
+{
+    <span class="btn btn-success">
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    </span>
+    <span class="checkbox">
+        @Html.PagedListPager(Model, Page_No => Url.Action("Index", "GeneralLedgers",
+                      new { Page_No, Sorting_Order = Request.QueryString["Search"] }))
+    </span>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+    var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}

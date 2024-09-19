@@ -1,0 +1,435 @@
+﻿@model IEnumerable<KGERP.Service.Implementation.General_Requisition.GeneralRequisitionMasterVM>
+@using KGERP.Utility
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Generral Requisition Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 1;
+    int companyId = ViewBag.CompanyId ?? 0;
+}
+<style>
+    .overdate {
+        z-index: 1400;
+        position: absolute;
+    }
+</style>
+<section class="content-header">
+    <h1>General Requisition List</h1>
+    @*<ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("AddOrUpdate", new { CompanyId = companyId })" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New Requisition
+            </a>
+        </li>
+    </ol>*@
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Approval", "GeneralRequisition", FormMethod.Get, new { @class = "formValidator" }))
+                        {
+                            @Html.Hidden("companyId", new { htmlAttributes = new { @value = companyId } })
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="GeneralRequisitionType" class="control-label">Requisition Status</label>
+                                    @Html.EnumDropDownListFor(model => model.FirstOrDefault().RequisitionSignatoryStatus, htmlAttributes: new { @class = "form-control",required="false"})                                 
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.Editor("fromDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessage("fromDate", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.Editor("toDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessage("toDate", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-2" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+                        </div>
+                        }
+                        <hr />
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-responsive table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Requisiton No</th>
+                                            <th>Requisition Date</th>
+                                            <th>From Company</th>
+                                            <th>To Company/Division</th>
+                                            <th>Category</th>
+                                            <th>Remarks</th>
+                                            <th>Requisition Amount</th>
+                                            <!--<th>-->@*Action*@<!--</th>-->
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @(sl++)
+                                                </td>
+                                                <td>
+                                                    <a href="~/Report/GeneralRequisitionReport?companyId=@item.UserCompanyId&&masterId=@item.Id" target="_blank">  @item.RequisitionNumber </a>
+                                                </td>
+                                                <td>@item.RequisitionDate.ToString("yyyy-MM-dd")</td>
+                                                <td>@item.UserCompanyName</td>
+                                                <td>@(item.GeneralRequisitionType == KGERP.Utility.BusinessTypeEnum.Company?item.CompanyName:item.DivisionName)</td>
+                                                <td>@item.CategoryName</td>
+                                                <td>@item.Remarks</td>
+                                                <td>@item.RequisitionTotalAmount</td>
+                                                <td>
+                                                    @if (item.RequisitionSignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending)
+                                                    {
+                                                    @*<a href="@Url.Action("UpdateApprovalStatus", "GeneralRequisition", new { companyId = item.UserCompanyId, requisitionSignatoryId = item.RequisitionSignatoryId, status =  KGERP.Utility.SignatoryStatusEnum.Approved})"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>*@
+                                                    <a onclick="loadActionModal(@item.UserCompanyId, @item.RequisitionSignatoryId,@((int)KGERP.Utility.SignatoryStatusEnum.Approved),'@item.RequisitionNumber');"  data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
+                                                    @*<a href="@Url.Action("UpdateApprovalStatus", "GeneralRequisition", new { companyId = item.UserCompanyId, requisitionSignatoryId = item.RequisitionSignatoryId, status = KGERP.Utility.SignatoryStatusEnum.Rejected })">  <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>*@
+                                                    <a onclick="loadActionModal(@item.UserCompanyId, @item.RequisitionSignatoryId,@((int)KGERP.Utility.SignatoryStatusEnum.Rejected),'@item.RequisitionNumber');"  data-toggle="modal" data-target="#actionModal" title="Reject" data-placement="top">  <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
+                                                    @*<a onclick="loadSignatory(@item.Id);" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top">  <span class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span></a>*@
+                                                    }
+                                                    else
+                                                    {                                                     
+                                                     <button class="btn btn-sm pr-1">@item.RequisitionSignatoryStatus</button>
+                                                    }
+                                                    <a onclick="loadSignatory(@item.Id);" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top">  <span class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span></a>
+                                                </td>
+                                                @*<td>
+                                                    <a href="@Url.Action("UpdateApprovalStatus", "GeneralRequisition", new { companyId = item.UserCompanyId, requisitionSignatoryId = item.RequisitionSignatoryId, status = KGERP.Utility.GeneralRequisitionStatusEnum.Approved })"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
+                                                    <a href="@Url.Action("UpdateApprovalStatus", "GeneralRequisition", new { companyId = item.UserCompanyId, requisitionSignatoryId = item.RequisitionSignatoryId, status = KGERP.Utility.GeneralRequisitionStatusEnum.Reject })">  <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
+                                                    <a onclick="loadSignatory(@item.Id);" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top">  <span class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span></a>
+                                                </td>*@
+                                            </tr>
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+
+                @using (Html.BeginForm("UpdateApprovalStatus", "GeneralRequisition", FormMethod.Get))
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="modal fade" id="actionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                        &times;
+                                    </button>
+                                    <h3 class="modal-title"><b>General Requisition </b><span id="rqNumber"></span></h3>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.AntiForgeryToken()
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                    @Html.Hidden("requisitionSignatoryId")
+                                    @Html.Hidden("companyId")
+                                    @Html.Hidden("status")      
+                                   <textarea  id="comment" name="comment" style="max-width:100% !important"  placeholder="Write your valuable comment here" rows="3"></textarea>
+                                    <div style="text-align:center">
+                                        @*<h3>Are you sure to Reject this general requisition?</h3>*@
+                                        <h3 id="modalTitle"></h3>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="col-md-3">
+                                        <button type="button" onclick="resetActionModal()" class="btn btn-warning fa fa-close" data-dismiss="modal">NO</button>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <button type="submit" id="btnName" style="width:100%" class="btn btn-danger fa fa-remove"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+                <div class="modal fade" id="signatoryModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                    &times;
+                                </button>
+                                <h5 class="modal-title"><b>Requisition Signatory</b></h5>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-responsive-md table-striped table-hover" id="signatoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Signatory Id</th>
+                                            <th scope="col">Signatory</th>
+                                            <th scope="col">Designation</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Approved Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sigantoryTableBody">
+                                        @*@if (Model.RequisitionApprovalLIst != null)
+                                            {
+                                                int ii = 1;
+                                                foreach (var item in Model.RequisitionApprovalLIst)
+                                                {
+                                                    <tr>
+                                                        <td>@(ii++)</td>
+                                                        <td>@item.EmployeeName</td>
+                                                        <td>@item.DesignationName</td>
+                                                        <td>@item.Status</td>
+                                                    </tr>
+                                                }
+                                            }*@
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+        $(document).ready(function () {
+        $("#toDate").val("@(DateTime.Today.ToString("yyyy/MM/dd"))");
+        $("#fromDate").val("@(DateTime.Today.AddMonths(-2).ToString("yyyy/MM/dd"))");
+            $(function () {
+                $("#RequestForPersonName").autocomplete({
+                source: function (request, response) {
+                    $.ajax
+                        ({
+                            url: "/Configuration/EmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data,
+                                    function (item) {
+                                        return { label: item.label, value: item.label, id: item.val }
+                                    }));
+                            },
+                            error: function (e) { }
+                        });
+                },
+                minLength: 1,
+                delay: 500,
+                autoFocus: true,
+                select: function (event, ui) {
+                    console.log(ui);
+                    $("#RequestForPersonId").val(ui.item.id);
+                }
+            });
+        });
+     });
+
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+        function makeDeletable(id, companyId,rqNumber) {
+            $("#id").val(id);
+            $("#companyId").val(companyId);
+            $("#rqNumber").text(" #" + rqNumber);
+
+        }
+
+    function makeEditable(id, userCompanyId, rqNumber, requisitionTypeId, categoryId, companyId, departmentId, remarks) {
+            $("#rqNumber").text(" #" + rqNumber);
+             $("#GeneralRequisitionType").val(requisitionTypeId);
+            $("#Remarks").val(remarks);
+             $("#UserCompanyId").val(userCompanyId);
+            $("#Id").val(id);
+            LoadCategory(categoryId);
+            if (requisitionTypeId == @((int)KGERP.Utility.BusinessTypeEnum.Company)) {
+                LoadCompany(companyId);
+            }
+            if (requisitionTypeId ==  @((int)KGERP.Utility.BusinessTypeEnum.Division)) {
+                //$('#CompanyName').text("Select Division");
+                LoadDepartment(departmentId);
+            }
+        }
+        function resetUpdateModal() {
+            $("#CommonId").html("");
+            $("#Remarks").val("");
+            $("#UserCompanyId").val(null);
+          //  $("#GeneralRequisitionType").val(0);
+            $("#CategoryId").html("");
+            $("#Id").val(null);
+            $("#rqNumber").text("");
+        }
+
+        function LoaderFunction(id) {
+            var requisitionTypeId = $("#GeneralRequisitionType").val();
+            if (requisitionTypeId == 0) {
+                return;
+            }
+            LoadCategory();
+            if (requisitionTypeId == @((int)KGERP.Utility.BusinessTypeEnum.Company)) {
+                $('#CompanyName').text("Select Company");
+                LoadCompany();
+            }
+            if (requisitionTypeId ==  @((int)KGERP.Utility.BusinessTypeEnum.Division)) {
+                $('#CompanyName').text("Select Division");
+                LoadDepartment();
+            }
+        }
+        function LoadCompany(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                    if (id != null && id > 0) {
+                        $("#CommonId").val(id);
+                    }
+                }
+            })
+        }
+        function LoadDepartment(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                    if (id != null && id > 0) {
+                        $("#CommonId").val(id);
+                    }
+                }
+            })
+        }
+        function LoadCategory(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllGRQSProductCategoryAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CategoryId").html("");
+                    var content = '<option>Select Category</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CategoryId").append(content)
+
+                    if (id != null && id > 0) {
+                        $("#CategoryId").val(id);
+                    }
+                }
+            })
+        }
+    function loadSignatory(id) {
+        $.ajax({
+            type: "GET",
+            url: "/GeneralRequisition/GetApprovalList",
+             data: { requisitionId: id },
+            success: function (data) {
+                // Get the table element from the HTML
+                const table = document.getElementById('sigantoryTableBody');
+                while (table.rows.length > 0) {
+                    table.deleteRow(0);
+                }
+                data.forEach((item, index) => {
+                    const row = table.insertRow(index);
+
+                    // Display specific fields in the table
+                    const fieldsToDisplay = ['OrderBy', 'EmployeeIdString', 'EmployeeName', 'DesignationName', 'StatusString','ApprovedTime'];
+
+                    fieldsToDisplay.forEach((field) => {
+                        const cell = row.insertCell();
+                        cell.innerHTML = item[field];
+                    });
+                });
+            }
+        })
+    }
+        function loadActionModal(userCompanyId, requisitionApprovalId, actionType, requisitionNumber) {
+            $("#rqNumber").text(" " + requisitionNumber);
+            $("#status").val(actionType);
+            $("#companyId").val(companyId);
+            $("#requisitionSignatoryId").val(requisitionApprovalId);
+
+            $("#comment").removeAttr("class");
+            $("#comment").addClass("form-control");
+
+            if (actionType == @((int)(KGERP.Utility.SignatoryStatusEnum.Rejected))) {
+                $("#modalTitle").text("Are you sure you want to reject this item ?");
+
+                $("#modalTitle").removeAttr("class");
+                $("#modalTitle").addClass("text-danger");
+                $("#btnName").removeAttr("class");
+                $("#btnName").addClass("btn btn-danger fa fa-remove");
+                $("#btnName").text(" Reject");
+            } else {
+                $("#modalTitle").text("Are you sure you want to approved this item ?");
+                $("#modalTitle").removeAttr("class");
+                $("#modalTitle").addClass("text-primary");
+                $("#btnName").removeAttr("class");
+                $("#btnName").addClass("btn btn-primary fa fa-check");
+                $("#btnName").text(" Approved");
+            }
+    }
+        function resetActionModal() {
+            $("#id").val(null);
+            $("#companyId").val(null);
+            $("#rqNumber").text("");
+
+        }
+
+</script>
+}

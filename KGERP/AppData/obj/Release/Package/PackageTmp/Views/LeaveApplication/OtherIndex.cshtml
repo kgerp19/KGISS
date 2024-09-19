@@ -1,0 +1,137 @@
+﻿
+@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.LeaveApplicationModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    var message = TempData["successMessage"];
+}
+
+
+
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+<div class="row">
+    <div class="col-md-4">
+        @Html.Label("Other Leave Applications", new { @style = "font-size:20px" })
+    </div>
+    <div class="col-md-5">
+        @using (Html.BeginForm("OtherIndex", "LeaveApplication", FormMethod.Get, new { @class = "example" }))
+        {
+            @Html.TextBox("searchText", null, new { @autocomplete = "off", @placeholder = "Search.." })
+            <button type="submit"><i class="fa fa-search"></i></button>
+        }
+    </div>
+    <div class="col-md-3">
+        @using (Html.BeginForm("OtherCreate", "LeaveApplication", FormMethod.Get, new { @class = "example"}))
+        {
+            @Html.TextBox("kgId", null, new { @autocomplete = "off", @placeholder = "KG ID" })
+            <button type="submit" style="background-color:#3c8dbc" title="New Application">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+            </button>
+
+        }
+
+    </div>
+</div>
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped table-responsive">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>SL</th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EmployeeId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EmployeeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().LeaveCategoryId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Reason)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ApplicationDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().LeaveDays)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().AppliedBy)
+            </th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+        <tr>
+            <td>
+                @(item.Index + 1)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.EmployeeId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.EmployeeName)
+            </td>
+
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.LeaveName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.Reason)
+            </td>
+            <td>
+                @if (item.Data.ApplicationDate.HasValue)
+                {
+                    @item.Data.ApplicationDate.Value.ToString("dd-MMM-yyyy")
+                }
+            </td>
+            <td>
+                @item.Data.StartDate.Value.ToString("dd-MMM-yyyy")
+            </td>
+            <td>
+                @item.Data.EndDate.Value.ToString("dd-MMM-yyyy")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.LeaveDays)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.AppliedBy)
+            </td>
+        </tr>
+        }
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("OtherIndex", "LeaveApplication",
+                                                                                     new { Page_No, Sorting_Order = Request.QueryString["Search"], searchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+    var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}

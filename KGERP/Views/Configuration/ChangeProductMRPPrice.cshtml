@@ -1,0 +1,268 @@
+﻿
+@{
+    ViewData["Title"] = "Change Product MRP Price";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string collapsedBox = "";
+
+}
+@model KGERP.Service.Configuration.VMCommonProduct
+    <script src="~/bower_components/jquery/dist/jquery.min.js"></script>
+
+    <section class="content-header">
+        <h1>
+            <span>
+                Change Product MRP Price
+            </span>
+
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+            <li class="active"> Change Product MRP Price</li>
+        </ol>
+    </section>
+    @using (Html.BeginForm("ChangeProductCostingPrice", "Configuration", FormMethod.Post, new { id = "changeProductCostingPriceFormId", @class = "formValidator" }))
+    {
+        <section class="content">
+            <div class="row">
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+                        <div class="box-header">
+
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="col-md-12">
+                                <div class="box box-success box-solid @collapsedBox">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title" style="text-align:center">
+                                            Change Product Costing Price
+                                        </h3>
+                                        <div class="box-tools pull-right">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    @Html.HiddenFor(model => model.ActionId, new { id = "changeProductExpiryActionId" })
+                                    @Html.HiddenFor(model => model.CompanyFK, new { Value = "", id = "CompanyFK" })
+
+                                    <div class="box-body">
+                                        <div class="row">
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-10">
+
+                                                <div class="box-body">
+                                                    <div class="form-group">
+                                                        <label>Search By Product</label>
+                                                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "ProductName", @id = "txtProductNameOrBarcode" } })
+                                                        @Html.HiddenFor(model => model.ID, new { id = "hidCommon_ProductFK" })
+
+                                                        @Html.ValidationMessageFor(model => model.ID, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+                                                <div class="box-body">
+
+                                                    <table id="productDetailsTable" class="table">
+                                                        <tr>
+                                                            <th>
+                                                                Category
+                                                            </th>
+                                                            <td><span id="spnCategoryName"></span></td>
+                                                            <th>
+                                                                Subcategory
+                                                            </th>
+                                                            <td><span id="spnSubCategoryName"></span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>MRP Price</th>
+                                                            <td>
+                                                                <span id="spnMRPPrice"></span>
+                                                            </td>
+                                                            <th>
+                                                                Current Expiry Date
+                                                            </th>
+                                                            <td><span id="spnExpiryDate"></span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>VAT</th>
+                                                            <td>
+
+                                                                <span id="spnVAT"></span>
+                                                            </td>
+                                                            <th>
+                                                                Unit
+                                                            </th>
+                                                            <td>
+                                                                <span id="spnUnitName"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+
+                                                            <th>
+                                                                Costing Price
+                                                            </th>
+                                                            <td>
+                                                                <input name="CostingPrice" asp-for="CostingPrice" type="text" required="required" readonly="readonly" class="form-control" id="txtCostingPrice" placeholder="CostingPrice" autocomplete="off">
+                                                            </td>
+                                                            <th>
+                                                                MRP Price
+                                                            </th>
+                                                            <td>
+                                                                <input name="MRPPrice" asp-for="MRPPrice" type="text" required="required" class="form-control" id="txMRPPrice" placeholder="MRP Price" autocomplete="off">
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1"></div>
+
+                                    </div>
+                                    <div class="box-footer">
+                                        @if (Model.ID > 0)
+                                        {
+                                            <h4 class="text-success text-center">
+                                                The MRP Price of<span class="text-danger"> @Model.Name @Model.SystemBarcode</span> Successfully Changed with <span class="text-danger">@Model.MRPPrice</span>
+                                            </h4>
+                                        }
+                                        <div class="row">
+                                            <div class="col-md-4">
+
+                                            </div>
+                                            <div class="col-lg-8 col-md-8">
+                                                <button type="submit" id="btnsave" class="btn btn-primary btn-block">
+                                                    <i class='fa fa-edit'></i>
+
+                                                    <span>Change</span>
+
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+    }
+
+
+    @section scripts {
+
+        <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+            $("#productDetailsTable").hide();
+
+
+
+ $("#txtProductNameOrBarcode").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("AutoCompleteProductGet", "Marketing")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { id : request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#hidCommon_ProductFK").val(i.item.val);
+
+                   $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("CommonProductByID", "Configuration")",
+                    datatype: "Json",
+                       data: { id: i.item.val },
+                     success: function (data) {
+                         console.log(data);
+                         $("#productDetailsTable").show();
+                         $("#txtCostingPrice").val(data.costingPrice)
+                         $("#txMRPPrice").val(data.mrpPrice);
+                         $("#spnCategoryName").text(data.categoryName);
+                         $("#spnSubCategoryName").text(data.subCategoryName);
+                         $("#spnMRPPrice").text(data.mrpPrice);
+                         $("#spnVAT").text(data.vat);
+                         $("#spnUnitName").text(data.unitName);
+
+                         var expiryDate = data.expiryDate;
+                         $("#spnExpiryDate").text(expiryDate.substr(0, 10));
+                         $("#txtExpiryDate").val(expiryDate.substr(0, 10));
+                         $("#changeProductExpiryActionId").val(2)
+                    }
+                });
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+            @*$.ajaxSetup({ cache: false });
+            //$("#ddlShipmentInvoiceFk").change(function (e) {
+            $("#ddlProductId").change(function (e) {
+                var productId = $("#ddlProductId").val();
+
+                 $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("CommonProductByID", "Configuration")",
+                    datatype: "Json",
+                     data: { id: productId },
+                     success: function (data) {
+                         console.log(data);
+                         $("#productDetailsTable").show();
+                         $("#txtCostingPrice").val(data.costingPrice)
+                         $("#txMRPPrice").val(data.mrpPrice);
+                         $("#spnCategoryName").text(data.categoryName);
+                         $("#spnSubCategoryName").text(data.subCategoryName);
+                         $("#spnMRPPrice").text(data.mrpPrice);
+                         $("#spnVAT").text(data.vat);
+                         $("#spnUnitName").text(data.unitName);
+
+                         var expiryDate = data.expiryDate;
+                         $("#spnExpiryDate").text(expiryDate.substr(0, 10));
+                         $("#txtExpiryDate").val(expiryDate.substr(0, 10));
+                         $("#changeProductExpiryActionId").val(2)
+                    }
+                });
+
+
+                return false;
+             });*@
+        });
+
+
+
+        </script>
+    }

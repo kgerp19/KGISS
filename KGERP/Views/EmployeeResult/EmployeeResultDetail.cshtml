@@ -1,0 +1,1468 @@
+﻿@model KGERP.Service.Implementation.EmployeeResults.EmployeeResultsVM
+@{
+    ViewData["Title"] = "EmployeeResultDetail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var APRDetailsId = Model.AnnualPerformanceDetailId > 0 ? Model.FullName : "....................";
+    string CompanyFlg = "";
+    string DepartmentFlg = "";
+    int majorWorkOne = Model.MajorWorkOne == null ? 0 : 20;
+    int majorWorkTwo = Model.MajorWorkTwo == null ? 0 : 20;
+    int majorWorkThree = Model.MajorWorkThree == null ? 0 : 20;
+    int majorWorkFour = Model.MajorWorkFour == null ? 0 : 20;
+    int TotalNumberOfMajorWork = majorWorkOne + majorWorkTwo + majorWorkThree + majorWorkFour;
+    if (Model.AnnualPerformanceDetailId > 0)
+    {
+        CompanyFlg = Model.CompanyId > 0 ? "checked" : "";
+        DepartmentFlg = Model.DepartmentId > 0 ? "checked" : "";
+    }
+    double TotalScore = 0;
+    var RecValue = 1;
+    var FirstSignatory = "";
+    var FirstSignatoryDate = "";
+    var FirstSignatoryDig = "";
+    var FirstSignatoryDep = "";
+    var FirstSignatoryCom = "";
+    var SecondSignatory = "";
+    var SecondSignatoryDig = "";
+    var SecondSignatoryDep = "";
+    var SecondSignatoryCom = "";
+    var SecondSignatoryDate = "";
+    var ThirdSignatory = "";
+    var ThirdSignatoryDig = "";
+    var ThirdSignatoryDep = "";
+    var ThirdSignatoryCom = "";
+    var ThirdSignatoryDate = "";
+    var FrouthSignatory = "";
+    var FrouthSignatoryDig = "";
+    var FrouthSignatoryDate = "";
+    var FrouthSignatoryDep = "";
+    var FrouthSignatoryCom = "";
+
+    var signatories = Model.signatoryApprovalList?.Where(x => x.Status == 1).ToList();
+
+    if (signatories != null && signatories.Count > 0)
+    {
+        foreach (var item in signatories)
+        {
+            switch (item.OrderBy)
+            {
+                case 1:
+                    FirstSignatory = item.SignatoryName;
+                    FirstSignatoryDate = item.ApproveDate?.ToString("dd-MMM-yyyy");
+                    FirstSignatoryDig = item.DesignationName;
+                    FirstSignatoryDep = item.SignatoryDepartment;
+                    FirstSignatoryCom = item.SignatoryCompany;
+                    Model.RemarksOfReportingOfficer = item.Comment;
+                    break;
+                case 2:
+                    FrouthSignatory = item.SignatoryName;
+                    FrouthSignatoryDep = item.SignatoryDepartment;
+                    FrouthSignatoryCom = item.SignatoryCompany;
+                    FrouthSignatoryDig = item.DesignationName;
+                    FrouthSignatoryDate = item.ApproveDate?.ToString("dd-MMM-yyyy");
+                    Model.RemarksOfMdOrCeo = item.Comment; ;
+                    break;
+                case 3:
+                    SecondSignatory = item.SignatoryName;
+                    SecondSignatoryDig = item.DesignationName;
+                    SecondSignatoryDep = item.SignatoryDepartment;
+                    SecondSignatoryCom = item.SignatoryCompany;
+                    SecondSignatoryDate = item.ApproveDate?.ToString("dd-MMM-yyyy");
+                    Model.HOdAdminHr = item.Comment;
+                    break;
+                case 4:
+                    ThirdSignatory = item.SignatoryName;
+                    ThirdSignatoryDig = item.DesignationName;
+                    ThirdSignatoryDep = item.SignatoryDepartment;
+                    ThirdSignatoryCom = item.SignatoryCompany;
+                    ThirdSignatoryDate = item.ApproveDate?.ToString("dd-MMM-yyyy");
+                    Model.FinalCommentOfManagement = item.Comment;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    input, select {
+        max-width: 100% !important;
+    }
+    .indent {
+        text-indent: 2em; /* Adjust the value as needed */
+    }
+    #tblFooter tr {
+        cursor: move;
+    }
+
+    .marks-section {
+        /*background-color: #f8f9fa;*/
+        border: 1px solid #dee2e6;
+        border-radius: 1.25rem;
+        padding: 20px;
+        margin-bottom: 4%;
+    }
+
+    .marks-header {
+        font-size: 2.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .marks-item {
+        font-size: 1.7rem;
+        margin-bottom: 5px;
+    }
+
+    .marks-total {
+        font-size: 1.7rem;
+        font-weight: 700;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .ui-state-highlight {
+        height: 2em;
+        line-height: 1.2em;
+        /*background-color: #f2f2f2;*/
+        border: 1px dashed #aaa;
+    }
+
+    .forCustomHeading {
+        background: whitesmoke;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
+        padding: 10px 20px;
+        font-size: 19px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .empFormGroup {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+        .empFormGroup label {
+            margin-right: 10px;
+        }
+
+        .empFormGroup span {
+            flex-grow: 1;
+        }
+
+    .container {
+        font-family: 'Roboto', sans-serif;
+        /*background-color: #fff;*/
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100% !important;
+        padding-bottom: 1%;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+    /*  table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    th {
+        background-color: #343a40;
+        color: #fff;
+        text-align: center;
+    }
+
+    td {
+        text-align: center;
+    }*/
+
+    .score {
+        margin: 0;
+    }
+
+    p {
+        font-size: 1.2em;
+    }
+
+    #additionalMonths {
+        width: 5%;
+        /*background-color: darkblue;*/
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        border-radius: 7%;
+    }
+
+    #totalScore, #averageScore {
+        font-weight: bold;
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: end;
+        margin-top: 20px;
+    }
+
+    .card-containers {
+        display: flex;
+        justify-content: space-evenly;
+        margin-top: 20px;
+    }
+
+    #IncreaseProMonth {
+        width: 10%;
+        text-align: center;
+        font-weight: 700;
+        border-radius: 7%;
+    }
+
+    .card {
+        width: 42%;
+        text-align: center;
+        padding: 20px;
+        /*background-color: #fff;*/
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .card p {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+    .demonstrated-traits-row {
+        font-weight: bold;
+        text-align: center;
+        /*background-color: #e9ecef;*/
+    }
+
+        .demonstrated-traits-row > td {
+            text-align: left;
+        }
+
+    .traitRowTd {
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .thead-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+
+
+    .radio-group {
+        display: flex;
+        flex-direction: row; /* Ensure the items are aligned horizontally */
+        gap: 20px; /* Space between radio buttons */
+    }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+</style>
+
+<div class="container prevent-context-menu">
+
+
+    <div id="divPersonalInformation">
+
+
+        <div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <h3 style="text-decoration:underline">PART-I</h3>
+                    </div>
+                    <div style="text-align:end">
+                        <label>ID no: @Model.EmployeeCode</label>
+                    </div>
+                </div>
+            </div>
+            <div class="box-title">
+                <h3>1.Personal Information </h3>
+            </div>
+            <div>
+
+
+                <div class="col-md-12">
+                    <table class="table table-responsive table-bordered  ">
+                        <tr>
+                            <th>
+                                Employee Name
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @*@Model.EmployeeCode*@ @Model.FullName
+                            </th>
+
+
+                            <th>
+                                Designation
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.Designation
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                Data Of Birth
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @(Model.DateOfBirth!=null?Model.DateOfBirth.Value.ToString("dd-MMM-yyyy"):"N/A")
+                            </th>
+
+
+                            <th>
+                                Phone No
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.ContractNumber
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                Department
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.Department
+                            </th>
+
+
+                            <th>
+                                Appointment Date
+
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @(Model.AppointmentDate!=null?Model.AppointmentDate.Value.ToString("dd-MMM-yyyy"):"N/A")
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <th>
+                                Assessment From
+
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.AssessmentFromMsg
+                            </th>
+
+
+                            <th>
+                                Assessment To
+
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.AssessmentToMsg
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                Marital Status
+
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.MaritalStatus
+                            </th>
+
+
+                            <th>
+                                Grade
+
+                            </th>
+                            <th>
+                                :
+                            </th>
+                            <th>
+                                @Model.GradeName
+                            </th>
+                        </tr>
+
+
+                    </table>
+
+
+
+                </div>
+
+
+
+
+                <div>
+                    <h3 style="text-decoration:underline">2.Qualifications</h3>
+                </div>
+
+
+                <div class="col-md-12">
+                    <table class="table table-bordered table-striped" style="white-space:nowrap">
+
+                        <thead>
+                            <tr>
+                                <th colspan="7" style="font-size: large; text-align: center">
+                                    a. Educational Qualifications (SSC/eqvt and avove)
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Sl</th>
+                                <th style="text-align:center;width:30%;">Qualification</th>
+                                <th style="width:20%">Subject</th>
+                                <th style="width:20%">Div/Grade/Category/Class</th>
+                                <th style="width:10%">Passed Year</th>
+                                <th style="width:20%">Institute</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.EmployeeEqucationList != null && Model.EmployeeEqucationList.Count > 0)
+                                {
+                                    int sl = 1;
+                                    foreach (var item in Model.EmployeeEqucationList)
+                                    {
+                                        <tr>
+                                            <td><b>@sl</b></td>
+                                            <td>@item.Qualification</td>
+                                            <td>@item.Subject</td>
+                                            <td>@item.Result</td>
+                                            <td>@item.PassedYear</td>
+                                            <td>@item.Institute</td>
+                                        </tr>
+                                        sl += 1;
+                                    }
+                                }
+
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="box-footer">
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+
+    <div id="devQualifications">
+
+        <div class="row">
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h3 style="text-decoration:underline">3.Self-Assessment by the Employee</h3>
+                <label class="required">(a) Justifiction of your compensation and performance in reporting year.</label>
+                <div class="form-group">
+                    @Html.Raw(Model.PerformanceInReportingYear)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <label class="required">(b) Your Expected compensation package in reporting year with justification</label>
+                <div class="form-group">
+                    @Html.Raw(Model.PlanforNextYear)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <label class="required">(c) Your performing plan for next year.</label>
+                <div class="form-group">
+                    @Html.Raw(Model.performingPlanForNextYear)
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card" style="padding: 8px; width: 50%; margin-top: 40%;">
+                    <div class="card-body">
+                        <div class="empFormGroup text-right">
+                            <span style="text-align: justify;">Date: @Model.APREmpCreateDate.ToString("dd-MMM-yyyy")</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card-container">
+                    <div class="card" style="padding: 8px; width: 60%;margin-top:4%">
+                        <div class="card-header">
+                            <h4 class="text-left mb-4" style="font-size: medium;"><label>Signature of the Employee Reported Upon</label></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <label>Name:</label>
+                                <span style="text-align: justify;">@Model.FullName</span>
+                            </div>
+                            <div class="empFormGroup text-right">
+                                <label>Designation:</label>
+                                <span style="text-align: justify;">@Model.Designation</span>
+                            </div>
+                            <div class="empFormGroup text-right">
+                                <label>Division/Sister Org:</label>
+                                <span style="text-align: justify;">@Model.Department</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+    <div class="row" id="hodAdminAndHr">
+        <div class="container" style="margin-top:2%">
+            <div class="text-center">
+                <h3 style="text-decoration:underline">Confidential</h3>
+                <span style="text-decoration:underline">PART-II</span>
+            </div>
+            <h3 style="text-decoration:underline">4.Part-II (A)-Quantitative Performance</h3>
+            <div class="row">
+                <div id="QuantitativePerformance" style="font-size: medium;">
+                    <div class="col-md-12">
+                        <label style="text-decoration:underline">a.Attendance Summanry (To be field up by Admin)(10): </label>
+                        <ol id="attendanceSummanryMark">
+                        </ol>
+                    </div>
+                    <div class="col-md-12">
+                        <label style="text-decoration:underline">b.Discipline State (To be field up by Admin)(10): </label>
+                        <ol id="disciplineStateMarks">
+                        </ol>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="row justify-content-center">
+                            <div class="col-md-12">
+                                <div class="marks-section">
+                                    <div class="marks-header">Marks Obtained</div>
+                                    <div class="marks-item">Attendance Mark: <b id="attendanceMark"></b></div>
+                                    <div class="marks-item">Discipline Marks: <b id="disciplineMarks"></b></div>
+                                    <div class="marks-total">Total: <b id="totalEmployeePerformanceMark"></b></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card" style="padding: 8px; width: 50%; margin-top: 40%;">
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <span style="text-align: justify;">Date: @SecondSignatoryDate</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card-container">
+                        <div class="card" style="padding: 8px; width: 55%;margin-top:6%">
+                            <div class="card-header">
+                                <h4 class="text-left mb-4" style="font-size: medium;"><label>Signature of Director (Admin Or HR)</label></h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="empFormGroup text-right">
+                                    <label>Name:</label>
+                                    <span style="text-align: justify;">@SecondSignatory</span>
+                                </div>
+                                <div class="empFormGroup text-right">
+                                    <label>Designation:</label>
+                                    <span style="text-align: justify;">@SecondSignatoryDig</span>
+                                </div>
+                                <div class="empFormGroup text-right">
+                                    <label>Division/Sister Org:</label>
+                                    <span style="text-align: justify;">@SecondSignatoryDep</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="achivementAsAgainstTarget">
+        <h3 style="margin-bottom: 0px !important;text-decoration:underline">c.Achievement as against Target(80):</h3>
+        <span>(For Business Employee)</span>
+
+        <div style="margin-top:1%">
+            <table class="table table-bordered table-striped">
+
+                <tbody class="container mt-5">
+                    <tr>
+                        <th style="text-align:left">
+                            <label>Sale target-(ton/no/tk)</label>
+
+                        </th>
+                        <th style="text-align:left">
+                            <label>Achievement-(ton/no/tk)</label>
+
+                        </th>
+                        <th style="text-align:left">
+                            <label>Marks obtained..out of(25)</label>
+
+                        </th>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left">
+
+                            @Model.SalesTarget
+                        </td>
+                        <td style="text-align:left">
+
+                            @Model.SalesAchievement
+                        </td>
+                        <td style="text-align:left">
+
+                            <span type="number" id="salesTargetMakrs"></span>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <th style="text-align:left">
+                            <label>Recovery target-(ton/no/tk)</label>
+
+                        </th>
+                        <th style="text-align:left">
+                            <label>Achievement-(ton/no/tk)</label>
+
+                        </th>
+                        <th style="text-align:left">
+                            <label>Marks obtained..out of(25)</label>
+
+                        </th>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left">
+
+                            @Model.RecoveryTarget
+                        </td>
+                        <td style="text-align:left">
+
+                            <div class="form-group" style="display:flex">
+                                @(Model.RecoveryAchievement??0)
+                            </div>
+                        </td>
+                        <td style="text-align:left">
+
+                            <span type="number" id="salesTargetMakrsRecover"></span>
+                        </td>
+
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" style="text-align:right"><h3 style="margin:0px !important">Total makrs obtained:</h3></td>
+                        <td style="text-align:left"><h3 style="margin:0px !important" id="totalmarksobtained"></h3></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <div id="divForSupportServiceEmployee">
+        <h3 style="margin-bottom: 0px !important;text-decoration:underline">d.Major works done beyond routine work-20 marks for each work(80):</h3>
+        <span>(For Support Service Employee)</span>
+        <div style="margin-top:1%">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-fixed">
+                    <tr>
+                        <th style="width: 3%;">SL</th>
+                        <th>Major works</th>
+                        <th style="width:10%">Marks</th>
+                    </tr>
+                </thead>
+                <tbody class="container mt-5">
+                    <tr>
+                        <td>
+                            <label>1</label>
+                        </td>
+                        <td>
+                            @Model.MajorWorkOne
+                        </td>
+                        <td>
+                            @majorWorkOne
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>2</label>
+                        </td>
+                        <td>
+                            @Model.MajorWorkTwo
+                        </td>
+                        <td>
+                            @majorWorkTwo
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>3</label>
+                        </td>
+                        <td>
+                            @Model.MajorWorkThree
+                        </td>
+                        <td>
+                            @majorWorkThree
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>4</label>
+                        </td>
+                        <td>
+                            @Model.MajorWorkFour
+                        </td>
+                        <td>
+                            @majorWorkFour
+                        </td>
+
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" style="text-align:right"><b>Total makrs obtained:</b></td>
+                        <td style="text-align:left"><label id="totalMajorWorkMarks">@TotalNumberOfMajorWork</label></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="text-center">
+                <h3 style="text-decoration:underline">Confidential</h3>
+                <span style="text-decoration:underline">PART-II</span>
+            </div>
+        </div>
+    </div>
+    @if (Model.ProfileQualitiesList != null && Model.ProfileQualitiesList.Any(x => x.ScoreApr > 0))
+    {
+
+
+        <div id="divProfileQualities">
+            <h3 style="text-decoration:underline">5. Part-II (B) - Qualitative Performance Analysis</h3>
+            <table id="traitsTable" class="table table-bordered table-striped">
+                <thead class="thead-fixed">
+                    <tr>
+                        <th>Sl</th>
+                        <th style="text-align:left;width:30%;">Qualities Name</th>
+                        <th>5</th>
+                        <th>4</th>
+                        <th>3</th>
+                        <th>2</th>
+                        <th>1</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model.ProfileQualitiesList.Count > 0)
+                        {
+                            int DropDownTypeId = 0;
+                            foreach (var profileQuality in Model.ProfileQualitiesList)
+                            {
+                                var t = "";
+                                if (profileQuality.DropDownTypeId != DropDownTypeId)
+                                {
+                                    <tr class="demonstrated-traits-row">
+                                        <td colspan="11">@profileQuality.ProfileQualitiesGroupName</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td>@(Model.ProfileQualitiesList.IndexOf(profileQuality) + 1)</td>
+                                    <td hidden>@profileQuality.DropDownItemId</td>
+                                    <td class="traitRowTd">@profileQuality.ProfileQualitiesName</td>
+                                    @for (int j = 5; j >= 1; j--)
+                                    {
+                                        t = j == profileQuality.ScoreApr ? "checked" : "";
+                                        <td><input type="checkbox" @t value="@j" class="score"></td>
+                                        TotalScore += j;
+                                    }
+                                </tr>
+                                DropDownTypeId = profileQuality.DropDownTypeId;
+                            }
+                        }
+
+                    }
+                </tbody>
+            </table>
+            <div class="card-containers">
+                <div class="card">
+                    <p>Total Score: <span id="totalScore">0</span></p>
+                </div>
+                <div class="card">
+                    <p>Average Score: <span id="averageScore">0</span></p>
+                </div>
+            </div>
+        </div>
+        <div id="divOverallEvaluation">
+            <h3 style="text-decoration:underline">6.Overall Evaluation</h3>
+            <table class="table table-bordered table-striped">
+                <thead class="thead-fixed">
+                    <tr>
+                        <th>Grading</th>
+                        <th class="text-center">Excellent<br />4.5-above</th>
+                        <th class="text-center">Very Good <br />4-4.4</th>
+                        <th class="text-center">Good<br />3.5-3.9</th>
+                        <th class="text-center">Average<br />2.5-3.4</th>
+                        <th class="text-center">Below Average<br />2.4 & below</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            Quantitative (Part-II A)
+                        </td>
+                        <td class="text-center">
+                            <input type="radio"  id="lebOutstanding" name="favEvaluation" />
+                            @*<label for="lebOutstanding">95 - 100</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebVeryGood" name="favEvaluation" />
+                            @*<label for="lebVeryGood">90-94</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebGood" name="favEvaluation" />
+                            @*<label for="lebGood">80-89</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebAboveAverage" name="favEvaluation" />
+                            @*<label for="lebAboveAverage">70-79</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebAverage" name="favEvaluation" />
+                            @*<label for="lebAverage">69-below</label>*@
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Qualitative (Part-II B)
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebOutstandingQua" name="favEvaluationQua" />
+                            @*<label for="lebOutstandingQua">95 - 100</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebVeryGoodQua" name="favEvaluationQua" />
+                            @*<label for="lebVeryGoodQua">90-94</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebGoodQua" name="favEvaluationQua" />
+                            @*<label for="lebGoodQua">80-89</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebAboveAverageQua" name="favEvaluationQua" />
+                            @*<label for="lebAboveAverageQua">70-79</label>*@
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" id="lebAverageQua" name="favEvaluationQua" />
+                            @*<label for="lebAverageQua">69-below</label>*@
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="required" style="text-decoration:underline">7.General and Special Remarks by Reporting Officer: </h3>
+                    <div class="form-group">
+                        @Html.Raw(Model.RemarksOfReportingOfficer)
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    @*<div class="card" style="padding: 8px; width: 50%; margin-top: 40%;">
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <span style="text-align: justify;">Date: @FirstSignatoryDate</span>
+                            </div>
+
+                        </div>
+                    </div>*@
+                </div>
+                <div class="col-md-8">
+                    <div class="card-container">
+                        <div class="card" style="padding: 8px; width: 60%; margin-top: 4%">
+
+                            <div class="card-body">
+                                <div class="empFormGroup text-right">
+                                    <label>Name:</label>
+                                    <span style="text-align: justify;">@FirstSignatory</span>
+                                </div>
+                                <div class="empFormGroup text-right">
+                                    <label>Designation:</label>
+                                    <span style="text-align: justify;">@FirstSignatoryDig</span>
+                                </div>
+                                <div class="empFormGroup text-right">
+                                    <label>Division/Sister Org:</label>
+                                    <span style="text-align: justify;">@FirstSignatoryDep</span>
+                                </div>
+                            </div>
+                            <div class="card-header">
+                                <hr style="margin: 0%;border-top: 1px solid;" />
+                                <h4 class="text-left mb-4" style="font-size: medium"><label>Signature of Reporting Officer</label></h4>
+                                <h4 class="text-left mb-4" style="font-size: medium;"><label>Date: @FirstSignatoryDate</label></h4>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div class="text-center">
+                    <h3 style="text-decoration:underline">Confidential</h3>
+                    <span style="text-decoration:underline">PART-III</span>
+                </div>
+            </div>
+            <div class="row">
+                <h3 style="text-decoration: underline; padding-left: 1% ">8. Recommendations  <span style=" font-size: large;">(Recommend this employee for:)</span></h3>
+
+
+                <div class="col-md-12" style="margin-left:1%">
+
+                    @{
+                        if (Model.DDLRecommendationModel != null && Model.DDLRecommendationModel.Count > 0)
+                        {
+
+                            foreach (var item in Model.DDLRecommendationModel)
+                            {
+                                var RecommendationId = $"Recommendation_{RecValue}";
+                                string isChecked = item.DropDownItemId == item.DropDownItemIdEmpApr ? "checked" : "";
+                                string colorH = item.DropDownItemId == item.DropDownItemIdEmpApr ? "color: green;font-weight: bold;" : "";
+
+                                if (item.DropDownTypeId == 73)
+                                {
+                                    <div class="recommendationForPermanentEmployee">
+                                        <input type="radio" @isChecked /> <span style="@colorH">@item.RecommendationName</span>
+                                        @if (item.DropDownItemId == 1644)
+                                        {
+                                            <input value="@item.IncreaseProMonth" type="number" id="IncreaseProMonth" />
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="recommendationForProbitionPerionEmployee">
+                                        <input type="radio" @isChecked /> <span style="@colorH">@item.RecommendationName</span>
+                                        @if (item.DropDownItemId == 1644)
+                                        {
+                                            <input style="border:none" value="@item.IncreaseProMonth" type="number" id="IncreaseProMonth" />
+                                        }
+                                    </div>
+                                }
+
+
+                                RecValue += 1;
+                            }
+                        }
+                    }
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <h3 style="text-decoration: underline; padding-left: 1%;">9. Cartification</h3>
+                <div class="col-md-12" style="margin-left:1%;">
+
+                    <p style="font-size: medium;">I certify that the employee worked under me for @Model.WorkWithReportingOfficer year/months. Ihave made my assessment on this employee from personal knowledge and that it is my honest opinion.I have informad him of this failings or weaknesses.</p>
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card" style="padding: 8px; width: 50%; margin-top: 40%;">
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <span style="text-align: justify;">Date: @FirstSignatoryDate</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card-container">
+                        <div class="card" style="padding: 8px; width: 60%; margin-top: 4%">
+                            <div class="card-header">
+                                @*<hr style="margin: 0%;border-top: 1px solid;" />*@
+                                <h4 class="text-left mb-4" style="font-size: medium"><label>Signature of Reporting Officer</label></h4>
+                                @*<h4 class="text-left mb-4" style="font-size: medium;"><label>Date: @FirstSignatoryDate</label></h4>*@
+                            </div>
+                            <div class="card-body">
+                                <div class="empFormGroup text-right">
+                                    <label>Name:</label>
+                                    <span style="text-align: justify;">@FirstSignatory</span>
+                                </div>
+                                <div class="empFormGroup text-right">
+                                    <label>Designation:</label>
+                                    <span style="text-align: justify;">@FirstSignatoryDig</span>
+                                </div>
+                                <div class="empFormGroup text-right">
+                                    <label>Division/Sister Org:</label>
+                                    <span style="text-align: justify;">@FirstSignatoryDep</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+    }
+
+</div>
+
+<div id="empMdOrCeo">
+    <div class="container" style="margin-top:2%">
+        @*<div class="text-center">
+                <h3 class="btn btn-lg forCustomHeading">To be initiated By Counter Signatory (Officer)</h3>
+            </div>*@
+        <div class="row">
+            <div class="text-center">
+                <h3 style="text-decoration:underline">PART-IV</h3>
+            </div>
+            <div class="col-md-12">
+                <h4 class="required" style="text-decoration:underline">10. Remarks of GMD/Director/MD/CEO: </h4>
+
+            </div>
+            <div id="anushobinEvaluation" class="col-md-12">
+                <ol>
+                    <li>
+                        <input name="Anushobin Evaluation" @(Model.AssessmentOfTheApplicant == 1 ? "checked" : "") type="radio" value="1" /> Comments if Agree (if any) @((Model.AssessmentOfTheApplicant == 1) ? Html.Raw(Model.RemarksOfMdOrCeo) : new HtmlString(""))
+                    </li>
+                    <li><input name="Anushobin Evaluation" @(Model.AssessmentOfTheApplicant == 2 ? "checked" : "") type="radio" value="2" /> Comments if Disagree (mandatory) @((Model.AssessmentOfTheApplicant == 2) ? Html.Raw(Model.RemarksOfMdOrCeo) : new HtmlString(""))</li>
+                    <li><input name="Anushobin Evaluation" @(Model.AssessmentOfTheApplicant == 3 ? "checked" : "") type="radio" value="3" /> Adverse comments (if any) @((Model.AssessmentOfTheApplicant == 3) ? Html.Raw(Model.RemarksOfMdOrCeo) : new HtmlString(""))</li>
+                </ol>
+
+            </div>
+            <div id="numberProvidedGMD">
+                <div class="col-md-12">
+                    <div class="col-md-4" style=" padding: 0px;">
+                        <div class="card" style="padding: 8px; width: 50%; font-size: large; border: 1px solid; ">
+                            <div class="card-body">
+                                <div class="empFormGroup text-right">
+                                    <span style="text-align: justify;">Full Marks: @Model.FinalMarkings</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card" style="padding: 8px; width: 50%; margin-top: 40%;">
+                    <div class="card-body">
+                        <div class="empFormGroup text-right">
+                            <span style="text-align: justify;">Date: @FrouthSignatoryDate</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card-container">
+                    <div class="card" style="padding: 8px; width: 60%;margin-top:4%">
+                        <div class="card-header">
+                            <h4 class="text-left mb-4" style="font-size: medium;"><label>GMD/Director/MD/CEO (Counter Signatory)</label></h4>
+                        </div>
+                        <div class="card-body">
+                            @*<div class="empFormGroup text-right">
+                                    <label>Signature:</label>
+                                    <span style="text-align: justify;">@FrouthSignatory</span>
+                                </div>*@
+                            <div class="empFormGroup text-right">
+                                <label>Name:</label>
+                                <span style="text-align: justify;">@FrouthSignatory</span>
+                            </div>
+                            <div class="empFormGroup text-right">
+                                <label>Designation:</label>
+                                <span style="text-align: justify;">@FrouthSignatoryDig</span>
+                            </div>
+                            <div class="empFormGroup text-right">
+                                <label>Sister Org:</label>
+                                <span style="text-align: justify;">@FrouthSignatoryDep</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+<div id="MdOrCeo">
+    <div class="container" style="margin-top:2%">
+        <div class="text-center">
+            <h3 style="text-decoration:underline">PART-V</h3>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <h4 class="required" style="text-decoration:underline">11. Remarks of Group Managing Director: </h4>
+                <div class="form-group">
+                    @Html.Raw(Model.FinalCommentOfManagement)
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card" style="padding: 8px; width: 50%; margin-top: 40%;">
+                    <div class="card-body">
+                        <div class="empFormGroup text-right">
+                            <span style="text-align: justify;">Date: @ThirdSignatoryDate</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card-container">
+                    <div class="card" style="padding: 8px; width: 60%; margin-top: 4%">
+                        <div class="card-header">
+                            <h4 class="text-left mb-4" style="font-size: medium;"><label>Group Managing Director</label></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <label>Name:</label>
+                                <span style="text-align: justify;">@ThirdSignatory</span>
+                            </div>
+                            <div class="empFormGroup text-right">
+                                <label>Designation:</label>
+                                <span style="text-align: justify;">@ThirdSignatoryDig</span>
+                            </div>
+                            <div class="empFormGroup text-right">
+                                <label>Division/Sister Org:</label>
+                                <span style="text-align: justify;">@ThirdSignatoryDep</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        let salesAchiveCal = (t, a) => {
+            if (isNaN(t)) {
+                return;
+            }
+            var achievementPercent = (40 / t) * a;
+            return achievementPercent;
+        }
+
+        // Define a function to calculate and update values
+        function calculateAndUpdateValues() {
+            debugger
+            var saleTarget = parseFloat("@Model.SalesTarget");
+            var achievement = parseFloat("@Model.SalesAchievement");
+            let achievementPercentR = salesAchiveCal(saleTarget, achievement);
+            $("#salesTargetMakrs").text(achievementPercentR.toFixed(2));
+
+            var salerRecover = parseFloat("@Model.RecoveryTarget");
+            var salerecoverachive = parseFloat("@Model.RecoveryAchievement");
+            let result = salesAchiveCal(salerRecover, salerecoverachive);
+            $("#salesTargetMakrsRecover").text(result.toFixed(2));
+
+            let recoverResult = parseFloat($("#salesTargetMakrsRecover").text());
+            let salesResult = parseFloat($("#salesTargetMakrs").text());
+            let finalResult = 0;
+            if (recoverResult > 0 && salesResult > 0) {
+                finalResult = (recoverResult + salesResult).toFixed(2)
+            } else if (recoverResult > 0) {
+                finalResult = recoverResult.toFixed(2)
+            } else if (salesResult>0) {
+                finalResult = salesResult.toFixed(2)
+            }
+            $("#totalmarksobtained").text(finalResult);
+    }
+
+        let employeePerformanceMark = (annualPerDetailEmpId, annualPerDetailEmpIdCode, assessmentFrom, assessmentTo) => {
+            debugger
+            if (annualPerDetailEmpId > 0 && annualPerDetailEmpIdCode != null && assessmentFrom != null && assessmentTo != null) {
+
+                var data = HttpRequest.AjaxData("GET", "/EmployeeResult/GetEmployeeMarks", { employeeId: annualPerDetailEmpId, employeeCode: annualPerDetailEmpIdCode, startDate: assessmentFrom, endDate: assessmentTo })
+                if (data != null) {
+
+                    let attendanceHtml = '';
+                    $.each(data["EmpAttendanceStatus"], function (index, item) {
+                        attendanceHtml += '<li>Total ' + item["EmpStatus"] + ' - (<b>' + item["MarkingEmpAttendance"] + '</b>) mark deducted for <b>' + item["StatusCount"] + '</b> days ' + item["EmpStatus"] + '.</li>';
+                    });
+                    $.each(data["EmpLeaveCategory"], function (index, item) {
+                        attendanceHtml += '<li>Total ' + item["LeaveCategory"].slice(0, 12) + ' - (<b>' + item["Marking"] + '</b>) mark deducted for <b>' + item["TotalLeaveDays"] + '</b> ' + item["LeaveCategory"].slice(0, 12) + ' days</li>';
+                    });
+
+                    // Generate HTML for EmpDisciplineStatus
+                    let disciplineHtml = '';
+                    $.each(data["EmpDisciplineStatus"], function (index, item) {
+                        disciplineHtml += '<li>Total no of ' + item["EmployeeDisciplineStatus"] + ' - (<b>' + item["Marking"] + '</b>) mark deducted for <b>' + item["LogCount"] + '</b> ' + item["EmployeeDisciplineStatus"] + '</li>';
+                    });
+
+                    $('#attendanceMark').text(data.AttendanceMark);
+                    $('#disciplineMarks').text(data.DisciplineMarks);
+                    $('#totalEmployeePerformanceMark').text(data.TotalEmployeePerformanceMark);
+                    calToChkOverallQualitative(data.TotalEmployeePerformanceMark);
+                    // Append generated HTML to the document
+                    $('#attendanceSummanryMark').append(attendanceHtml);
+                    $('#disciplineStateMarks').append(disciplineHtml);
+                }
+
+            } else {
+                alert();
+            }
+        }
+        $(document).ready(function () {
+            if (@Model.FinalMarkings>0) {
+                let numbers = @Model.FinalMarkings
+                $('#provideNumberMakeText').text(numberToWords(numbers));
+            }
+
+            if (@Model.EmployeeServiceType == 27) {
+                $('.recommendationForPermanentEmployee').html('');
+            } else {
+                $('.recommendationForProbitionPerionEmployee').html('');
+            }
+            employeePerformanceMark('@Model.EmployeeId','@Model.EmployeeCode','@Model.AssessmentFrom.ToString("yyyy-MM-dd")','@Model.AssessmentTo.ToString("yyyy-MM-dd")');
+            if (@Model.SalesTarget<= 0 && @Model.RecoveryTarget<=0) {
+                $("#achivementAsAgainstTarget").html('');
+            } else if(@Model.SalesTarget> 0 || @Model.RecoveryTarget> 0) {
+                calculateAndUpdateValues();
+
+            }
+
+
+
+            if (@Model.AnnualPerformanceDetailId > 0) {
+                if (@Model.CompanyId> 0) {
+                    $("#divHdnCompany").show();
+                } else if(@Model.DepartmentId>0) {
+                    $("#divHdnDepartment").show();
+                }
+            }
+            $('input[type="checkbox"]').on('change', function () {
+
+                let row = $(this).closest('tr');
+                row.find('input[type="checkbox"]').not(this).prop('checked', false);
+                calculateScores();
+            });
+
+            function calculateScores() {
+                let totalScore = 0;
+                let count = 0;
+
+                $('input[type="checkbox"]:checked').each(function () {
+                    let checkboxValue = parseInt($(this).val());
+                    if (isNaN(checkboxValue)) {
+                        console.log("Invalid value: " + $(this).val());
+                    } else {
+                        totalScore += checkboxValue;
+                        count++;
+                    }
+                });
+
+                let averageScore = count > 0 ? (totalScore / count).toFixed(2) : 0;
+
+                $('#totalScore').text(totalScore);
+                $('#averageScore').text(averageScore);
+                calToChkOverallEvaluation(averageScore);
+            }
+            calculateScores();
+
+            $('#notePlanforNextYear').summernote({
+                toolbar: [
+
+                ],
+                tabsize: 2,
+                height: 200
+            });
+
+            $('#noteAdditionalPerformance').summernote({
+                toolbar: [
+
+                ],
+                tabsize: 2,
+                height: 200
+            });
+
+            $('#notePerformanceNextYear').summernote({
+                toolbar: [
+
+                ],
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteFinalCommentOfManagement').summernote({
+                toolbar: [
+
+                ],
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteHOdAdminHr').summernote({
+                toolbar: [
+
+                ],
+                tabsize: 2,
+                height: 100
+            });
+
+            $('#noteFinalCommentOfManagements').summernote({
+                toolbar: [
+
+                ],
+                disabled: true,
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteRemarksOfReportingOfficer').summernote({
+                toolbar: [
+
+                ],
+                disabled: true,
+                tabsize: 2,
+                height: 100
+            });
+            $('#notePerformingPlanForNextYear').summernote({
+                toolbar: [
+
+                ],
+                disabled: true,
+                tabsize: 2,
+                height: 200
+            });
+        });
+
+        let calToChkOverallEvaluation = (calValue) => {
+            debugger
+            if (calValue >= 4.5) {
+                $("#lebOutstandingQua").prop("checked", true)
+            } else if (calValue >= 4 && calValue < 4.5) {
+                $("#lebVeryGoodQua").prop("checked", true)
+            } else if (calValue >= 3.5 && calValue < 4) {
+                $("#lebGoodQua").prop("checked", true)
+            } else if (calValue >= 2.5 && calValue < 3.5) {
+                $("#lebAboveAverageQua").prop("checked", true)
+            } else if (calValue < 2.5) {
+                $("#lebAverageQua").prop("checked", true)
+            }
+        }
+
+        let calToChkOverallQualitative = (calValue) => {
+            debugger
+                if (calValue >= 18) {
+                    $("#lebOutstanding").prop("checked", true)
+                } else if (calValue >= 15 && calValue < 18) {
+                    $("#lebVeryGood").prop("checked", true)
+                } else if (calValue >= 10 && calValue < 15) {
+                    $("#lebGood").prop("checked", true)
+                } else if (calValue >= 5 && calValue < 10) {
+                    $("#lebAboveAverage").prop("checked", true)
+                } else if (calValue < 5) {
+                    $("#lebAverage").prop("checked", true)
+                }
+            }
+
+
+    </script>
+}

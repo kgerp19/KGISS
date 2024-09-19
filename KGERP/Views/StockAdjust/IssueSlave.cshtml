@@ -1,0 +1,467 @@
+﻿@model KGERP.Service.ServiceModel.IssueVm
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "Issue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+    decimal totalPrice = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.IssueId > 0)
+        {
+            <span>
+                Issue of: <a target="_blank" href="~/StockAdjust/IssueReport?companyId=@Model.CompanyId&issueId=@Model.IssueId">@Model.IssueNo</a>
+            </span>
+        }
+        else
+        {
+            <span>Issue</span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a href="@Url.Action("IssueIndex",new {companyId=Model.CompanyId })" class="link-black">Issue List</a></li>
+    </ol>
+</section>
+
+@using (Html.BeginForm("IssueSlave", "StockAdjust", FormMethod.Post, new { id = "issueSlaveFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.IssueId, new { id = "hidIssueId" })
+                @Html.HiddenFor(model => model.IssueDetailId, new { id = "hidIssueDetailId" })
+
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyFK" })
+
+                <div class="box-danger">
+                    <div class="box-body">
+                        @if (Model.IssueId > 0)
+                        {
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <th style="width:18%">
+                                            Issue No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.IssueNo</label>
+                                        </td>
+                                        <th style="width:18%"> Issue Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.IssueDate.ToString("dd-MMM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Created By</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedBy</td>
+                                        <th>Created Date</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedDate</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Issue To</th>
+                                        <th>:</th>
+                                        <td>@Model.IssueToName</td>
+                                        <th></th>
+                                        <th></th>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+                        <div class="box-body">
+                            @if (Model.IssueId == 0)
+                            {
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="txtIssueDate" class="form-control-label">Issue Date</label>
+                                            <div class="">
+                                                <input name="IssueDate" asp-for="IssueDate" type="text"
+                                                       value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtIssueDate" autocomplete="off">
+                                                @Html.ValidationMessageFor(model => model.IssueDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Issue To</label>
+                                            <div class="">
+                                                @Html.EditorFor(model => model.IssueToName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Issue To", @id = "txtIssueTo" } })
+                                                @Html.HiddenFor(model => model.IssueTo, new { id = "ddlIssueToFK" , @required= true })
+                                                @Html.ValidationMessageFor(model => model.IssueTo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="control-label">Remarks</label>
+                                            <div class="">
+                                                @Html.EditorFor(model => model.Remarks, new { htmlAttributes = new { @autocomplete = "off", @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!Model.IsSubmited)
+                            {
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Product:</label>
+                                        @Html.EditorFor(model => model.ProductName, new
+                                   {
+                                       htmlAttributes = new
+                                       { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" }
+                                   })
+                                        @Html.HiddenFor(model => model.ProductId, new { id = "ddlProductFK" })
+                                        @Html.HiddenFor(model => model.UnitPrice, new { id = "txtUnitPrice" })
+
+                                        @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Quantity</label>
+                                        <div class="input-group">
+                                            @Html.TextBoxFor(model => model.Quantity, new { id = "txtQuantity", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Purchase Quantity", required = "Required" })
+                                            @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="issueCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        @if (Model.IssueId > 0)
+                                        {
+                                            <span>Add Item</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Create</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                            }
+                        </div>
+
+                        <!--Body Will by Start Here-->
+                        @{
+                            if (Model.IssueId > 0)
+                            {
+
+                                @Html.HiddenFor(model => model.IssueDetailId, new { id = "hidSlaveID" })
+                                <div class="table-responsive col-md-12  text-nowrap">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead style="background-color:#ddd;">
+                                            <tr>
+                                                <th style="padding:5px;text-align:center;">SL</th>
+                                                <th style="padding:5px;text-align:left;">Product</th>
+                                                <th style="padding:5px;text-align:left;">Unit</th>
+                                                <th style="padding:5px;text-align:center;">Quantity</th>
+                                                <th style="padding:5px;text-align:center;">Unit Price</th>
+                                                <th style="padding:5px;text-align:right;">Total Price</th>
+                                                @if (Model.Status == (int)EnumPOStatus.Draft)
+                                                {
+                                                    <th style="padding:5px;text-align:center;">Action</th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.Items)
+                                            {
+                                                totalPrice += item.Quantity * item.UnitPrice;
+                                                <tr>
+                                                    <td style="padding:5px">@(++sl)</td>
+                                                    <td style="padding:5px;text-align:left;">@item.ProductName</td>
+                                                    <td style="padding:5px;text-align:left;">@item.UnitName</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.000}", item.Quantity) @item.UnitName</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.000}", item.UnitPrice)</td>
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.000}", item.Quantity * item.UnitPrice)</td>
+                                                    @{ if (Model.Status == (int)EnumPOStatus.Draft)
+                                                        {
+                                                            <td style="padding:5px;text-align:center;">
+                                                                <a id="@item.IssueDetailId" onclick=" makeEditble(@item.IssueDetailId);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                                <a id="@item.IssueDetailId" onclick="makeDeletale(@item.IssueDetailId)" class="linkPointer" data-toggle="modal" data-target="#deleteIssueSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                            </td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot style="background-color:#eee;">
+                                            <tr>
+                                                <th></th>
+                                                <th colspan="4">TOTAL</th>
+                                                <th style="padding:5px;text-align:right;">@String.Format("{0:0.000}", totalPrice) </th>
+                                                @if (Model.Status == (int)EnumPOStatus.Draft)
+                                                {
+                                                    <th></th>
+                                                }
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="box-footer">
+                        @if (Model.IssueId > 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-6"></div>
+                                <div class="col-md-6">
+                                    <a id="@Model.IssueId" onclick="makeSubmitble(@Model.IssueId)" class="linkPointer btn btn-success" data-toggle="modal" style="width:100%" data-target="#submitIssueModal" data-placement="top">
+                                        @if (Model.IsSubmited)
+                                        {
+                                            <i>Undo Submit</i>
+                                        }
+                                        else
+                                        {
+                                            <i>Submit</i>
+                                        }
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+@using (Html.BeginForm("FeedIssueSubmit", "WareHouse", FormMethod.Post, new { @class = "formValidator" }))
+{
+ 
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="submitIssueModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+                        <h5 class="modal-title"><b><span class="submitOrDraftText"></span> &nbsp; No (<span id="submitOrDraftIssueNoText"></span>)</b></h5>
+                    </div>
+                    <div class="modal-body">
+                        @Html.HiddenFor(model => model.IssueId, new { id = "hidsubmitIssueId" })
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "submitCompanyFK" })
+
+                        @Html.HiddenFor(model => model.ActionId, new { id = "submitActionId" })
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div style="text-align:center">
+                            <h3>Are you sure to <span class="submitOrDraftText"></span> this Issue?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" onclick="resetIssueForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    @using (Html.BeginForm("DeleteIssueSlave", "StockAdjust", FormMethod.Post, new { id = "deleteIssueSlaveFormId", @class = "formValidator" }))
+    {
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="deleteIssueSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+                        <h5 class="modal-title"><b>Delete Issue Item</b></h5>
+                    </div>
+                    <div class="modal-body">
+                        @Html.HiddenFor(model => model.IssueDetailId, new { id = "hidDeleteIssueSlaveId" })
+                        @Html.HiddenFor(model => model.IssueId, new { id = "hidDeleteIssueId" })
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyFK" })
+                        @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div style="text-align:center">
+                            <h3>Are you sure to Delete this Issue Item?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" onclick="resetIssueSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+
+    @section scripts {
+
+        <script type="text/javascript">
+
+        function makeDeletale(rowId) {
+            $('#hidDeleteIssueSlaveId').val(rowId);
+            $('#deleteActionId').val(3);
+        }
+        function resetIssueSlaveForm() {
+          $('#issueSlaveFormId')[0].reset();
+          $('#ActionId').val(1);
+        }
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+            $("#ddlFinalDestinationCountryFk").val(19).change();
+
+              $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url:"@Url.Action("AutoCompleteProductGet", "Configuration")",
+                        data: { companyId: "@Model.CompanyId", prefix: request.term, productType: "R" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                        },
+                        failure: function (response) {
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                    $("#ddlProductFK").val(i.item.val);
+                    $("#txtUnitPrice").val(i.item.price);
+                    $('#txtProductName').focus();
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+              $("#txtIssueTo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteEmployeeGet", "StockAdjust")",
+                        data: { prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                        },
+                        failure: function (response) {
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlIssueToFK").val(i.item.val);
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+        });
+        function makeEditble(rowId) {
+
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("SingleIssueSlave", "StockAdjust")",
+                  datatype: "Json",
+                  data: { id: rowId },
+                  success: function (data) {
+                      console.log(data);
+                      $('#issueCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidIssueId").val(data.IssueId);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val(data.CompanyId);
+                      $("#txtProductName").val(data.ProductName);
+                      $("#ddlProductFK").val(data.ProductId);
+                      $("#txtQuantity").val(data.Quantity);
+                      $("#hidIssueDetailId").val(data.IssueDetailId)
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                 });
+            }
+
+        function makeSubmitble(rowId) {
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleIssue", "StockAdjust")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftIssueNoText').text(data.IssueNo);
+
+                            if (data.Status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+            $('#hidsubmitIssueId').val(rowId);
+            }
+        </script>
+    }

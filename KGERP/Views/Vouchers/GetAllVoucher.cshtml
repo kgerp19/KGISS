@@ -1,0 +1,182 @@
+﻿@model KGERP.ViewModel.VoucherViewModel
+@{
+    ViewBag.Title = "Voucher List";
+    var message = TempData["message"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section class="content-header">
+    <h1>
+        Voucher List
+    </h1>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.Voucher.CompanyId, new { id = "CompanyId" })
+                <div class="box-danger">
+
+                    <div class="box">
+                        <div class="box-danger">
+
+                            <div class="box-body">
+                                @using (Html.BeginForm("Index", "Vouchers", FormMethod.Post, new { id = "marketingSalesListView", @class = "formValidator", @enctype = "multipart/form-data" }))
+                                {  
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.Voucher.VoucherTypeId, htmlAttributes: new { @class = "control-label" })
+
+                                                @Html.DropDownListFor(model => model.Voucher.VoucherTypeId, new SelectList(Model.VoucherTypes, "Value", "Text"), "---Select---", new { @id = "ddlVoucherType", @class = "searchingDropdown form-control" })
+                                                @Html.ValidationMessageFor(model => model.Voucher.VoucherTypeId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                                <br />
+                                                @Html.EditorFor(model => model.Voucher.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                                @Html.ValidationMessageFor(model => model.Voucher.StrFromDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                                <br />
+                                                @Html.EditorFor(model => model.Voucher.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                                @Html.ValidationMessageFor(model => model.Voucher.StrToDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <hr />
+
+                                <div class="table-responsive">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr style="background-color:#32527B;color:#FFFFFF">
+                                                <th>
+                                                    SL
+                                                </th>
+                                                <th>
+                                                    Voucher No
+                                                </th>
+                                                <th>
+                                                    Voucher Date
+                                                </th>
+                                                <th>
+                                                    Posting Date
+                                                </th>
+                                                <th>
+                                                    Narration
+                                                </th>
+                                                <th style="width:70px;">Report</th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.Voucher.DataList)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @(++sl)
+                                                    </td>
+                                                    <td>
+
+                                                        @item.VoucherNo
+                                                    </td>
+                                                    <td>
+
+                                                        @if (item.VoucherDate.HasValue)
+                                                        {
+                                                            @item.VoucherDate.Value.ToString("dd/MMM/yyyy")
+                                                        }
+
+                                                    </td>
+                                                    <td>
+                                                        @if (item.CreateDate.HasValue)
+                                                        {
+                                                            @item.CreateDate.Value.ToString("dd/MMM/yyyy")
+                                                        }
+                                                    </td>
+                                                    <td>
+
+                                                        @Html.Raw(item.Narration)
+
+                                                    </td>
+                                                    <td>
+                                                        @if (item.IsStock)
+                                                        {
+                                                            <a href="~/Vouchers/ManageStock?companyId=@item.CompanyId&voucherId=@item.VoucherId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a href="~/Vouchers/ManageBankOrCash?companyId=@item.CompanyId&voucherId=@item.VoucherId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                                        }
+                                                        @if (!item.IsIntegrated)
+                                                        {
+                                                            <a id="linkVoucherId_@item.VoucherId" onclick="makeDeletale(@item.VoucherId,@item.CompanyId)" style="color:red" class="linkPointer" data-toggle="modal" data-target="#deleteVoucherModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+
+                                                        }
+                                                        <a href="@Url.Action("GetVoucherReport","Report", new { companyId = item.CompanyId, voucherId = item.VoucherId ,reportName =""})" target="_blank" class="btn btn-primary btn-xs">
+                                                            Print
+                                                        </a>
+
+                                                    </td>
+                                                </tr>
+
+                                            }
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+    </script>
+}
+
+
+

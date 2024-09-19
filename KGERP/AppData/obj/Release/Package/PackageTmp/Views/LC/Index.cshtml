@@ -1,0 +1,175 @@
+﻿@model KGERP.Service.ServiceModel.LCViewModel
+
+@{
+    var message = TempData["successMessage"];
+    var Type = "";
+    if (Model.LCType.HasValue)
+    {
+        var x = Model.POtypeLst.Select(o => new { id = o.Value.ToString(), Text = o.Text.ToString() })
+         .FirstOrDefault(e => e.id ==Model.LCType.Value.ToString());
+        Type = x.Text;
+    }
+
+    ViewBag.Title = $"LC List {Type}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>LC List @Type</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("CreateOrEdit", new {companyId=Model.CompanyId, id = 0 })" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New LC
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "LC", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("LC type", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.DropDownListFor(model => model.LCType,new SelectList(Model.POtypeLst,"Value", "Text"),"--Select--", new { @class = "form-control", @autocomplete = "off" } )
+                                        @Html.ValidationMessageFor(model => model.LCType, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <hr />
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%;">SL</th>
+                                        <th style="width:10%;">LC No</th>
+                                        <th style="width:10%;">LC Date</th>
+                                        <th style="width:10%;">LC Type</th>
+                                        <th style="width:10%;">Supplier</th>
+                                        <th style="width:10%;">LC Value</th>
+                                        <th style="width:10%;">Freighter Charge</th>
+                                        <th style="width:10%;">Other Charge</th>
+                                        <th style="width:10%;">Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                    <tr>
+                                        <td>
+                                            @(++sl)
+                                        </td>
+                                        <td>
+                                            @item.LCNo
+                                        </td>
+                                        <td>
+                                            @item.LCDate.ToString("dd/MMM/yyyy")
+                                        </td>
+                                        <td>
+                                            @item.LCType
+                                        </td>
+                                        <td>
+                                            @item.Supplier
+                                        </td>
+                                        <td>
+                                            @item.LCValue
+                                        </td>
+                                        <td>
+                                            @item.FreighterCharge
+                                        </td>
+                                        <td>
+                                            @item.OtherCharge
+                                        </td>
+                                        <td>
+                                            @if (item.POCreated || item.IsSubmit)
+                                            {
+                                                <a href="@Url.Action("CreateOrEdit","LC",new {companyId=Model.CompanyId,id=item.LCId })" title="Edit" class="btn btn-info btn-xs">
+                                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a onclick="return confirm('Are you sure you want to FInalize this LC?');" href="@Url.Action("Finalize","LC",new {companyId=Model.CompanyId,id=item.LCId })" title="Finalize" class="btn btn-info btn-xs">
+                                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="@Url.Action("CreateOrEdit","LC",new {companyId=Model.CompanyId,id=item.LCId })" title="Edit" class="btn btn-warning btn-xs">
+                                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="@Url.Action("Delete","LC",new {companyId=Model.CompanyId,id=item.LCId })" onclick="return confirm('Are you sure to delete This LC?');" title="Delete" class="btn btn-danger btn-xs">
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                </a>
+                                            }
+
+                                            <a href="@Url.Action("GetDemandReport","Report", new {demandId=item.LCId,reportName="RMDemandReport"})" target="_blank" class="btn btn-primary btn-xs">
+                                                <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+    </script>
+}

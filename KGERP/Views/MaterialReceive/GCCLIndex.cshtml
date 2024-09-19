@@ -1,0 +1,163 @@
+﻿@model KGERP.Service.ServiceModel.GCCLMaterialRecieveVm
+
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "GCCLMaterial Recieve  List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Material Received List
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        @*<li>
+            <a href="~/WareHouse/WareHousePOReceivingSlave?companyId=@Model.companyId" class="btn btn-primary pull-right">
+                <span class="fs fs-plus"></span> New Receive
+            </a>
+        </li>*@
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("SeedIndex", "MaterialReceive", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <hr />
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;">SL</th>
+                                        <th style="width:10%;">Receive No</th>
+                                        <th style="width:15%;">PO No</th>
+                                        <th style="width:15%;">Challan Date</th>
+                                        <th style="width:10%;">Received Date</th>
+                                        <th style="width:15%;">Supplier</th>
+                                        <th style="width:10%;">Stutas</th>
+                                        <th style="width:10%;">Report</th>
+                                        <th style="width:5%;">Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                    <tr>
+                                        <td>
+                                            @(++sl)
+                                        </td>
+                                        
+                                        <td>@item.ReceiveNo</td>
+                                        <td>@item.PoNo</td>
+                                        <td>
+                                            @if (item.ReceivedDate.HasValue)
+                                            {
+                                                @item.ReceivedDate.Value.ToString("dd/MMM/yyyy")
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.PoDate.HasValue)
+                                            {
+                                                @item.PoDate.Value.ToString("dd/MMM/yyyy")
+                                            }
+                                        </td>
+                                        <td>
+                                            @item.SupplierName
+                                        </td>
+                                        <td>
+                                            @if(item.IsSubmitted)
+                                            {
+                                            <button class="btn btn-Success btn-xs">SUBMITTED</button>
+                                            }
+                                           else
+                                            {
+                                                <button class="btn btn-warning btn-xs">NOT-SUBMITTED</button>
+                                            }
+                                        </td>
+                                        <td>
+                                            <!--WareHouse/WareHousePOReceivingSlave?companyId=21&materialReceiveId=82531-->
+                                            <a href="~/WareHouse/WareHousePOReceivingSlaveReport?companyId=@item.CompanyId&materialReceiveId=@item.MaterialReceiveId" target="_blank" class="btn btn-primary btn-xs">
+                                                Report
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="~/WareHouse/WareHousePOReceivingSlave?companyId=@item.CompanyId&materialReceiveId=@item.MaterialReceiveId" title="Details" class="btn btn-success btn-xs">
+                                                <i class="fa fa-sticky-note"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}
+

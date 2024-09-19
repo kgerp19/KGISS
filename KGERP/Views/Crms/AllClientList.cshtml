@@ -1,0 +1,944 @@
+﻿@model KGERP.Data.CustomModel.CrmListVm
+@{
+    ViewBag.Title = "AllClientList";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+    int sl = 0;
+}
+
+
+<style>
+    .ui-autocomplete {
+        z-index: 2147483647;
+    }
+
+    td > a {
+        color: black;
+        font-weight: bold;
+    }
+</style>
+<section>
+    @if (Model.HasMessage)
+    {
+        if (Model.MessageList != null)
+        {
+            foreach (var m in Model.MessageList)
+            {
+                <span class="text-bg-danger">@m</span>
+            }
+        }
+    }
+
+</section>
+<section>
+    <table>
+        <tr>
+            <td>
+                <a class="btn hvr-sweep-to-bottom  text-dark border " href="@Url.Action("AddNewClient","Crms", new {companyId=Model.CompanyId})"><i class="fa-plus"></i> &nbsp; New Client</a>
+            </td>
+            <td>
+                <button class="btn  hvr-sweep-to-top text-dark border" data-toggle="modal" data-target="#searchClientModal"><i class="fa fa-search"></i> &nbsp; Client Search </button>
+            </td>
+
+        </tr>
+    </table>
+</section>
+<table id="customerDatatable" class="table table-striped table-sm font-weight-normal">
+    <thead>
+        <tr>
+            @*<th style="width:2%;" class="p-1">S.L</th>*@
+            <th>Client Name</th>
+            <th>Details</th>
+            <th>Mobile</th>
+            <th>Status</th>
+            <th>Change Status</th>
+            <th>Responsible Office</th>
+            <th>change Responsible Office</th>
+            <th>Change Company</th>
+            <th>Change Schedule</th>
+            @*<th style="width:10%;">Email</th>
+        <th style="width:15%;">Responsible officer</th>
+        <th style="width:8%;">Status</th>
+        <th style="width:10%;">Project</th>*@
+            @*<th>Action</th>*@
+        </tr>
+    </thead>
+    @*<tbody>
+            @foreach (var i in Model.DataList)
+            {
+
+                sl = sl + 1;
+                <tr>
+                    <td class="p-1">@{ @sl}</td>
+                    <td class="hvr-underline-from-left p-1">
+                        <a href="@Url.Action("GetClientDetailsById", "Crms", new {clientId= i.ClientId, companyId= Model.CompanyId})">
+                            @i.Name   <i class="fa fa-info-circle"></i>
+                        </a>
+                    </td>
+                    <td class="p-1">@i.MobileNo</td>
+                    <td class="p-1">@i.Email</td>
+                    <td class="hvr-float p-1">
+                        <div style="display:flex;">
+                            @i.ResponsibleOfficeName
+                            <a data-target="#responsibleOfficerModal" onclick="changeResponsibleOfficer(@i.ClientId, @i.CompanyId)"
+                               data-toggle="modal" data-placement="top" title="Change Responsible Officer">
+                                <i class="fa fa-sync "></i>
+                            </a>
+                        </div>
+                    </td>
+                    <td class="p-1">
+                        <div style="display:flex;">
+                            @i.StatusText
+                            <a data-target="#serviceStatusModal" onclick="changeServiceStatus(@i.ClientId, @i.CompanyId)"
+                               data-toggle="modal" data-placement="top" title="Change Service Status">
+                                <i class="fa fa-sync"></i>
+                            </a>
+                        </div>
+                    </td>
+                    <td class="p-1">@i.ProjectText</td>
+                    <td class="p-1">
+                        <a data-target="#scheduleModal" class="btn btn-sm hvr-float-shadow btn-primary" onclick="changeSchedule(@i.ClientId)"
+                           data-toggle="modal" data-placement="top" title="Schedule">
+                            <i class="fa fa-plus "></i>schedule
+                        </a>
+
+                        <a data-target="#companyModal" class="btn  btn-sm hvr-curl-top-right btn-info" onclick="changeCompany(@i.ClientId)"
+                           data-toggle="modal" data-placement="top" title="Switch company">
+                            <i class="fa fa-sync"></i>company
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>*@
+
+</table>
+
+
+
+
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleFormId">
+
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtclientName">
+                            <input type="hidden" class="" id="txtclientId">
+                            <input type="hidden" class="" id="txtCompanyId">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtclientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Date</label>
+
+                            <input id="txtscheduleDate" class="datepicker form-control" style="width:80%; display:revert !important">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Time</label>
+                            <div class="input-group">
+                                <input id="txtScheduleTime" type="text" class="timepicker form-control" />
+                                <div class="input-group-addon">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Type</label>
+                            <div class="input-group">
+                                <select class="form-control" id="txtScheduleType">
+                                    <option value="Follow Up">Follow Up</option>
+                                    <option value="Client Visit">Client Visit</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Note</label>
+                            <textarea class="form-control" id="txtScheduleNote"></textarea>
+                        </div>
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="makeSchedule()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="companyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Company</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="companyChangeFormId">
+
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtCompanyclientName">
+                            <input type="hidden" class="" id="clientId">
+
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtCompanyclientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Present Company</label>
+                            <input type="text" class="form-control" readonly id="txtclientCompany">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Change Company</label>
+                            <select class="form-control" id="companyList">
+                                <option value="">--select company--</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="switchCompany()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="responsibleOfficerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Responsible Officer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="responsibleOfficerFormId">
+
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtResponsibleOfficerClientName">
+                            <input type="hidden" class="" id="txtclientId">
+                            <input type="hidden" class="" id="txtcompanyId">
+
+
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtResponsibleOfficerClientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Present Responsible Officer</label>
+                            <input type="text" class="form-control" readonly id="txtResponsibleOfficerClient">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Change Responsible Officer</label>
+                            <select class="form-control" id="ResponsibleOfficerList">
+                                <option value="" id="resid">--select Responsible Officer--</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="switchResponsibleofficer()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="serviceStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Service Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClientName">
+                            <input type="hidden" class="" id="clientId">
+                            <input type="hidden" class="" id="companyId">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Present Service Status</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClient">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Change Service Status</label>
+                            <select class="form-control" id="ServiceStatusList">
+                                <option value="">--select Service Status--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label">Note</label>
+                            <textarea type="text" class="form-control" id="txtStatusNoteClient"></textarea>
+                        </div>
+                    </div>
+                </form>
+                <table id="serviceHistListId">
+
+                    <tr><td>History</td></tr>
+                    <tbody>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="switchServiceStatus()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="searchClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Search Client</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="textSearchClientByName" class="form-label">Client Name</label>
+
+                            <input type="text" class="form-control" id="textSearchClientByName" autocomplete="on" placeholder="Search Client Name ...">
+                            <input type="hidden" id="txtClientId" />
+                        </div>
+                        <div class="row">
+                        </div>
+                        <div class="col-12">
+                            <label for="textSearchClientByMobile" class="form-label">Mobile No</label>
+                            <input type="text" class="form-control" id="textSearchClientByMobile" placeholder="Search Client Mobile ...">
+                            <input type="hidden" id="txtClientId" />
+                        </div>
+                    </div>
+                    <div>
+                        <p id="txtClientId"></p>
+                        <p id="textSearchClientByName"></p>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a onclick="clientDetails()" class="btn btn-primary">Client Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#customerDatatable").DataTable({
+                "ajax": {
+                    "url": "/Crms/GetAllClient",
+                    "type": "POST",
+                    "datatype": "json",
+                    data: { "companyId": '@Model.CompanyId' }
+                },
+                "columns": [
+                    { "data": "Name", "name": "Client Name", "autoWidth": true },
+                    {
+                        data: "ClientId",
+                        "searchable": false,
+                        "orderable": false,
+                        "filter": false,
+                        render(data) {
+                            return '<a  class="btn  btn-sm btn-info" href="/Crms/GetClientDetailsById?clientId=' + data + '&companyId=' +@Model.CompanyId+'">  <i class="fa fa-Info"></i> Details </a>'
+                        }, className: "text-center",
+                    },
+                    { "data": "MobileNo", "name": "Mobile", "autoWidth": true },
+                    { "data": "StatusText", "name": "Status", "autoWidth": true },
+                    {
+                        data: "ClientId",
+                        "searchable": false,
+                        "orderable": false,
+                        "filter": false,
+                        render(data) {
+                            return '<a data-toggle="modal" data-target="#serviceStatusModal"  class="btn  btn-sm btn-sm  btn-info" onclick="changeServiceStatus(' + data + ')" >  <i class="fa fa-sync"></i> Change Status </a>'
+                        }, className: "text-center",
+                    },
+                    { "data": "ResponsibleOfficeName", "name": "Responsible Office", "autowidth": true },
+                    {
+                        data: "ClientId",
+                        "searchable": false,
+                        "orderable": false,
+                        "filter": false,
+                        render(data) {
+                            return '<a data-toggle="modal" data-target="#responsibleOfficerModal"  class="btn  btn-sm  btn-info" onclick="changeResponsibleOfficer(' + data + ')" >  <i class="fa fa-sync"></i> Change Responsible Office </a>'
+                        }, className: "text-center",
+                    },
+
+                        {
+                            data: "ClientId",
+                                "searchable": false,
+                                    "orderable": false,
+                                        "filter": false,
+                                            render(data) {
+                                return '<a data-toggle="modal" data-target="#companyModal"  class="btn  btn-sm btn-sm  btn-info" onclick="changeCompany(' + data + ')" >  <i class="fa fa-sync"></i> company </a>'
+                            }, className: "text-center",
+
+                     },
+
+                    {
+                        data: "ClientId",
+                        "searchable": false,
+                        "orderable": false,
+                        "filter": false,
+                        render(data) {
+                            return '<a data-toggle="modal" data-target="#scheduleModal"  class="btn  btn-sm  btn-info" onclick="changeSchedule(' + data + ')" >  <i class="fa fa-sync"></i> Schedule </a>'
+                        }, className: "text-center",
+                    }
+
+                ],
+
+                "serverSide": "true",
+                "order": [0, "asc"],
+                "processing": "true",
+                "language": {
+                    "processing": "processing... please wait"
+                }
+
+
+
+            });
+        });
+
+
+
+    @*$(document).ready(function () {
+        $("#customerDatatable").DataTable({
+            "processing": true,
+            "serverSide": true,
+            "paging": true,
+            "searchable": true,
+            "ajax": {
+                "url": "/Crms/GetAllClient",
+                "type": "POST",
+                "datatype": "json",
+                data: {"companyId": '@Model.CompanyId'}
+
+            },
+            "language": {
+                "emptyTable": "No record found.",
+                "processing":
+                    '<i class="fa fa-spinner fa-spin fa-3x fa-fw" style="color:#2a2b2b;"></i><span class="sr-only">Loading...</span> '
+            },
+            "pageLength": 10,
+            "paging": true,
+            "columns": [
+                { "data": "Name", "name": "Client Name", "autoWidth": true },
+                { "data": "MobileNo", "name": "Mobile", "autoWidth": true },
+                { "data": "ResponsibleOfficeName","name":"Responsible Office", "autowidth":true}
+
+                //{
+                //    "render": function (data, row) { return "<a href='#' class='btn btn-danger' onclick=DeleteCustomer('" + row.id + "'); >Delete</a>"; }
+                //},
+            ]
+        });
+    });*@
+
+    var clientID = 0;
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+        $('.timepicker').timepicker({
+            showInputs: false
+        });
+
+
+        function changeCompany(a) {
+           // console.log("ami mridul",a);
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    console.log(data);
+                    $('#txtclientCompany').val(data.CompanyText);
+                    $("#txtCompanyclientName").val(data.Name);
+                    $('#txtCompanyclientMobile').val(data.MobileNo);
+                    $('#clientId').val(data.ClientId);
+                    $('#companyId').val(data.CompanyId);
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllCompany", "Crms")",
+
+                success: function (i) {
+                    console.log(i.DataList);
+                    $.each(i.DataList, function (key, value) {
+                        var select = $("#companyList");
+                        select.children().remove();
+                        select.append($("<option>").val('').text('Select'));
+                        $(i.DataList).each(function (index, item) {
+                            select.append($("<option data-toggle='tooltip' title='" + item.CompanyId + "'>").val(item.CompanyId).text(item.CompanyText));
+                        });
+                        return false;
+                    });
+
+                }
+            });
+         }
+        function changeResponsibleOfficer(a) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    console.log(data);
+                    $('#txtResponsibleOfficerClientName').val(data.Name);
+                    $("#txtResponsibleOfficerClientMobile").val(data.MobileNo);
+                    $('#txtResponsibleOfficerClient').val(data.ResponsibleOfficeName);
+                    $('#clientId').val(data.ClientId);
+                     clientID = $('#clientId').val();
+
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllResponsibleOfficer", "Crms")",
+                data: { companyId: @Model.CompanyId },
+                success: function (i) {
+                    console.log(i.DataList);
+                    var select = $("#ResponsibleOfficerList");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('Select'));
+                    $(i.DataList).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.ResponsibleOfficerId + "'>").val(item.ResponsibleOfficerId).text(item.ResponsibleOfficerText));
+
+                    });
+                    return false;
+
+                }
+            });
+    }
+    function switchResponsibleofficer() {
+        var ResponisibleofcrId = $('#ResponsibleOfficerList').find(":selected").val();
+        var v = {
+            'Id': clientID,
+            'CustomId': ResponisibleofcrId
+        }
+         $.ajax({
+
+                type: "Post",
+                url: "@Url.Action("UpdateResponsibleOfficer", "Crms")",
+                datatype: "Json",
+             data: { model: v},
+             success: function (data) {
+                 if (data.Id===0) {
+                     alert("You have No PermIssion To Change")
+                 } else {
+                     location.reload();
+                 }
+                }
+            });
+    }
+
+
+
+        function changeServiceStatus(a) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    console.log(data);
+                    $('#txtServiceStatusClientName').val(data.Name);
+                    $("#txtServiceStatusClientMobile").val(data.MobileNo);
+                    $('#txtServiceStatusClient').val(data.ResponsibleOfficeName);
+                    $('#clientId').val(data.ClientId);
+                    $('#companyId').val(data.CompanyId);
+                    clientID=  ($("#clientId").val());
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllServiceStatus", "Crms")",
+                data: { companyId: @Model.CompanyId },
+                success: function (i) {
+
+                    $.each(i.Datalist, function (key, value) {
+                        console.log(i.Datalist);
+
+
+                        console.log(i.Datalist);
+                        var select = $("#ServiceStatusList");
+                        select.children().remove();
+                        select.append($("<option>").val('').text('Select service statuss'));
+                        $(i.Datalist).each(function (index, item) {
+                            select.append($("<option data-toggle='tooltip' title='" + item.StatusId + "'>").val(item.StatusId).text(item.StatusText));
+
+                        });
+                        return false;
+                    });
+
+                }
+            });
+              $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetClientStatusHistories", "Crms")",
+                data: { clientId: a },
+                 success: function (data) {
+                     console
+                     $("#serviceHistoryId").show();
+                     var z = 1;
+                     let rows = "";
+                     for (var i = 0; i < data.length; i++) {
+                         rows += "<tr><td>" + z + "</td><td style='text-align: left;'>" + data[i].HistoryText + "</td></tr>";
+                         z++;
+                     }
+
+                     $("#serviceHistListId tbody").append(rows);
+                }
+            });
+            }
+         function changeSchedule(a) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    $("#txtclientName").val(data.Name);
+                    $('#txtclientMobile').val(data.MobileNo);
+                    $('#txtclientId').val(data.ClientId);
+                    $('#txtCompanyId').val(data.CompanyId);
+                    var clientID = $('#txtclientId').val(data.ClientId);
+
+                }
+            });
+            }
+        function makeSchedule() {
+
+            var v = {
+                'ScheduleTimeText': $('#txtScheduleTime').val(),
+                'ScheduleDate': $('#txtscheduleDate').val(),
+                'ScheduleType': $('#txtScheduleType').val(),
+                'Note': $('#txtScheduleNote').val(),
+                'ClientId': $('#txtclientId').val(),
+                'CompanyId': $('#txtCompanyId').val()
+            };
+            console.log(v);
+            $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("MakeSchedule", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                   // console.log(data);
+                    $('#scheduleModal').modal('hide');
+                    $('#txtScheduleTime').val('');
+                    $('#txtscheduleDate').val('');
+                    $('#txtScheduleType').val('');
+                    $('#txtScheduleNote').val('');
+                    $('#txtCompanyId').val('');
+                    location.reload();
+                }
+            });
+        }
+        $("#btnsubmit").click(function (e) {
+
+            var valdata = $("#formId").serialize();
+            //to get alert popup
+            alert(valdata);
+            console.log(valdata);
+
+        });
+
+
+
+    $("#textSearchClientByName").autocomplete({
+
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteClientName", "Crms")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#txtClientId").val(i.item.val);
+                $("#textSearchClientByName").val(i.item.label);
+
+            },
+            minLength: 3,
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+
+        $("#textSearchClientByMobile").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteClientMobile", "Crms")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#txtClientId").val(i.item.val);
+                $("#textSearchClientByName").val(i.item.label);
+
+            },
+            minLength: 3,
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+    $('#searchClientModal').on('hidden.bs.modal', function () {
+        $(this).find('form').trigger('reset');
+    });
+
+    function clientDetails() {
+
+        var c = $('#txtClientId').val();
+
+        window.location = '/Crms/GetClientDetailsById?clientId=' + c + '&companyId=' +@Model.CompanyId;
+    }
+
+
+    function switchCompany() {
+        var CompanyId = $('#companyList').find(":selected").val();
+        var ClId = $('#clientId').val();
+        var v = {
+            'Id': ClId,
+            'CustomId': CompanyId
+        }
+        console.log(v);
+         $.ajax({
+
+                type: "Post",
+                url: "@Url.Action("UpdateCompany", "Crms")",
+                datatype: "Json",
+             data: { model: v},
+             success: function (data) {
+                 if (data.Id === 0) {
+                     alert("You have No PermIssion To Change")
+                 } else {
+                     location.reload();
+                 }
+
+                }
+            });
+    }
+
+
+
+
+    function switchServiceStatus() {
+
+        var statusId = $('#ServiceStatusList').find(":selected").val();
+        var clientId = $('#clientId').val();
+        var statusNote = $('#txtStatusNoteClient').val();
+        var v = {
+            'Id': clientId,
+            'CustomId': statusId,
+            'Note': statusNote
+        }
+
+         $.ajax({
+
+                type: "Post",
+                url: "@Url.Action("UpdateServiceStatus", "Crms")",
+                datatype: "Json",
+             data: { model: v},
+             success: function (data) {
+                 location.reload();
+
+                }
+            });
+
+    }
+    @*$(document).ready(function () {
+        var blog = getUrlParameter('companyId');
+
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllResponsibleOfficer", "Crms")",
+                data: { companyId: blog },
+                success: function (i) {
+                    console.log(i.DataList);
+                    var select = $("#reosid");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('Select Responsible Officer'));
+                    $(i.DataList).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.ResponsibleOfficerId + "'>").val(item.ResponsibleOfficerId).text(item.ResponsibleOfficerText));
+
+                    });
+                    return false;
+
+                }
+        });
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllServiceStatus", "Crms")",
+                data: { companyId: blog },
+                success: function (i) {
+
+                    $.each(i.Datalist, function (key, value) {
+                        console.log(i.Datalist);
+
+
+                        console.log(i.Datalist);
+                        var select = $("#sts");
+                        select.children().remove();
+                        select.append($("<option>").val('').text('Select service statuss'));
+                        $(i.Datalist).each(function (index, item) {
+                            select.append($("<option data-toggle='tooltip' title='" + item.StatusId + "'>").val(item.StatusId).text(item.StatusText));
+
+                        });
+                        return false;
+                    });
+
+                }
+            });
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllproject", "Crms")",
+                data: { companyId: blog },
+                success: function (i) {
+
+                    $.each(i.Datalist, function (key, value) {
+                        console.log(i.Datalist);
+
+
+                        console.log(i.Datalist);
+                        var select = $("#project");
+                        select.children().remove();
+                        select.append($("<option>").val('').text('Select Project'));
+                        $(i.Datalist).each(function (index, item) {
+                            select.append($("<option data-toggle='tooltip' title='" + item.ProjectId + "'>").val(item.ProjectId).text(item.ProjectName));
+
+                        });
+                        return false;
+                    });
+
+                }
+            });
+
+       /* reosid */
+    });*@
+
+
+
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+        return false;
+    };
+
+
+
+    </script>
+}
+

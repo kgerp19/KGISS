@@ -1,0 +1,135 @@
+﻿
+@model IList<KGERP.Service.ServiceModel.WorkQAModel>
+
+@{
+    ViewBag.Title = "Questions & Answers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = TempData["successMessage"];
+}
+<style>
+    .table > thead > tr > th,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        border-top: 1px solid #fff;
+    }
+</style>
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+<div class="row">
+    @Html.Label("Query & Answers", new { @style = "font-size:20px;color:#0066CC" })
+    <a href="@Url.Action("QuestionCreate",new { id=0 })" class="btn btn-primary btn-xs pull-right">
+        <span class="glyphicon glyphicon-plus-sign"></span> New Comments
+    </a>
+    <hr style="border-color:#4CAF50; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+</div>
+
+
+<div class="row">
+    <table class="table table-responsive">
+        @foreach (var item in Model)
+        {
+            if (item.FromKGID.Equals(System.Web.HttpContext.Current.User.Identity.Name))
+            {
+                <tr>
+                    <td width="10%">
+                        <label class="control-label">To</label>
+                    </td>
+                    <td width="90%">
+                        <a href="#">
+                            <img src="@Url.Content(item.ToEmpImage)" style="border-radius:50%" height="25" width="25" alt="Image"> @item.ToName
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="10%">
+                        <label class="control-label">Comments</label>
+                    </td>
+                    <td width="90%">
+                        @item.Conversation
+                    </td>
+                </tr>
+
+                if (item.WorkQAFiles.Any())
+                {
+                    <tr>
+                        <td width="10%">
+                            <label class="control-label">Attachments</label>
+                        </td>
+                        <td width="90%">
+                            @{
+                                int count = 0;
+                            }
+                            @foreach (var file in item.WorkQAFiles)
+                            {
+                                count = count + 1;
+                                <a href="@Url.Action("Download", new {workQAFileId = file.WorkQAFileId})">
+                                    @(count.ToString() + ". ") @file.FileName @*<i class="fa fa-download" style="font-size:15px;" aria-hidden="true"></i>*@
+                                </a><br />
+                            }
+                        </td>
+                    </tr>
+                }
+
+            }
+
+            if (item.ToKGID.Equals(System.Web.HttpContext.Current.User.Identity.Name))
+            {
+
+                <tr>
+                    <td width="10%">
+                        <label class="control-label">From</label>
+                    </td>
+                    <td width="90%">
+                        <a href="#">
+                            <img src="@Url.Content(item.FromEmpImage)" style="border-radius:50%" height="25" width="25" alt="Image"> @item.FromName
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="10%">
+                        <label class="control-label">Comments</label>
+                    </td>
+                    <td width="90%">
+                        @item.Conversation |
+                        <a href="@Url.Action("QuestionCreate", new { id = item.WorkQAId})">
+                            Reply
+                        </a>
+                    </td>
+                </tr>
+                if (item.WorkQAFiles.Any())
+                {
+                    <tr>
+                        <td width="10%">
+                            <label class="control-label">Attachments</label>
+                        </td>
+                        <td width="90%">
+                            @{
+                                int count = 0;
+                            }
+                            @foreach (var file in item.WorkQAFiles)
+                            {
+                                count = count + 1;
+                                <a href="@Url.Action("Download", new {workQAFileId = file.WorkQAFileId})">
+                                    @(count.ToString() + ". ") @file.FileName @*<i class="fa fa-download" style="font-size:15px;" aria-hidden="true"></i>*@
+                                </a><br />
+                            }
+                        </td>
+                    </tr>
+                }
+
+            }
+        }
+    </table>
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+    </script>
+
+}

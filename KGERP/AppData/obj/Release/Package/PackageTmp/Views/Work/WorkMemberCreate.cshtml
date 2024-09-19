@@ -1,0 +1,86 @@
+﻿@model KGERP.Service.ServiceModel.WorkMemberModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row" style="background-color:#000080;color:#FFFFFF">
+    <span style="font-size:20px;padding:5px;font-weight:bold">New Member</span>
+</div>
+<br />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.MemberId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @name = "employee", @id = "employee" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                @Html.HiddenFor(x => x.MemberId, new { @id = "memberId", @name = "memberId" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-3 col-md-6">
+                <a href="@Url.Action("Index")" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove-circle"></span>Close
+                </a>
+                <button type="submit" class="btn btn-primary" onclick="javascript: return SubmitForm();" style="margin-left: 20px;"><span class="glyphicon glyphicon-floppy-disk"></span>Save</button>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        function SubmitForm() {
+            var r = confirm("Are you sure to save task?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        $(function () {
+            $("#employee").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#memberId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+    </script>
+}

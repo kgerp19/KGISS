@@ -1,0 +1,1284 @@
+﻿@model KGERP.Service.Implementation.LcInfoServices.LcInfoViewModel
+@using KGERP.Utility
+@{
+    ViewBag.Title = "LcDetalis";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isMatch = true;
+    string orderno = "";
+    int slr = 1;
+    int rowspanCount = 0;
+    decimal total = 0;
+    decimal sum = 0;
+}
+<style>
+
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #ffeb3b47;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .form-control {
+        max-width: 100%
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    fieldset {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 20px;
+    }
+
+    .description-heading {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+
+    .description-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .modal {
+        left: auto;
+        right: auto;
+        background-color: transparent;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .premium-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .premium-table th,
+        .premium-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .premium-table th {
+            background-color: #f2f2f2;
+        }
+
+        .premium-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .premium-table tbody tr:hover {
+            background-color: #ddd;
+        }
+
+        .premium-table tfoot td {
+            font-weight: bold;
+        }
+
+    .linkPointer {
+        cursor: pointer;
+    }
+
+    .btn {
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+    }
+</style>
+<button id="printButton" onclick="printDivContent()" class="btn btn-warning pull-right" style="margin-top:50px;"> Print Lc</button>
+<div id="contentToPrint">
+
+    <section style="margin-bottom:20px;font-size:25px">
+        <h3 class="bg-w" style="padding-left:5px"><b> @Model.CompanyNmae -LC Detalis Information </b> </h3>
+    </section>
+
+    <div class="row">
+        <table class="table">
+
+            <tr>
+                <th style="width:18%">
+                    LC No
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.LCNo</label>
+                </td>
+                <th style="width:18%">LC Date</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.LCDate.ToString("dd-MM-yyyy")
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Created By
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.CreatedBy</label>
+                </td>
+                <th style="width:18%"> Created Date </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CreatedDate.ToString("dd-MM-yyyy")
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    PI No
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.PINo</label>
+                </td>
+                <th style="width:18%"> PI Date</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.PIDate.Value.ToString("dd-MM-yyyy")
+                </td>
+            </tr>
+
+
+            <tr>
+                <th style="width:18%">
+                    Principle Name
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.SupplierName</label>
+                </td>
+                <th style="width:18%"> Principle Phone</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.SupplierPhone
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Principle Address
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.SupplierAddress</label>
+                </td>
+                <th style="width:18%">  Principle Bank Name </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.SupplierBankName
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Company Bank
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.CompanyBankNmae</label>
+                </td>
+                <th style="width:18%">LC Value</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySign@Model.LCValue
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Latest Shipment Date
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.ShipmentDate.ToString("dd-MM-yyyy")
+                </td>
+                <th style="width:18%">LC Value In BDT</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@(String.Format("{00:00.00}", Model.LCValue * Model.CurrenceyRate))
+                </td>
+            </tr>
+
+
+            @*//<td>@(String.Format("{00:00.00}", item.PurchasingPrice * Model.CurrenceyRate)) BDT</td>*@
+            <tr>
+                <th style="width:18%">
+                    Country of Origin Name
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.CountryofOriginName</label>
+                </td>
+                <th style="width:18%"> Amendment Increase</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.AmendmentIncrase, @Model.CurrencySignBDT@(String.Format("{00:00.00}", Model.AmendmentIncrase * Model.CurrenceyRate))
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Port Of Loading
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.PortOfLoadingName</label>
+                </td>
+                <th style="width:18%"> Amendment decrease </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.AmendmentDiccrase, @Model.CurrencySignBDT@(String.Format("{00:00.00}", Model.AmendmentDiccrase * Model.CurrenceyRate))
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Port of Discharge
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.PortOfDischargeName</label>
+                </td>
+                <th style="width:18%"> Cash Margin Percent</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CashMarginPercent<span> %</span>
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Country Of Destination
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.CountryOfDestinationName</label>
+                </td>
+                <th style="width:18%">Cash Margin </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySign@Model.CashMarginAmount
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Lc Type
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@((LcTypeEnum)Model.LCType)</label>
+                </td>
+                <th style="width:18%"> Commission Value </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.CommissionValue
+                    @*(@(String.Format("{00:00.00}", Model.CommissionValue * Model.CurrenceyRate)) In BDT)*@
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Notefy Party
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.NotefyParty</label>
+                </td>
+                <th style="width:18%">Insurance Value</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.InsuranceValue
+                    @*(@(String.Format("{00:00.00}", Model.InsuranceValue * Model.CurrenceyRate)) In BDT)*@
+                </td>
+            </tr>
+
+
+            <tr>
+                <th style="width:18%">
+                    Mode Of shipment
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@((VesselTypeEnum)Model.VesselId)</label>
+                </td>
+                <th style="width:18%"> Bank Charge</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.BankCharge
+                    @*(@(String.Format("{00:00.00}", Model.BankCharge * Model.CurrenceyRate)) In BDT)*@
+                </td>
+            </tr>
+
+
+
+            <tr>
+                <th style="width:18%">
+                    Expary Date
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.ExparyDate.ToString("dd-MM-yyyy")</label>
+                </td>
+                <th style="width:18%"> Other Charge</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.OtherCharge
+                    @*(@(String.Format("{00:00.00}", Model.OtherCharge * Model.CurrenceyRate)) In BDT)*@
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    Currency Name
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.CurrenceyName</label>
+                </td>
+                <th style="width:18%"> CurrenceyRate </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @Model.CurrencySignBDT@Model.CurrenceyRate
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Payment Terms
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.PaymentTerms</label>
+                </td>
+                <th style="width:18%"> Total Landed Value </th>
+                <th style="width:2%">:</th>
+                <th style="width:30%">
+                    @Model.CurrencySign@Model.TotalLandedValue
+                    @*(@(String.Format("{00:00.00}", Model.TotalLandedValue * Model.CurrenceyRate)) In BDT)*@
+                </th>
+            </tr>
+
+        </table>
+    </div>
+
+
+
+
+    <div class="row" style="margin-top:15px">
+        <div class="col-md-3">
+            @*<a class="btn btn-warning btn-block" style="width:100%">Amendment</a>*@
+            <a id="@Model.LCId" @*onclick=" makeEditble(@Model.LCId);"*@ class="linkPointer btn btn-info btn-block" data-toggle="modal" data-target="#LcValueModal" title="LcValue" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i>LC VAlue</a>
+
+        </div>
+        <div class="col-md-3">
+            @*<a class="btn btn-warning btn-block" style="width:100%">Amendment</a>*@
+            <a id="@Model.LCId" onclick=" makeEditble(@Model.LCId);" class="linkPointer btn btn-info btn-block" data-toggle="modal" data-target="#amendmentModal" title="Amendment" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i>Amendment</a>
+
+        </div>
+
+        <div class="col-md-6 text-center">
+            @if (Model.Status == 1)
+            {
+                <a onclick="makeLCInfoSubmitable(@Model.LCId);" id="sbmt" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitLCInfoModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+
+            }
+            else
+            {
+                <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Submitted</button>
+
+            }
+
+        </div>
+
+    </div>
+    <br />
+    <br />
+    <div id="successMessage" class="alert alert-success" style="display:none"></div>
+    @if (Model.LcValueAmendmentList.Any())
+    {
+        <h2>LC Value Amendment Information</h2>
+
+        <fieldset>
+            <div class="table-wrapper">
+                <table class="premium-table" id="LcValueAmdmntTbl">
+                    <thead>
+                        <tr>
+                            <th>SL</th>
+                            <th>Date</th>
+                            <th>Value</th>
+                            <th>Value (BDT)</th>
+                            <th>CM (%)</th>
+                            <th>CM Amount</th>
+                            <th>Freight Charges</th>
+                            <th>Bank Charge</th>
+                            <th>Insurance</th>
+                            <th>Commission</th>
+                            <th>Other Charge</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int sl = 1;
+                        }
+                        @foreach (var item in Model.LcValueAmendmentList)
+                        {
+                            <tr data-amendment-id="@item.LCValueAmendmentId">
+                                <td> @sl</td>
+                                <td>@item.AmendmentDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.LCValue</td>
+                                <td>@item.LCValueInBDT</td>
+                                <td>@item.CashMarginPercent</td>
+                                <td>@item.CashMarginAmount</td>
+                                <td>@item.FreightCharges</td>
+                                <td>@item.BankCharge</td>
+                                <td>@item.InsuranceValue</td>
+                                <td>@item.CommissionValue</td>
+                                <td>@item.OtherCharge</td>
+                                <td>
+                                    @if (item.Status == 0)
+                                    {
+                                        <a id="@item.LCValueAmendmentId" onclick="makeAmmendmentLCValueSubmitble(@item.LCValueAmendmentId)" class="linkPointer btn btn-primary btn-sm" data-toggle="modal" data-target="#SubmitAmendmentLCValueMolalId" data-placement="top">Submit</a>
+
+                                        <a id="@item.LCValueAmendmentId" onclick="MakeEdit(@item.LCValueAmendmentId)" class="linkPointer btn btn-warning btn-sm btn-sm" data-toggle="modal" data-target="#LcValueModal" data-placement="top">
+                                            <i class="fa fa-pencil mr-1"></i>
+                                        </a>
+
+                                        <a id="@item.LCValueAmendmentId" onclick="confirmDelete(@item.LCValueAmendmentId)" class="linkPointer btn btn-danger btn-sm btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-placement="top">
+                                            <i class="fa fa-trash mr-1"></i>Delete
+                                        </a>
+
+                                    }
+                                    else
+                                    {
+                                        <span class="btn btn-info btn-sm">Submitted</span>
+                                    }
+                                </td>
+                            </tr>
+                            sl++;
+                            }
+                        </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align:right"><b>Total:</b></td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.LCValue)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.LCValueInBDT)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.CashMarginPercent)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.CashMarginPercent)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.FreightCharges)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.BankCharge)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.InsuranceValue)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.CommissionValue)</td>
+                            <td>@Model.LcValueAmendmentList.Sum(a => a.OtherCharge)</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </fieldset>
+    }
+    else
+    {
+        <p>No amendment information available.</p>
+    }
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this item?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteItem()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteConfirmationModal1" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel1">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this amendment item?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteAmendmentItem()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+    @if (Model.AmendmentList.Count != 0)
+    {
+        <h2>Amendment Information</h2>
+    }
+    <div id="successMessage1" class="alert alert-success" style="display:none"></div>
+
+    <fieldset>
+            <table id="amandmendtbl">
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>Amendment Date</th>
+                        <th>Amendment Value</th>
+                        <th>Increase or Decrease</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var amendment in Model.AmendmentList)
+                    {
+                        int serial = slr++;
+                        sum = sum + amendment.AmendmentValue;
+
+                        <tr data-amendment-id="@amendment.LCAmendmentId">
+                            <!-- Add data-amendment-id attribute here -->
+                            <td>@serial</td>
+                            <td>@amendment.AmendmentDate</td>
+                            <td>@amendment.AmendmentValue</td>
+                            @if (amendment.IsIncrase)
+                            {
+                                <td>Increase</td>
+                            }
+                            else
+                            {
+                                <td>Decrease</td>
+                            }
+                            <td>
+                                @if (amendment.IsSubmit == false)
+                                {
+                                    <a id="@amendment.LCAmendmentId" onclick="makeAmmendmentSubmitble(@amendment.LCAmendmentId)" class="linkPointer btn btn-warning" data-toggle="modal" data-target="#submitAmendments" data-placement="top">Submit</a>
+                                    <a id="@amendment.LCAmendmentId" onclick="MakeAmendmentEdit(@amendment.LCAmendmentId)" class="linkPointer btn btn-warning btn-sm btn-premium" data-toggle="modal" data-target="#amendmentModal" data-placement="top">
+                                        <i class="fa fa-pencil mr-1"></i>
+                                    </a>
+
+                                    <a id="@amendment.LCAmendmentId" onclick="amndmentDelete(@amendment.LCAmendmentId)" class="linkPointer btn btn-danger btn-sm btn-premium" data-toggle="modal" data-target="#deleteConfirmationModal1" data-placement="top">
+                                        <i class="fa fa-trash mr-1"></i>Delete
+                                    </a>
+
+                                }
+                                else
+                                {
+                                    <span class="btn btn-info">Submitted</span>
+                                }
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td style="text-align:right" colspan="2"><b>Total:</b> </td>
+                        <td>
+                            @sum
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+    </fieldset>
+
+
+
+    @if (Model.PurchaseorderList.Count != 0)
+    {
+        <h2>Purchase Information</h2>
+    }
+
+    @foreach (var purchaseOrder in Model.PurchaseorderList)
+    {
+        <fieldset>
+            <legend>Order Information - @purchaseOrder.OrderNo</legend>
+            <div>
+                <label>Order No:</label>
+                <span>@purchaseOrder.OrderNo</span>
+            </div>
+            <div>
+                <label>Supplier Name:</label>
+                <span>@purchaseOrder.SupplierName</span>
+            </div>
+            <div>
+                <label>Order Date:</label>
+                <span>@purchaseOrder.OrderDate</span>
+            </div>
+            <div>
+                <label>Delivery Address:</label>
+                <span>@purchaseOrder.DeliveryAddress</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+
+                        <th>Serial</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var purchaseOrderDetail in purchaseOrder.PurchaseOrderDetails)
+                    {
+
+                        int sl = slr++;
+                        <tr>
+                            <td>@sl</td>
+                            <td>@purchaseOrderDetail.ProductName</td>
+                            <td>@purchaseOrderDetail.PurchaseQuantity</td>
+                            <td>@purchaseOrderDetail.PurchaseAmount </td>
+                            <td>@purchaseOrderDetail.PurchasingPrice @Model.CurrencySign</td>
+
+                        </tr>
+
+
+                    }
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td style="text-align:right" colspan="4"><b>Total:</b> </td>
+                        <td>
+                            @purchaseOrder.PurchaseOrderDetails.Sum(x => x.PurchasingPrice)&nbsp;@Model.CurrencySign (@(String.Format("{00:00.00}",purchaseOrder.PurchaseOrderDetails.Sum(x => x.PurchasingPrice) * Model.CurrenceyRate)) In BDT)
+
+
+
+
+
+
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </fieldset>
+    }
+</div>
+
+@using (Html.BeginForm("LcValueAmendmentSave", "LcInformations", FormMethod.Post, new { id = "LCValiueamendmentSaveForm", @class = "formValidator" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="modal fade" id="LcValueModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetLcValueModal()" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"><b>LC Value</b></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        @Html.HiddenFor(model => model.CurrenceyRate, new { id = "Currencyrate" })
+                        @Html.HiddenFor(model => model.LCId, new { id = "LCId" })
+                        @Html.HiddenFor(model => model.LCValueAmendmentId, new { id = "LCValueAmendmentId" })
+
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.LCValueAmendMendt, "L/C Value")
+                                @Html.EditorFor(model => model.LCValueAmendMendt, new { htmlAttributes = new { @onkeyup = "TotalLCValueInBDT()", @id = "LcVal", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.LCValueAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.LCValueInBDTAmendMendt, "L/C Value In BDT")
+                                @Html.EditorFor(model => model.LCValueInBDTAmendMendt, new { htmlAttributes = new { @id = "LCValueInBDT", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.LCValueInBDTAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CashMarginPercentAmendMendt, "C. Margin%")
+                                @Html.EditorFor(model => model.CashMarginPercentAmendMendt, new { htmlAttributes = new { @onkeyup = "AmountByPecentage()", @id = "CashMarginPecentage", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.CashMarginPercentAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CashMarginAmountAmendMendt, "C. Margin Amount")
+                                @Html.EditorFor(model => model.CashMarginAmountAmendMendt, new { htmlAttributes = new { @onkeyup = "PecentageByAmount()", @id = "CashMarginAmount", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.CashMarginAmountAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.FreightChargesAmendMendt, "Freight Charges")
+                                @Html.EditorFor(model => model.FreightChargesAmendMendt, new { htmlAttributes = new { @id = "FreightCharges", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.FreightChargesAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.BankChargeAmendMendt, "Bank Charge")
+                                @Html.EditorFor(model => model.BankChargeAmendMendt, new { htmlAttributes = new { @id = "BankCharge", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.BankChargeAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.InsuranceValueAmendMendt, "Insurance Value")
+                                @Html.EditorFor(model => model.InsuranceValueAmendMendt, new { htmlAttributes = new { @id = "txtPINo", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.InsuranceValueAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CommissionValueAmendMendt, "Commission Value")
+                                @Html.EditorFor(model => model.CommissionValueAmendMendt, new { htmlAttributes = new { @id = "txtCommision", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.CommissionValueAmendMendt, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.OtherChargeAmendMendt, "Other Charge")
+                                @Html.EditorFor(model => model.OtherChargeAmendMendt, new { htmlAttributes = new { @id = "OtherCharge", @class = "form-control" } })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("LC Date:", htmlAttributes: new { })
+                                <div style="display:flex">
+                                    @Html.TextBoxFor(model => model.LCDateAmmendMend, new { @Value = Model.LCDateAmmendMend.ToString("dd/MM/yyyy"), @class = "form-control datepicker", @style = "width: 240px;", @id = "LCDateAmmendMend", @required = "required", @autocomplete = "off" })
+                                </div>
+                                @Html.ValidationMessageFor(model => model.LCDateAmmendMend, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="resetLcValueModal()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnsaveUpdate1" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("AmendmentSave", "LcInformations", FormMethod.Post, new { id = "amendmentSaveForm", @class = "formValidator" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.LCId, new { @id = "lcIdhidField" })
+    @Html.HiddenFor(model => model.LCAmendmentId, new {@id = "LcAmendmentIDField"})
+    <div class="modal fade" id="amendmentModal" tabindex="-1" role="dialog" aria-labelledby="amendmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="amendmentModalLabel"><b>LC Amendment</b></h5>
+                    <button type="button" class="close" onclick="resetLcAmdmntModal()" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.Label("Amendment Date:", htmlAttributes: new { @class = "control-label" })
+                                <div>
+                                    @Html.TextBoxFor(model => model.AmendmentDate, new { @Value = Model.AmendmentDate.ToString("dd/MM/yyyy"), @class = "form-control datepicker", @id = "txtLC.AmendmentDate", @required = "required", @autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.AmendmentDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.Label("Value:", htmlAttributes: new { @class = "control-label" })
+                                <div>
+                                    @Html.TextBoxFor(model => model.AmendmentValue, new { @class = "form-control", required = "required", @id="amendmentValueID" })
+                                    @Html.ValidationMessageFor(model => model.AmendmentValue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-top:33px;">
+                                <div class="radio-inline">
+                                    <label>
+                                        @Html.RadioButtonFor(model => model.IsIncrase, true, new { id = "isIncreaseButton", @checked = "checked" }) Is Increase
+                                    </label>
+                                </div>
+                                <div class="radio-inline">
+                                    <label>
+                                        @Html.RadioButtonFor(model => model.IsIncrase, false) Is Decrease
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.Label("Remarks:", htmlAttributes: new { @class = "control-label" })
+                                <div>
+                                    @Html.TextAreaFor(model => model.Remark, new { @class = "form-control", required = "required", rows = "3", @id="amendmentRemarksField" })
+                                    @Html.ValidationMessageFor(model => model.Remark, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="resetLcAmdmntModal()" data-dismiss="modal">Close</button>
+                    <button type="submit" id="amendmentSaveBtn" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("SubmitLC", "LcInformations", FormMethod.Post, new { id = "SubmitLCFormId", @class = "formValidator" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitLCInfoModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Submit LC</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "submitCompanyid" })
+                    @Html.HiddenFor(model => model.LCId, new { id = "submitLCInfoId" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Submit this Adjustment?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="modal fade" id="SubmitAmendmentLCValueMolalId" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    @using (Html.BeginForm("SubmitAmendmentLCValue", "LcInformations", FormMethod.Post, new { id = "SubmitLCFormId", @class = "formValidator" }))
+    {
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Amendment Submit</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "submitAmdLCValueCompanyid" })
+                    @Html.HiddenFor(model => model.LCValueAmendmentId, new { id = "submitLCValueAmendmentId" })
+                    <div style="text-align:center">
+                        <h3>Are you sure to submit<span class="submitOrDraftText"></span> this Amendment?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-save">&nbsp;<span class="submitOrDraftText">Yes</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="submitAmendments" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    @using (Html.BeginForm("SubmitAmendments", "LcInformations", FormMethod.Post, new { id = "SubmitLCFormId", @class = "formValidator" }))
+    {
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Amendment Submit</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "submitAmendmentCompanyid" })
+                    @Html.HiddenFor(model => model.LCAmendmentId, new { id = "submitLCAmendmentId" })
+                    <div style="text-align:center">
+                        <h3>Are you sure to submit<span class="submitOrDraftText"></span> this Amendment?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-save">&nbsp;<span class="submitOrDraftText">Yes</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+            $(document).ready(function () {
+                // Set the first radio button checked by default
+                $('#isIncreaseButton').prop('checked', true);
+            });
+
+         function makeLCInfoSubmitable(rowId) {
+             $("#submitLCInfoId").val(rowId)
+             $('#submitCompanyid').val("@Model.CompanyId");
+
+        }
+
+        function makeAmmendmentSubmitble(amdmentId) {
+
+            $("#submitLCAmendmentId").val(amdmentId)
+            $('#submitAmendmentCompanyid').val("@Model.CompanyId");
+
+        }
+
+         function makeAmmendmentLCValueSubmitble(amdmentId) {
+
+             $("#submitLCValueAmendmentId").val(amdmentId)
+             $('#submitAmdLCValueCompanyid').val("@Model.CompanyId");
+
+        }
+
+        //function printDivContent() {
+        //    var contentOfDiv = document.getElementById("contentToPrint").innerHTML;
+
+        //    // Create a hidden iframe with an empty src attribute
+        //    var iframe = document.createElement('iframe');
+        //    iframe.style.display = 'none';
+        //    iframe.src = 'about:blank'; // Set a blank URL
+        //    document.body.appendChild(iframe);
+
+        //    // Add the content to the iframe
+        //    var iframeDoc = iframe.contentWindow.document;
+        //    iframeDoc.open();
+        //    iframeDoc.write('<html><head><title>LC Details</title></head><body>');
+        //    /* iframeDoc.write('<h1>Content of Div element:</h1><br>');*/
+        //    iframeDoc.write(contentOfDiv);
+        //    iframeDoc.write('</body></html>');
+        //    iframeDoc.close();
+
+        //    // Print the content
+        //    iframe.contentWindow.print();
+
+        //    // Remove the iframe after printing
+        //    setTimeout(function () {
+        //        document.body.removeChild(iframe);
+        //    }, 1000);
+        //}
+
+        function printDivContent() {
+            var contentOfDiv = document.getElementById("contentToPrint").innerHTML;
+            $("#sbmt").hide();
+            var iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'about:blank';
+            document.body.appendChild(iframe);
+
+
+            var iframeDoc = iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write('<html><head><title>LC Details</title></head><body>');
+            iframeDoc.write(contentOfDiv);
+            iframeDoc.write('</body></html>');
+            iframeDoc.close();
+            iframe.contentWindow.print();
+            function afterPrint() {
+
+                $("#sbmt").show();
+
+                document.body.removeChild(iframe);
+            }
+            if (window.matchMedia) {
+                var mediaQueryList = window.matchMedia('print');
+                mediaQueryList.addListener(function (mql) {
+                    if (!mql.matches) {
+                        afterPrint();
+                    }
+                });
+            }
+
+
+            setTimeout(function () {
+                afterPrint();
+            }, 1000);
+        }
+
+
+        function TotalLCValueInBDT() {
+            var LcVal = $("#LcVal").val();
+            var Currencyrate = $("#Currencyrate").val();
+            var calculation = (parseFloat(LcVal) * parseFloat(Currencyrate));
+            $("#LCValueInBDT").val(calculation.toFixed(2));
+        }
+
+        function PecentageByAmount() {
+            var LCValueInBDT = $("#LCValueInBDT").val();
+            var cashMarginAmount = $("#CashMarginAmount").val();
+
+            var cashMarginAmount = $("#CashMarginAmount").val();
+            var calculation = (parseFloat(cashMarginAmount) * 100) / parseFloat(LCValueInBDT);
+            $("#CashMarginPecentage").val(calculation.toFixed(2));
+        }
+
+        function AmountByPecentage() {
+            var LCValueInBDT = $("#LCValueInBDT").val();
+            var cashPercentage = $("#CashMarginPecentage").val();
+            var calculation = (parseFloat(cashPercentage) * parseFloat(LCValueInBDT)) / 100;
+            $("#CashMarginAmount").val(calculation.toFixed(2));
+        }
+
+        function MakeEdit(amendmentId) {
+
+            $.ajax({
+                url: '/LcInformations/GetAmmendmentLcValue',
+                type: 'GET',
+                data: { amendmentId: amendmentId },
+                success: function (response) {
+                    console.log(response);
+                    $("#LcVal").val(response.LCValue);
+                    $("#LCValueInBDT").val(response.LCValueInBDT);
+                    $("#CashMarginPecentage").val(response.CashMarginPercent);
+                    $("#CashMarginAmount").val(response.CashMarginAmount);
+                    $("#FreightCharges").val(response.FreightCharges);
+                    $("#BankCharge").val(response.BankCharge);
+                    $("#txtPINo").val(response.InsuranceValue);
+                    $("#txtCommision").val(response.CommissionValue);
+                    $("#OtherCharge").val(response.OtherCharge);
+                    var AmendmentDate = DateCustom(response.AmendmentDate);
+                    $("#LCDateAmmendMend").val(AmendmentDate);
+                    $("#LCValueAmendmentId").val(response.LCValueAmendmentId);
+                    $("#btnsaveUpdate1").html("Update");
+                    var Currencyrate = $("#Currencyrate").val();
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX request failed');
+                    console.error(status + ': ' + error);
+
+                }
+            });
+        }
+        function MakeAmendmentEdit(amendmentId) {
+
+            $.ajax({
+                url: '/LcInformations/GetLcAmendment',
+                type: 'GET',
+                data: { amendmentId: amendmentId },
+                success: function (response) {
+                    console.log(response);
+                    $("#txtLC.AmendmentDate").val(response.AmendmentDate);
+                    $("#amendmentValueID").val(response.AmendmentValue);
+                    $("#isIncreaseButton").val(response.IsIncrase);
+                    $("#amendmentRemarksField").val(response.Remark);
+                    $("#LcAmendmentIDField").val(response.LCAmendmentId);
+                    $("#amendmentSaveBtn").html("Update");
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX request failed');
+                    console.error(status + ': ' + error);
+                }
+            });
+        }
+
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+        }
+
+        // Function to set the ID of the item to be deleted
+        function confirmDelete(amendmentId) {
+            $('#deleteConfirmationModal').data('amendmentId', amendmentId);
+        }
+        function amndmentDelete(amendmentId) {
+            $('#deleteConfirmationModal1').data('amendmentId', amendmentId);
+        }
+
+
+        function deleteItem() {
+            var amendmentId = $('#deleteConfirmationModal').data('amendmentId');
+
+            $.ajax({
+                url: '/LcInformations/DeleteAmmendMendValue',
+                type: 'POST',
+                data: { amendmentId: amendmentId },
+                success: function (response) {
+                    console.log('Item deleted successfully');
+
+                    // Show success message
+                    $('#successMessage').text('Item deleted successfully!').show();
+
+                    // Hide the message after a delay (e.g., 3 seconds)
+                    setTimeout(function () {
+                        $('#successMessage').hide();
+                    }, 3000);
+
+                    $('#deleteConfirmationModal').modal('hide');
+                    var rowToRemove = $('#LcValueAmdmntTbl').find('tr[data-amendment-id="' + amendmentId + '"]');
+                    if (rowToRemove.length > 0) {
+                        rowToRemove.remove();
+                        console.log('Row removed from the table');
+                    } else {
+                        console.error('Row not found in the table');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to delete item');
+                    console.error(status + ': ' + error);
+                }
+            });
+        }
+        function deleteAmendmentItem(amendmentId) {
+            var amendmentId = $('#deleteConfirmationModal1').data('amendmentId');
+            $.ajax({
+                url: '/LcInformations/DltAmmendment',
+                type: 'POST',
+                data: { amendmentId: amendmentId },
+                success: function (response) {
+                    console.log('Item deleted successfully');
+                    $('#successMessage1').text('Item deleted successfully!').show();
+
+                    setTimeout(function () {
+                        $('#successMessage1').hide();
+                    }, 3000);
+
+                    $('#deleteConfirmationModal1').modal('hide');
+
+                    var rowToRemove = $('#amandmendtbl').find('tr[data-amendment-id="' + amendmentId + '"]');
+                    if (rowToRemove.length > 0) {
+                        rowToRemove.remove();
+                        console.log('Row removed from the table');
+                    } else {
+                        console.error('Row not found in the table');
+                    }
+                },
+
+                error: function (xhr, status, error) {
+                    console.error('Failed to delete item');
+                    console.error(status + ': ' + error);
+                }
+            });
+        }
+
+        function resetLcValueModal() {
+            $("#LCValueAmendmentId").val(0);
+            $('#LcVal').val(0.0); 
+            $('#LCValueInBDT').val(0.0); 
+            $('#CashMarginPecentage').val(0.0); 
+            $('#CashMarginAmount').val(0.0); 
+            $('#FreightCharges').val(0.0); 
+            $('#BankCharge').val(0.0); 
+            $('#txtPINo').val(0.0); 
+            $('#txtCommision').val(0.0); 
+            $('#OtherCharge').val(0.0);
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            var formattedDate = yyyy + '-' + mm + '-' + dd;
+
+            $('#LCDateAmmendMend').val(formattedDate);
+            $("#btnsaveUpdate1").html("Save");
+        }
+        function resetLcAmdmntModal() {
+            $("#LcAmendmentIDField").val(0);
+            $("#amendmentValueID").val(0);
+            $("#isIncreaseButton").prop("checked", true);
+            $("#amendmentRemarksField").val('');
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            var formattedDate = yyyy + '-' + mm + '-' + dd;
+
+            $('#txtLC.AmendmentDate').val(formattedDate);
+
+            $("#amendmentSaveBtn").html('<i class="fa fa-floppy-o"></i>&nbsp;Save');
+        }
+
+    </script>
+}

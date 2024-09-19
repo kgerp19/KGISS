@@ -1,0 +1,1681 @@
+﻿@model KGERP.Services.Procurement.FeedSalesOrderModel
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "Sales Invoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+    double totalGrossAmount = 0;
+    double totalBaseCommission = 0;
+    double totalCashCommission = 0;
+    double totalCarryingCommission = 0;
+    double totalSpecialDiscount = 0;
+    double totalMonthlyIncentiveInInvoice = 0;
+    double totalYearlyIncentiveInInvoice = 0;
+    double netPayable = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.OrderMasterId > 0)
+        {
+            <span>
+                Sales Invoice
+
+            </span>
+        }
+        else
+        {
+            <span>
+                Sales Invoice
+            </span>
+        }
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Sales Invoice</li>
+    </ol>
+</section>
+@using (Html.BeginForm("FeedSalesOrderSlave", "Procurement", FormMethod.Post, new { id = "procurementSalesOrderSlaveFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                @Html.HiddenFor(model => model.ProductType, new { id = "ProductType" })
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.OrderMasterId, new { id = "OrderMasterId" })
+
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.OrderMasterId > 0)
+                        {
+
+
+
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table table-sm table-hover table-condensed">
+                                    <tr>
+                                        <th style="width:18%">
+                                            Invoice No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.SalesOrderNo</label>
+                                        </td>
+                                        <th style="width:18%"> Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.OrderDate.ToShortDateString()</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>:</th>
+                                        <td>@Model.CommonCustomerName</td>
+
+                                        <th>Customer Code</th>
+                                        <th>:</th>
+                                        <td>@Model.CommonCustomerCode</td>
+
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Address
+                                        </th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerAddress</td>
+                                        <th>
+                                            Zone
+                                        </th>
+                                        <th>:</th>
+                                        <td>@Model.ZoneName</td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            Contact Person
+                                        </th>
+                                        <th>:</th>
+                                        <td>@Model.ContactPerson</td>
+
+                                        <th>Customer Phone</th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerPhone</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerEmail</td>
+                                        <th>Order Location</th>
+                                        <th>:</th>
+                                        <td>@Model.WareHouse</td>
+                                    </tr>
+                                    <tr>
+
+                                        <th>Created By</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedBy</td>
+                                        <th>Created Date</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedDate</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sale Person</th>
+                                        <th>:</th>
+                                        <td>@Model.SalePersonName</td>
+                                        <th>Order Ststus</th>
+                                        <th>:</th>
+                                        <td>
+                                            @if (Model.Status == (int)EnumFeedSalesStatus.Draft)
+                                            {
+                                                <span class="btn btn-info btn-xs">
+                                                    Submit Pending
+                                                </span>
+                                            }
+
+                                            @if (Model.Status == (int)EnumFeedSalesStatus.Submit)
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    GM Approval Pending
+                                                </span>
+                                            }
+                                            @*@if (Model.Status == (int)EnumFeedSalesStatus.GMApproval)
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    MD Approval Pending
+                                                </span>
+                                            }*@
+                                            @if (Model.Status == (int)EnumFeedSalesStatus.MDApproval)
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    Accounts Approval Pending
+                                                </span>
+                                            }
+                                            @if (Model.Status == (int)EnumFeedSalesStatus.AccountsApproval)
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    Deliver Pending
+                                                </span>
+                                            }
+                                            @if (Model.Status == (int)EnumFeedSalesStatus.PartialDelivered)
+                                            {
+                                                <span class="btn btn-primary btn-xs">
+                                                    Partially Delivered
+                                                </span>
+                                            }
+                                            @if (Model.Status == (int)EnumFeedSalesStatus.Delivered)
+                                            {
+                                                <span class="btn btn-success btn-xs">
+                                                    Delivered
+                                                </span>
+                                            }
+
+
+                                        </td>
+                                    </tr>
+                                    @*<tr>
+                                            <td>Approval</td>
+                                            <td>:</td>
+                                            <th>
+                                                @if (Model.Status == (int)EnumFeedSalesStatus.Approved)
+                                                {
+                                                    <span class="bg-success">
+                                                        Approved
+                                                    </span>
+
+                                                }
+                                                else
+                                                {
+                                                    <span class="bg-warning">
+                                                        Draft
+                                                    </span>
+                                                }
+                                            </th>
+                                        </tr>*@
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+                        <div class="box-body">
+
+                            @if (Model.OrderMasterId == 0)
+                            {
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group" style="padding:0px">
+                                            <label for="message-text" class="col-form-label">Order Location:</label>
+                                            @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Select Order Location==", new { id = "ddlStockInfoId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Invoice Date</label>
+                                            <input name="OrderDate" asp-for="OrderDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtOrderDate" placeholder="Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.OrderDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        @Html.LabelFor(model => model.SalesOrderNo, htmlAttributes: new { @class = "control-label" })
+                                        @Html.EditorFor(model => model.SalesOrderNo, new { htmlAttributes = new { @id = "txtOrderNo", @class = "form-control", @autocomplete = "off", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(model => model.SalesOrderNo, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <div class="form-group">
+                                            <label>Customer</label>
+                                            @Html.HiddenFor(model => model.CustomerId, new { id = "ddlCustomerId" })
+                                            @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtCustomerName" } })
+                                            @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="form-group">
+                                            <div id="linkCustomerAgeingDiv">
+                                                <a class="btn btn-info" id="linkCustomerAgeingId" href="" target="_blank"></a>
+                                                <a class="btn btn-warning" id="linkCustomerCommission" href="" target="_blank"></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+
+                                        <div class="form-group">
+                                            <label class="text-danger">Have Short Credit? &nbsp;&nbsp;</label>
+                                            @Html.CheckBoxFor(model => model.HaveShortCredit, new { id = "checkHaveShortCredit" })
+                                            @Html.ValidationMessageFor(model => model.HaveShortCredit, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Expected Delivery Date</label>
+                                            <input name="ExpectedDeliveryDate" asp-for="ExpectedDeliveryDate" type="text" required="required" class="datePicker form-control" id="txtDeliveryDate" placeholder="Expected Delivery Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.ExpectedDeliveryDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group" style="padding:0px">
+                                            <label for="message-text" class="col-form-label">Sale Person:</label>
+                                            @Html.HiddenFor(model => model.SalePersonId, new { id = "ddlSalePersonId" })
+                                            @Html.EditorFor(model => model.SalePersonName, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtSalePersonName", @readonly = "readonly" } })
+
+                                            @Html.ValidationMessageFor(model => model.SalePersonId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="txtDescription" class="col-form-label">Remarks:</label>
+                                            @Html.TextAreaFor(model => model.Remarks, new { id = "txtDescription", placeholder = "Description", @class = "form-control", rows = 2 })
+                                            @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            }
+                            else
+                            {
+                                @Html.HiddenFor(model => model.CustomerId, new { id = "ddlCustomerId" })
+                                @Html.HiddenFor(model => model.StockInfoId, new { id = "ddlStockInfoId" })
+                                @Html.HiddenFor(model => model.HaveShortCredit, new { id = "checkHaveShortCredit" })
+                                @Html.HiddenFor(model => model.OrderMasterId, new { id = "txtOrderMasterId" })
+
+                            }
+                            @if (Model.Status == (int)EnumFeedSalesStatus.Draft)
+                            {@Html.HiddenFor(model => model.OrderDetailId, new { id = "hidOrderDetailId" })
+
+                            <div class="row">
+                                <div class="col-md-4" style="padding:0px 2px 0px 8px;">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Product Name:</label>
+
+                                        @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
+                                        @Html.HiddenFor(model => model.FProductId, new { id = "ddlFProductId" })
+                                        @Html.ValidationMessageFor(model => model.FProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Order Qty</label>
+                                        <div class="input-group">
+                                            @Html.TextBoxFor(model => model.Qty, new { id = "txtSalesOrderQuantity", @onkeyup = "TotalAmountSumation()", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Purchase Quantity", required = "Required" })
+                                            @Html.ValidationMessageFor(model => model.Qty, "", new { @class = "text-danger" })
+
+                                            <div class="input-group-addon">
+                                                <span class="txtUnitName"></span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Unit Price</label>
+                                        @if (Model.ProductType == "F")
+                                        {
+                                            @Html.TextBoxFor(model => model.UnitPrice, new { id = "txtUnitPrice", type = "number", @onkeyup = "TotalAmountSumation()", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Unit Price", required = "Required" })
+
+                                        }
+                                        else
+                                        {
+                                            @Html.TextBoxFor(model => model.UnitPrice, new { id = "txtUnitPrice", type = "number", @onkeyup = "TotalAmountSumation()", @class = "form-control", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Unit Price", required = "Required" })
+
+                                        }
+
+                                        @Html.ValidationMessageFor(model => model.UnitPrice, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2" style="padding:0px 0px 8px 0px;">
+                                    <div class="form-group">
+                                        <label>Total Amount</label>
+                                        @Html.TextBoxFor(model => model.TotalAmount, new { id = "txtTotalAmount", type = "number", @readonly = "readonly", @class = "form-control", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Total Amount", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Base Commission</label>
+                                        @Html.TextBoxFor(model => model.BaseCommission, new { id = "txtBaseCommission", type = "number", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "BaseC ommission", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.BaseCommission, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Cash Commission</label>
+                                        @Html.TextBoxFor(model => model.CashCommission, new { id = "txtCashCommission", type = "number", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Cash Commission", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.CashCommission, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Carrying Commission</label>
+                                        @Html.TextBoxFor(model => model.CarryingCommission, new { id = "txtCarryingCommission", type = "number", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Carrying Commission", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.CarryingCommission, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Special Discount</label>
+                                        @Html.TextBoxFor(model => model.SpecialDiscount, new { id = "txtSpecialCommission", type = "number", @class = "form-control", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Special Discount", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.SpecialDiscount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Additional Price</label>
+                                        @Html.TextBoxFor(model => model.AdditionalPrice, new { id = "txtAdditionPrice", type = "number", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Additional Price", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.AdditionalPrice, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Monthly Incentive</label>
+                                        @Html.TextBoxFor(model => model.MonthlyIncentiveInInvoice, new { id = "txtMonthlyIncentive", type = "number", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Monthly Incentive", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.MonthlyIncentiveInInvoice, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="padding:0px">
+                                    <div class="form-group">
+                                        <label>Yearly Incentive</label>
+                                        @Html.TextBoxFor(model => model.YearlyIncentiveInInvoice, new { id = "txtYearlyIncentive", type = "number", @class = "form-control", @readonly = "readonly", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Yearly Incentive", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.YearlyIncentiveInInvoice, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+
+                        </div>
+                        @if (Model.Status == (int)EnumFeedSalesStatus.Draft)
+                        {
+                            <div class="box-footer">
+                                <div class="row">
+                                    <div class="col-md-8">
+
+                                    </div>
+
+                                    <div class="col-lg-4 col-md-4">
+                                        <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                            <i class='fa fa-plus'></i>
+                                            @if (Model.OrderMasterId > 0)
+                                            {
+                                                <span>Add Item In Invoice</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Create New Invoice</span>
+                                            }
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+
+                        <!--Body Will by Start Here-->
+                        @{
+                            if (Model.OrderMasterId > 0)
+                            {
+
+                                @Html.HiddenFor(model => model.ID, new { id = "hidSlaveID" })
+                                <div class="table-responsive col-md-12">
+                                    <table id="KgErpDataTable" class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding:5px;text-align:center;">SL</th>
+                                                <th style="padding:5px;text-align:left;">Product Name</th>
+
+                                                <th style="padding:5px;text-align:center;">Quantity</th>
+                                                <th style="padding:5px;text-align:center;">Unit Price</th>
+                                                <th style="padding:5px;text-align:center;">Gross Amount</th>
+                                                <th style="padding:5px;text-align:center;">Base Commission</th>
+                                                <th style="padding:5px;text-align:center;">Cash Commission</th>
+                                                <th style="padding:5px;text-align:center;">Carrying Commission</th>
+
+                                                <th style="padding:5px;text-align:center;">Special Discount</th>
+                                                <th style="padding:5px;text-align:center;">Monthly Incentive</th>
+                                                <th style="padding:5px;text-align:center;">Yearly Incentive</th>
+                                                <th style="padding:5px;text-align:right;">Net Amount</th>
+                                                @if (Model.Status == (int)EnumFeedSalesStatus.Draft)
+                                                {
+                                                    <th style="padding:5px;text-align:center;">Action</th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var item in Model.DataListSlave)
+                                            {
+                                                totalGrossAmount += item.Qty * (item.UnitPrice + Convert.ToDouble(item.AdditionalPrice));
+                                                totalBaseCommission += item.Qty * Convert.ToDouble(item.BaseCommission);
+                                                totalCashCommission += item.Qty * Convert.ToDouble(item.CashCommission);
+                                                totalCarryingCommission += item.Qty * Convert.ToDouble(item.CarryingCommission);
+                                                totalSpecialDiscount += item.Qty * Convert.ToDouble(item.SpecialDiscount);
+                                                totalMonthlyIncentiveInInvoice += item.Qty * Convert.ToDouble(item.MonthlyIncentiveInInvoice);
+                                                totalYearlyIncentiveInInvoice += item.Qty * Convert.ToDouble(item.YearlyIncentiveInInvoice);
+                                                netPayable += ((item.Qty * (item.UnitPrice + Convert.ToDouble(item.AdditionalPrice))) - (item.Qty * Convert.ToDouble(item.BaseCommission) + item.Qty * Convert.ToDouble(item.CashCommission) + item.Qty * Convert.ToDouble(item.CarryingCommission) + item.Qty * Convert.ToDouble(item.SpecialDiscount) + item.Qty * Convert.ToDouble(item.MonthlyIncentiveInInvoice) + item.Qty * Convert.ToDouble(item.YearlyIncentiveInInvoice)));
+
+                                                <tr>
+                                                    <td style="padding:5px">@(++sl)</td>
+                                                    <td style="padding:5px;text-align:left;">@item.ProductName </td>
+
+
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty) @item.UnitName</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.UnitPrice)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * (item.UnitPrice + Convert.ToDouble(item.AdditionalPrice)))</td>
+
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * Convert.ToDouble(item.BaseCommission)) (@item.BaseCommission)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * Convert.ToDouble(item.CashCommission)) (@item.CashCommission)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * Convert.ToDouble(item.CarryingCommission)) (@item.CarryingCommission)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * Convert.ToDouble(item.SpecialDiscount)) (@item.SpecialDiscount)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * Convert.ToDouble(item.MonthlyIncentiveInInvoice)) (@item.MonthlyIncentiveInInvoice)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Qty * Convert.ToDouble(item.YearlyIncentiveInInvoice)) (@item.YearlyIncentiveInInvoice)</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", ((item.Qty * (item.UnitPrice + Convert.ToDouble(item.AdditionalPrice))) - (item.Qty * Convert.ToDouble(item.BaseCommission) + item.Qty * Convert.ToDouble(item.CashCommission) + item.Qty * Convert.ToDouble(item.CarryingCommission) + item.Qty * Convert.ToDouble(item.SpecialDiscount) + item.Qty * Convert.ToDouble(item.MonthlyIncentiveInInvoice) + item.Qty * Convert.ToDouble(item.YearlyIncentiveInInvoice))))</td>
+
+
+
+                                                    @{ if (Model.Status == (int)EnumFeedSalesStatus.Draft)
+                                                        {
+                                                            <td style="padding:5px;text-align:center;">
+                                                                <a id="@item.ID" onclick=" makeEditble(@item.OrderDetailId);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                                <a id="@item.ID" onclick="makeDeletale(@item.OrderDetailId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                            </td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="7"></th>
+                                                <th colspan="3">Total Gross Amount</th>
+                                                <th colspan="2" style="text-align:right;">@totalGrossAmount</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Total Base Commission</th>
+                                                <th colspan="2" style="text-align:right;">@totalBaseCommission</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Total Cash Commission</th>
+                                                <th colspan="2" style="text-align:right;">@totalCashCommission</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Total Carrying Commission</th>
+                                                <th colspan="2" style="text-align:right;">@totalCarryingCommission</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Total Special Discount</th>
+                                                <th colspan="2" style="text-align:right;">@totalSpecialDiscount</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Total Monthly Incentive</th>
+                                                <th colspan="2" style="text-align:right;">@totalMonthlyIncentiveInInvoice</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Total Yearly Incentive</th>
+                                                <th colspan="2" style="text-align:right;">@totalYearlyIncentiveInInvoice</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="7"></th>
+
+                                                <th colspan="3">Net Payable</th>
+                                                <th colspan="2" style="text-align:right;">@netPayable</th>
+                                            </tr>
+
+
+
+
+                                        </tfoot>
+
+
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+}
+
+
+
+@using (Html.BeginForm("FeedDeleteSalesOrderSlave", "Procurement", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Sales Item</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.OrderDetailId, new { id = "hidDeleteOrderDetailId" })
+                    @Html.HiddenFor(model => model.OrderMasterId, new { id = "hidDeleteOrderMasterId" })
+
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyId" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Sales Item?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (Model.OrderMasterId > 0)
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("FeedCollection", "Collection", FormMethod.Post, new { id = "orderMasterByIDformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+                {
+                    <div class="box">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+
+                        @Html.HiddenFor(model => model.PaymentMasterId, new { id = "hidPaymentMasterId" })
+                        @Html.HiddenFor(model => model.PaymentFromHeadGLId, new { id = "hidPaymentFromHeadGLId" })
+                        @Html.HiddenFor(model => model.PaymentToHeadGLId, new { id = "hidPaymentToHeadGLId" })
+                        @Html.HiddenFor(model => model.PaymentId, new { id = "paymentId" })
+                        @Html.HiddenFor(model => model.BankName, new { id = "Bankname" })
+                        <div class="box-danger">
+                            <div class="box">
+                                <div class="box-body">
+                                    @if (Model.Status == (int)EnumFeedSalesStatus.Draft)
+                                    {
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>
+                                                        <input type="checkbox" id="chkIsShortCredit"> Is Short Credit
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" id="AdChk">
+                                                    <label>
+                                                        <input type="checkbox" id="chkIsAdvance"> Is Advance
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Collection Date</label>
+                                                    <input name="TransactionDate" asp-for="TransactionDate" type="text" required="required" class="datePicker form-control" id="txtPaymentDate" placeholder="Payment Date" autocomplete="off">
+                                                    @Html.ValidationMessageFor(model => model.TransactionDate, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4" id="typeDropdown">
+                                                <div class="form-group">
+                                                    <label>Type</label>
+                                                    @Html.DropDownListFor(model => model.Accounting_BankOrCashParantId, Model.BankOrCashParantList as SelectList, "==Select Type==", new { id = "ddlAccounting_BankOrCashParantId", @class = "form-control ddlReset", style = "width:100%" })
+                                                    @Html.ValidationMessageFor(model => model.Accounting_BankOrCashParantId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="form-group" id="typeDropdown1">
+                                                    <label>Bank/Cash</label>
+                                                    @Html.DropDownListFor(model => model.Accounting_BankOrCashId, Model.BankOrCashGLList as SelectList, new { id = "ddlAccounting_BankOrCashId", @class = "form-control searchingDropdown", style = "width:100%" })
+                                                    @Html.ValidationMessageFor(model => model.Accounting_BankOrCashId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @Html.HiddenFor(model => model.CustomerId, new { id = "paymentCustomerId" })
+                                        @Html.HiddenFor(model => model.CompanyId, new { id = "paymentCompanyId" })
+                                        @Html.HiddenFor(model => model.OrderMasterId, new { id = "paymentOrderMasterId" })
+                                        @Html.HiddenFor(model => model.ProductType, new { id = "paymentProductType" })
+                                        <div class="row">
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="txtPaidAmount" class="col-form-label">Collected Amount:</label>
+                                                    <input name="InAmount" asp-for="InAmount" type="text" class="form-control" id="txtPaidAmount" placeholder="Collected Amount">
+                                                    @Html.ValidationMessageFor(model => model.InAmount, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="txtDescription" class="col-form-label">Remarks</label>
+                                                    @Html.TextAreaFor(model => model.ReferenceNo, new { id = "txtReferenceNo", placeholder = "Reference No", @class = "form-control", Rows = 1 })
+                                                    @Html.ValidationMessageFor(model => model.ReferenceNo, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4" style="display:none;" id="rec">
+                                                <div class="form-group">
+                                                    <label for="txtDescription" class="col-form-label">Receive By:</label>
+                                                    @Html.TextAreaFor(model => model.ReceiveLocation, new { id = "txtrcv", placeholder = "Receive By", @class = "form-control", Rows = 1 })
+                                                    @Html.ValidationMessageFor(model => model.ReceiveLocation, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="box-footer">
+                                            <div class="row">
+                                                <div class="col-md-6"></div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <button type="submit" id="edddddd" class="btn btn-primary btn-block">
+                                                            <i class='fa fa-plus'></i>
+                                                            <span>Collection</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    }
+
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table id="KgErpDataTable" class="table table-striped rmp">
+                                                <thead>
+                                                    <tr>
+                                                        <th>SL</th>
+
+                                                        <th>
+                                                            Transaction  No
+                                                        </th>
+                                                        <th>
+                                                            Transaction  Date
+                                                        </th>
+
+                                                        <th>
+                                                            Bank Name
+                                                        </th>
+                                                        <th>
+                                                            Remarks
+                                                        </th>
+                                                        <th style="text-align:right;">
+                                                            Collected Amount
+                                                        </th>
+                                                        @if (Model.Status < (int)EnumFeedSalesStatus.Submit)
+                                                        {
+                                                            <th style="text-align:right;">
+                                                                Action
+                                                            </th>
+                                                        }
+
+                                                    </tr>
+                                                </thead>
+                                                @{int sl2 = 0;
+                                                    decimal paidTotal = 0;
+                                                }
+                                                <tbody>
+                                                    @foreach (var item in Model.DataListPayment)
+                                                    {
+                                                        paidTotal += item.InAmount;
+                                                        <tr>
+                                                            <td>@(++sl2)</td>
+
+                                                            <td>
+                                                                @item.MoneyReceiptNo
+                                                            </td>
+                                                            <td>
+                                                                @item.TransactionDate.ToString("dd/MMM/yy")
+                                                            </td>
+                                                            <td>
+                                                                @item.BankName
+                                                            </td>
+                                                            <td>
+                                                                @item.ReferenceNo
+                                                            </td>
+
+                                                            <td style="text-align:right;">
+                                                                @item.InAmount
+                                                            </td>
+                                                            @if (Model.Status < (int)EnumFeedSalesStatus.Submit)
+                                                            {
+                                                                <td style="text-align:right;">
+                                                                    <a onclick="editFunction(@item.PaymentId)">
+                                                                        <i class="fa fa-edit text-primary"></i>
+                                                                    </a>
+                                                                    <a onclick="deleteFunction(@item.PaymentId)">
+                                                                        <i class="fa fa-trash text-danger"></i>
+                                                                    </a>
+                                                                </td>
+                                                            }
+
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th colspan="4">
+                                                            Total Amount
+                                                        </th>
+
+                                                        <th style="text-align:right;">
+                                                            @paidTotal
+                                                        </th>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th colspan="4">
+                                                            Due
+                                                        </th>
+
+                                                        <th style="text-align:right;">
+                                                            @( Convert.ToDecimal(netPayable) - paidTotal )
+                                                        </th>
+
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="box-footer">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @if (Model.OrderMasterId > 0)
+                                            {
+
+                                            <a class="btn btn-primary" style="width: 100%" target="_blank" href="~/Report/SingleGeneralLedger?companyId=@Model.CompanyId&headGlId=@Model.HeadGLId"> Ledger - Current Balance: @Model.LedgerBalance</a>
+
+                                            }
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a class="btn btn-warning" style="width:100%" target="_blank" href="~/Report/GetFeedInvoiceReport?orderMasterId=@Model.OrderMasterId"><i class="fa fa-print"></i> Sales Invoice</a>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            @if (Model.Status < (int)EnumFeedSalesStatus.Submit)
+                                            {
+                                                if ((Convert.ToDecimal(netPayable) - paidTotal) <= 0)
+                                                {
+                                                    <a onclick="makeProdReferenceSubmitable(@Model.OrderMasterId);" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitPaymentMasterIdModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-success btn-block" style="width:100%" title="Due Amount Must be 0" data-placement="top">Submit</a>
+
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Submitted</button>
+
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="table-responsive">
+                                        <table id="" class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>SL</th>
+
+                                                    <th>
+                                                        EmployeeId
+                                                    </th>
+                                                    <th>
+                                                        Employee Name
+                                                    </th>
+
+                                                    <th>
+                                                        Approval Date
+                                                    </th>
+                                                    <th>
+                                                        Comments
+                                                    </th>
+                                                    <th>
+                                                        Status
+                                                    </th>
+                                                    <th>
+                                                        Action
+                                                    </th>
+
+                                                </tr>
+                                            </thead>
+                                            @{int sl3 = 0;
+
+                                            }
+                                            <tbody>
+                                                @if (Model.SignatoryApprovalList.Any())
+                                                {
+                                                    foreach (var item in Model.SignatoryApprovalList)
+                                                    {
+                                                        <tr>
+                                                            <td>@(++sl3)</td>
+                                                            <td>
+                                                                @item.EmployeeId
+                                                            </td>
+                                                            <td>
+                                                                @item.EmployeeName
+                                                            </td>
+                                                            <td>
+                                                                @if (item.ApprovalDate != null)
+                                                                {
+                                                                    @item.ApprovalDate.Value.ToString("dd/MMM/yy")
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                @item.Comments
+                                                            </td>
+                                                            <td>
+                                                                @if (item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending)
+                                                                {
+                                                                    <span class="btn btn-warning btn-xs"> @item.SignatoryStatus</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="btn btn-success btn-xs"> @item.SignatoryStatus</span>
+                                                                }
+
+
+                                                            </td>
+
+                                                            <td>
+                                                                @if (item.ApproverEmployeeIntId == Model.CurrentEmployeeIntId && item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending)
+                                                                {
+
+                                                                    <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approve" data-placement="top" class="btn btn-primary btn-xs"> <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></a>
+                                                                    <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Rejected));" data-toggle="modal" data-target="#actionModal" title="Reject" data-placement="top" class="btn btn-danger btn-xs">  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                                                }
+                                                                @*else if (item.ApproverEmployeeIntId == Model.CurrentEmployeeIntId && item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Rejected)
+                                                                    {
+                                                                        <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
+                                                                        <button class="btn btn-sm pr-1 text-danger">@item.SignatoryStatus</button>
+                                                                    }*@
+                                                                else
+                                                                {
+                                                                    <span>--</span>
+                                                                }
+
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @using (Html.BeginForm("FeedCollection", "Collection", FormMethod.Post, new { id = "orderMasterByIDFormId", @class = "formValidator" }))
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="modal fade" id="submitPaymentMasterIdModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                        &times;
+                                    </button>
+                                    <h5 class="modal-title"><b>Submit</b></h5>
+                                </div>
+                                <div class="modal-body">
+
+                                    @Html.HiddenFor(model => model.CompanyId, new { id = "submitCompanyFK" })
+                                    @Html.HiddenFor(model => model.ActionId, new { id = "submitActionId" })
+                                    @Html.HiddenFor(model => model.CustomerId, new { id = "submitCustomerId" })
+                                    @Html.HiddenFor(model => model.OrderMasterId, new { id = "submitOrderMasterId" })
+                                    @Html.HiddenFor(model => model.ProductType, new { id = "submitProductType" })
+
+
+                                    @Html.AntiForgeryToken()
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    <div style="text-align:center">
+                                        <h3>Are you sure to submit this?</h3>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <button type="submit" id="btnsave1" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+
+        </div>
+        <!-- Add this modal at the end of your HTML body -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="exampleModalLabel">Delete Payment</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="lead"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="refresh" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </section>
+}
+
+
+@using (Html.BeginForm("UpdateSignatoryStatusFromDetail", "FeedApprovalSystem", FormMethod.Post))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="actionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h3 class="modal-title"><b>Approval Signatory</b><span id="rqNumber"></span></h3>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.Hidden("Id")
+                    @Html.Hidden("UserCompanyId")
+                    @Html.Hidden("SignatoryStatus")
+                    <textarea id="Comment" name="Comment" placeholder="Write your valuable comment here" rows="3"></textarea>
+                    <div style="text-align:center">
+                        @*<h3>Are you sure to Reject this general requisition?</h3>*@
+                        <h3 id="modalTitle"></h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetActionModal()" class="btn btn-warning fa fa-close" data-dismiss="modal">NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnName" style="width:100%" class="btn btn-danger fa fa-remove"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+
+         function makeProdReferenceSubmitable(rowId) {
+            $('#submitActionId').val(10);
+        }
+
+        function makeDeletale(rowId) {
+            $('#hidDeleteOrderDetailId').val(rowId);
+            $('#deleteActionId').val(3);
+        }
+
+
+         function loadActionModal(companyId, id, statusEnum) {
+
+            $("#Id").val(id);
+            $("#SignatoryStatus").val(statusEnum);
+            $("#UserCompanyId").val(companyId);
+
+            $("#Comment").removeAttr("class");
+            $("#Comment").addClass("form-control");
+
+            if (statusEnum == @((int)KGERP.Utility.SignatoryStatusEnum.Rejected)) {
+                $("#modalTitle").text("Are you sure you want to reject this item ?");
+
+                $("#modalTitle").removeAttr("class");
+                $("#modalTitle").addClass("text-danger");
+                $("#btnName").removeAttr("class");
+                $("#btnName").addClass("btn btn-danger fa fa-remove");
+                $("#btnName").text(" Reject");
+            } else {
+                $("#modalTitle").text("Are you sure you want to approved this item ?");
+                $("#modalTitle").removeAttr("class");
+                $("#modalTitle").addClass("text-primary");
+                $("#btnName").removeAttr("class");
+                $("#btnName").addClass("btn btn-primary fa fa-check");
+                $("#btnName").text(" Approved");
+            }
+         }
+        function resetActionModal() {
+            $("#Id").val(0);
+            $("#SignatoryStatus").val('');
+            $("#UserCompanyId").val(0);
+        }
+
+
+
+        function resetProcurementPurchaseRequisitionSlaveForm() {
+            $('#procurementSalesOrderSlaveFormId')[0].reset();
+            $('#ActionId').val(1);
+        }
+
+
+        $(document).ready(function () {
+
+
+            $('#txtReferenceNo').val('Order No: ' + '@Model.SalesOrderNo' + ' Date: ' + '@Model.OrderDate.ToLongDateString()');
+            //$('.formValidator').bootstrapValidator();
+            //$('#tblStockAvailable').hide();
+            $('#datePickerById').datepicker({
+                format: "yyyy-mm-dd",
+                todayHighlight: true,
+                autoclose: true,
+                clearBtn: true
+            }).on('changeDate', function (ev) {
+                if ($(this).parents('form') && $(this).attr('required')) {
+                    $(this).parents('form').bootstrapValidator('revalidateField', $(this));
+                }
+
+            });
+
+
+
+
+
+
+
+
+
+
+
+         $("#ddlAccounting_BankOrCashParantId").change(function () {
+                var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+
+
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("FeedHeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                         data: { companyId: "@Model.CompanyId", parentId: bankOrCashParantId},
+                    success: function (data) {
+                        console.log(data);
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                                $(data).each(function (index, item) {
+
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+
+                            });
+
+
+                        }
+                    }
+                });
+
+
+        })
+
+
+            $("#ddlStockInfoId").change(function () {
+                var stockInfoId = $("#ddlStockInfoId option:selected").val();
+                var productType = '@Model.ProductType';
+
+                $.ajax({
+                    url: '/OrderMaster/GetNewOrderNo?stockInfoId=' + stockInfoId + "&productType=" + productType+"",
+                    type: "Post",
+                    async: true,
+                    processData: false,
+                    cache: false,
+                    success: function (response) {
+                        $('#txtOrderNo').val(response);
+                    },
+                    error: function (xhr) {
+                        //alert('error');
+                    }
+                });
+            });
+
+            $(function () {
+                $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        data: '{"prefix":"' + request.term + '", "productType":"@Model.ProductType"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#ddlFProductId").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadProductPrice(ui.item.val);
+
+                }
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+            function loadProductPrice(productId) {
+                var stockInfoId = $("#ddlStockInfoId").val();
+                var vendorId = $("#ddlCustomerId").val();
+                var haveShortCredit = $('#checkHaveShortCredit').prop('checked');
+
+            $.ajax({
+                type: "GET",
+                url: "/OrderMaster/GetProductConfig",
+                data: { 'productId': productId, 'vendorId': vendorId, 'stockInfoId': stockInfoId},
+                success: function (data) {
+                    $('#txtUnitPrice').val(data.UnitPrice);
+                    if (haveShortCredit) {
+                        $('#txtBaseCommission').val(0);
+                    } else {
+                        $('#txtBaseCommission').val(data.BaseCommission);
+                    }
+                   
+                    $('#txtCarryingCommission').val(data.CarryingCommission);
+                    $('#txtCashCommission').val(data.CashCommission);
+                    $('#txtSpecialCommission').val(data.SpecialCommission);
+                    $('#txtAdditionPrice').val(data.AdditionPrice);
+                    $('#txtMonthlyIncentive').val(data.MonthlyIncentive);
+                    $('#txtYearlyIncentive').val(data.YearlyIncentive);
+
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+            $('#checkHaveShortCredit').change(function () {
+                var productId = $("#ddlFProductId").val();
+
+                loadProductPrice(productId)
+            })
+
+
+
+            $("#ddlSupplierPaymentMethodEnumFK").change(function () {
+                var productId = $("#ddlRProductFK").val();
+
+                $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("ProductStockByProduct", "Procurement")",
+                        datatype: "Json",
+                    data: { companyId: "@Model.CompanyFK", productId: productId },
+                        success: function (data) {
+                            var items = "";
+                            if (data) {
+                               // $('#tblStockAvailable').show();
+                                $('.txtUnitName').text(data.UnitName);
+                                //$('#stockAvailable').text(data.CurrentStock + ' ' + data.UnitName);
+                                var customerTypeFK = $("#ddlSupplierPaymentMethodEnumFK").val();
+                                if (customerTypeFK == "@((int)VendorsPaymentMethodEnum.Cash)") {
+
+                                }
+                                if (customerTypeFK == "@((int)VendorsPaymentMethodEnum.Credit)") {
+                                    $("#txtUnitPrice").val(data.CreditSalePrice);
+                                }
+                            }
+                        }
+                    });
+            })
+
+            $("#txtCustomerName").autocomplete({
+                source: function (request, response) {
+                       $.ajax({
+                       url:"@Url.Action("AutoCompleteCustomer", "Vendor")",
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                           data: { prefix: request.term, companyId: "@Model.CompanyId" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+
+
+                },
+                select: function (e, i) {
+
+                    $("#ddlCustomerId").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+
+            $("#TermsAndConditionid").change(function () {
+                                                            var termsAndConditionid = $('#TermsAndConditionid').val();
+                $.ajax({
+                                                            type: "GET",
+                    url: "@Url.Action("GetTermNCondition", "Procurement")",
+                    datatype: "Json",
+                    data: { id: termsAndConditionid },
+                    success: function (data) {
+                        $('#txtTermsAndCondition').empty();
+                        $('#txtTermsAndCondition').append(data.description);
+
+                                                                }
+                                                            });
+                                                        });
+
+
+
+            $("#ddlSupplierPaymentMethodEnumFK").change(function () {
+                var paymethod = $("#ddlSupplierPaymentMethodEnumFK").val();
+                if (paymethod === "@((int)VendorsPaymentMethodEnum.LC)") {
+                    $("#piReletedDivId").show();
+                }
+                else {
+                    $("#piReletedDivId").hide();
+                }
+
+            })
+
+
+        });
+        function TotalAmountSumation() {
+            var purchaseQuantity = $("#txtSalesOrderQuantity").val();
+            var unitPrice = $("#txtUnitPrice").val();
+
+            $("#txtTotalAmount").val(Number(purchaseQuantity) * Number(unitPrice));
+
+        }
+
+
+        function loadCustomerInformation(customerId) {
+            $.ajax({
+                url: '/Procurement/FeedCustomerDetailsById?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+
+
+                    $('#txtCashCommissionCattle').val(data.CashCommissionCattle);
+                    var newUrl = "/Report/FeedCustomerInfoReport?companyId=@Model.CompanyId&vendorId=" + customerId ;
+
+                    $("#linkCustomerAgeingId").attr("href", newUrl);
+                    $("#linkCustomerAgeingId").text("See " + data.Name + " Registration Form");
+
+                    var commissionUrl = "/VendorOffer/Index?vendorId=" + customerId + "&productType=" + "@Model.ProductType";
+                    $("#linkCustomerCommission").attr("href", commissionUrl);
+                    $("#linkCustomerCommission").text("Set Commission (if need)");
+
+                    $('#ddlSalePersonId').val(data.SalesOfficerEmpId);
+                    $('#txtSalePersonName').val(data.EmployeeName);
+
+
+
+
+
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+
+        }
+            function makeEditble(rowId) {
+                //console.log(rowId);
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("SingleOrderDetails", "Procurement")",
+                  datatype: "Json",
+                  data: { id: rowId },
+                  success: function (data) {
+                      //console.log(data);
+                      $('#poCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidOrderMasterId").val(data.OrderMasterId);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val(data.CompanyFK);
+                      $("#txtProductName").val(data.ProductCategoryName +" "+ data.ProductSubCategoryName + " "+ data.ProductName);
+                      $("#ddlRProductFK").val(data.FProductId);
+                      $("#txtSalesOrderQuantity").val(data.Qty);
+                      var totall = parseFloat(data.Qty) * parseFloat(data.UnitPrice);
+                      $("#txtTotalAmount").val(totall);
+                      $('#txtUnitPrice').val(data.UnitPrice);
+                      $('#txtSpecialCommission').val(data.SpecialDiscount);
+                      $('#txtBaseCommission').val(data.BaseCommission);
+                      $('#txtCarryingCommission').val(data.CarryingCommission);
+                      $('#txtCashCommission').val(data.CashCommission);
+                      $('#ddlFProductId').val(data.FProductId);
+                      $("#hidOrderDetailId").val(data.OrderDetailId)
+                      $('.txtUnitName').text(data.UnitName);
+
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                  }
+                 });
+            }
+
+        function makeSubmitble(rowId) {
+
+            $('#hidsubmitOrderMasterId').val(rowId);
+        }
+
+        function editFunction(paymentId) {
+            $("#ddlAccounting_BankOrCashParantId").val('');
+            $("#ddlAccounting_BankOrCashId").empty('');
+            $('#chkIsShortCredit').prop('checked', false).change();
+            $('#chkIsAdvance').prop('checked', false).change();
+
+            $.ajax({
+                url: '/Collection/GetPaymentDataEditFeed?PaymentId=' + paymentId + '&companyId=' + @Model.CompanyId,
+                type: "Get",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (response) {
+                    console.log("testt",response);
+
+                    if (response.BankId == null && response.BranchName == "Short Credit") {
+
+                        $('#chkIsShortCredit').prop('checked', true).change();
+                        $("#ddlAccounting_BankOrCashId").empty('');
+                    }
+                    if (response.BankId != null && response.BranchName == "Advance") {
+
+                        $('#chkIsAdvance').prop('checked', true).change();
+                      /*  $("#ddlAccounting_BankOrCashId").empty('');*/
+                    }
+                    if (Array.isArray(response) && response.length > 0 && response[0].head5) {
+                        var targetId = response[0].head5.Id;
+                        console.log("ani", targetId);
+                        $("#ddlAccounting_BankOrCashParantId option[value='" + targetId + "']").prop("selected", true);
+                        $("#ddlAccounting_BankOrCashParantId").trigger("change");
+                    } else if (response.head5) {
+                        var targetId = response.head5.Id;
+                        $("#ddlAccounting_BankOrCashParantId option[value='" + targetId + "']").prop("selected", true);
+                        $("#ddlAccounting_BankOrCashParantId").trigger("change");
+
+
+                 $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("FeedHeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                     data: { companyId: "@Model.CompanyId", parentId: targetId },
+                    success: function (data) {
+                        console.log(data);
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                                $(data).each(function (index, item) {
+
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+
+                            });
+
+
+                                $("#ddlAccounting_BankOrCashId option[value='" + response.BankId + "']").prop("selected", true);
+                        }
+                    }
+                });
+
+                    }
+                    var TransactionDate = DateCustom(response.TransactionDate);
+                    $("#txtPaymentDate").val(TransactionDate);
+                    $("#txtPaidAmount").val(response.InAmount);
+                    $("#txtReferenceNo").val(response.ReferenceNo);
+                    $("#paymentId").val(response.PaymentId);
+                    $("#ddlAccounting_BankOrCashId").val(response.BankId);
+                    $("#txtrcv").val(response.ReceiveLocation);
+
+                },
+
+
+
+                error: function (xhr) {
+
+                }
+            });
+
+
+            var poCreateBtn = document.getElementById('edddddd');
+
+            if (poCreateBtn && poCreateBtn.innerHTML.includes('Collection')) {
+                poCreateBtn.innerHTML = '<i class="fa fa-edit"></i><span>Update</span>';
+            } else if (poCreateBtn) {
+                poCreateBtn.innerHTML = '<i class="fa fa-plus"></i><span>Collection</span>';
+            }
+
+        }
+
+function deleteFunction(paymentId) {
+    var isConfirmed = confirm('Are you sure you want to delete?');
+
+    if (isConfirmed) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("DeletePayment", "Collection")",
+            datatype: "Json",
+            data: { paymentId: paymentId },
+            success: function (data) {
+                var message = data === true ? 'Payment is successfully deleted.' : 'Payment failed to delete.';
+                showModal(message);
+            },
+            error: function (xhr) {
+                showModal('Error occurred while trying to delete payment.');
+            }
+        });
+    }
+}
+$('#chkIsShortCredit').change(function () {
+            if ($(this).is(':checked') ) {
+                $("#ddlAccounting_BankOrCashId").val('');
+            }
+
+});
+
+
+function showModal(message) {
+    $('#myModal').find('.modal-body p').text(message);
+    $('#myModal').modal('show');
+
+    // Attach the reload on close button click
+    $('#myModal').on('hidden.bs.modal', function () {
+        location.reload(true);
+    });
+}
+        $('#chkIsShortCredit').change(function () {
+            if ($(this).is(':checked')) {
+                $('#chkIsAdvance').prop('checked', false);
+                $('#Bankname').val('Short Credit');
+            }
+            updateDropdownVisibility();
+        });
+
+        $('#chkIsAdvance').change(function () {
+            var Recvby = $('#rec');
+            if ($(this).is(':checked')) {
+                $('#chkIsShortCredit').prop('checked', false);
+                Recvby.show();
+                $('#Bankname').val('Advance');
+            } else {
+                $('#Bankname').val('');
+                Recvby.hide();
+            }
+
+        });
+
+
+        function updateDropdownVisibility() {
+            var dropdownDiv = $('#typeDropdown'); // Assuming the dropdown is in a div with id 'typeDropdown'
+          var dropdownDiv1 = $('#typeDropdown1'); // Assuming the dropdown is in a div with id 'typeDropdown'
+            var adchkk1 = $('#AdChk'); // Assuming the dropdown is in a div with id 'typeDropdown'
+
+            if ($('#chkIsShortCredit').is(':checked') ) {
+                dropdownDiv.hide();
+                dropdownDiv1.hide();
+                adchkk1.hide();
+            } else {
+                dropdownDiv.show();
+                dropdownDiv1.show();
+                adchkk1.show();
+            }
+        }
+
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+
+        $('#btnsave1').click(function () {
+            $(this).attr('disabled', 'disabled');
+            $(this).val('Processing...');
+            $('#orderMasterByIDFormId').submit();
+
+
+        });
+
+
+
+
+
+    </script>
+}

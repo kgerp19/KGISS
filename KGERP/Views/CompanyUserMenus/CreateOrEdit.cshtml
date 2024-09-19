@@ -1,0 +1,123 @@
+﻿@model KGERP.ViewModel.CompanyUserMenuViewModel
+@{
+    ViewBag.Title = "Create";
+}
+
+
+@using (Html.BeginForm("CreateOrEdit", "CompanyUserMenus", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <span style="font-size:25px">Company User Menu</span>
+        <hr style="border-color:#32527B; padding:0px;margin-top: 10px;margin-bottom: 10px; border-width: 2px;" />
+    </div>
+
+    <div class="form-horizontal">
+        <div class="row">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.CompanyUserMenu.CompanyUserMenuId)
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CompanyUserMenu.CompanyId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanyId, new SelectList(Model.Companies, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlCompany" })
+                        @Html.ValidationMessageFor(model => model.CompanyUserMenu.CompanyId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CompanyUserMenu.CompanyMenuId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanyMenuId, new SelectList(Model.CompanyMenus, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlCompanyMenu" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CompanyUserMenu.CompanySubMenuId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanySubMenuId, new SelectList(Model.CompanySubMenus, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlCompanySubMenu" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CompanyUserMenu.UserId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.CompanyUserMenu.UserId, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.CompanyUserMenu.UserId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CompanyUserMenu.IsActive, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.CompanyUserMenu.IsActive)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <input type="submit" value="@Model.CompanyUserMenu.ButtonName" id="apply" class="btn btn-primary pull-right" />
+                    <a href="@Url.Action("Index")" class="btn btn-danger pull-right" style="margin-right:8px">
+                        Close <i class="fa fa-close" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $('#ddlCompany').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/CompanyMenus/GetCompanyMenuSelectModelsByCompany",
+                data: { companyId: $('#ddlCompany').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var companyMenu = "<select>";
+                    companyMenu = companyMenu + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        companyMenu = companyMenu + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    companyMenu = companyMenu + '</select>';
+                    $('#ddlCompanyMenu').html(companyMenu);
+                }
+            });
+        });
+
+        $('#ddlCompanyMenu').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/CompanySubMenus/GetCompanySubMenuSelectModelsByCompanyMenu",
+                data: { menuId: $('#ddlCompanyMenu').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var companySubMenu = "<select>";
+                    companySubMenu = companySubMenu + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        companySubMenu = companySubMenu + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    companySubMenu = companySubMenu + '</select>';
+                    $('#ddlCompanySubMenu').html(companySubMenu);
+                }
+            });
+        });
+    </script>
+
+}

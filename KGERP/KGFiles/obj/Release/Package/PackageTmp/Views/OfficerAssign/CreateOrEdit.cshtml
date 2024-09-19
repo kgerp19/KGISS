@@ -1,0 +1,131 @@
+﻿@model KGERP.ViewModel.OfficerAssignViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.OfficerAssign.OfficerAssignId)
+    @Html.HiddenFor(x => x.OfficerAssign.CompanyId)
+
+<div class="form-horizontal">
+    <h4>Marketing Officer Assign</h4>
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.OfficerAssign.ZoneId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.OfficerAssign.ZoneId, new SelectList(Model.Zones, "Value", "Text"), "--Select--", htmlAttributes: new { @class = "dropdownsize form-control", @id = "ddlDistrict", @onchange = "getUpazilaCode()" })
+            @Html.ValidationMessageFor(model => model.OfficerAssign.ZoneId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.OfficerAssign.EmpId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.OfficerAssign.OfficerName, new { htmlAttributes = new { @class = "form-control", @name = "employee", @id = "employee" } })
+            @Html.HiddenFor(x => x.OfficerAssign.EmpId, new { @id = "employeeId", @name = "employeeId" })
+        </div>
+    </div>
+
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.OfficerAssign.StartDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-8">
+            @Html.EditorFor(model => model.OfficerAssign.StartDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:240px", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.OfficerAssign.StartDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.OfficerAssign.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-8">
+            @Html.EditorFor(model => model.OfficerAssign.EndDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:240px", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.OfficerAssign.EndDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.OfficerAssign.Remarks, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-8">
+            @Html.TextAreaFor(model => model.OfficerAssign.Remarks, 2, 51, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.OfficerAssign.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <div class="checkbox">
+                @Html.EditorFor(model => model.OfficerAssign.IsActive)
+                @Html.ValidationMessageFor(model => model.OfficerAssign.IsActive, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-offset-3 col-md-3">
+        <div class="form-group">
+            <a href="@Url.Action("Index",new {companyId=Model.OfficerAssign.CompanyId })" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove-circle"></span>   Close
+            </a>
+            <button type="submit" class="btn btn-primary" onclick="javascript: return SubmitForm();" style="margin-left: 20px;"><span class="glyphicon glyphicon-floppy-disk"></span>Submit</button>
+        </div>
+    </div>
+</div>
+}
+
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        function SubmitForm() {
+
+            var r = confirm("Are you sure you want to submit?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        $(function () {
+            $("#employee").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#employeeId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+    </script>
+
+}

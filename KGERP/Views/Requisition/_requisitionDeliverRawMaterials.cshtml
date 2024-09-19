@@ -1,0 +1,213 @@
+﻿@model List<KGERP.Service.ServiceModel.RequisitionItemDetailModel>
+<input type="hidden" id="hfFormulaMessage" value="@ViewBag.FormulaMessage" />
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("CommonSupplier", "Configuration", FormMethod.Post, new { id = "commonSupplierformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+
+
+                        <div class="box">
+                            <div class="box-danger">
+                                <div class="box-header">
+
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body">
+                                    <div class="table-responsive text-nowrap">
+                                        <table class="table table-bordered">
+                                            <tr style="background-color:#4CAF50;color:#FFFFFF">
+                                                <td colspan="7"><b>Raw Marterials Details</b></td>
+                                            </tr>
+                                            <tr style="background-color:lightblue;color:#000000">
+                                                <th>SL</th>
+                                                <th>Raw Material</th>
+                                                <th>Quantity</th>
+                                                <th>Process Loss (%)</th>
+                                                <th>Extra Qty</th>
+                                                <th>Total Qty (Quantity + Extra Qty)</th>
+                                                <th>Available Qty</th>
+                                            </tr>
+
+                                            @if (Model.Any())
+                                            {
+                                                foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+                                                {
+                                                    <tr class="mycontainer" id="mainrow" style='background-color :@(item.Data.BalanceQty<=0 ?"red":"white")'>
+                                                        <td>
+                                                            @(item.Index + 1)
+                                                        </td>
+
+                                                        <td>
+                                                            @item.Data.RProductName
+                                                        </td>
+
+                                                        <td>
+                                                            @item.Data.RQty
+                                                        </td>
+                                                        <td>
+                                                            @if (item.Data.BalanceQty <= 0)
+                                                            {
+                                                                @(item.Data.RProcessLoss.ToString() + "%")
+                                                            }
+                                                            else
+                                                            {
+                                                                <span style='background-color :@(item.Data.RProcessLoss>0 ?"#ADD8E6":"#FFFFFF")'> @(item.Data.RProcessLoss.ToString() + "%")</span>
+                                                            }
+
+                                                        </td>
+
+
+                                                        <td>
+
+                                                            @if (item.Data.BalanceQty <= 0)
+                                                            {
+                                                                @item.Data.RExtraQty
+                                                            }
+                                                            else
+                                                            {
+                                                                <span style='background-color :@(item.Data.RExtraQty>0 ?"orange":"#FFFFFF")'> @item.Data.RExtraQty</span>
+                                                            }
+
+                                                        </td>
+
+                                                        <td>
+                                                            @item.Data.RTotalQty
+
+                                                        </td>
+
+                                                        <td>
+                                                            @item.Data.BalanceQty
+
+                                                        </td>
+
+                                                    </tr>
+                                                }
+                                                <tr style="background-color:lightblue;color:#000000">
+                                                    <td colspan="2" class="text-center">
+                                                        <b>Total Quantity</b>
+                                                    </td>
+                                                    <td>
+                                                        <b>@(Model.Sum(x => x.RQty).ToString() + " Kg")</b>
+                                                    </td>
+                                                    <td>
+                                                        <b>@(Model.Sum(x => x.RProcessLoss).ToString() + " %")</b>
+                                                    </td>
+
+                                                    <td>
+                                                        <b>@(Model.Sum(x => x.RExtraQty).ToString() + " Kg")</b>
+                                                    </td>
+                                                    <td>
+                                                        <b>@(Model.Sum(x => x.RTotalQty).ToString() + " Kg")</b>
+                                                    </td>
+                                                    <td>
+                                                        <b>@(Model.Sum(x => x.BalanceQty).ToString() + " Kg")</b>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="7" class="text-center">
+                                                        <b style="color:red;font-size:15px">Product Formula is not set up yet. Please Setup Product Formula First !</b>
+                                                    </td>
+                                                </tr>
+                                            }
+
+
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <div class="box-footer">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="col-md-6">
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="col-md-5">
+                                                    <a href="@Url.Action("RequisitionDeliverIndex",new { companyId=Session["CompanyId"]})" class="btn btn-danger btn-block">
+                                                        Cancel
+                                                    </a>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    @if (ViewBag.Count > 0)
+                                                    {
+                                                        <input id="submit" type="submit" value="Deliver" class="btn btn-success" style="padding:5px 10px" disabled title="Stock Unavailable" />
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <button type="button" id="btnProductionSubmit" data-toggle="modal" style="width:100%"
+                                                                data-target="#submitProdReferenceModal" data-placement="top"
+                                                                class="btn btn-primary btn-block">
+                                                            <i class='fa fa-plus'></i>
+                                                            <span>Deliver</span>
+                                                        </button>
+
+                                                        @*<input id="submit" type="submit" value="Deliver" class="btn btn-success" onclick="javascript: return SubmitForm();" style="padding:5px 10px" />*@
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+
+
+
+
+
+<div class="modal fade" id="submitProdReferenceModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b>Submit</b></h5>
+            </div>
+            <div class="modal-body">
+
+                <div style="text-align:center">
+                    <h3>Are you sure to Submit this Requisition?</h3>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                </div>
+                <div class="col-md-9">
+                    <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

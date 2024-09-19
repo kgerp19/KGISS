@@ -1,0 +1,373 @@
+﻿@model KGERP.ViewModel.EmiViewModel
+@{
+    ViewBag.Title = "EMI Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: #dd4b39;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("CreateOrEdit", "EMI", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.EMI.CompanyId    )
+    @Html.HiddenFor(x => x.EMI.EmiId)
+    <div class="row">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <span style="font-size:15px;font-family:Arial;font-weight:bold">EMI Information</span>
+            </div>
+            <div class="panel-body" style="padding-left:0px;padding-right:0px">
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.EMINo, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.EMINo, new { htmlAttributes = new { @class = "control-label" } })
+                </div>
+
+
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.VendorId, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.HiddenFor(x => x.EMI.VendorId, htmlAttributes: new { @id = "hfVendor" })
+                    @*<input type="hidden" id="hfVendor" name="VendorId" />*@
+                    @Html.EditorFor(model => model.EMI.Vendor.Name, new { htmlAttributes = new { @class = "control-label", @name = "VendorName", @id = "txtVendor" } })
+                </div>
+                <div class="col-md-3">
+                    <label for="CompanyName" class="control-label">Company Name</label>  
+                    <br />
+                    @Html.EditorFor(model => model.EMI.Vendor.Name, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "CompanyName" } })
+
+                </div>
+                <div class="col-md-3">
+                    <label for="Address" class="control-label">Address</label>
+                    <br />
+                    @Html.EditorFor(model => model.EMI.Vendor.Address, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "Address" } })
+                    
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.OrderId, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.DropDownListFor(model => model.EMI.OrderId, new SelectList(Model.OrderInvoice, "Value", "Text"), "------Select------", new { @class = " control-label", @id = "orderInvoiceNo" })
+                    @Html.ValidationMessageFor(model => model.EMI.OrderId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.SaleValue, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.SaleValue, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "salesValue" } })
+                    @Html.ValidationMessageFor(model => model.EMI.SaleValue, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.Dp, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.Dp, new { htmlAttributes = new { @class = "control-label", @autocomplete = "off", @id = "dpRate" } })
+                    @Html.ValidationMessageFor(model => model.EMI.Dp, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.DpValue, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.DpValue, new { htmlAttributes = new { @class = "control-label", @id = "dpValue" } })
+                    @Html.ValidationMessageFor(model => model.EMI.DpValue, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.OutStandingPrinciple, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.OutStandingPrinciple, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "outStandingPrinciple" } })
+                    @Html.ValidationMessageFor(model => model.EMI.OutStandingPrinciple, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.NoOfInstallment, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.NoOfInstallment, new { htmlAttributes = new { @class = "control-label", @autocomplete = "off", @id = "noOfInstallment" } })
+                    @Html.ValidationMessageFor(model => model.EMI.NoOfInstallment, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.FlatRatePerYear, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.FlatRatePerYear, new { htmlAttributes = new { @class = "control-label", @autocomplete = "off", @id = "flatRate" } })
+                    @Html.ValidationMessageFor(model => model.EMI.FlatRatePerYear, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.BankCharge, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.BankCharge, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "bankCharge" } })
+                    @Html.ValidationMessageFor(model => model.EMI.BankCharge, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.NetOutStanding, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.NetOutStanding, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "netOutStandingPrinciple" } })
+                    @Html.ValidationMessageFor(model => model.EMI.NetOutStanding, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.InstallmentAmount, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.EMI.InstallmentAmount, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "installmentAmount" } })
+                    @Html.ValidationMessageFor(model => model.EMI.InstallmentAmount, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.EMI.InstallmentStartDate, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                        @Html.EditorFor(model => model.EMI.InstallmentStartDate, new { htmlAttributes = new { @class = "datepicker", @id = "installmentStartDate" } })
+                        @*@Html.EditorFor(model => model.EMI.InstallmentStartDate, new { htmlAttributes = new { @class = "control-label", @autocomplete = "off",  @type = "Datetime", @id = "installmentStartDate" } })*@
+                        @Html.ValidationMessageFor(model => model.EMI.InstallmentStartDate, "", new { @class = "text-danger" })
+                    </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row" id="emiDetail">
+
+    </div>
+
+}
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Order/OrderGenerate.js"></script>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "dd/mm/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+
+        $(function () {
+            $("#installmentStartDate").datepicker();
+        });
+
+        $(function () {
+            $("#txtVendor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/AutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                    loadOrderInvoice(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function loadCustomerInformation(customerId) {
+
+            $.ajax({
+                url: '/Vendor/GetCustomerInformation?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#CompanyName').val(result.Name);
+                    $('#Address').val(result.Address);
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+
+        }
+
+        function loadOrderInvoice(customerId) {
+
+            $.ajax({
+                url: '/EMI/GetOrderinvoiceByCustomer?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var OrderInvoice = "<select>";
+                    OrderInvoice = OrderInvoice + '<option value="">------Select------</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        OrderInvoice = OrderInvoice + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    OrderInvoice = OrderInvoice + '</select>';
+                    $('#orderInvoiceNo').html(OrderInvoice);
+                },
+                error: function (xhr) {
+
+                }
+            });
+
+        }
+
+        function flatRate() {
+            var noOfInstallment = $('#noOfInstallment').val();
+            var outStandingPrinciple = $("#outStandingPrinciple").val();
+            var flatRate = $("#flatRate").val();
+            var bankCharge = parseInt((((outStandingPrinciple * flatRate) / 100) / 12) * noOfInstallment);
+            var netOutStandingPrinciple = parseInt(bankCharge) + parseInt(outStandingPrinciple);
+            var installmentAmount = parseInt(netOutStandingPrinciple / noOfInstallment);
+            $("#bankCharge").val(bankCharge);
+            $("#netOutStandingPrinciple").val(netOutStandingPrinciple);
+            $("#installmentAmount").val(installmentAmount);
+        }
+
+        function installmentAmountWithoutInterest() {
+            var noOfInstallment = $('#noOfInstallment').val();
+            var outStandingPrinciple = $("#outStandingPrinciple").val();
+           
+            var installmentAmount = parseInt(outStandingPrinciple / noOfInstallment);
+            $("#flatRate").prop("disabled", true);
+            $("#bankCharge").prop("disabled", true);
+            $("#netOutStandingPrinciple").prop("disabled", true);
+            $("#installmentAmount").val(installmentAmount);
+        }
+
+
+        $("#orderInvoiceNo").change(function () {
+            var orderId = $("#orderInvoiceNo").val();
+            $.ajax({
+                url: '/EMI/GetSalesValue?orderId=' + orderId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#salesValue').val(result);
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+        })
+
+        $("#dpRate").keyup(function () {
+            var salesValue = $('#salesValue').val();
+            var dpRate = $(this).val();
+            var dpValue = (salesValue * dpRate) / 100;
+            var outStandingPrinciple = parseInt(salesValue - dpValue);
+            $("#dpValue").val(dpValue);
+            $("#outStandingPrinciple").val(outStandingPrinciple);
+            flatRate();
+        })
+
+
+        $("#dpValue").keyup(function () {
+            var salesValue = $('#salesValue').val();
+            var dpValue = $(this).val(); 
+            var dprate = ((dpValue * 100) / salesValue).toFixed(2);
+            var outStandingPrinciple = parseInt(salesValue - dpValue);
+            $("#dpRate").val(dprate);
+            $("#outStandingPrinciple").val(outStandingPrinciple);
+            flatRate();
+        })
+
+        $("#flatRate").keyup(function () {
+            flatRate();
+        })
+        $("#noOfInstallment").keyup(function () {
+            var no = $(this).val();
+            if (parseInt(no) <= 10) {
+                installmentAmountWithoutInterest();
+            }
+            else {
+                $("#flatRate").prop("disabled", false);
+                $("#bankCharge").prop("disabled", false);
+                $("#netOutStandingPrinciple").prop("disabled", true);
+                flatRate();
+            }
+            
+        })
+
+        //$("#installmentStartDate").change(function () {
+        //    var installmentDate = new Date();
+        //    //installmentDate = $(this).val();
+        //    var noOfInstallment = $('#noOfInstallment').val();
+        //    var installmentAmount = $("#installmentAmount").val();
+        //    for (i = 0; i < noOfInstallment; i++) {
+
+        //        installmentDate.setMonth(i);
+        //        //var html = "<tr><td>" + parseInt(i) + parseInt(1) + "</td><td>" + installmentDate + "</td><td>" + installmentAmount + "</td></tr>";
+        //        var html = "<tr><td>" + parseInt(i + 1) + "</td><td><input type='hidden'  name='EmiDetail[" + i + "].InstallmentDate' value='" + installmentDate + "' />" + installmentDate + "</td><td><input type='hidden'  name='EmiDetail[" + i + "].InstallmentAmount' value='" + installmentAmount + "' />" + installmentAmount + "</td></tr>";
+        //        $("#installmentDetail").append(html);
+        //    }
+        //})
+
+
+        $("#installmentStartDate").change(function () {
+
+            var installmentDate = $(this).val();
+            var noOfInstallment = $('#noOfInstallment').val();
+            var installmentAmount = parseInt($("#installmentAmount").val());
+            $.ajax({
+                url: '/EMI/GetEmiDetails?installmentDate=' + installmentDate + '&noOfInstallment=' + noOfInstallment + '&installmentAmount=' + installmentAmount + "",
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    $('#emiDetail').html(data);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+        })
+
+    </script>
+}
+

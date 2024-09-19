@@ -1,0 +1,153 @@
+﻿@model KGERP.Service.ServiceModel.RequisitionModel
+
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Requisition Issue Pending List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>Requisition Issue Pending List</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a class="btn btn-info" href="~/Requisition/CreateOrEdit?companyId=@Model.CompanyId&requisitionId=0"><i class="fa fa-plus"></i> New Requisition</a>
+        </li>
+        <li>
+            <a class="btn btn-warning" href="~/Requisition/RequisitionDeliverIndex?companyId=@Model.CompanyId&requisitionId=0"><i class="fa fa-plus"></i>Requisition Deliver Panding</a>
+
+            
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("RequisitionIssueIndex", "Requisition", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+
+
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Requisition No</th>
+                                        <th>Requisition Date</th>
+                                        <th>Requested By</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Is Submit</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                    <tr>
+                                        <td>@(++sl)</td>
+                                        <td id="tdUnitName_@item.RequisitionNo">@item.RequisitionNo</td>
+                                        <td id="tdUnitName_@item.RequisitionNo">@item.RequisitionDate.Value.ToShortDateString()</td>
+                                        <td id="tdUnitName_@item.RequisitionNo">@item.RequisitionBy</td>
+                                        <td id="tdUnitName_@item.RequisitionNo">@item.Description</td>
+                                        <td>
+                                            @if (item.RequisitionStatus == "N")
+                                            {
+                                            <span class="label label-info">Draft</span>
+
+                                            }
+                                            else if (item.RequisitionStatus == "D")
+                                            {
+                                            <span class="label label-warning">Delivered</span>
+                                            }
+                                            else if (item.RequisitionStatus == "I")
+                                            {
+                                            <span class="label label-success">Issued</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.IsSubmitted)
+                                            {
+                                            <span class="label label-success">Submited</span>
+
+                                            }
+                                            else
+                                            {
+                                        <span class="label label-warning">Submit Pending</span>
+
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("RequisitionIssueEdit", "Requisition", new {companyId = item.CompanyId, requisitionId = item.RequisitionId })" class="btn btn-success btn-xs">
+                                                Go to Issue
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+}
+

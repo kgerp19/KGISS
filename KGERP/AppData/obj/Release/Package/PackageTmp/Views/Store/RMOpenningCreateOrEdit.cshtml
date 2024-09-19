@@ -1,0 +1,284 @@
+﻿@model KGERP.ViewModel.StoreViewModel
+
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("RMOpenningCreateOrEdit", "Store", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model=>model.Store.CompanyId)
+    <div class="row">
+        <table class="table table-bordered">
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <td colspan="6">
+                    <b>Raw Material Openning Balance Entry</b>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                @Html.LabelFor(model => model.Store.VendorId, htmlAttributes: new {@class = "control-label col-md-4" })
+                                @Html.HiddenFor(model => model.Store.Type, new { @Value = "R" })
+                            </div>
+                            <div class="col-md-8">
+                                    @Html.EditorFor(model => model.Store.SupplierName, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "VendorName" } })
+                                    @Html.HiddenFor(x => x.Store.VendorId, new { @id = "hfVendor", @name = "vendorId" })
+                                    @Html.ValidationMessageFor(model => model.Store.VendorId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            <label for="CompanyName" class="control-label col-md-4">Proprietor</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="ContactName" name="ContactName" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            <label for="Address" class="control-label col-md-4">Address</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="Address" name="Address" readonly>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "form-control col-md-6", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.Store.ReceivedDate, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.Store.ReceivedDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.Store.StockInfoId, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.DropDownListFor(model => model.Store.StockInfoId, new SelectList(Model.StockInfos, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.Store.Remarks, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextAreaFor(model => model.Store.Remarks, 4, 51, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+
+ 
+    <div class="details">
+        <table class="table table-responsive">
+            <tr  style="background-color:#009270;color:#FFFFFF">
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Rate </th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+                <td>
+                    <input type="text" id="product" name="product" class="form-control col-md-6" />
+                    <input type="hidden" id="hfProductId" name="productId" />
+                </td>
+                <td>
+                    <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid quantity required</span>
+                </td>
+
+                <td>
+                    <input type="text" id="unitPrice" class="unitPrice form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid rate required</span>
+                </td>
+
+                <td>
+                    <button type="button" id="add" onclick="addItemToGrid()" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp; Add</button>
+                    @*<input type="button" id="add" value="Add" style="width:80px" class="btn btn-success" />*@
+
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems">
+            <table class="table" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:#3c8dbc;color:#ffffff;font-weight:bold">
+                        <th>Sl</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" style="color:red"></span>
+        </div>
+
+
+        <div class="col-md-offset-6">
+            <div style="padding:10px 0; text-align:right">
+                <input id="submit" type="submit" value="Submit" onclick="javascript: return SubmitForm();" class="btn btn-success" style="padding:5px 10px" />
+            </div>
+        </div>
+
+    </div>
+}
+
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/OpenningStockEntry.js"></script>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        function SubmitForm() {
+            var r = confirm("Are you sure to submit?");
+            if (!r) {
+                return false;
+            }
+        }
+
+
+        $(function () {
+            $("#VendorName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/SupplierAutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                }
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function loadCustomerInformation(supplierId) {
+            $.ajax({
+                url: '/Vendor/GetSupplierInformation?supplierId=' + supplierId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#ContactName').val(result.ContactName);
+                    $('#Address').val(result.Address);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+
+        }
+        
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"R"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+    </script>
+}

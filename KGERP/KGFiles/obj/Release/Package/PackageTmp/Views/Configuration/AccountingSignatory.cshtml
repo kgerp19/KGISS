@@ -1,0 +1,205 @@
+﻿
+@{
+
+    ViewData["Title"] = "Raw Materials Subcategory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMAccountingSignatory
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Account Signatory
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"> Signatory </li>
+    </ol>
+</section>
+@using (Html.BeginForm("AccountingSignatory", "Configuration", FormMethod.Post, new { id = "commonAccountingSignatoryFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>Add Signatory</h4>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.SignatoryId, new { id = "hidSignatoryId" })
+                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                            @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Company Name:</label>
+                                    @Html.DropDownListFor(model => model.CompanyFK, Model.CompanyList as SelectList, "---Select Company---", new { id = "ddlCompanyId", @class = "searchingDropdown form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.CompanyFK, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Signatory Type:</label>
+                                    @Html.TextBoxFor(model => model.SignatoryType, new { id = "txtSignatoryType", @class = "form-control", @placeholder = "Signatory Type" })
+                                    @Html.ValidationMessageFor(model => model.SignatoryType, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Signatory Name:</label>
+                                    @Html.TextBoxFor(model => model.SignatoryName, new { id = "txtSignatoryName", @class = "form-control", @placeholder = "Signatory Name" })
+                                    @Html.ValidationMessageFor(model => model.SignatoryName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Order By:</label>
+                                    @Html.TextBoxFor(model => model.OrderBy, new { id = "txtOrderBy", @class = "form-control", @placeholder = "Order By" })
+                                    @Html.ValidationMessageFor(model => model.OrderBy, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-5">
+                                    <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                </div>
+                                <div class="col-md-7">
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>Signatory List</h4>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="table-responsive col-md-12">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Company Name</th>
+                                            <th>Signatory Type</th>
+                                            <th>Signatory Name</th>
+                                            <th>Order By</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    @{int sl = 0;
+                                    }
+                                    <tbody>
+                                        @foreach (var item in Model.DataList)
+                                        {
+
+                                        <tr>
+                                            <td>@(++sl)</td>
+                                            <td>
+                                                <input type="hidden" id="CompanyFK_@item.SignatoryId" name="CompanyFK" value="@item.CompanyFK" />
+                                                @item.CompanyName
+                                            </td>
+                                            <td id="tdSignatoryType_@item.SignatoryId">@item.SignatoryType</td>
+                                            <td id="tdSignatoryName_@item.SignatoryId">@item.SignatoryName</td>
+                                            <td id="tdOrderBy_@item.SignatoryId">@item.OrderBy</td>
+                                            <td>
+                                                <a id="@item.SignatoryId" onclick="makeEditble(this)" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                                <a id="@item.SignatoryId" onclick="makeDeletable(@item.SignatoryId);" class="linkPointer" data-toggle="modal" data-target="#deleteModal" title="Delete"
+                                                   data-placement="top">
+                                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                </a>
+
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+
+@using (Html.BeginForm("AccountingSignatory", "Configuration", FormMethod.Post, new { id = "commonAccountingSagnatoryDeleteFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.SignatoryId, new { id = "SignatoryIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFKDelete" })
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Signatory Delete</b></h5>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+    @section scripts {
+        <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+             
+        });
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#hidSignatoryId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#ddlCompanyId').val($('#CompanyFK_' + rowId).val()).change();
+                $('#txtSignatoryType').val($('#tdSignatoryType_' + rowId).text().trim());
+                $('#txtSignatoryName').val($('#tdSignatoryName_' + rowId).text().trim());
+                $('#txtOrderBy').val($('#tdOrderBy_' + rowId).text().trim());
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#SignatoryIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+            }
+        }
+        function resetForm() {
+            $('#commonAccountingSignatoryFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+        }
+        </script>
+    }
+

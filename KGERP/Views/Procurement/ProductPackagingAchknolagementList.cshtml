@@ -1,0 +1,176 @@
+﻿@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+@{
+    ViewBag.Title = "ProductPackagingAchknolagementList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .hasDatepicker {
+        position: relative;
+        z-index: 9999;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Issue Item List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Issue Item List</li>
+    </ol>
+</section>
+@using (Html.BeginForm("PackagingIssueItemList", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Issue No</th>
+                                        <th>Issue Date</th>
+                                        <th>From Requisition</th>
+                                        <th>To Requisition</th>
+                                        <th>Achknolagement</th>
+                                        <th class="text-center">Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+
+                                            <td>
+                                                <a style="color:blue" href="~/Report/PackagingIssueProductReport?IssuedMasterId=@item.IssueMasterId" target="_blank"> @item.IssueNo </a>
+                                            </td>
+                                            <td>
+                                                @if (item.IssueDate != null)
+                                                {<span>@item.IssueDate.ToString("dd-MM-yyyy")</span>}
+                                            </td>
+                                            <td>@item.FromDepartmentIssueName</td>
+                                            <td>@item.ToDepartmentIssueName</td>
+                                            <td>
+                                                @if (item.Achknolagement)
+                                                {
+                                                    <span class="text-success">
+                                                        Acknowledged
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-warning">
+                                                        Pending
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                @if (!item.Achknolagement)
+                                                {
+                                                    <a onclick="makeUndoSubmit(@item.IssueMasterId,@item.CompanyId)" class="linkPointer text-warning" data-toggle="modal" data-target="#undoSubmitAchknolagementModal" title="Achknolagement" data-placement="top">
+                                                        <i class="glyphicon glyphicon-ok" aria-hidden="true"></i>
+                                                    </a>
+                                                    
+                                                }
+                                                &nbsp;
+                                                <a target="_blank" href="~/Procurement/PackagingIssueProductFromStore?companyId=20&issueMasterId=@item.IssueMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                            </td>
+
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+
+
+@using (Html.BeginForm("PackagingRMIssuedAchknolagement", "Procurement", FormMethod.Post, new { id = "frmAchknolagementSubmit", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="undoSubmitAchknolagementModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Acknowledgement</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.IssueMasterId, new { id = "undoIssuedMasterId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "undoSubmitCompanyId" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>
+                            Are you sure to Acknowledged this Issue?.
+                        </h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-undo">&nbsp;  Submit Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+    <script type="text/javascript">
+        let makeUndoSubmit = (issueMasterId, companyId) => {
+            $("#undoIssuedMasterId").val(issueMasterId);
+            $("#undoSubmitCompanyId").val(companyId);
+        }
+        $(document).ready(function () {
+            $("#btnsave").click(() => {
+                $('#undoSubmitAchknolagementModal').modal('hide');
+            })
+        })
+
+    </script>
+}
+
+
+

@@ -1,0 +1,345 @@
+﻿@model KGERP.Services.Procurement.VMPurchaseOrderSlave
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "Supplier Opening";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+    decimal TotalPrice = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            Supplier Opening
+        </span>
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Supplier Opening</li>
+    </ol>
+</section>
+@using (Html.BeginForm("ProcurementPurchaseOrderSupplierOpening", "Procurement", FormMethod.Post, new { id = "procurementPurchaseOrderSupplierOpeningFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+
+                        <div class="box-body">
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Opening Date</label>
+                                        <input name="OrderDate" asp-for="OrderDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtOrderDate" placeholder="Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.OrderDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-md-6">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Supplier</label>
+                                        @Html.EditorFor(model => model.SupplierName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Supplier Name", @id = "txtSupplierName" } })
+
+                                        @Html.HiddenFor(model => model.Common_SupplierFK, new { id = "ddlCommon_SupplierFK" })
+                                        @Html.ValidationMessageFor(model => model.Common_SupplierFK, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Opening Balance</label>
+                                        @Html.TextBoxFor(model => model.PurchasingPrice, new { id = "txtPurchasingPrice", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Purchasing Price", required = "Required" })
+                                        @Html.ValidationMessageFor(model => model.PurchasingPrice, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="txtDescription" class="col-form-label">Description:</label>
+                                        @Html.TextAreaFor(model => model.Description, new { id = "txtDescription", placeholder = "Description", @class = "form-control", rows = 2 })
+                                        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+                            <div class="row">
+                                <div class="col-md-8">
+
+                                </div>
+                                <div class="col-lg-4 col-md-4">
+                                    <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        <span>Save</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Body Will by Start Here-->
+                        @{
+                            <div class="table-responsive col-md-12  text-nowrap">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                                                <tr>
+                                                                    <th style="padding:5px;text-align:center;">SL</th>
+                                                                    <th style="padding:5px;text-align:left;">Reference No</th>
+                                                                    <th style="padding:5px;text-align:center;">Date</th>
+                                                                    <th style="padding:5px;text-align:center;">Supplier</th>
+                                                                    <th style="padding:5px;text-align:center;">Description</th>
+
+                                                                    <th style="padding:5px;text-align:right;">Balance</th>
+
+                                                                </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.DataListSlave)
+                                        {
+                                            
+                                        <tr>
+                                            <td style="padding:5px">@(++sl)</td>
+                                            <td style="padding:5px;text-align:left;">@item.CID</td>
+                                            <td style="padding:5px;text-align:center;">@item.CreatedDate.ToLongDateString()</td>
+                                            <td style="padding:5px;text-align:center;">@item.SupplierName</td>
+                                            <td style="padding:5px;text-align:center;">@item.Description</td>
+
+                                            <td style="padding:5px;text-align:right;">@String.Format("{0:0.000}", item.PurchaseAmount)</td>
+
+                                        </tr>
+                                        }
+                                    </tbody>
+
+                                  
+                                </table>
+                            </div>
+                        }
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        function makeDeletale(rowId) {
+            $('#hidDeleteProcurementPurchaseOrderSlaveId').val(rowId);
+            $('#deleteActionId').val(3);
+        }
+        function resetProcurementPurchaseRequisitionSlaveForm() {
+          $('#procurementPurchaseRequisitionSlaveFormId')[0].reset();
+          $('#ActionId').val(1);
+        }
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+            $("#ddlFinalDestinationCountryFk").val(19).change();
+              $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("AutoCompleteProductGet", "Configuration")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.CompanyFK", prefix: request.term, productType : "R" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                    $("#ddlRProductFK").val(i.item.val);
+
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductByID", "Configuration")",
+                        datatype: "Json",
+                        data: { id: i.item.val },
+                        success: function (data) {
+                            console.log(data);
+                            var items = "";
+                            if (data) {
+
+                                $('.txtUnitName').text(data.UnitName);
+
+                            }
+                        }
+                    });
+                    $('#txtProductName').focus();
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+              $("#txtSupplierName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSupplierGet", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCommon_SupplierFK").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+
+            $("#TermsAndConditionid").change(function () {
+                  var termsAndConditionid = $('#TermsAndConditionid').val();
+                $.ajax({
+                       type: "GET",
+                    url: "@Url.Action("GetTermNCondition", "Procurement")",
+                    datatype: "Json",
+                    data: { id: termsAndConditionid },
+                    success: function (data) {
+                        $('#txtTermsAndCondition').empty();
+                        $('#txtTermsAndCondition').append(data.Value);
+
+                    }
+                });
+            });
+
+
+
+            $("#ddlSupplierPaymentMethodEnumFK").change(function () {
+                var paymethod = $("#ddlSupplierPaymentMethodEnumFK").val();
+                if (paymethod === "@((int)VendorsPaymentMethodEnum.LC)") {
+                    $("#piReletedDivId").show();
+                }
+                else {
+                    $("#piReletedDivId").hide();
+                }
+
+            })
+
+
+        });
+        function makeEditble(rowId) {
+
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("SingleProcurementPurchaseOrderSlave", "Procurement")",
+                  datatype: "Json",
+                  data: { id: rowId },
+                  success: function (data) {
+                      console.log(data);
+                      $('#poCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidPurchaseOrderId").val(data.PurchaseOrderId);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val(data.CompanyFK);
+                      $("#txtProductName").val(data.ProductName);
+                      $("#ddlRProductFK").val(data.Common_ProductFK);
+                      $("#txtPurchaseQuantity").val(data.PurchaseQuantity);
+                      $('#txtPurchasingPrice').val(data.PurchasingPrice);
+                      $("#hidPurchaseOrderDetailId").val(data.PurchaseOrderDetailId)
+                      $('.txtUnitName').text(data.UnitName);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                 });
+            }
+
+        function makeSubmitble(rowId) {
+                // console.log(rowId);
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftPOCIDText').text(data.CID);
+
+                            if (data.Status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+            $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+    </script>
+}

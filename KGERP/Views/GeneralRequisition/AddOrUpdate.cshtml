@@ -1,0 +1,743 @@
+﻿@model KGERP.Service.Implementation.General_Requisition.GeneralRequisitionMasterVM
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "General Requisition";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 1;
+    decimal grandTotal = 0;
+    decimal grandDiscount = 0;
+    int companyId = Model.UserCompanyId;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.Id > 0)
+        {
+            <span>
+                Product Requisition  History of : @Model.RequisitionNumber
+            </span>
+        }
+        else
+        {
+            <span>
+                General Requisition
+            </span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a href="~/GeneralRequisition/Index?CompanyId=@companyId">Requisition List</a></li>
+    </ol>
+</section>
+@using (Html.BeginForm("AddOrUpdate", "GeneralRequisition", FormMethod.Post, new { id = "procurementSalesOrderSlaveFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.UserCompanyId)
+            <div class="box-danger">
+                <!-- /.box-header -->
+                <div class="box-body">
+                    @if (Model.Id > 0)
+                    {
+                        @Html.HiddenFor(model => model.Id, new { id = "Id", @name = "requisitionId" })
+                        @Html.HiddenFor(model => model.RequisitionItemId)
+                        @Html.HiddenFor(model => model.RequisitionToCompanyId)
+                        <div class="col-md-1"> </div>
+                        <div class="col-md-10">
+                            <table class="table">
+                                <tr>
+                                    <th style="width:18%">
+                                        Requisition Number
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.RequisitionNumber</label>
+                                    </td>
+                                    <th style="width:18%">Requisition Date</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@Model.RequisitionDate.ToString("dd-MM-yyyy")</td>
+                                </tr>
+                                <tr class="col-order-2">
+                                    <th style="width:18%">
+                                        @(Model.GeneralRequisitionType == BusinessTypeEnum.Company?"To Company":"To Division")
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@(Model.GeneralRequisitionType == BusinessTypeEnum.Company?Model.CompanyName:Model.DivisionName)</label>
+                                    </td>
+
+                                    <th style="width:18%">Project</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@Model.ProjectName</td>
+                                </tr>
+                                <tr class="col-order-2">
+                                    <th style="width:18%">
+                                        Category
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.CategoryName</label>
+                                    </td>
+
+                                    <th style="width:18%">Type</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@(Model.IsAsset?"Asset":"OpEx")</td>
+                                </tr>
+
+                                <tr class="col-order-2">
+                                    <th style="width:18%">
+                                        AIT (%)
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.AITParcent</label>
+                                    </td>
+
+                                    <th style="width:18%">Discount (%)</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.DiscountParcent</label>
+                                    </td>
+                                </tr>
+
+                                @*<tr class="col-order-2">
+                                        <th style="width:18%">
+                                            Requisition Type
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@(Model.IsAsset?"Asset":"OpEx")</label>
+                                        </td>
+                                        <th style="width:18%">Category</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.CategoryName</td>
+                                    </tr>*@
+
+                                <tr>
+                                    <th style="width:18%">
+                                        Submited By
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.CreatedBy</label>
+                                    </td>
+                                    <th style="width:18%">Remarks</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@Model.Remarks</td>
+                                </tr>
+
+                            </table>
+                        </div>
+                        <div class="col-md-1"> </div>
+                    }
+                    <div class="box-body">
+                        @if (Model.Id == 0)
+                        {
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="CompanyId" class="control-label">Company</label>
+                                    @Html.DropDownListFor(x => x.RequisitionToCompanyId, new SelectList(String.Empty, "value", "text"), new { @class = "form-control searchingDropdown", @data_val = "true", @onchange = "LoadProject()" })
+                                    @Html.ValidationMessageFor(x => x.RequisitionToCompanyId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ProjectId" class="control-label">Project</label>
+                                    @Html.DropDownListFor(x => x.ProjectId, new SelectList(String.Empty, "value", "text"), new { @class = "form-control searchingDropdown", @data_val = "false" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="GeneralRequisitionType" class="control-label">Requisition Type</label>
+                                    @Html.EnumDropDownListFor(model => model.RequisitionAssetType, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.RequisitionAssetType, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.CategoryName, htmlAttributes: new { @class = "control-label" })
+                                    @Html.DropDownListFor(x => x.CategoryId, new SelectList(String.Empty, "value", "text"), new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(x => x.CategoryId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">AIT (%):</label>
+                                    @Html.TextBoxFor(model => model.AITParcent, new { @class = "form-control", @id = "AITParcent" })
+                                    @Html.ValidationMessageFor(model => model.AITParcent, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label" })
+                                    @Html.TextAreaFor(model => model.Remarks, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                           
+
+                        }
+                    </div>
+                    @if (Model.Status == GeneralRequisitionStatusEnum.Draft)
+                    {
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group" style="padding:0px">
+                                    <label for="message-text" class="col-form-label">Particular:</label>
+
+                                    @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "off", @class = "form-control", @name = "ProductName", placeholder = "Write particular name here", @id = "ProductName" } })
+
+                                    @*@Html.HiddenFor(model => model.ProductId, new { id = "ProductId", @value = "null" })*@
+                                    @Html.ValidationMessageFor(model => model.ProductName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    @Html.EditorFor(model => model.Quantity, new { htmlAttributes = new { id = "Quantity", type = "number", @onkeyup = "TotalAmountSumation()", @class = "form-control", placeholder = "Requisition Quantity", required = "Required" } })
+                                    @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Unit</label>
+                                    @Html.DropDownListFor(model => model.UnitId, new SelectList(Model.UnitList, "ID", "Name"), "Select Unit ", new { id = "Unit", @class = "form-control", onchange = "TotalAmountSumation()" })
+                                    @Html.ValidationMessageFor(model => model.UnitId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Unit Price</label>
+                                    @Html.TextBoxFor(model => model.UnitPrice, new { id = "UnitPrice", type = "number", @onkeyup = "TotalAmountSumation()", @class = "form-control", placeholder = "Unit Price", required = "Required" })
+                                    @Html.ValidationMessageFor(model => model.UnitPrice, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Discount (%)</label>
+                                    @Html.TextBoxFor(model => model.DiscountProductParcent, new { id = "DiscountProductParcent", type = "number", @class = "form-control", placeholder = "Unit Price", required = "Required" })
+                                    @Html.ValidationMessageFor(model => model.DiscountProductParcent, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Total Price</label>
+
+                                    @Html.TextBoxFor(model => model.TotalPrice, new { id = "TotalPrice", type = "number", @readonly = "readonly", @class = "form-control", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Total Price", required = "Required" })
+                                    @Html.ValidationMessageFor(model => model.TotalPrice, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="box-footer">
+                    <div class="row">
+                        <div class="col-md-3 pull-right">
+                            @if (Model.Status == GeneralRequisitionStatusEnum.Draft)
+                            {
+                                <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                    <i class='fa fa-plus'></i>
+                                    @if (Model.Id > 0)
+                                    {
+                                        <span>Add Requisition Item</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Create New Requisition</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="box-body">
+                    @if (Model.RequisitionProductList != null && Model.RequisitionProductList.Count() > 0)
+                    {
+                        @Html.HiddenFor(model => model.Id, new { id = "requisitionId" })
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-responsive-md table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Particulars</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Name</th>
+                                        <th style="text-align:right;">Unit Price</th>
+                                        <th style="text-align:right;">Discount</th>
+                                        <th style="text-align:right;">Total Price</th>
+                                        @if (Model.Status == GeneralRequisitionStatusEnum.Draft)
+                                        {
+                                            <th>Action</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var item in Model.RequisitionProductList)
+                                    {
+                                        grandTotal += (decimal)(item.UnitPrice * item.Quantity);
+                                        grandDiscount += item.UnitPrice * item.Quantity / 100 * item.DiscountProductParcent;
+
+                                        <tr>
+
+                                            <td>@(i++)</td>
+
+                                            <td>@item.ProductName</td>
+                                            <td>@item.Quantity</td>
+                                            <td>@item.UniName</td>
+                                            <td style="text-align:right;">@item.UnitPrice</td>
+                                            <td style="text-align:right;">@(Math.Round( item.UnitPrice * item.Quantity/ 100 * item.DiscountProductParcent,2) ) (@item.DiscountProductParcent %)</td>
+                                            <td style="text-align:right;">@(item.UnitPrice * item.Quantity)</td>
+                                            @if (Model.Status == GeneralRequisitionStatusEnum.Draft)
+                                            {
+                                                <td>
+                                                    <a id="@item.Id" onclick="makeEditble(@item.Id, '@item.ProductName',@item.Quantity,@item.UnitPrice,@item.UnitId,@(item.UnitPrice * item.Quantity), @item.DiscountProductParcent)" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                    <a id="@item.Id" onclick="makeDeletale(@item.Id)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="border-1">
+                                        <td></td>
+
+                                        <th style="text-align:right;" colspan="4">Gross Total</th>
+                                        <th style="text-align:right;"> </th>
+                                        <th style="text-align:right;">@String.Format("{0:0.00}", grandTotal) </th>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="border-1">
+                                        <td></td>
+
+                                        <th style="text-align:right;" colspan="4">Discount</th>
+                                        <th style="text-align:right;"></th>
+                                        <th style="text-align:right;">@String.Format("{0:0.00}", grandDiscount) </th>
+                                        <td></td>
+                                    </tr>
+
+                                    <tr class="border-1">
+                                        <td></td>
+
+                                        <th style="text-align:right;" colspan="4">Amount after Discount</th>
+                                        <th style="text-align:right;"></th>
+                                        <th style="text-align:right;">@String.Format("{0:0.00}", grandTotal - grandDiscount) </th>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="border-1">
+                                        <td></td>
+
+                                        <th style="text-align:right;" colspan="4">AIT</th>
+                                        <th style="text-align:right;"></th>
+                                        <th style="text-align:right;">@String.Format("{0:0.00}", (grandTotal - grandDiscount) / 100 * Model.AITParcent) </th>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="border-1">
+                                        <td></td>
+
+                                        <th style="text-align:right;" colspan="4">Net Amount</th>
+                                        <th style="text-align:right;"></th>
+                                        <th style="text-align:right;">@String.Format("{0:0.00}", grandTotal - (grandDiscount + (grandTotal - grandDiscount) / 100 * Model.AITParcent)) </th>
+                                        <td></td>
+                                    </tr>
+
+                                </tfoot>
+                            </table>
+                        </div>
+
+                    }
+                </div>
+                <div class="box-footer">
+                    @if (Model.RequisitionProductList != null && Model.RequisitionProductList.Count() > 0)
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="~/Report/GeneralRequisitionReport?companyId=@(companyId)&&masterId=@Model.Id" target="_blank" class="btn btn-block btn-info"> Print Report </a>
+                            </div>
+                            <div class="col-md-6">
+                                @if (Model.Status == GeneralRequisitionStatusEnum.Draft)
+                                {
+                                    <a data-toggle="modal" onclick="updateStatusModal(@Model.Id,@companyId,'@KGERP.Utility.GeneralRequisitionStatusEnum.Submitted')" data-target="#updateStatusModal" title="Submit" data-placement="top" class="btn btn-block btn-success linkPointer">Submit</a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary btn-block disabled">Submitted</button>
+                                    @*<a data-toggle="modal" onclick="updateStatusModal(@Model.Id,@companyId,'@KGERP.Utility.GeneralRequisitionStatusEnum.Submitted')" data-target="#signatoryModal" title="Submit" data-placement="top" class="btn  btn-info linkPointer"><i class="fa fa-eye"></i>Status</a>*@
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (Model.Status != GeneralRequisitionStatusEnum.Draft && Model.RequisitionApprovalLIst != null)
+                {
+                    <h3>Signatory List</h3>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Signatory</th>
+                                <th scope="col">Designation</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Approved Time</th>
+                                <th scope="col">Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RequisitionApprovalLIst != null)
+                            {
+                                int ii = 1;
+                                foreach (var item in Model.RequisitionApprovalLIst)
+                                {
+                                    <tr>
+                                        <td>@(ii++)</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.DesignationName</td>
+                                        <td>@item.StatusString</td>
+                                        <td>@item.ApprovedTime</td>
+                                        <td>@item.Comment</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </section>
+
+}
+
+@using (Html.BeginForm("DeleteGeneralRequisitionItem", "GeneralRequisition", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete  Product Requisition  Item</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.RequisitionItemId, new { id = "reqItemId" })
+                    @Html.HiddenFor(model => model.UserCompanyId)
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this  Product Requisition  Item?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("UpdateStatus", "GeneralRequisition", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="updateStatusModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Submit General Requisition</b><span id="rqNumber"></span></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(x => x.Id, new { @id = "sId" })
+                    @Html.HiddenFor(x => x.UserCompanyId, new { @id = "sUserCompanyId" })
+                    @Html.HiddenFor(x => x.Status, new { @id = "sStatus" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Submit this general requisition?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetStatusModal()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-info fa fa-check">&nbsp;Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="signatoryModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b>Requisition Signatory</b></h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-responsive-md table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Signatory</th>
+                            <th scope="col">Designation</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RequisitionApprovalLIst != null)
+                        {
+                            int ii = 1;
+                            foreach (var item in Model.RequisitionApprovalLIst)
+                            {
+                                <tr>
+                                    <td>@(ii++)</td>
+                                    <td>@item.EmployeeName</td>
+                                    <td>@item.DesignationName</td>
+                                    <td>@item.Status</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        LoaderFunction();
+        function TotalAmountSumation() {
+            var purchaseQuantity = $("#Quantity").val();
+            var unitPrice = $("#UnitPrice").val();
+            var totalAmount = Number(purchaseQuantity) * Number(unitPrice);
+
+            $("#TotalPrice").val(totalAmount);
+            if (totalAmount <= 0) {
+                $(":submit").attr("disabled", true);
+            }
+            else {
+                $(":submit").removeAttr("disabled");
+                $("#spnCreditLimitExceed").text("")
+            }
+        };
+
+        function makeEditble(id, productName, quantity, unitPrice, UnitId, TotalPrice, discountProductParcent) {
+
+     /*       var totalPrice = parseInt(quantity) * parseInt(unitPrice);*/
+            $("#ProductName").val(productName);
+            $("#Quantity").val(quantity);
+            $("#UnitPrice").val(unitPrice);
+            $("#TotalPrice").val(TotalPrice);
+            $("#DiscountProductParcent").val(discountProductParcent);
+            $("#Unit").val(UnitId);
+           // $("#ProductId").val(productId);
+            $("#RequisitionItemId").val(id);
+            $("#poCreateBtn").text("Update");
+        };
+        function LoaderFunction(e) {
+            $("#ProjectId").html("");
+            LoadCategory();
+            LoadCompany();
+        }
+        //function bindProperty() {
+        //    var requisitionTypeId = $("#GeneralRequisitionType").val();
+        //    var company = $("#Company").val();
+        //    if (requisitionTypeId == 1) {
+        //        $("#CompanyId").val(company);
+        //    }
+        //    if (requisitionTypeId == 2) {
+        //        $("#DivisionId").val(company);
+        //    }
+        //}
+        function LoadCompany() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#RequisitionToCompanyId").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#RequisitionToCompanyId").append(content)
+                }
+            })
+        }
+        function LoadDepartment() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+               // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    $('#CommonName').text("Division");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                }
+            })
+        }
+        function LoadCategory() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllGRQSProductCategoryAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CategoryId").html("");
+                    var content = '<option>Select Category</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CategoryId").append(content)
+                    //LoadEmployee();
+                }
+            })
+        }
+        function LoadProject() {
+            var companyId = $("#RequisitionToCompanyId").val();
+            $("#ProjectId").html("");
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllProjectList",
+                 data: { companyId: companyId },
+                success: function (res) {
+                    var content = '<option value="0">Select Project</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#ProjectId").append(content)
+                }
+            })
+        }
+
+         @*$(document).ready(function () {
+            $(function () {
+            $("#ProductName").autocomplete({
+                source: function (request, response) {
+                    $.ajax
+                        ({
+                            url: "/GeneralRequisition/GetGenralRequisitionProductListAutoCompleteJson",
+                            dataType: "json",
+                            data: { companyId: "@Model.CompanyId", prefix: request.term },
+                            success: function (data) {
+                                response($.map(data,
+                                    function (item) {
+                                        /*return item.label;*/
+                                        console.log(item);
+                                        return { label: item.label,value:item.label, id: item.val, price: item.price }
+                                    }));
+                            },
+                            error: function (e) { }
+                        });
+                },
+                minLength: 1,
+                delay: 500,
+                autoFocus: true,
+                select: function (event, ui) {
+                    console.log(ui);
+                    $("#ProductId").val(ui.item.id);
+                    $("#Quantity").val(1);
+                    $("#TotalPrice").val(ui.item.price);
+                    $("#UnitPrice").val(ui.item.price);
+                }
+            });
+            $("#RequestForPersonName").autocomplete({
+            source: function (request, response) {
+                $.ajax
+                    ({
+                        url: "/Configuration/EmployeeAutoComplete",
+                        dataType: "json",
+                        data: { prefix: request.term },
+                        success: function (data) {
+                            response($.map(data,
+                                function (item) {
+                                    return { label: item.label, value: item.label, id: item.val }
+                                }));
+                        },
+                        error: function (e) { }
+                    });
+            },
+            minLength: 1,
+            delay: 500,
+            autoFocus: true,
+            select: function (event, ui) {
+                console.log(ui);
+                $("#RequestForPersonId").val(ui.item.id);
+            }
+        });
+     });*@
+
+
+        function makeDeletale(rowId) {
+            $('#reqItemId').val(rowId);
+            //$('#deleteActionId').val(3);
+        }
+        function updateStatusModal(id, userCompanyId, status) {
+            $("#sId").val(id);
+            $("#sStatus").val(status);
+            $("#sUserCompanyId").val(statusId);
+        }
+        function resetStatusModal() {
+            $("#sId").val(null);
+            $("#sStatus").val("");
+            $("#sUserCompanyId").val(null);
+        }
+
+
+    </script>
+}

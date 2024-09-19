@@ -1,0 +1,178 @@
+﻿@model KGERP.ViewModel.HeadGLViewModel
+@using System.Web.UI.WebControls
+@using KGERP.TreeViewModel;
+
+@{
+    var message = TempData["successMessage"];
+}
+<div>
+    <h3 style="color:darkblue;text-align:center">@Model.CompanyName</h3>
+    <h4 class="text-center" style="border:1px solid #32527B; padding:0px; color:white; background-color:#32527B">
+       Chart of Accounts - Treeview
+    </h4>
+   
+    @using (Html.BeginForm("GetChartOfAccountReport", "Report", FormMethod.Get))
+    {
+        @Html.Hidden("companyId", new { companyId = Request.QueryString["companyId"] })
+        @Html.Hidden("reportName", "ChartOfAccount")
+        <input type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+        <select class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px" name="ReportType" id="ReportType">
+            <option value="PDF">PDF</option>
+            <option value="EXCEL">EXCEL</option>
+            <option value="WORD">WORD</option>
+        </select>
+    }
+    @*@using (Html.BeginForm("ProdReferenceGet", "Report", FormMethod.Get))
+    {
+        @Html.Hidden("companyId", new { companyId = 21 })
+        @Html.Hidden("reportName", "ProdReference")
+        <input type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+        <select class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px" name="ReportType" id="ReportType">
+            <option value="PDF">PDF</option>
+            <option value="EXCEL">EXCEL</option>
+            <option value="WORD">WORD</option>
+        </select>
+    }*@
+</div>
+
+@*<link href="~/Scripts/TreeView/dist/themes/default/style.min.css" rel="stylesheet" />*@
+<div class="form-body">
+    <div>
+        <input type="text" placeholder="Search for Chart of account..." autocomplete="off" class="form-control" id="searchCharts">
+    </div>
+    <div id="jstreeChartOfAccounts">
+        @(Html.TreeView(Model.Head1s).EmptyContent("<b style='font-family:arial;color:#32527B'>General Ledger</b>")
+                                                                                                                                                                          .Children(m => m.Head11)
+                                                                                                                                                                          .HtmlAttributes(new { id = "tree" })
+                                                                                                                                                                      .ChildrenHtmlAttributes(new { @class = "subItem" })
+                                                                                                                                                                          .ItemText(m => m.AccCode)
+                                                                                                                                                                          .ItemTemplate(
+                                                                                                                                                        @<text>
+                                                                                                                                                            <a href="#" onclick='getChartOfAccount("@item.Id","@item.LayerNo","@item.AccCode","@item.AccName")' title="Create New Child Head or Update Existing" desc="@item.AccName"><span style="font-family:Arial;font-weight:bold;color:#32527B">@(item.AccCode + "-" + item.AccName)</span></a>
+                                                                                                                                                        </text>)
+        )
+    </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:#28845B;color:#ffffff !important">
+                <b class="modal-title" id="exampleModalLongTitle">Selection Window</b>
+                <a href="@Url.Action("TreeView","HeadGLs",new { companyId=Model.Head1s.First().CompanyId})" class="close" aria-label="Close" title="Close">
+                    <span aria-hidden="true">&times;</span>
+                </a>
+            </div>
+            <div class="modal-body" style="height:83px">
+                ...
+            </div>
+            @*<div class="modal-footer">
+
+                </div>*@
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="createEditAccountHeadModal" tabindex="-1" role="dialog" aria-labelledby="createEditAccountHeadTitle" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:#32527B;color:#ffffff">
+                <b class="modal-title" id="createEditAccountHeadTitle">Selection Window form _selectionWindow Pertial view</b>
+                <a href="@Url.Action("TreeView","HeadGLs",new { companyId=Model.Head1s.First().CompanyId})" class="close pull-right" aria-label="Close" title="Close">
+                    <span aria-hidden="true">&times;</span>
+                </a>
+                <span class="pull-right" id="spanStatus"></span>
+
+            </div>
+            <div class="create-edit-accont-head-modal-body" style="height:200px;margin-top:5px">
+                ...
+            </div>
+            @*<div class="modal-footer">
+
+                </div>*@
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section scripts
+{
+    <script>
+    var message = '@message';
+    //if(message){
+    //    alert(message);
+    //}
+
+        $(function () {
+            var selectedData;
+            $('#jstreeChartOfAccounts').jstree({
+                "core": {
+                    "multiple": true,
+                    "check_callback": false,
+                    'themes': {
+                        "responsive": true,
+                        'variant': 'medium',
+                        'stripes': false,
+                        'dots': true,
+                    }
+                },
+                "plugins": ["search", "state"],
+                "search": {
+                    "case_sensitive": false,
+                    "show_only_matches": true
+                },
+                "types": {
+                    "default": {
+                        "icon": "glyphicon glyphicon-minus-sign"
+                    },
+                    "demo": {
+                        "icon": "glyphicon glyphicon-plus-sign"
+                    }
+
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $("#searchCharts").keyup(function () {
+                var searchString = $(this).val();
+                //console.log(searchString);
+                $('#jstreeChartOfAccounts').jstree('search', searchString);
+            });
+        });
+
+
+        function getChartOfAccount(accountHeadId, layerNo, accCode, accName) {
+
+            $.ajax({
+                url: '/HeadGLs/GetSelectionWindow?accountHeadId=' + accountHeadId + '&layerNo=' + layerNo + "&accCode=" + accCode + "&accName=" + accName + "",
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    $('#exampleModalLongTitle').html("<style='font:bold'>" + accCode + "-" + accName + "</style>");
+                    console.log(data);
+                    $(".modal-body").html(data);
+                    $("#exampleModalLong").modal({
+                        show: true,
+                        backdrop: 'static',
+                        keyboard: false
+
+                    });
+
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+        }
+    </script>
+}
+

@@ -1,0 +1,274 @@
+﻿@model KGERP.Service.Implementation.Audit.ViewModels.PreservingAuditDocumentVM
+@using KGERP.Utility;
+@{
+    ViewBag.Title = "Index";
+    int i = 1;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>Audit Document List</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+    </ol>
+</section>
+
+
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "Audit", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            <div class="row">
+                                <div class="col-md-3">
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Type, htmlAttributes: new { @class = "control-label" })
+                                        @Html.EnumDropDownListFor(model => model.Type, "-- Select Document Type --", htmlAttributes: new { @class = "form-control",@data_val="false" })
+                                        @Html.ValidationMessageFor(model => model.Type, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Year, htmlAttributes: new { @class = "control-label" })
+                                        @Html.DropDownListFor(x => x.Year, new SelectList(String.Empty, "value", "text"), new { @class = "form-control",@data_val="false" })
+                                        @Html.ValidationMessageFor(x => x.Year, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Month, htmlAttributes: new { @class = "control-label" })
+                                        @Html.DropDownListFor(x => x.Month, new SelectList(String.Empty, "value", "text"), new { @class = "form-control", rows = "1" })
+                                        @Html.ValidationMessageFor(x => x.Month, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-3">
+                                    <label for="CompanyId" class="control-label">Select Company</label>
+                                    @Html.DropDownListFor(x => x.CompanyId, new SelectList(String.Empty, "value", "text"), new { @class = "form-control companyDrop", @data_val = "false" })
+                       
+                                </div>
+                            </div>
+
+
+
+
+                        }
+                        <hr />
+                        @if (Model.DataList != null && Model.DataList.Any())
+                        {
+
+
+
+                            <div class="table-responsive " style="border: 1px solid #808080; padding:15px;">
+                                <h3 class="text-center" style="background-color: #dddddd;padding:10px;">Document List</h3>
+                                <table id="KgErpDataTable" class="table table-striped table-hover ">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">CompanyName</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Year</th>
+                                            <th scope="col">Month</th>
+                                            <th scope="col">Procedure Applied</th>
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.DataList)
+                                        {
+                                            <tr>
+                                                <td>@(i++)</td>
+                                                <td>@item.CompanyName</td>
+                                                <td>@item.Type</td>
+                                                <td>@item.Year</td>
+                                                <td>@item.MonthName</td>
+                                                <td>@item.ProcedureeApplied</td>
+                                                <td>@item.Title</td>
+                                                <td>
+                                                    <a href="~/Audit/FileUpload2?Id=@item.Id" target="_blank" class="linkPointer btn btn-success btn-xs" title="File Upload"><i class="fa fa-file"></i></a>
+                                                    
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("RemoveAuditDocument", "Audit", FormMethod.Post, new { id = "deleteAuditDocumentFormsId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete  Product Requisition  Item</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.Id, new { id = "deletedItemId" })
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this  Document?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetDeleteForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section Scripts {
+    <script type="text/javascript">
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+
+
+
+        $(document).ready(function () {
+            LoadCompany();
+            $(".companyDrop").select2();
+            LoadMonth();
+            LoadYear();
+        });
+
+        function LoadMonth() {
+            var monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            var dropdown = $('#Month');
+            var currentMonth = new Date().getMonth() + 1;
+            dropdown.empty();
+            dropdown.append($('<option></option>').text('Select Month'));
+            $.each(monthNames, function (index, monthName) {
+                var option = $('<option></option>').val(index + 1).text(monthName);
+                if (index + 1 === currentMonth) {
+                    option.attr('selected', 'selected');
+                }
+                dropdown.append(option);
+            });
+        }
+
+        function LoadCompany() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CompanyId").html("");
+                    $('#CompanyId').text("Select Company");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CompanyId").append(content)
+                }
+            })
+        }
+        function loadPresevingAuditDocument(id) {
+            $.ajax({
+                type: "GET",
+                url: "/Audit/GetAuditDocumentById",
+                 data: { id: id },
+                success: function (res) {
+                    $.each(res,
+                        function (index, itemData) {
+                            var attr = $("#" + index);
+                            if (attr) {
+                                attr.val(itemData);
+                            }
+                        })
+
+              $("#ActionEnum").val("@ActionEnum.Edit.ToString()");
+                }
+            })
+        }
+        function LoadYear() {
+            var currentYear = new Date().getFullYear();
+            var startYear = currentYear - 2;
+            var endYear = currentYear + 20;
+            var dropdown = $('#Year');
+            dropdown.empty();
+            dropdown.append($('<option></option>').text('Select Year'));
+            for (var year = startYear; year <= endYear; year++) {
+                var option = $('<option></option>').val(year).text(year);
+                if (year === currentYear) {
+                    option.attr('selected', 'selected');
+                }
+                dropdown.append(option);
+            }
+        }
+
+
+        function makeDeletable(documentId) {
+            $('#deletedItemId').val(documentId);
+        }
+        function makeEditable(documentId) {
+            $("#action_btn").text("Update");
+            loadPresevingAuditDocument(documentId);
+        }
+        function resetDeleteForm() {
+            $("#sId").val(null);
+            $("#sStatus").val("");
+            $("#sUserCompanyId").val(null);
+        }
+        function resetauditDocumentForm() {
+            $("#ActionEnum").val("@ActionEnum.Add.ToString()");
+             $("#Id").val(null);
+            $("#action_btn").text("Add");
+            var entryForm = $("#auditDocumentForm");
+            $('#auditDocumentForm :input').val('');
+            $('#auditDocumentForm select').prop('selectedIndex', 0);
+        }
+
+    </script>
+}

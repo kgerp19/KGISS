@@ -1,0 +1,176 @@
+﻿
+@model KGERP.Data.CustomModel.ServiceStatusListVm
+@{
+    ViewBag.Title = "Service Status";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+    int sl = 0;
+}
+
+<div class="row">
+    <div class=" col-8">
+        <h5 class="bg-gray">Service List</h5>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th class="p-1">S.L</th>
+                    <th class="p-1">Name</th>
+                    <th class="p-1">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in Model.Datalist)
+                {
+                    sl = sl + 1;
+                    <tr>
+                        <td class="p-1">@{ @sl}</td>
+                        <td class="p-1">@i.StatusText</td>
+                        <td class="p-1">
+                            <button onclick='EditItem(@i.StatusId)' class="btn  btn-primary fa-sm"><i class="fa fa-pen"></i></button>
+                            <button onclick='deleteItem(@i.StatusId)' class="btn btn-danger fa-sm"><i class="fa fa-times"></i></button>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+
+        </table>
+    </div>
+
+    <div class="col-4">
+        <h5 class="p-3">Service</h5>
+        <div class="mb-3 col-12">
+            <input id="txtStatusId"  type="hidden"/>
+            <label for="serviceStatusName" class="form-label">Name</label>
+            <input type="text" class="form-control" name="" id="serviceStatusName" placeholder="Service Status Name">
+            <h3 class="text-danger" id="msg"></h3>
+        </div>
+        <p id="demo"></p>
+        <div class="mb-3 col-12">
+            <button id="sbmt" type="submit" class="btn btn-outline-primary col-12">Save</button>
+        </div>
+    </div>
+
+
+</div>
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <script>
+
+
+
+
+
+        $("#sbmt").click(function () {
+
+
+        var v = {
+            'StatusText': $('#serviceStatusName').val(),
+            'StatusId': $('#txtStatusId').val(),
+            'CompanyId': '@Model.CompanyId'
+
+            };
+           
+        $.ajax({
+                type: "POST",
+                url: "@Url.Action("SaveServiceStatus", "Crms")",
+                datatype: "Json",
+            data: { model: v },
+            success: function (data) {
+                console.log(data);
+                    console.log(data.MessageList);
+                    //$.each(data.MessageList, function (key, value) {
+                    //    console.log(value);
+                    //    console.log(key);
+                    //    //$('#ServiceStatusList').append(
+                    //    //    $('<option></option>').val(key.StatusId).text(value.StatusText)
+                    //    //);
+                    //});
+
+                if (data.message == null) {
+                    location.reload();
+                } else {
+                
+                    $("#msg").append(data.message);
+                }
+            
+                }
+            });
+    });
+
+        function deleteItem(id) {
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+                  $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteServiceStatus", "Crms")",
+                datatype: "Json",
+                      data: { id: id },
+                      success: function (data) {
+                          location.reload();
+
+                }
+             })
+
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+        }
+
+        function EditItem(id) {
+
+            var eid = id;
+
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetServiceStatusById", "Crms")",
+                datatype: "Json",
+            data: { id: eid },
+                success: function (data) {
+                    console.log(data);
+                    $("#serviceStatusName").val(data.StatusText);
+                    $("#txtStatusId").val(data.StatusId);
+                    $("#sbmt").html(" <span>Update</span>");
+                   //// $("#sbmt").css('red');
+                }
+            });
+
+        }
+
+        $("#ur").click(function () {
+            var blog = getUrlParameter('companyId');
+            alert(blog);   
+        }
+        );
+
+        var getUrlParameter = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+          
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+           
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+            return false;
+        };
+    </script>
+
+}

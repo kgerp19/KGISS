@@ -1,0 +1,163 @@
+﻿@model KGERP.Service.Implementation.KfmlInstallments.IKfml_InstallmentViewModel
+@{
+    ViewBag.Title = "InstallmentList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .ui-front {
+        z-index: 2100 !important;
+    }
+
+    .ui-datepicker {
+        z-index: 2100 !important;
+    }
+
+    @@media (min-width: 768px) {
+        .modal-content {
+            width: 750px;
+        }
+    }
+
+    .input-group {
+        width: 100% !important;
+    }
+
+    .mb-2 {
+        margin-bottom: 15px !important;
+    }
+
+    .input-group .form-control {
+        max-width: 100%;
+    }
+
+    .badge-primary {
+        color: #fff;
+        background-color: #007bff;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+
+    .badge-dark {
+        color: #fff;
+        background-color: #343a40;
+    }
+
+    .badge-info {
+        color: #fff;
+        background-color: #17a2b8;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 5px 15px 5px 5px;
+        background-color: #4caf5029 !important;
+    }
+</style>
+
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-sm-12">
+            <b style="font-size:20px">
+                Customer Booking List
+            </b>
+        </div>
+        <div class="col-sm-12" style="margin-top:10px;">
+            @using (Html.BeginForm("FilterBookingList", "ProductBooking", FormMethod.Post, new { @class = "formValidator" }))
+            {
+                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.Label(" Booking From Date", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            <div style="display:flex">
+                                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off", @style = "width: 100%;" } })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.Label("Booking ToDate", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            <div style="display:flex">
+                                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off", @style = "width: 100%;" } })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+
+                        </div>
+                    </div>
+                    <div class="col-md-4" style="padding: 0px 2px 0px 8px;">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>File No</th>
+                <th>Booking date</th>
+                <th>Item Name</th>
+                <th>Total Value</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.kfmldatalist)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td>@item.FileNo</td>
+                    <td>@item.BookingDate.Value.ToString("dd-MM-yyyy")</td>
+                    <td>@(item.ProductCategoryName+"-"+item.ProductSubCategoryName+"-"+item.ProductName)</td>
+                    <td>@(item.ProductValue+item.BookingMoney+item.InterestAmount)</td>
+
+                    <td>
+                        @if (item.IsSubmitted==false)
+                        {
+                            <span class="badge badge-primary">Draft</span>
+                        }
+                        @if (item.IsSubmitted==true)
+                        {
+                            <span class="badge badge-dark">Submitted</span>
+                        }
+                       
+                    </td>
+                    <td>
+                        <a href="/Kfml_Installment/ViewDetalis?companyId=@Model.CompanyId&bookingId=@item.BookingId" target="_blank" class="btn btn-warning btn-xs">
+                            Details
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

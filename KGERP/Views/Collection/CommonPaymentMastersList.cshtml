@@ -1,0 +1,193 @@
+﻿@model KGERP.Service.Implementation.VMPaymentMaster
+@{
+    ViewData["Title"] = "Dealer / Customer Collection List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .InlineBtn:hover {
+        background-color: green;
+        color: white;
+        text-decoration: underline;
+    }
+</style>
+
+<section class="content-header">
+    <h3><b>Dealer / Customer List</b> </h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Dealer / Customer Collection</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="box-danger">
+
+                    <div class="box">
+                        <div class="box-danger">
+                            <div class="box-header">
+                                @using (Html.BeginForm("CommonPaymentMastersList", "Collection", FormMethod.Post, new { @class = "formValidator" }))
+                                {
+                                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                                <br />
+                                                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                                <br />
+                                                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <div class="table-responsive">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead style="background-color:#ccc;">
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>Payment No</th>
+                                                <th>Transaction Date</th>
+                                                <th>
+                                                    Money Receipt No
+                                                </th>
+                                                <th>
+                                                    Money Receipt Date
+                                                </th>
+                                                <th>Bank Charge Head</th>
+                                                <th>Bank Charge</th>
+                                                <th>Payment To</th>
+                                                <th style="width:100px">
+                                                    Payment Received
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>
+                                                        @item.PaymentNo
+                                                    </td>
+                                                    <td>
+                                                        @item.TransactionDate.ToString("dd-MM-yyyy")
+                                                    </td>
+                                                    <td>
+                                                        @item.MoneyReceiptNo
+                                                    </td>
+                                                    <td>
+                                                        @(item.MoneyReceiptDate != null ?item.MoneyReceiptDate.Value.ToString("dd-MM-yyyy"):"")
+                                                    </td>
+                                                    <td>
+                                                        @item.BankChargeHeadGLName
+                                                    </td>
+                                                    <td>
+                                                        @item.BankCharge
+                                                    </td>
+                                                    <td>
+                                                        @item.PaymentToHeadGLName
+                                                    </td>
+
+                                                    <td style="width:180px;">
+                                                        <a href="~/Collection/OrderMasterByID?companyId=@item.CompanyFK&paymentMasterId=@item.PaymentMasterId">Collection Details</a>
+                                                        @*@Html.ActionLink("Delivery Challan", "POwiseGoodsReceived", new { companyId = item.CompanyFK }, new { @title = "You can see all goods quantity that already Delivered to customer", @class = "InlineBtn", @target = "_blank" })
+                                                            <br />*@
+
+                                                        @*@Html.ActionLink("invoices", "OrderMasterByCustomer", new { companyId = item.CompanyFK, customerId = item.ID }, new { @class = "InlineBtn", @target = "_blank" })
+                                                            <br />
+                                                            @Html.ActionLink("Payment Received", "OrderMasterByID", new { companyId = item.CompanyFK, customerId = item.ID }, new { @class = "InlineBtn", @target = "_blank" })
+                                                            <br />
+                                                            @Html.ActionLink("Payment List", "PaymentMasterList", new { companyId = item.CompanyFK, customerId = item.ID }, new { @class = "InlineBtn", @target = "_blank" })
+                                                            <br />
+                                                            @Html.ActionLink("Customer Ledger", "InvoiceWiseCustomerLedgerOpening", new { companyId = item.CompanyFK, customerId = item.ID }, new { @target = "_blank", @class = "InlineBtn" })*@
+
+                                                    </td>
+                                                    @*<td style="width:180px;">
+
+                                                            @Html.ActionLink("Payment Received Ledger", "VmLedger2SupplierPayment", new { companyId = item.CompanyFK }, new { @class = "InlineBtn", @target = "_blank" })
+
+                                                        </td>*@
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+</section>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+       
+    if(message){
+        alert(message);
+    }
+
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+
+        });
+    </script>
+
+}
+
+
+

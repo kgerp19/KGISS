@@ -1,0 +1,120 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.ProductSubCategoryModel>
+@using PagedList;
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+@using (Html.BeginForm("Index", "ProductSubCategories", FormMethod.Get, new { @class = "example" }))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <h4><b>Product Sub Categories</b></h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="hidden" value="@Request.QueryString["companyId"]" name="companyId" />
+                <input type="hidden" value="@Request.QueryString["productType"]" name="productType" />
+                @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..." } })
+                <button type="submit"><i class="fa fa-search "></i></button>
+            </div>
+        </div>
+        <div class="col-md-2 pull-right">
+            <div class="form-group">
+                <a href="@Url.Action("CreateOrEdit",new { id=0,productType=Request.QueryString["productType"]})" class="btn btn-primary pull-right">
+                    <span class="glyphicon glyphicon-user"></span> Add
+                </a>
+            </div>
+        </div>
+    </div>
+}
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProductCategory.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Name)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().BaseCommissionRate)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().OrderNo)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().Remarks)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().IsActive)
+            </th>
+
+            <th class="text-center">Action</th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.ProductCategory.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.BaseCommissionRate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.OrderNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Remarks)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.IsActive)
+                </td>
+
+                <td class="text-center">
+                    @*@Html.ActionLink("Edit", "CreateOrEdit", new { id = item.Data.ProductSubCategoryId, companyId = Request.QueryString["companyId"], type = Request.QueryString["type"] }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.Data.ProductSubCategoryId, companyId = Request.QueryString["companyId"], type = Request.QueryString["type"] })*@
+                    <a href="@Url.Action("CreateOrEdit", new { id = item.Data.ProductSubCategoryId,companyId=Request.QueryString["companyId"],productType=Request.QueryString["productType"] })" title="Edit" class="btn btn-info btn-xs">
+                        <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+
+                    <a href="@Url.Action("Delete", new { id = item.Data.ProductSubCategoryId,companyId=Request.QueryString["companyId"],productType=Request.QueryString["productType"] })" title="Delete" class="btn btn-danger btn-xs">
+                        <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("Index", "ProductSubCategories",
+                                              new {Page_No, Sorting_Order = Request.QueryString["Search"], companyId = Request.QueryString["companyId"], productType = Request.QueryString["productType"], SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>

@@ -1,0 +1,508 @@
+﻿@model KGERP.Service.Implementation.Production.VMProdReferenceSlave
+
+
+@{
+    ViewData["Title"] = "Production Process";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+
+    var result = ViewBag.resultFlg;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.ProdReferenceId > 0)
+        {
+            <span>
+                Production Process History of: <a target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@Model.ProdReferenceId">@Model.ReferenceNo</a>
+            </span>
+        }
+        else
+        {
+            <span>
+                Production Process : @DateTime.Today.ToString("dd-MM-yyyy")
+            </span>
+        }
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Production Reference</li>
+    </ol>
+</section>
+@using (Html.BeginForm("KPLProdReference", "Production", FormMethod.Post, new { id = "frmKPLProdReference", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.ProdReferenceId, new { id = "hidProdReferenceId" })
+                @Html.HiddenFor(model => model.ProdReferenceSlaveID, new { id = "hidProdReferenceSlaveID" })
+
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.ProdReferenceId > 0)
+                        {
+
+
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <th style="width:18%">
+                                            Production No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.ReferenceNo</label>
+
+
+                                        </td>
+                                        <th style="width:18%"> Production Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.ReferenceDate.ToString("dd-MM-yyyy")</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="width:18%">
+                                            Order No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.OrderMasterNo</label>
+
+
+                                        </td>
+                                        <th style="width:18%"> Order Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.OrderDate.ToString("dd-MM-yyyy")</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="width:18%">
+                                            Job No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.JobNo</label>
+
+
+                                        </td>
+                                        <th style="width:18%">Job Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.JobDate.Value.ToString("dd-MM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Customer
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.CustomerName</label>
+
+
+                                        </td>
+                                        <th style="width:18%">Customer Phone</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.CustomerPhone</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Order Qty
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.OrderQty</label>
+
+
+                                        </td>
+                                        <th style="width:18%">Structure</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.Remarks</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Pouch Derection
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.PouchDerection</label>
+                                        </td>
+                                        <th style="width:18%">Created Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.CreatedDate</td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <th style="width:18%">
+                                            Created By
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.CreatedBy</label>
+
+
+                                        </td>
+                                        <th style="width:18%">Submission</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @if (Model.IsSubmitted)
+                                            {
+                                                <span class="btn btn-success btn-xs">
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    Submission Pending
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Authorized By
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.AuthorizedBy</label>
+
+
+                                        </td>
+                                        <th style="width:18%">Authorization</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @if (Model.IsAuthorized == true)
+                                            {
+                                                <span class="btn btn-success btn-xs">
+                                                    Authorized
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    Authorization Pending
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+
+                    </div>
+
+                    <div class="box-body">
+                        @if (Model.ProdReferenceId == 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="required">Production Date</label>
+                                    <div class="form-group" style="display:flex">
+                                        @Html.EditorFor(model => model.ReferenceDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.ReferenceDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label required">Production Manager</label>
+                                        @Html.EditorFor(model => model.ManagerName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Title", @id = "txtManagerName", @style = "max-width: 100%" } })
+                                        @Html.HiddenFor(model => model.ManagerBy, new { id = "hdnManagerBy" })
+                                        @Html.ValidationMessageFor(model => model.ManagerBy, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="required">Customer</label>
+                                        @Html.EditorFor(model => model.CustomerBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtCustomerBy" } })
+                                        @Html.ValidationMessageFor(model => model.CustomerBy, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="required">OrderNo</label>
+
+                                        @Html.DropDownListFor(model => model.Order, Model.PoList as SelectList, new { id = "Order", @class = "form-control" })
+                                        @Html.HiddenFor(model => model.OrderMasterId, new { id = "hdnOrderNo" })
+                                        @Html.ValidationMessageFor(model => model.Order, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="required">Job No</label>
+
+                                        @Html.DropDownListFor(model => model.JobNo, Model.PoList as SelectList, new { id = "textJobNo", @class = "form-control" })
+                                        @Html.HiddenFor(model => model.OrderDetailId, new { id = "hdnOrderDetailId" })
+                                        @Html.ValidationMessageFor(model => model.JobNo, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <table class="table table-striped">
+                                <tr>
+                                    <td>Job Order No</td>
+                                    <td>:</td>
+                                    <td>
+                                        <span id="txtJobOrderNo">
+                                        </span>
+                                    </td>
+                                    <td>Order Date</td>
+                                    <td>:</td>
+
+                                    <td>
+                                        <span id="txtOrderDate">
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Job No</td>
+                                    <td>:</td>
+
+                                    <td>
+                                        <span id="txtOrderMasterNo">
+                                        </span>
+                                    </td>
+                                    <td>Quantity</td>
+                                    <td>:</td>
+
+                                    <td>
+                                        <span id="txtQty">
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Structure</td>
+                                    <td>:</td>
+
+                                    <td>
+                                        <span id="txtStucture">
+                                        </span>
+                                    </td>
+                                    <td>Product Name</td>
+                                    <td>:</td>
+
+                                    <td>
+                                        <span id="txtProductName">
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Remarks</td>
+                                    <td>:</td>
+                                    <td colspan="4">
+                                        <span id="txtRemarks">
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </table>
+
+
+
+
+
+
+                        }
+                    </div>
+
+                    @{
+                        if (Model.ProdReferenceId > 0)
+                        {
+                            var IsDisplay = Model.IsSubmitted == true ? "none" : "";
+
+                            decimal GrossTotal = 0;
+                            decimal RawCOGSTotal = 0;
+                            @Html.HiddenFor(model => model.ID, new { id = "hidSlaveID" })
+                            <div class="table-responsive col-md-12  text-nowrap">
+                                <div class="header">
+                                    Finished Goods
+                                </div>
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:center;">SL</th>
+                                            <th style="text-align:left;">Product</th>
+                                            <th style="text-align:center;">Production Qty</th>
+                                            <th style="text-align:right;">Costing Price</th>
+                                            <th style="text-align:right;">Total Costing</th>
+                                            @if (!Model.IsSubmitted)
+                                            {
+                                                <th style="text-align:center;">Action</th>
+                                            }
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.DataListSlave)
+                                        {
+                                            GrossTotal += item.TotalPrice;
+                                            <tr>
+                                                <td style="text-align:center;">@(++sl)</td>
+                                                <td style="text-align:left;">@item.ProductName</td>
+                                                <td style="text-align:center;">@String.Format("{0:0.00}", item.Quantity)</td>
+                                                <td style="text-align:right;">@item.CostingPrice.ToString("F2")</td>
+                                                <td style="text-align:right;">@item.TotalPrice.ToString("F2")</td>
+                                                @if (!Model.IsSubmitted)
+                                                {
+                                                    <td style="text-align:center;">
+                                                        <a id="@item.ProdReferenceSlaveID" onclick="makeDeletable(@item.ProdReferenceSlaveID,@item.CompanyFK)" class="linkPointer text-danger" data-toggle="modal" data-target="#deleteModal" title="Delete" data-placement="top"> <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> </a>
+
+                                                        <a onclick="makeEditable('@item.ProdReferenceSlaveID','@item.ProdReferenceId')" class="linkPointer" data-toggle="modal" data-target="#updateModal" title="Edit" data-placement="top"> <i class="fa fa-edit" aria-hidden="true"></i> </a>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td colspan="4" style="text-align:right"><b>Total Costing</b></td>
+                                            <td colspan="1" style="text-align:right"><b>@GrossTotal.ToString("F2")</b></td>
+                                            @if (!Model.IsSubmitted)
+                                            {
+                                                <td>
+                                                </td>
+                                            }
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+
+                        }
+                    }
+
+                    <div class="box-footer">
+                        <div id="ProdReferenceSlaveData">
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (Model.IsAuthorized == false)
+                            {
+                                <a id="ProdRefeId_@Model.ProdReferenceId"  style="width:100%" onclick="makeEdit(@Model.ProdReferenceId,@Model.CompanyFK)" class="btn btn-warning" data-toggle="modal" data-target="#AuthSubmitModal" title="Authorization" data-placement="top"> Authorize </a>
+
+                            }
+                            else
+                            {
+                                <span class="btn btn-primary" style="width:100%" >
+                                    Authorized
+                                </span>
+                            }
+
+                        </div>
+                        <div class="col-md-4">
+                            <a style="width:100%" class="btn btn-info" target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@Model.ProdReferenceId">Print Production</a>
+
+                        </div>
+                        <div class="col-md-4">
+                             
+                                @if (Model.IsSubmitted)
+                                {
+                                    <span style="width:100%" class="btn btn-success"> Submitted Successfully</span>
+
+
+                                }
+                               
+
+                             
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+
+
+@using (Html.BeginForm("AuthProdReference", "Production", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="AuthSubmitModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Authorize  Production</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.ProdReferenceId, new { id = "hdnProdReferenceId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "hdnCompanyId" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "editActionId" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Authorized this Production?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnDelete" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Authorize</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+
+    <script type="text/javascript">
+
+        
+        let makeEdit = (ProdReferenceId, CompanyId) => {
+            
+            $('#editActionId').val(2);
+        }
+
+        
+
+ 
+    </script>
+}

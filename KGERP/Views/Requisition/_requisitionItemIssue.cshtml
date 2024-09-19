@@ -1,0 +1,221 @@
+﻿@model List<KGERP.Service.ServiceModel.RequisitionItemModel>
+<style>
+
+    .spinner-border {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        vertical-align: text-bottom;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        -webkit-animation: spinner-border .75s linear infinite;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @@keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+
+    @@keyframes spinner-grow {
+        0% {
+            transform: scale(0);
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+
+    .spinner-grow-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .spinner-grow {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        vertical-align: text-bottom;
+        background-color: currentColor;
+        border-radius: 50%;
+        opacity: 0;
+        -webkit-animation: spinner-grow .75s linear infinite;
+        animation: spinner-grow .75s linear infinite;
+    }
+
+    #spinnerId {
+        display: none;
+    }
+
+    .btn-primary {
+        color: #fff !important;
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+    }
+</style>
+<div class="box">
+    <div class="box-danger">
+        <div class="box-body">
+            <table class="table table-striped">
+                <tr>
+                    <th>Product Name</th>
+                    <th>Qty</th>
+                    <th>Input Qty</th>
+                    <th>Process Loss</th>
+                    <th>Output Qty</th>
+                    <th>Available Bag Qty</th>
+                    <th>Consumption Bag Qty</th>
+                    @*<th>Over Head</th>*@
+                    <th><input type="checkbox" id="select_all" /> Issue All</th>
+                </tr>
+
+
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.Hidden("RequistionItems.Index", (@i))
+                            @Html.Hidden("RequistionItems[" + i + "].RequisitionId", Model[i].RequisitionId)
+                            @Html.Hidden("RequistionItems[" + i + "].RequisitionItemId", Model[i].RequisitionItemId)
+                            @Html.Hidden("RequistionItems[" + i + "].BagUnitPrice", Model[i].BagUnitPrice)
+                            @Html.Hidden("RequistionItems[" + i + "].ProductId", Model[i].ProductId)
+                            @Html.DisplayFor(model => model[i].ProductName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model[i].Qty)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model[i].InputQty)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model[i].ProcessLoss)
+                        </td>
+                        <td>
+                            @Html.TextBox("RequistionItems[" + i + "].OutputQty", Model[i].OutputQty, new { @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;width:80px;text-align:right" })
+                        </td>
+                        <td>
+                            @Html.TextBox("RequistionItems[" + i + "].AvailableBagQty", Model[i].AvailableBagQty, new { @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;width:115px;text-align:right;color:" + (Model[i].AvailableBagQty < Model[i].ConsumptionBagQty ? "red" : "green") })
+                            @*@Html.TextBox("deliverItems[" + i + "].StoreAvailableQty", Model[i].StoreAvailableQty, new { @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;text-align:right;width:120px;font-weight:bold;color:" + (Model[i].StoreAvailableQty <= 0 ? "red" : "green") })*@
+                        </td>
+                        <td>
+                            @Html.TextBox("RequistionItems[" + i + "].ConsumptionBagQty", Model[i].ConsumptionBagQty, new { @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;width:150px;text-align:right" })
+                        </td>
+                        @*<td>
+                            @Html.TextBox("RequistionItems[" + i + "].BagUnitPrice", Model[i].BagUnitPrice, new { @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;width:80px;text-align:right" })
+                        </td>*@
+                        @*<td>
+                            @Html.TextBox("RequistionItems[" + i + "].OverHead", Model[i].OverHead, new { @class = "", @style = "width:70px;text-align:right" })
+
+                        </td>*@
+                        <td>
+                            @Html.CheckBox("RequistionItems[" + i + "].IsIssued", Model[i].IsIssued, new { htmlAttributes = new { @class = "checkbox checkToInstruction", @style = "width: 30px;height: 20px; " } })
+                        </td>
+
+                    </tr>
+
+                }
+
+                @*@for (int i = 0; i < Model.RequistionItems.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.HiddenFor(model => model.RequistionItems[i].RequisitionId)
+                            @Html.HiddenFor(model => model.RequistionItems[i].RequisitionItemId)
+                            @Html.HiddenFor(model => model.RequistionItems[i].ProductId)
+                            @Html.DisplayFor(model => model.RequistionItems[i].ProductName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.RequistionItems[i].Qty)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.RequistionItems[i].InputQty)
+                        </td>
+                        <td>
+                            @Html.EditorFor(model => model.RequistionItems[i].OutputQty, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right", @autocomplete = "off", } })
+                            @Html.ValidationMessageFor(model => model.RequistionItems[i].OutputQty, "", new { @class = "text-danger" })
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.RequistionItems[i].ProcessLoss)
+                        </td>
+                        <td>
+                            @Html.EditorFor(model => model.RequistionItems[i].OverHead, new { htmlAttributes = new { @class = "form-control", @style = "width:70px;text-align:right", @autocomplete = "off", @max = "10", @min = "0" } })
+                            @Html.ValidationMessageFor(model => model.RequistionItems[i].OverHead, "", new { @class = "text-danger" })
+                        </td>
+
+                        <td>
+                            @Html.EditorFor(model => model.RequistionItems[i].IsIsued, new { htmlAttributes = new { @style = "width: 40px;height: 25px; " } })
+                            @Html.ValidationMessageFor(model => model.RequistionItems[i].IsIsued, "", new { @class = "text-danger" })
+                        </td>
+
+                    </tr>
+
+                }*@
+
+              
+
+            </table>
+        </div>
+        <div class="box-footer">
+            <div class="col-md-5">
+                <a  href="@Url.Action("RequisitionIssueIndex","Requisition",new {companyId= Session["CompanyId"]})" class="btn btn-info" style="width:100%">
+                   << Go Back
+                </a>
+            </div>
+            <div class="col-md-7">
+                <button  id="submitId" type="submit" class="btn btn-success pull-right" onclick="javascript:  return SubmitForm();" style="width:100%">Issue & Submit</button>
+            </div>
+        </div>
+        <button id="spinnerId" class="btn btn-primary" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </button>
+    </div>
+    </div>
+
+
+
+<script>
+    $(document).ready(function () {
+
+
+        $("#select_all").change(function () {  //"select all" change
+            $(".checkToInstruction").prop('checked', $(this).prop("checked")); //change all ".checkbox" checked status
+        });
+
+        //".checkbox" change
+        $('.checkToInstruction').change(function () {
+            //uncheck "select all", if one of the listed checkbox item is unchecked
+            if (false == $(this).prop("checked")) { //if this item is unchecked
+                $("#select_all").prop('checked', false); //change "select all" checked status to false
+            }
+            //check "select all" if all checkbox items are checked
+            if ($('.checkToDownload:checked').length == $('.checkToDownload').length) {
+                $("#select_all").prop('checked', false);
+            }
+        });
+
+
+
+
+        $("#chkIsDefineBin input:checkbox").change(function () {
+            //var ischecked = $(this).is(':checked');
+            //if (ischecked) {
+            //    $("#linkDefine").show();
+            //}
+            //else {
+            //    $("#linkDefine").hide();
+
+            //}
+
+            alert('uncheckd ' + $(this).val());
+        });
+
+    });
+
+
+</script>
+

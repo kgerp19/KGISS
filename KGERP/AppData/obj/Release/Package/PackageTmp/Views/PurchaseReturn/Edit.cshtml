@@ -1,0 +1,279 @@
+﻿@model KGERP.Service.ServiceModel.OrderMasterModel
+@{
+    ViewBag.Title = "Order Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var productType = Request.QueryString["productType"];
+}
+
+@using (Html.BeginForm("OrderEdit", "OrderMaster", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.CompanyId)
+    @Html.HiddenFor(x => x.ProductType)
+    @Html.HiddenFor(x => x.OrderMasterId)
+    <div class="row">
+        <div class="panel-heading" style="background-color:#3c8dbc;color:#ffffff">
+            <span style="font-size:15px;font-family:Arial;font-weight:bold"> Order Update</span>
+        </div>
+        <div class="panel-body" style="padding-left:0px;padding-right:0px">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.StockInfoId, htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownListFor(model => model.StockInfoId, new SelectList(Model.OrderLocations, "Value", "Text"), "---Select---", new { @id = "ddlOrderLocation", @class = "dropdownsize form-control" })
+                @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.CustomerId, htmlAttributes: new { @class = "control-label" })
+                @Html.HiddenFor(model => model.CustomerId, htmlAttributes: new { @id = "hfVendor", @name = "CustomerId", @class = "control-label" })
+                @Html.EditorFor(model => model.Customer, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtVendor" } })
+                @Html.ValidationMessageFor(model => model.Customer, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.CustomerAddress, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.CustomerAddress, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtVendor" } })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.CustomerPhone, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.CustomerPhone, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtVendor" } })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.OrderNo, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.OrderNo, new { htmlAttributes = new { @id = "txtOrderNo", @class = "form-control", @autocomplete = "off", @readonly = "readonly" } })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.OrderDate, htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.OrderDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                <br />
+                @Html.ValidationMessageFor(model => model.OrderDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.ExpectedDeliveryDate, htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.ExpectedDeliveryDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                <br />
+                @Html.ValidationMessageFor(model => model.ExpectedDeliveryDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label" })
+                @Html.TextAreaFor(model => model.Remarks, 4, 51, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.SalePersonId, htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.DropDownListFor(model => model.SalePersonId, new SelectList(Model.MarketingOfficers, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "ddlMarketingOfficer" })
+            </div>
+        </div>
+
+        @*<input id="submit" type="submit" onclick="javascript: return SubmitForm();" value="Submit" class="btn btn-success pull-right" style="padding:5px 10px;margin-top:5px" />
+            <a href="@Url.Action("Index",new { companyId=Model.CompanyId,productType=Model.ProductType})" id="cancel" class="btn btn-danger pull-right" style="padding:5px 10px;margin-right:10px;margin-top:5px">Cancel</a>*@
+    </div>
+
+    <table class="table">
+        <tr style="background-color:#3c8dbc;color:#FFFFFF">
+            <th>
+                Product
+            </th>
+            <th>
+                Quantity
+            </th>
+            <th>
+                Rate
+            </th>
+            <th>
+                Amount
+            </th>
+            <th>
+                Action
+            </th>
+
+
+        </tr>
+        @for (int i = 0; i < Model.OrderDetails.Count(); i++)
+        {
+
+            <tr>
+                <td>
+                    @Html.HiddenFor(model => model.OrderDetails[i].OrderMasterId)
+                    @Html.HiddenFor(model => model.OrderDetails[i].OrderDetailId)
+                    @Html.DropDownListFor(model => model.OrderDetails[i].ProductId, new SelectList(Model.Products, "Value", "Text", Model.OrderDetails[i].ProductId), new { @id = "OrderDetails_" + i + "__ProductId", @onchange = "getProductPrice(" + i + ")", @class = "ddlBag dropdownsize form-control", @style = "width: 200px;height: 26px;padding: 0px;" })
+                    @Html.ValidationMessageFor(model => model.OrderDetails[i].ProductId, "", new { @class = "text-danger" })
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.OrderDetails[i].Qty, new { htmlAttributes = new { @id = "OrderDetails_" + i + "__Qty", @onkeyup = "calculateAmount(" + i + ")", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.OrderDetails[i].Qty, "", new { @class = "text-danger" })
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.OrderDetails[i].UnitPrice, new { htmlAttributes = new { @id = "OrderDetails_" + i + "__UnitPrice", @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.OrderDetails[i].UnitPrice, "", new { @class = "text-danger" })
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.OrderDetails[i].Amount, new { htmlAttributes = new { @id = "OrderDetails_" + i + "__Amount", @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                </td>
+                <td>
+                    <a href="@Url.Action("DeleteOrderDetail", "OrderMaster", new {orderMasterId=Model.OrderMasterId, orderDetailId = Model.OrderDetails[i].OrderDetailId})" onclick='return confirm("Are you sure to delete this record?");' class="btn btn-danger btn-xs">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+
+
+
+        }
+
+        <tr>
+            <td colspan="11">
+                <br />
+                <input type="submit" value="Update" onclick='return confirm("Are you sure to update Order?");' class="btn btn-success pull-right" />
+                <a href="@Url.Action("Index", "OrderMaster", new { companyId = Model.CompanyId,productType=Model.ProductType})" class="btn btn-warning" style="float:right;margin-right:10px">
+                    Close <i class="fa fa-close" aria-hidden="true"></i>
+                </a>
+                &nbsp;
+            </td>
+        </tr>
+
+    </table>
+
+}
+
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        function SubmitForm() {
+            var r = confirm("Are you sure to submit?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        $(function () {
+            $("#txtVendor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/AutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function loadCustomerInformation(customerId) {
+            $.ajax({
+                url: '/Vendor/GetCustomerInformation?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#CompanyName').val(result.Name);
+                    $('#Address').val(result.Address);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+            $.ajax({
+                type: "post",
+                url: "/OfficerAssign/GetMarketingOfficersByCustomerZone",
+                data: { customerId: customerId },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var MarketingOfficer = "<select>";
+                    MarketingOfficer = MarketingOfficer + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        MarketingOfficer = MarketingOfficer + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    MarketingOfficer = MarketingOfficer + '</select>';
+                    $('#ddlMarketingOfficer').html(MarketingOfficer);
+                }
+            });
+        }
+
+
+
+
+
+
+        $(function () {
+            $("#ddlOrderLocation").change(function () {
+                var stockInfoId = $("#ddlOrderLocation option:selected").val();
+                var productType = '@productType';
+
+                $.ajax({
+                    url: '/OrderMaster/GetNewOrderNo?stockInfoId=' + stockInfoId + "&productType=" + productType+"",
+                    type: "Post",
+                    async: true,
+                    processData: false,
+                    cache: false,
+                    success: function (response) {
+                        $('#txtOrderNo').val(response);
+                    },
+                    error: function (xhr) {
+                        //alert('error');
+                    }
+                });
+            });
+        });
+
+
+        function calculateAmount(id) {
+            var receiveQty = $("#OrderDetails_" + id + "__Qty").val();
+            var unitPrice = $("#OrderDetails_" + id + "__UnitPrice").val();
+            $("#OrderDetails_" + id + "__Amount").val(parseFloat(parseFloat(receiveQty) * parseFloat(unitPrice)).toFixed(2));
+        }
+
+        function getProductPrice(id) {
+            var receiveQty = $("#OrderDetails_" + id + "__Qty").val();
+            var productId = $("#OrderDetails_" + id + "__ProductId option:selected").val();
+
+            $.ajax({
+                url: '/Products/GetProductPrice?productId=' + productId + "",
+                type: "Post",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (response) {
+                    $("#OrderDetails_" + id + "__UnitPrice").val(response);
+                    $("#OrderDetails_" + id + "__Amount").val(parseFloat(parseFloat(receiveQty) * parseFloat(response)).toFixed(2));
+
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+        }
+
+    </script>
+}
+

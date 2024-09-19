@@ -1,0 +1,134 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.WorkAssignModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = TempData["successMessage"];
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+<div class="row">
+    <div class="col-md-8">
+        <h4><b>Member Task List</b></h4>
+    </div>
+    <div class="col-md-4">
+        @using (Html.BeginForm("MemberWorkIndex", "Work", FormMethod.Get, new { @class = "example" }))
+        {
+            <input type="text" placeholder="Search.." autocomplete="off" name="searchText">
+            <button type="submit"><i class="fa fa-search"></i></button>
+        }
+    </div>
+
+
+</div>
+
+
+<div class="row">
+    <hr style="border-color:#32527B; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#000080;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().WorkNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().WorkTopic)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EntryDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ExpectedEndDate)
+            </th>
+            <th>
+                Manager Status
+            </th>
+            <th>
+                Emp. Status
+            </th>
+            <th>
+              Report
+            </th>
+            <th class="text-center">Action</th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.WorkNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.WorkTopic)
+                </td>
+                <td>
+                    @if (item.Data.EntryDate.HasValue)
+                    {
+                        @item.Data.EntryDate.Value.ToString("dd MMM yyyy")
+                    }
+                </td>
+                <td>
+                    @item.Data.ExpectedEndDate.Value.ToString("dd MMM yyyy")
+
+                </td>
+                <td>
+                    <button class='@(item.Data.ManagerState=="Completed"?"btn btn-success btn-xs":"btn btn-primary btn-xs")'>@item.Data.ManagerState</button>
+                </td>
+                <td>
+                    <button class='@(item.Data.MemberState=="Completed"?"btn btn-success btn-xs":"btn btn-primary btn-xs")'>@item.Data.MemberState</button>
+                </td>
+                <td>
+                    @item.Data.Report
+                </td>
+                <td class="text-center">
+                    @if (item.Data.MemberState.Equals("Completed"))
+                    {
+                        <button disabled title="Not allowed" class="btn btn-info btn-xs">
+                            <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+
+                        <a href="@Url.Action("ChangeMemberState", new {id = item.Data.WorkAssignId})" title="Change Status" class="btn btn-info btn-xs">
+                            <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("Index", "Work",
+                                                                                           new { Page_No, Sorting_Order = Request.QueryString["Search"], SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+    var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}

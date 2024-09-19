@@ -1,0 +1,228 @@
+﻿@model KGERP.ViewModel.LeaveApplicationViewModel
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Create";
+}
+
+<style>
+    .table > thead > tr > th,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        padding: 2px 2px 2px 2px;
+    }
+</style>
+@using (Html.BeginForm("OtherCreate", "LeaveApplication", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.LeaveApplication.LeaveApplicationId)
+    @Html.HiddenFor(model => model.LeaveApplication.Id)
+    <div class="row" style="font-family:Arial">
+        <table class="table table-bordered">
+            <tr>
+                <td><b>Employee ID</b></td>
+                <td>@Model.LeaveApplication.KGID</td>
+
+                <td><b>Name</b></td>
+                <td>@Model.LeaveApplication.EmployeeName</td>
+            </tr>
+            <tr>
+                <td><b>Department</b></td>
+                <td>@Model.LeaveApplication.DepartmentName</td>
+
+                <td><b>Designation</b></td>
+                <td>@Model.LeaveApplication.DesignationName</td>
+            </tr>
+        </table>
+        <table class="table table-striped" style="border:2px solid #009270;border-radius:2px">
+            <thead>
+                <tr style="background-color:#4CAF50;color:#FFFFFF">
+                    <th>Leave Type</th>
+                    <th>Total Leave</th>
+                    <th>Leave Availed</th>
+                    <th>Leave Due</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.LeaveBalance)
+                {
+                    <tr>
+                        <td><span><b>@item.LeaveCategory</b></span></td>
+                        <td><span class="badge" style="background-color:blue">@item.MaxDays</span></td>
+                        <td><span class="badge" style="background-color:red">@item.LeaveAvailed</span></td>
+                        <td><span class="badge" style="background-color:forestgreen">@(item.MaxDays - item.LeaveAvailed)</span></td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+    <div class="form-horizontal">
+        <fieldset>
+            <legend>Leave Application</legend>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.ManagerId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.TextBox("ManagerName", Model.LeaveApplication.ManagerInfo, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.LeaveCategoryId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.LeaveApplication.LeaveCategoryId, new SelectList(Model.LeaveCategories, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.LeaveCategoryId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.StartDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.StartDate, new { htmlAttributes = new { @class = "datepicker", @id = "txtStartDate", @autocomplete = "off", @onchange = "getStartDate()" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.StartDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.EndDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.EndDate, new { htmlAttributes = new { @class = "datepicker", @id = "txtEndDate", @autocomplete = "off", @onchange = "getStartDate()" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.EndDate, "", new { @class = "text-danger", @id = "endDate" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.LeaveDays, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.LeaveDays, new { htmlAttributes = new { @class = "form-control", @id = "txtLeaveDays", @readonly = "readonly" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.LeaveDays, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.Address, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.Address, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.Address, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.Reason, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.TextAreaFor(model => model.LeaveApplication.Reason, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.Reason, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.Remarks, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.Remarks, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.Remarks, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index")" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-arrow-left"></span> Back
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    @if (TempData["errorMessage"] != null)
+                    {
+                        <b class="text-danger">@TempData["errorMessage"]</b>
+                    }
+                </div>
+                <div class="col-md-3">
+                    <input type="submit" data-confirm="Are you sure to submit your leave application?" value="Submit" id="apply" class="btn btn-primary pull-right" />
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+          function stopRKey(evt) {
+        var evt = (evt) ? evt : ((event) ? event : null);
+        var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+        if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
+    }
+    document.onkeypress = stopRKey;
+
+        function getStartDate() {
+            var startDate = $('#txtStartDate').val();
+            var start_Date = startDate.split("/");
+
+            var d = parseInt(start_Date[0], 10),
+                m = parseInt(start_Date[1], 10),
+                y = parseInt(start_Date[2], 10);
+            var start = new Date(y, m - 1, d);
+
+            console.log(start);
+
+            var endDate = $('#txtEndDate').val();
+            var end_Date = endDate.split("/");
+            var d = parseInt(end_Date[0], 10),
+                m = parseInt(end_Date[1], 10),
+                y = parseInt(end_Date[2], 10);
+            var end = new Date(y, m - 1, d);
+
+            console.log(end);
+
+            var timeDiff = Math.abs(start.getTime() - end.getTime());
+            var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            diffDays = diffDays++;
+
+            console.log(diffDays);
+            if (end < start) {
+                $('#txtLeaveDays').val(diffDays * -1);
+                return false;
+            }
+            $('#txtLeaveDays').val(diffDays + 1);
+        }
+
+
+        jQuery(document).ready(function () {
+            jQuery('[data-confirm]').click(function (e) {
+                if (!confirm(jQuery(this).attr("data-confirm"))) {
+                    e.preventDefault();
+                   @*window.location.href = '@Url.Action("Index", "AttendenceApproval")';*@
+                }
+            });
+        });
+
+
+
+    </script>
+
+}

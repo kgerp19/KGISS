@@ -1,0 +1,188 @@
+﻿@model KGERP.ViewModel.PFormulaDetailViewModel
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .table > thead > tr > th,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        padding: 2px 0px 2px 0px;
+    }
+</style>
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+<div class="row">
+    <table class="table table-striped">
+        <tr>
+            <td class="text-center">
+                <b>Product</b>
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ProductFormula.Product.ProductName)
+            </td>
+            <td>
+                <b>Quantity</b>
+            </td>
+
+            <td> @(Model.ProductFormula.FQty.ToString() + " Kg")</td>
+            <td>
+                <b>Date</b>
+            </td>
+
+            <td>
+                @if (Model.ProductFormula.FormulaDate.HasValue)
+                {
+                    @Model.ProductFormula.FormulaDate.Value.ToString("dd MMM yyyy")
+                }
+
+            </td>
+            <td>
+                <button id="btnAdd" onclick="addOrEditModal(0,@Model.ProductFormula.ProductFormulaId)" style="margin-left:10px" class="btn btn-primary btn-xs pull-right"><span class="glyphicon glyphicon-plus-sign"></span> Add</button>
+                <a href="@Url.Action("Index",new { companyId=Request.QueryString["companyId"]})" class="btn btn-danger btn-xs pull-right">
+                    <span class="glyphicon glyphicon-arrow-left"></span> Back
+                </a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#4CAF50;color:#ffffff">
+            <th class="text-center">
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PFormulaDetails.First().RProductId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PFormulaDetails.First().RQty)
+            </th>
+            <th>
+                Process Loss (%)
+            </th>
+
+            <th class="text-center">Action</th>
+        </tr>
+        @if (Model.PFormulaDetails.Any())
+        {
+            foreach (var item in Model.PFormulaDetails.Select((x, i) => new { Data = x, Index = i }))
+            {
+                <tr>
+                    <td style="text-align:center">
+                        @(item.Index + 1)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Data.Product.ProductName)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Data.RQty)
+                    </td>
+
+
+                    <td>
+                        <b> @(item.Data.RProcessLoss.ToString() + " %")</b>
+                    </td>
+
+                    <td class="text-center">
+                        <a href="@Url.Action("DeletePFormulaDetail", new { pFormulaDetailId = item.Data.PFormulaDetailId })" onclick="return confirm('Are you sure to delete Product ?');" class="btn btn-danger btn-xs">
+                            <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" onclick="addOrEditModal(@item.Data.PFormulaDetailId,@item.Data.ProductFormulaId)"  class="btn btn-primary btn-xs"><i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i></a>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="2" class="text-center">
+                    <b>Total Quantity</b>
+                </td>
+                <td>
+                    <b> @(Model.PFormulaDetails.Sum(x => x.RQty).ToString() + " Kg")</b>
+                </td>
+                <td colspan="3">
+                    <b> @(Model.PFormulaDetails.Sum(x => x.RProcessLoss).ToString() + " %")</b>
+                </td>
+
+            </tr>
+
+        }
+
+
+    </table>
+</div>
+
+<div id="modalWrapper">
+
+</div>
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script>
+
+        $(function () {
+            $('#addOrEditModal').modal({
+                show: true,
+                backdrop: 'static',
+                keyboard: false
+            });
+        });
+
+        function addOrEditModal(pFormulaDetailId, productFormulaId) {
+            $.ajax({
+                url: '/ProductFormula/CreateOrEditPFormulaDetail?pFormulaDetailId=' + pFormulaDetailId + '&productFormulaId=' + productFormulaId,
+                success: function (data) {
+                    $('#modalWrapper').html(data);
+                    $("#addOrEditModal").modal({
+                        show: true,
+                        backdrop: 'static',
+                        keyboard: false
+
+                    });
+                }
+            });
+        }
+
+
+
+        //$('#btnAdd').click(function () {
+        //    $("#exampleModalLong").modal({
+        //        show: true,
+        //        backdrop: 'static',
+        //        keyboard: false
+        //    });
+        //});
+
+        function getRProcessLoss() {
+            var productId = $('#ddlRawMaterial').val();
+            $.ajax({
+                url: '/Products/GetProductPoressLoss?productId=' + productId,
+                type: "Post",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (response) {
+                    $('#txtRProcessLoss').val(response);
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+
+        }
+
+
+    </script>
+}

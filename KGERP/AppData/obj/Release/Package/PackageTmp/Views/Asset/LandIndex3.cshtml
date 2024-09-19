@@ -1,0 +1,277 @@
+﻿
+@model KGERP.Service.ServiceModel.AssetModel2
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+
+<style type="text/css">
+
+    /*Custom table CSS*/
+    .text-on-pannel {
+        background: #fff none repeat scroll 0 0;
+        height: auto;
+        margin-left: 20px;
+        padding: 3px 5px;
+        position: absolute;
+        margin-top: -47px;
+        border: 1px solid #337ab7;
+        border-radius: 8px;
+    }
+
+    .panel {
+        /* for text on pannel */
+        margin-top: 27px !important;
+    }
+
+    .panel-body {
+        padding-top: 30px !important;
+    }
+
+    .spacing-table {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        font-size: 12px;
+        border-collapse: separate;
+        border-spacing: 0 5px; /* this is the ultimate fix */
+        width: 100%;
+    }
+
+        .spacing-table th {
+            text-align: left;
+            padding: 5px 5px;
+        }
+
+        .spacing-table td {
+            border-width: 3px 0;
+            /* border-color: darkred;
+                border-style: solid;*/
+            background-color: #f1f1f1;
+            color: Black;
+            padding: 5px 5px;
+        }
+
+            .spacing-table td:first-child {
+                /*  border-left-width: 3px;*/
+                border-radius: 5px 0 0 5px;
+            }
+
+            .spacing-table td:last-child {
+                /*border-right-width: 3px;*/
+                border-radius: 0 5px 5px 0;
+            }
+
+    .image {
+        float: left;
+        max-height: 50px;
+        max-width: 50px;
+        margin-right: 10px;
+    }
+
+    .name {
+        margin: 0;
+        padding: 0;
+    }
+
+    .username {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 1em;
+    }
+
+    .ui-autocomplete {
+        max-height: 320px;
+        overflow: auto;
+    }
+
+    .tdRightAlign {
+        width: 20%;
+        font-size: medium;
+        text-align: right;
+    }
+
+    .tdCenterAlign {
+        background-color: #E9EDBE;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    /*Red Horizontal Line*/
+    .redHorizontalLine {
+        border-color: red;
+        padding: 0px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border-width: 2px;
+    }
+</style>
+
+
+
+    <section class="content-header">
+        <h1>
+            Land List
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+            <li>
+                <a href="@Url.Action("CreateOrEditKGAsset", new { id = 0 })" class="btn btn-primary pull-right">
+                    <span class="fa fa-plus"></span> Add
+                </a>
+            </li>
+        </ol>
+    </section>
+    <div class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-danger">
+                        <div class="box-body">
+
+                            @using (Html.BeginForm("LandIndex3", "Asset", FormMethod.Post, new { @class = "formValidator" }))
+                            {
+
+                                <table class="table table-borderless">
+
+                                    <tr>
+
+                                        <td> LandReceiverId</td>
+                                        <td>
+                                            @Html.DropDownListFor(Model => Model.SelectedLandReceiverId,
+                                    new SelectList(Model.LandReceiverList, "Value", "Text"), "---Select---",
+                                    new { @class = " form-control" })
+                                        </td>
+                                        <td> District</td>
+                                        <td>
+                                            @Html.DropDownListFor(Model => Model.SelectedDistrictId,
+                                          new SelectList(Model.DistrictList, "Value", "Text"), "---Select---",
+                                          new { @class = " form-control", @id = "ddlDistrict" })
+                                        </td>
+                                        <td>Upazilla</td>
+                                        <td>
+                                            @Html.DropDownListFor(Model => Model.SelectedUpzillaId,
+                                    new SelectList(Model.UpzillaList, "Value", "Text"), "---Select---",
+                                    new { @class = " form-control", @id = "ddlUpazila" })
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Company Name</td>
+                                        <td>
+                                            @Html.DropDownListFor(Model => Model.SelectedCompanyId,
+                                      new SelectList(Model.CompanyList, "Value", "Text"), "---Select---",
+                                       new { @class = " form-control" })
+                                        </td>
+                                        <td>
+                                        </td>
+                                        <td>
+                                            <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                        </td>
+                                        <td></td>
+                                        <td>
+                                            <a href="@Url.Action("ExportLandListToExcel", "Asset", new
+                                                {
+
+                                                    SelectedCompanyId = Request.QueryString["SelectedCompanyId"],
+                                                    LandReceiverId = Request.QueryString["LandReceiverId"],
+                                                    DistrictId = Request.QueryString["DistrictId"],
+                                                    UpazillaId = Request.QueryString["UpazillaId"]
+                                                })"
+                                               title="Export Land List" class="btn btn-primary pull-right">
+                                                <span class="glyphicon glyphicon-download"></span> Export Land List
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            }
+                        </div>
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL.</th>
+                                        <th nowrap>  Company  </th>
+                                        <th nowrap>  District  </th>
+                                        <th nowrap>  Upazila  </th>
+                                        <th nowrap>  Deed No  </th>
+                                        <th nowrap>  Deed Receiver </th>
+                                        <th class="text-center">Files</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @(++sl)
+                                            </td>
+                                            <td>
+                                                @item.CompanyName
+                                            </td>
+                                            <td>
+                                                @item.DistrictName
+                                            </td>
+                                            <td>
+                                                @item.UpazillaName
+                                            </td>
+                                            <td>
+                                                @item.DeedNo
+                                            </td>
+                                            <td>
+                                                @item.ReceiverNameEn
+                                            </td>
+                                            <td>
+                                                @item.NumberofFile
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="@Url.Action("CreateOrEditKGAsset" ,new { id = item.AssetId })" title="Edit" class="btn btn-info btn-xs">
+                                                    <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="@Url.Action("CreateOrEditKGAsset" ,new { id = item.AssetId})" title="Details" class="btn btn-primary btn-xs">
+                                                    <i class="fa fa-user" style="font-size:15px;" aria-hidden="true"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            otherDispute();
+        });
+
+        $('#ddlDistrict').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Upazila/GetUpazilaSelectModelsByDistrict",
+                data: { districtId: $('#ddlDistrict').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var Upazila = "<select>";
+                    Upazila = Upazila + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        Upazila = Upazila + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    Upazila = Upazila + '</select>';
+                    $('#ddlUpazila').html(Upazila);
+                }
+            });
+        });
+
+    </script>
+}

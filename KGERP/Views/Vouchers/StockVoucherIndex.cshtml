@@ -1,0 +1,486 @@
+﻿@model KGERP.Service.ServiceModel.VoucherModel
+@{
+    ViewBag.Title = "Voucher List";
+    var message = TempData["message"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .linkPointe {
+        cursor: pointer;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Voucher List
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+        <li>
+            <a href="~/Vouchers/ManageBankOrCash?companyId=@Request.QueryString["companyId"]" class="btn btn-primary">New Voucher</a>
+        </li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="box-danger">
+
+                    <div class="box">
+                        <div class="box-danger">
+
+                            <div class="box-body">
+                              
+
+                                <div class="table-responsive">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr style="background-color:#32527B;color:#FFFFFF">
+                                                <th>
+                                                    SL
+                                                </th>
+                                                <th>
+                                                    Voucher No
+                                                </th>
+                                                <th>
+                                                    Voucher Date
+                                                </th>
+                                                <th>
+                                                    Posting Date
+                                                </th>
+                                                <th>
+                                                    Narration
+                                                </th>
+                                                <th style="width:70px;">Report</th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @(++sl)
+                                                    </td>
+                                                    <td>
+
+                                                        @item.VoucherNo
+                                                    </td>
+                                                    <td>
+
+                                                        @if (item.VoucherDate.HasValue)
+                                                        {
+                                                            @item.VoucherDate.Value.ToString("dd/MMM/yyyy")
+                                                        }
+
+                                                    </td>
+                                                    <td>
+                                                        @if (item.CreateDate.HasValue)
+                                                        {
+                                                            @item.CreateDate.Value.ToString("dd/MMM/yyyy")
+                                                        }
+                                                    </td>
+                                                    <td>
+
+                                                        @Html.Raw(item.Narration)
+
+                                                    </td>
+                                                    <td>
+                                                        @if (item.IsStock)
+                                                        {
+                                                            <a href="~/Vouchers/ManageStock?companyId=@item.CompanyId&voucherId=@item.VoucherId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a href="~/Vouchers/ManageBankOrCash?companyId=@item.CompanyId&voucherId=@item.VoucherId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                                        }
+
+                                                        @if (!item.IsIntegrated)
+                                                        {
+                                                            if (Model.IsSubmit == true)
+                                                            {
+                                                                <a id="linkUndoSubmit_@item.VoucherId" onclick="makeUndoSubmit(@item.VoucherId,@item.CompanyId)" class="linkPointer text-warning" data-toggle="modal" data-target="#undoSubmitVoucherModal" title="Undo Submit" data-placement="top"><i class="fa fa-undo" aria-hidden="true"></i></a>
+
+                                                            }
+
+                                                            <a id="linkVoucherId_@item.VoucherId" onclick="makeDeletale(@item.VoucherId,@item.CompanyId)" style="color:red" class="linkPointer" data-toggle="modal" data-target="#deleteVoucherModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                            @*<a id="linkVoucherId_@item.VoucherId" onclick="makeEditble(@item.VoucherId,@item.CompanyId)" style="color:#999" class="linkPointer" data-toggle="modal" data-target="#EditVoucherModal" title="Edit" data-placement="top"><i class="glyphicon glyphicon-pencil" aria-hidden="true"></i></a>*@
+
+                                                        }
+
+                                                        <a href="@Url.Action("GetVoucherReport","Report", new { companyId = item.CompanyId, voucherId = item.VoucherId ,reportName =""})" style="width:100%" target="_blank" class="btn btn-primary btn-xs">
+                                                            Print
+                                                        </a>
+
+                                                    </td>
+                                                </tr>
+
+                                            }
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+@using (Html.BeginForm("UndoSubmitVoucher", "Vouchers", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="undoSubmitVoucherModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Undo Submit Voucher</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.VoucherId, new { id = "undoSubmithidVoucherId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "undoSubmitCompanyId" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>
+                            Are you sure to Undo Submit?.
+                            after completing  this action, you get this voucher under Incomplete List
+                        </h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-undo">&nbsp; Undo Submit Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("DeleteVoucher", "Vouchers", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteVoucherModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Voucher</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.VoucherId, new { id = "deletehidVoucherId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyId" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Voucher? Delete or Not</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@*@using (Html.BeginForm("DeleteVoucher", "Vouchers", FormMethod.Post))*@
+@*{*@
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="modal fade" id="EditVoucherModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b id="txtVoucherNo"> </b></h5>
+            </div>
+            <div class="modal-body">
+                @Html.HiddenFor(model => model.VoucherId, new { id = "deletehidVoucherId" })
+                @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyId" })
+
+
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input name="Date" asp-for="Date" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" onchange="generateVoucherNoByDate()" class="datePicker form-control" id="txtDate" placeholder="Date" autocomplete="off">
+                            @Html.ValidationMessageFor(model => model.vM.Date, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Voucher Type</label>
+                            @Html.DropDownListFor(model => model.VoucherTypeId, Model.VoucherTypesList as SelectList, "==Voucher Type==", new { id = "ddlVoucherTypeId", @class = "form-control", @onchange = "generateVoucherNo()", style = "width:100%", required = "required" })
+                            @Html.ValidationMessageFor(model => model.VoucherTypeId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        @*<div class="form-group">
+                                <label>CostCenter/Project</label>
+                                @Html.DropDownListFor(model => model.vM.Accounting_CostCenterFK, Model.vM.CostCenterList as SelectList, new { id = "ddlAccounting_CostCenterFK", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                @Html.ValidationMessageFor(model => model.vM.Accounting_CostCenterFK, "", new { @class = "text-danger" })
+                            </div>*@
+                    </div>
+                </div>
+
+                <div class="row bankHead">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Cheque Date</label>
+                            <input name="ChqDate" asp-for="ChqDate" type="text" class="datePicker form-control" id="txtChqDate" placeholder="Chq Date" autocomplete="off">
+
+                            @Html.ValidationMessageFor(model => model.ChqDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Cheque No</label>
+                            @Html.TextBoxFor(model => model.ChqNo, new { id = "txtChqNo", @class = "form-control", placeholder = "Cheque No" })
+                            @Html.ValidationMessageFor(model => model.ChqNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Cheque Name</label>
+                            @Html.TextBoxFor(model => model.ChqName, new { id = "txtChqName", @class = "form-control", placeholder = "Cheque Name" })
+                            @Html.ValidationMessageFor(model => model.ChqName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                </div>
+                <div class="col-md-9">
+                    <button type="submit" id="voucharCreateBtn" style="width:100%" class="btn btn-primary fa fa-edit">&nbsp; Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*}*@
+
+
+
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+
+
+
+
+
+
+
+
+
+
+        function makeDeletale(VoucherId, CompanyId) {
+            $('#deletehidVoucherId').val(VoucherId);
+            $('#deleteCompanyId').val(CompanyId);
+        }
+        function makeUndoSubmit(VoucherId, CompanyId) {
+            $('#undoSubmithidVoucherId').val(VoucherId);
+            $('#undoSubmitCompanyId').val(CompanyId);
+        }
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+        });
+
+        var message = '@message';
+        if(message){
+            alert(message);
+        }
+
+        function makeEditble(voucherId) {
+
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("GetSingleVoucher", "Vouchers")",
+                  datatype: "Json",
+                data: { voucherId: voucherId },
+                  success: function (data) {
+                      console.log("gggggggggg",data);
+                      $('#voucharCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidVoucherId").val(data.VoucherId);
+                      $("#txtVoucherNo").text(data.VoucherNo);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val("@Model.CompanyId");
+                      $("#ddlVoucherTypeId").val(data.VoucherTypeId).change();
+
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                 });
+            }
+
+        function generateVoucherNo() {
+            var voucherTypeId = $("#ddlVoucherTypeId option:selected").val();
+            var voucherDate = $("#txtDate").val();
+            console.log(voucherTypeId);
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetSinglevoucherTypes", "Vouchers")",
+                datatype: "Json",
+                data: { voucherTypesId: voucherTypeId },
+                success: function (data) {
+                      if (data.IsBankOrCash == true) {
+                          $('.bankHead').show();
+                      }
+                      else {
+                          $('.bankHead').hide();
+                      }
+                }
+            });
+            $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("GetVoucherNo", "Vouchers")",
+                datatype: "Json",
+                data: { voucherTypeId: voucherTypeId, companyId: "@Model.CompanyId", voucherDate: voucherDate },
+                success: function (data) {
+                    console.log("vvvvv", data);
+                    $("#txtVoucherNo").val(data);
+                    $("#spnVoucherNo").text("-" + data);
+                }
+            });
+
+
+        }
+
+
+
+        @*function makeEditble(id) {
+            if (id !== null) {
+                $.ajax({
+                type: "get",
+                url: "@Url.Action("CommonCustomerByIDGet", "Configuration")",
+                    data: { id: id },
+                    datatype: "json",
+                    traditional: true,
+                    success: function (data) {
+                        //console.log(data);
+
+                        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                        $('#customerId').val(data.ID);
+                        $('#ActionId').val(2);
+                        $('#CompanyFK').val(data.CompanyFK);
+                        $('#txtCustomerName').val(data.Name);
+                        $('#txtContactPerson').val(data.ContactPerson);
+                        $('#txtPhone').val(data.Phone);
+
+
+                        $('#txtEmail').val(data.Email);
+                        $('#ddlCommon_DivisionFk').val(data.Common_DivisionFk);
+
+                        $('#ddlCommon_DistrictsFk').val(data.Common_DistrictsFk);
+                        $('#ddlCommon_UpazilasFk').val(data.Common_UpazilasFk);
+                        $('#ddlZoneId').val(data.ZoneId);
+                        $('#ddlSubZoneId').val(data.SubZoneId);
+                        $('#txtAddress').val(data.Address);
+                        $('#txtNID').val(data.NID);
+                        $('#txtCreditLimit').val(data.CreditLimit);
+                        $('#ddCustomerTypeFk').val(data.CustomerTypeFk);
+
+
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+            }
+        }*@
+
+
+        function resetForm() {
+            $('#commonCustomerformId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#customerIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+
+            }
+                    }
+
+    </script>
+}
+
+
+

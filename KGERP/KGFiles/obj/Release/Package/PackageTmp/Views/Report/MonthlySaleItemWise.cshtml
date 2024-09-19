@@ -1,0 +1,150 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+
+<div class="row">
+    <div class="col-md-12" style="background-color:#f1f1f1;padding:5px">
+        <span style="font-size:20px;color:#000000">Monthly Sale Item Wise</span>
+    </div>
+</div>
+<br />
+<div class="row">
+    @using (Html.BeginForm("GetMonthlySaleItemWiseReport", "Report", FormMethod.Get, new { @id = "idForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CompanyId, new { @id = "hfCompanyId" })
+
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.Label("Year", htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-9">
+                    <select class="dropdownsize form-control" data-val="true" data-val-number="The field Payment Mode must be a number." data-val-required="Please select Year" id="Year" name="Year">
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.Label("Month", htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-9">
+                    <select class="dropdownsize form-control" data-val="true" data-val-required="Please select Month" id="Month" name="Month">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group pull-left">
+                <input type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+                <select class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px" name="ReportType" id="ReportType">
+                    <option value="PDF">PDF</option>
+                    <option value="EXCEL">EXCEL</option>
+                    <option value="WORD">WORD</option>
+                </select>
+            </div>
+        </div>
+
+
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+        $('#btnAdd').unbind("click").bind("click", function () {
+            var form = $('#idForm');
+            var url = "/Vouchers/CreateTempVoucher";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "html",
+                data: form.serialize(),
+                beforeSend: function () {
+
+                },
+                success: function (resp) {
+                    $('#divVoucherGrid').html(resp);
+                },
+                error: function (request, status, error) {
+                    alert("Error");
+                }
+            });
+
+        });
+
+
+
+        $(function () {
+            $("#accountName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/HeadGLs/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#accountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+
+
+
+
+
+
+    </script>
+}
+
+
+
+
+

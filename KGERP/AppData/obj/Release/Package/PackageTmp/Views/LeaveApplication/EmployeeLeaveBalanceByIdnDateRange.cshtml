@@ -1,0 +1,188 @@
+﻿@model KGERP.Data.CustomViewModel.EmployeeLeaveBalanceCustomModel
+@{
+    ViewBag.Title = "Employee Leave Balance";
+}
+
+<style type="text/css">
+
+    /*Custom table CSS*/
+    .text-on-pannel {
+        background: #fff none repeat scroll 0 0;
+        height: auto;
+        margin-left: 20px;
+        padding: 3px 5px;
+        position: absolute;
+        margin-top: -47px;
+        border: 1px solid #337ab7;
+        border-radius: 8px;
+    }
+
+    .panel {
+        /* for text on pannel */
+        margin-top: 27px !important;
+    }
+
+    .panel-body {
+        padding-top: 30px !important;
+    }
+
+    .spacing-table {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        font-size: 12px;
+        border-collapse: separate;
+        border-spacing: 0 5px; /* this is the ultimate fix */
+        width: 100%;
+    }
+
+        .spacing-table th {
+            text-align: left;
+            padding: 5px 5px;
+        }
+
+        .spacing-table td {
+            border-width: 3px 0;
+            /* border-color: darkred;
+                border-style: solid;*/
+            background-color: #f1f1f1;
+            color: Black;
+            padding: 5px 5px;
+        }
+
+            .spacing-table td:first-child {
+                /*  border-left-width: 3px;*/
+                border-radius: 5px 0 0 5px;
+            }
+
+            .spacing-table td:last-child {
+                /*border-right-width: 3px;*/
+                border-radius: 0 5px 5px 0;
+            }
+
+    .image {
+        float: left;
+        max-height: 50px;
+        max-width: 50px;
+        margin-right: 10px;
+    }
+
+    .name {
+        margin: 0;
+        padding: 0;
+    }
+
+    .username {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 1em;
+    }
+
+    .ui-autocomplete {
+        max-height: 320px;
+        overflow: auto;
+    }
+
+    .tdRightAlign {
+        width: 10%;
+        font-size: medium;
+        text-align: right;
+    }
+
+    .tdCenterAlign {
+        background-color: #E9EDBE;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    /*Red Horizontal Line*/
+    .redHorizontalLine {
+        border-color: red;
+        padding: 0px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border-width: 2px;
+    }
+</style>
+
+@using (Html.BeginForm("EmployeeLeaveBalanceByIdnDateRange", "LeaveApplication", FormMethod.Get))
+{
+    <div class="row">
+        <table class="spacing-table">
+            <tr>
+                <td class="tdRightAlign">  @Html.Label("From Date", new { @style = "font-size:14px" })</td>
+                <td style="background-color: #E9EDBE; vertical-align: middle;">
+                    <input type="datetime" class="datepicker pull-left " name="StartDate" value="@ViewBag.FromDate" autocomplete="off">
+                </td>
+                <td class="tdRightAlign">   @Html.Label("To Date", new { @style = "font-size:14px" })</td>
+                <td style="background-color: #E9EDBE; vertical-align: middle;">
+                    <input type="datetime" class="datepicker pull-left " name="EndDate" value="@ViewBag.ToDate" autocomplete="off">
+                </td>
+                <td class="tdRightAlign">   @Html.Label("Employee Id", new { @style = "font-size:14px" })</td>
+                <td style="background-color: #E9EDBE; vertical-align: middle;">
+                    @Html.TextBox("employeeId", null, new { @autocomplete = "off", @class = "form-control pull-left", @placeholder = "Search..." })
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+    <div class="row">
+        <div class="col-md-6">
+            @Html.Label("Employee Leave Balance", new { @style = "font-size:20px" })
+
+        </div>
+
+        <div class="col-md-6">
+            <div class="col-md-12 pull-right">
+                <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+}
+
+
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+<div class="row">
+    @if (!string.IsNullOrEmpty(ViewBag.message))
+    {
+        <div class="alert alert-danger alert-dismissible">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>
+                @ViewBag.message
+            </strong>
+        </div>
+    }
+</div>
+<div class="row">
+    @if (Model.LeaveBalanceCustomModels.Any())
+    {<table class="table table-bordered" style="background-color:#f1f1f1;">
+            <tr>
+                <td align="right">Employee</td>
+                <td>@Model.EmployeeCustomModel.EmployeeName</td>             
+                <td  align="right">Employee ID</td>
+                <td>@Model.EmployeeCustomModel.EmployeeID</td>
+            </tr>
+        </table>
+        <table class="table table-striped table-responsive">
+            <thead>
+                <tr style="background-color:#4CAF50;color:#FFFFFF">
+                    <th>Leave Type</th>
+                    <th>Total Leave</th>
+                    <th>Leave Availed</th>
+                    <th>Leave Due</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.LeaveBalanceCustomModels)
+                {
+                    <tr>
+                        <td><span>@item.LeaveCategory</span></td>
+                        <td><span class="badge" style="background-color:blue">@item.MaxDays</span></td>
+                        <td><span class="badge" style="background-color:red">@item.LeaveAvailed</span></td>
+                        <td><span class="badge" style="background-color:forestgreen">@(item.MaxDays - item.LeaveAvailed)</span></td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+</div>

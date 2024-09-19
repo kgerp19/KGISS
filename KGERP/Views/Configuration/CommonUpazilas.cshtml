@@ -1,0 +1,247 @@
+﻿
+@using KG.Core.Services
+
+@{
+
+    ViewData["Title"] = "Upazilas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMCommonThana
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Upazilas List
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Upazilas</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="col-md-3">
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>Update Districts</h4>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.ID, new { Value = "", id = "unitId" })
+                            @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionId" })
+                            <div class="form-group">
+
+                                <select class="form-control" name="" id="District">
+                                    <option value="0"> Select district </option>
+                                    @foreach (var item in Model.DistrictList)
+                                    {
+                                        <option value="@item.DistrictId"> @item.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+
+                            <div class="form-group">
+                                @Html.HiddenFor(model => model.ID, new { Value = "", id = "upazilaid" })
+                            </div>
+                            <div class="form-group">
+                                @Html.TextBoxFor(model => model.Name, new { id = "txtDistrictsName", @class = "form-control input-sm", @placeholder = "Upazila Name", required = "true", })
+                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group">
+                                @Html.TextBoxFor(model => model.ShorName, new { id = "txtShortName", @class = "form-control input-sm", @placeholder = "Short Name", required = "true", })
+                                @Html.ValidationMessageFor(model => model.ShorName, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-5">
+                                    <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                </div>
+                                <div class="col-md-7">
+                                    <button type="button" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box-danger">
+                    <div class="box-header">
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>
+                                            Division
+                                        </th>
+                                        <th>
+                                            Distict
+                                        </th>
+                                        <th>
+                                            Upazila
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @if (Model.DataList != null)
+                                    {
+                                        foreach (var item in Model.DataList)
+                                        {
+
+                                            <tr>
+                                                <td>@(++sl)</td>
+                                                <td>
+                                                    @item.DivisionsName
+                                                </td>
+                                                <td>
+                                                    @item.DistictName
+                                                </td>
+                                                <td>
+                                                    @item.Name
+                                                </td>
+                                                <td>
+
+                                                    <a id="@item.ID" onclick="EditItem(@item.ID);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+
+                                                    <a id="@item.ID" onclick="deleteItem(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#productCategoryDeleteModal" title="Delete"
+                                                       data-placement="top">
+                                                        <i class="glyphicon glyphicon-trash text-danger" aria-hidden="true"></i>
+                                                    </a>
+
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <script type="text/javascript">
+
+
+        $("#btnSave").click(function () {
+            var stnm = $("#txtShortName").val();
+            var conceptName = $('#District').find(":selected").val();
+            if (stnm.length > 10) {
+                alert("Short Name Must Be Greater than 10 Charecter");
+            }
+            else {
+                var v = {
+                    'Name': $("#txtDistrictsName").val(),
+                    'DistrictId': conceptName,
+                    'ShortName': $("#txtShortName").val(),
+                    'UpazilaId': $("#upazilaid").val(),
+                }
+                $.ajax({
+                    url: "/Configuration/SaveUpazila",
+                    method: "Post",
+                    data: { Model: v },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+
+
+                    }
+
+                });
+
+
+            }
+
+            location.reload();
+        });
+
+
+        function EditItem(id) {
+
+            var eid = id;
+
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetUpazilaById", "Configuration")",
+                datatype: "Json",
+            data: { id: eid },
+                success: function (data) {
+                    console.log(data);
+                    $("#txtDistrictsName").val(data.Name);
+                    $("#txtShortName").val(data.ShortName);
+                    $("#District").val(data.DistrictId).change();
+                    $("#upazilaid").val(data.UpazilaId);
+                    $("#btnSave").html(" <span>Update</span>");
+                   //// $("#sbmt").css('red');
+                }
+            });
+
+        }
+
+
+        function deleteItem(id) {
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+                  $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteUpazila", "Configuration")",
+                datatype: "Json",
+                      data: { id: id },
+                      success: function (data) {
+                          location.reload();
+
+                }
+             })
+
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+        }
+
+
+
+
+    </script>
+}

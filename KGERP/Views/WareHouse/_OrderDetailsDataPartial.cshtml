@@ -1,0 +1,189 @@
+﻿@model KGERP.Services.WareHouse.VMOrderDeliverDetailPartial
+@using KG.Core.Services
+
+
+
+<div class="row">
+    <div class="col-lg-12">
+        @{
+            int styleScheduleCount = Model.DataToList.Count();
+            if (styleScheduleCount > 0)
+            {
+                <div class="table-responsive">
+                    <table id="datatableid" class="table table-bordered text-nowrap">
+                        <thead>
+                                    <tr class="bg-success">
+                                        <th>SL</th>
+
+                                        <th>Item</th>
+
+                                        <th class="center">
+                                            Order Quantity
+                                        </th>
+
+                                        <th class="center">
+                                            Delivered Quantity
+                                        </th>
+                                        <th class="center">
+                                            Deliver Quantity
+                                        </th>
+                                        <th class="center">
+                                            VAt Parcent
+                                        </th>
+                                        <th class="center">
+                                        Tds Parcent
+                                        </th>
+                                        <th class="center">
+                                            Current Stock
+                                        </th>
+
+                                        <th><input type="checkbox" id="select_all" />&nbsp;Check All</th>
+                                    </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.DataToList.Count(); i++)
+                            {
+                            <tr>
+                                <th>
+                                    @Html.HiddenFor(model => model.DataToList[i].OrderDetailId)
+                                    @Html.HiddenFor(model => model.DataToList[i].ProductId)
+                                    @Html.HiddenFor(model => model.DataToList[i].UnitPrice)
+                                    @Html.HiddenFor(model => model.DataToList[i].SpecialDiscount)
+                                    @Html.HiddenFor(model => model.DataToList[i].DiscountRate)
+                                    @Html.HiddenFor(model => model.DataToList[i].DiscountUnit)
+                                    @Html.HiddenFor(model => model.DataToList[i].VATPercent)
+                                    @Html.HiddenFor(model => model.DataToList[i].TDSPercent)
+
+
+                                    @(i + 1)
+                                </th>
+
+                                <td>
+                                    @Html.DisplayFor(model => model.DataToList[i].ProductName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.DataToList[i].OrderQty) @Html.DisplayFor(model => model.DataToList[i].UnitName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.DataToList[i].DeliveredQty) @Html.DisplayFor(model => model.DataToList[i].UnitName)
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(model => model.DataToList[i].DeliverQty, new { Value = Model.DataToList[i].OrderQty - Model.DataToList[i].DeliveredQty, @class = "form-control" })
+
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.DataToList[i].VATPercent)
+
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.DataToList[i].TDSPercent)
+
+                                </td>
+                                <td>
+                                    @if (Model.DataToList[i].CurrentStock < Convert.ToDecimal(Model.DataToList[i].DeliverQty))
+                                    {
+                                        <span style="color:red">
+                                            @Html.DisplayFor(model => model.DataToList[i].CurrentStock)
+                                        </span> }
+                                    else
+                                    {
+                                        <span>
+                                            @Html.DisplayFor(model => model.DataToList[i].CurrentStock)
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @Html.CheckBoxFor(model => model.DataToList[i].Flag, new { @class = "checkbox checkToInstruction" })
+
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <button type="submit" id="btnsave" class="btn btn-primary btn-block"><i class='fa fa-plus'></i>Deliver</button>
+                    </div>
+
+                </div>
+
+            }
+            else
+            {
+                <div class="col-md-12">
+                    <div class="box box-success box-solid">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            <div class="form-group" style="text-align:center;">
+                                <h3>
+                                    There are no Item yet.
+                                </h3>
+                            </div>
+
+
+
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        //$("#btnsave").click(function () {
+        //    $('#datatableid > tbody  > tr').each(function (index, tr) {
+        //        console.log(index);
+        //        console.log(tr);
+        //    });
+        //})
+
+        $("#select_all").change(function () {  //"select all" change
+            $(".checkToInstruction").prop('checked', $(this).prop("checked")); //change all ".checkbox" checked status
+        });
+
+        //".checkbox" change
+        $('.checkToInstruction').change(function () {
+            //uncheck "select all", if one of the listed checkbox item is unchecked
+            if (false == $(this).prop("checked")) { //if this item is unchecked
+                $("#select_all").prop('checked', false); //change "select all" checked status to false
+            }
+            //check "select all" if all checkbox items are checked
+            if ($('.checkToDownload:checked').length == $('.checkToDownload').length) {
+                $("#select_all").prop('checked', false);
+            }
+        });
+
+
+
+
+        //$("#chkIsDefineBin input:checkbox").change(function () {
+        //    //var ischecked = $(this).is(':checked');
+        //    //if (ischecked) {
+        //    //    $("#linkDefine").show();
+        //    //}
+        //    //else {
+        //    //    $("#linkDefine").hide();
+
+        //    //}
+
+        //    alert('uncheckd ' + $(this).val());
+        //});
+
+    });
+
+
+</script>

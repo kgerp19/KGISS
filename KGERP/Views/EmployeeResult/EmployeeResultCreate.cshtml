@@ -1,0 +1,1194 @@
+﻿@model KGERP.Service.Implementation.EmployeeResults.EmployeeResultsVM
+@{
+    ViewData["Title"] = "EmployeeResultIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var TotalScore = 0;
+    var APRDetailsId = Model.AnnualPerformanceDetailId > 0 ? Model.FullName : "....................";
+    string CompanyFlg = "";
+    string DepartmentFlg = "";
+    bool aprCloseDateChks = DateTime.Now.Date > Model.AprEndingDate;
+    if (Model.AnnualPerformanceDetailId > 0)
+    {
+        CompanyFlg = Model.CompanyId > 0 ? "checked" : "";
+        DepartmentFlg = Model.DepartmentId > 0 ? "checked" : "";
+    }
+    int sls = 1;
+}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    input, select {
+        max-width: 100% !important;
+    }
+
+    #tblFooter tr {
+        cursor: move;
+    }
+
+    .ui-state-highlight {
+        height: 2em;
+        line-height: 1.2em;
+        background-color: #f2f2f2;
+        border: 1px dashed #aaa;
+    }
+
+    .forCustomHeading {
+        background: whitesmoke;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
+        padding: 10px 20px;
+        font-size: 19px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .empFormGroup {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+        .empFormGroup label {
+            margin-right: 10px;
+        }
+
+        .empFormGroup span {
+            flex-grow: 1;
+        }
+
+    .container {
+        font-family: 'Roboto', sans-serif;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100% !important;
+        padding-bottom: 1%;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+    table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    th {
+        background-color: #343a40;
+        color: #fff;
+        text-align: center;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    .score {
+        margin: 0;
+    }
+
+    p {
+        font-size: 1.2em;
+    }
+
+    #additionalMonths {
+        width: 5%;
+        background-color: darkblue;
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        border-radius: 7%;
+    }
+
+    #totalScore, #averageScore {
+        font-weight: bold;
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: end;
+        margin-top: 20px;
+    }
+
+    .card-containers {
+        display: flex;
+        justify-content: space-evenly;
+        margin-top: 20px;
+    }
+
+    .card {
+        width: 45%;
+        text-align: center;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .card p {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+    .demonstrated-traits-row {
+        font-weight: bold;
+        text-align: center;
+        background-color: #e9ecef;
+    }
+
+        .demonstrated-traits-row > td {
+            text-align: left;
+        }
+
+    .traitRowTd {
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .thead-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+        .thead-fixed th {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+    .radio-group {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+    }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+</style>
+
+<div class="container">
+    <!-- The Modal -->
+    @using (Html.BeginForm("AnnualPerformanceSubmit", "EmployeeResult", FormMethod.Post))
+    {
+        <div class="modal fade" id="divSubmiteApr" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            @Html.HiddenFor(model => model.AnnualPerformanceId, new { @id = "modalAnnualPerformanceId" })
+            @Html.HiddenFor(model => model.AnnualPerformanceDetailId, new { @id = "modalAnnualPerformanceDetailId" })
+            @Html.HiddenFor(model => model.EmployeeId, new { @id = "modalEmployeeId" })
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Submit Please</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div style="text-align:center">
+                            <h3>Are You Sure To Submit This? <br />Once you submit it, you can't update it again</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <div class="modal fade" id="divQualityModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <input hidden id="EducationDropDownTypeId" />
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabelQua">Qualification</h4>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control form-control-sm" id="eduQualityTxt" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="btnModalSaveData">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="divPersonalInformation">
+        <h3>1.Personal Information</h3>
+        <div class="row">
+            @Html.HiddenFor(model => model.AnnualPerformanceId)
+            @Html.HiddenFor(model => model.EmployeeId)
+            @Html.HiddenFor(model => model.AnnualPerformanceDetailId)
+            <div class="col-md-3">
+                <label>Appointment Date</label>
+                <div class="form-group" style="display:flex">
+                    @Html.EditorFor(model => model.AppointmentDateMsg, new { htmlAttributes = new { @class = "form-control", @placeholder = "dd/mm/yyyy", @autocomplete = "off", @disabled = "disabled" } })
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label>Division/Sister org.</label>
+                <div class="form-group" style="display:flex">
+                    @Html.TextBoxFor(model => model.Department, new { @class = "form-control", @autocomplete = "off", @disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label>Designation</label>
+                <div class="form-group" style="display:flex">
+                    @Html.TextBoxFor(model => model.Designation, new { @class = "form-control", @autocomplete = "off", @disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label>Full Name</label>
+                <div class="form-group" style="display:flex">
+                    @Html.TextBoxFor(model => model.FullName, new { @class = "form-control", @autocomplete = "off", @disabled = "disabled" })
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="from" class="form-label">Assessment From</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.EditorFor(model => model.AssessmentFromMsg, new { htmlAttributes = new { @class = "form-control", @placeholder = "dd/mm/yyyy", @autocomplete = "off", @disabled = "disabled" } })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Assessment To</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.EditorFor(model => model.AssessmentToMsg, new { htmlAttributes = new { @class = "form-control", @placeholder = "dd/mm/yyyy", @autocomplete = "off", @disabled = "disabled" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Marital Status</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.TextBoxFor(model => model.MaritalStatus, new { @class = "form-control", @autocomplete = "off", @disabled = "disabled" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Grade</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.TextBoxFor(model => model.GradeName, new { @class = "form-control", @autocomplete = "off", @disabled = "disabled" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:1%">
+            <div class="col-md-3">
+                <div class="radio-group" id="radioButtonApp">
+                    <label>
+                        <input type="radio" @CompanyFlg name="Rentity" value="company"> IsCompany
+                    </label>
+                    <label>
+                        <input type="radio" @DepartmentFlg name="Rentity" value="division"> IsDepartment
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-md-6" style="display:none" id="divHdnCompany">
+                <div class="form-group">
+                    <label class="control-label col-md-2" style="margin-top: 1%;">Company</label>
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.CompanyId, new SelectList(Model.Companies, "Value", "Text"), "---Select---", new { @class = " form-control input-sm", @style = "font-size: medium;" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6" style="display:none" id="divHdnDepartment">
+                <div class="form-group">
+                    <label class="control-label col-md-2" style="margin-top: 1%;">Department</label>
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.DepartmentId, new SelectList(Model.DDLDepartments, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div id="devQualifications">
+        <h3>2.Qualifications</h3>
+        <div class="row">
+            <div class="md-card-content col-12" style="overflow: scroll;">
+                <table id="tblQualifications" class="table table-bordered table-striped table-responsive" style="white-space:nowrap">
+
+                    <thead class="thead-fixed">
+                        <tr style="text-align:center"><th colspan="7" style="font-size:large">Educational Qualifications </th></tr>
+                        <tr>
+                            <th>Sl</th>
+                            <th style="text-align:center;width:30%;">Qualification &nbsp; <button onclick="addEductionQua('@(Model.EmployeeEqucationList?.FirstOrDefault()?.ExaminationDropDownTypeId==null?7:@Model.EmployeeEqucationList.FirstOrDefault().ExaminationDropDownTypeId)','Qualification')" class="btn btn-warning btn-xs"><i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button></th>
+                            <th><label>Subject</label>  &nbsp; <button onclick="addEductionQua('@(Model.EmployeeEqucationList?.FirstOrDefault()?.SubjectDropDownTypeId==null?42:@Model.EmployeeEqucationList.FirstOrDefault().SubjectDropDownTypeId)','Subject')" class="btn btn-warning btn-xs"><i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button></th>
+                            <th>Div/Grade/Category/Class</th>
+                            <th>Passed Year</th>
+                            <th><label>Institute</label> &nbsp; <button onclick="addEductionQua('@(Model.EmployeeEqucationList?.FirstOrDefault()?.InstituteDropDownTypeId==null?40:@Model.EmployeeEqucationList.FirstOrDefault().InstituteDropDownTypeId)','Institute ')" class="btn btn-warning btn-xs"><i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button></th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (Model.EmployeeEqucationList != null && Model.EmployeeEqucationList.Count > 0)
+                            {
+                                int sl = 1;
+                                foreach (var item in Model.EmployeeEqucationList)
+                                {
+                                    <tr>
+                                        <td><b>@sl</b></td>
+                                        <td>@item.Qualification</td>
+                                        <td>@item.Subject</td>
+                                        <td>@item.Result</td>
+                                        <td>@item.PassedYear</td>
+                                        <td>@item.Institute</td>
+                                        <td>
+                                            <button class="btn btn-danger btn-sm" onclick="makeDeletale(@item.EducationId)">Delete</button>
+                                        </td>
+                                    </tr>
+                                    sl += 1;
+                                }
+                            }
+
+                        }
+                    </tbody>
+                    <tfoot id="tblFooter">
+
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="text-right">
+            <button id="addRowBtn" class="btn btn-primary btn-sm">Add</button>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Self-Assessment by the Employee</h3>
+                <label class="required">(a) Justification of your compensation and performance in the reporting year.</label>
+                <div class="form-group">
+                    @Html.TextAreaFor(model => model.PerformanceInReportingYear, new { id = "notePerformanceNextYear", @class = "summernote form-control", rows = 1 })
+                    @Html.ValidationMessageFor(model => model.PerformanceInReportingYear, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <label class="required">(b) Your expected compensation package in reporting year with justification </label>
+                <div class="form-group">
+                    @Html.TextAreaFor(model => model.PlanforNextYear, new { id = "notePlanforNextYear", @class = "summernote form-control", rows = 1 })
+                    @Html.ValidationMessageFor(model => model.PlanforNextYear, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        @*<div class="row">
+                <div class="col-md-12">
+                    <label class="required">(c) Extra Additional Performance</label>
+                    <div class="form-group">
+                        @Html.TextAreaFor(model => model.AdditionalPerformance, new { id = "noteAdditionalPerformance", @class = "summernote form-control", rows = 1 })
+                        @Html.ValidationMessageFor(model => model.AdditionalPerformance, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>*@
+        <div class="row">
+            <div class="col-md-12">
+                <label class="required">(c) Your performing plan for next year.</label>
+                <div class="form-group">
+                    @Html.TextAreaFor(model => model.performingPlanForNextYear, new { id = "notePerformingPlanForNextYear", @class = "summernote form-control", rows = 1 })
+                    @Html.ValidationMessageFor(model => model.performingPlanForNextYear, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div id="divForSupportServiceEmployee">
+            <h3 style="margin-bottom: 0px !important;">Major tasks outside of routine work</h3>
+            <span>(For Support Service Employee)</span>
+            <div>
+                <table class="table table-bordered table-striped">
+                    <thead class="thead-fixed">
+                        <tr>
+                            <th style="width: 3%;">SL</th>
+                            <th>Outside tasks</th>
+
+                        </tr>
+                    </thead>
+                    <tbody class="container mt-5">
+                        <tr>
+                            <td>
+                                <label>1</label>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.MajorWorkOne, new { htmlAttributes = new { type = "text", @id = "majorWorkOne", @class = "form-control form-control-sm" } })
+                            </td>
+
+
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>2</label>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.MajorWorkTwo, new { htmlAttributes = new { type = "text", @id = "majorWorkTwo", @class = "form-control form-control-sm" } })
+                            </td>
+
+
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>3</label>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.MajorWorkThree, new { htmlAttributes = new { type = "text", @id = "majorWorkThree", @class = "form-control form-control-sm" } })
+                            </td>
+
+
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>4</label>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.MajorWorkFour, new { htmlAttributes = new { type = "text", @id = "majorWorkFour", @class = "form-control form-control-sm" } })
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="card-containers">
+                <div class="card" style="padding: 8px; width: 35%;">
+                    <div class="card-header">
+                        <h4 class="text-left mb-4" style="font-size: medium;"><label>Signature of the Employee Reported Upon</label></h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="empFormGroup text-right">
+                            <label>Name:</label>
+                            <span style="text-align: justify;">@Model.FullName</span>
+                        </div>
+                        <div class="empFormGroup text-right">
+                            <label>Designation:</label>
+                            <span style="text-align: justify;">@Model.Designation</span>
+                        </div>
+                        <div class="empFormGroup text-right">
+                            <label>Division/Sister Org:</label>
+                            <span style="text-align: justify;">@Model.Department</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+
+                    <span>@APRDetailsId</span>
+                    <p>Employee's Signature</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row text-center">
+            @if (!aprCloseDateChks)
+            {
+                if (!Model.IsSubmited)
+                {
+                    if (Model.AnnualPerformanceDetailId > 0)
+                    {
+                        <div class="card-containers">
+                            <div class="card">
+                                <div class="card-header">
+                                    <button type="button" id="btnDevQualifications" class="btn btn-warning mb-1" style="width:25%;color:black"><b style="color:white">Update</b></button>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="card-containers">
+                            <div class="card">
+                                <div class="card-header">
+                                    <button style="width:25%" onclick="makeSubmitAPR('@Model.AnnualPerformanceId','@Model.AnnualPerformanceDetailId','@Model.EmployeeId')" class="btn btn-danger" data-toggle="modal" data-target="#divSubmiteApr" title="Submit" data-placement="top"> Submit </button>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    }
+                    else
+                    {
+                        <button type="button" id="btnDevQualifications" class="btn btn-warning" style="width: 25%; color: black; margin-top: 5%">Save</button>
+                    }
+                }
+            }
+            else
+            {
+                <div class="card-containers">
+                    <div class="card" style="border: 1px solid;">
+                        <div class="card-header">
+                            <h3 style="color:red">APR is already closed!</h3>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+        <br />
+        @if (Model.IsSubmited)
+        {
+            <div>
+                <div class="text-center">
+                    <h3 class="btn btn-lg forCustomHeading">Your Approval Signatory</h3>
+                </div>
+                <br />
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>SL</th>
+                            <th>Name Of Reviewer</th>
+                            <th>Designation</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.signatoryApprovalList)
+                        {
+
+
+                            string Status = item.Status == 0 ? "Processing" : item.Status == 1 ? "Approved" : "Holding";
+                            string StatusColor = item.Status == 0 ? "btn-warning" : item.Status == 1 ? "btn-success" : "btn-info";
+                            <tr>
+                                <td>@sls</td>
+                                <td>@item.SignatoryName</td>
+                                <td>@item.DesignationName</td>
+                                <td>
+                                    <label class="btn @StatusColor btn-sm">@Status</label>
+                                </td>
+                            </tr>
+                            sls += 1;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+
+    @*<div id="divProfileQualities">
+            <h3>3. Profile Qualities</h3>
+            <table id="traitsTable" class="table table-bordered table-striped">
+                <thead class="thead-fixed">
+                    <tr>
+                        <th>Sl</th>
+                        <th style="text-align:left;width:30%;">Qualities Name</th>
+                        <th>9</th>
+                        <th>8</th>
+                        <th>7</th>
+                        <th>6</th>
+                        <th>5</th>
+                        <th>4</th>
+                        <th>3</th>
+                        <th>2</th>
+                        <th>1</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model.ProfileQualitiesList.Count > 0)
+                        {
+                            int DropDownTypeId = 0;
+                            for (int i = 0; i < Model.ProfileQualitiesList.Count; i++)
+                            {
+
+                                if (Model.ProfileQualitiesList[i].DropDownTypeId != DropDownTypeId)
+                                {
+                                    <tr class="demonstrated-traits-row">
+                                        <td colspan="11">@Model.ProfileQualitiesList[i].ProfileQualitiesGroupName</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td hidden>@Model.ProfileQualitiesList[i].DropDownItemId</td>
+                                    <td class="traitRowTd">@Model.ProfileQualitiesList[i].ProfileQualitiesName</td>
+                                    @for (int j = 9; j >= 1; j--)
+                                    {
+                                        var t = j == 9 ? "checked" : "";
+                                        <td><input type="checkbox" @t value="@j" class="score"></td>
+                                        TotalScore += j;
+                                    }
+                                </tr>
+                                DropDownTypeId = Model.ProfileQualitiesList[i].DropDownTypeId;
+                            }
+                        }
+
+                    }
+                </tbody>
+            </table>
+            <div class="card-containers">
+                <div class="card">
+                    <p>Total Score: <span id="totalScore">0</span></p>
+                </div>
+                <div class="card">
+                    <p>Average Score: <span id="averageScore">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="divOverallEvaluation">
+            <h3>4. Overall  Evaluation</h3>
+            <table class="table table-bordered table-striped">
+                <thead class="thead-fixed">
+                    <tr>
+                        <th>Outstanding</th>
+                        <th>Very Good</th>
+                        <th>Good</th>
+                        <th>Above Average</th>
+                        <th>Average</th>
+                        <th>Below Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="radio" id="lebOutstanding" name="favEvaluation" />
+                            <label for="lebOutstanding">8.00 & above</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="lebVeryGood" name="favEvaluation" />
+                            <label for="lebVeryGood">7.00-7.99</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="lebGood" name="favEvaluation" />
+                            <label for="lebGood">6.00-6.99</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="lebAboveAverage" name="favEvaluation" />
+                            <label for="lebAboveAverage">5.00-5.99</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="lebAverage" name="favEvaluation" />
+                            <label for="lebAverage">4.00-4.99</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="lebBelowAverage" name="favEvaluation" />
+                            <label for="lebBelowAverage">3.99-1.00</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="card-container">
+                <div class="card">
+                    <span id="totalScore">....................</span>
+                    <p>Signature Of Evaluator</p>
+                </div>
+
+            </div>
+            <div class="row text-center" style="margin-top:2%">
+                <button type="button" id="btnQualification" class="btn btn-warning" style="width:12%;color:black">Submit</button>
+            </div>
+
+        </div>*@
+</div>
+
+@*<div id="empMdOrCeo">
+        <div class="container" style="margin-top:2%">
+            <div class="row">
+                <div class="text-center">
+                    <h3 class="btn btn-lg forCustomHeading">To be initiated By MD/CEO</h3>
+                </div>
+                <div class="col-md-12">
+                    <ol style="margin-top:2%">
+                        <li><input type="radio" id="lebPermanent" name="favRecommend" /> I recommend this probationary employee becomes permanent. </li>
+                        <li><input type="radio" id="lebDismissed" name="favRecommend" /> I recommend this probationary employee be dismissed.  </li>
+                        <li><input type="radio" id="lebIncreased" name="favRecommend" /> I recommend that his/her probationary period to be increased to another <input title="Probationary period to be increased" type="number" id="additionalMonths" name="additionalMonths" /> months.</li>
+                    </ol>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="card" style="padding: 8px; width: 35%;">
+                        <div class="card-header">
+                            <h4 class="text-left mb-4" style="font-size: medium;"><label><u>MD/CEO</u> </label></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <span style="text-align: justify;">Date:</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center" style="margin-top:2%">
+                <button type="submit" class="btn btn-warning" style="width:12%;color:black">Submit</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="MdOrCeo">
+        <div class="container" style="margin-top:2%">
+            <div class="text-center">
+                <h3 class="btn btn-lg forCustomHeading">To be initiated By Group MD</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="required">Final comment of Management: </label>
+                    <div class="form-group">
+                        @Html.TextAreaFor(model => model.FinalCommentOfManagement, new { id = "noteFinalCommentOfManagement", placeholder = "Terms and Condition", @class = "summernote form-control", rows = 1 })
+                        @Html.ValidationMessageFor(model => model.Department, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="card" style="padding: 8px; width: 35%;">
+                        <div class="card-header">
+                            <h4 class="text-left mb-4" style="font-size: medium;"><label><u>Signature of Group MD</u> </label></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <span style="text-align: justify;">Date:</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center" style="margin-top:2%">
+                <button type="submit" class="btn btn-warning" style="width:12%;color:black">Submit</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="hodAdminAndHr">
+        <div class="container" style="margin-top:2%">
+            <div class="text-center">
+                <h3 class="btn btn-lg forCustomHeading">To be initiated By Head Of Admin & HR</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="required">HOD, Admin & HR (For necessary action):</label>
+                    <div class="form-group">
+                        @Html.TextAreaFor(model => model.HOdAdminHr, new { id = "noteHOdAdminHr", placeholder = "Terms and Condition", @class = "summernote form-control", rows = 1 })
+                        @Html.ValidationMessageFor(model => model.Department, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="card" style="padding: 8px; width: 35%;">
+                        <div class="card-header">
+
+                            <h4 class="text-left">Test Admin</h4>
+                            <h3 class="text-left mb-4" style="font-size: medium;"><label><u>Signature of Group MD</u> </label></h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="empFormGroup text-right">
+                                <span style="text-align: justify;">Date:</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center" style="margin-top:2%">
+                <button type="submit" class="btn btn-warning" style="width:12%;color:black">Submit</button>
+            </div>
+        </div>
+
+    </div>*@
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        if (data.longId == 1) {
+                            location.reload(true);
+                        } else if (data.longId == 2) {
+                            $('#divQualityModal').modal('hide');
+                            $('#tblFooter').html('');
+                        }
+                        else {
+                            window.location.href = data.returnURL;
+                        }
+                    }
+                });
+            }
+            else {
+                $('#divQualityModal').modal('hide');
+                $.alert.open("error", data.message);
+
+                setTimeout(() => {
+                    if (data.longId == 8) {
+                        window.open(data.returnURL, "_blank");
+                    }
+                },2000)
+
+            }
+        }
+
+        let makeSubmitAPR = (aprid,aprdid, empid) => {
+            $("#modalAnnualPerformanceId").val(aprid);
+            $("#modalAnnualPerformanceDetailId").val(aprdid);
+            $("#modalEmployeeId").val(empid);
+        }
+
+        let addEductionQua = (id,name) => {
+            if (id > 0) {
+                $('#myModalLabelQua').text(name);
+                $('#EducationDropDownTypeId').val(id);
+                $("#divQualityModal").modal('toggle');
+            } else {
+                alert("DropDownType Can't found!");
+            }
+
+        }
+
+
+
+        $('#radioButtonApp input[type=radio][name=Rentity]').change(function () {
+            var selectedValue = $("input[name='Rentity']:checked").val();
+            if (selectedValue === "company") {
+                $("#divHdnDepartment").hide();
+                $("#divHdnCompany").show();
+                $("#DepartmentId").val('');
+            } else if (selectedValue === "division") {
+                $("#divHdnDepartment").show();
+                $("#divHdnCompany").hide();
+                $("#CompanyId").val('');
+            }
+        });
+
+        const makeDeletale = (eduId) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/EmployeeResult/DeleteEducationById', { "EduId": eduId }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            if (@Model.AnnualPerformanceDetailId > 0) {
+                if (@Model.CompanyId> 0) {
+                    $("#divHdnCompany").show();
+                } else if(@Model.DepartmentId>0) {
+                    $("#divHdnDepartment").show();
+                }
+            }
+
+            $('#btnModalSaveData').click(() => {
+                let dropDownTypeId = $('#EducationDropDownTypeId').val();
+                let eduQualityTxt = $('#eduQualityTxt').val();
+                if (dropDownTypeId > 0) {
+                    HttpRequest.Ajax("POST", '/EmployeeResult/EducationContentsSave', { "dropDownTypeId": dropDownTypeId, "Name": eduQualityTxt }, saveSuccess, true);
+                }
+            })
+
+            $('#divQualityModal').on('hidden.bs.modal', function () {
+                $("#eduQualityTxt").val('');
+                $('#EducationDropDownTypeId').val(0)
+            });
+
+            $("#tblFooter").sortable({
+                items: "> tr",
+                appendTo: "parent",
+                helper: "clone",
+                cursor: "move",
+                opacity: 0.6,
+                placeholder: "ui-state-highlight",
+                stop: function (event, ui) {
+                    updateRowIndices();
+                }
+            }).disableSelection();
+
+            $("#btnDevQualifications").click(() => {
+                let majorWorkOne = $("#majorWorkOne").val();
+                let majorWorkTwo = $("#majorWorkTwo").val();
+                let majorWorkThree = $("#majorWorkThree").val();
+                let majorWorkFour = $("#majorWorkFour").val();
+
+                let annualPerformanceDetailId = $("#AnnualPerformanceDetailId").val();
+                let performanceInReportingYear = $("#notePerformanceNextYear").val();
+                let additionalPerformance = $("#noteAdditionalPerformance").val();
+                let performingPlanForNextYear = $("#notePerformingPlanForNextYear").val();
+                let planforNextYear = $("#notePlanforNextYear").val();
+                let annualPerformanceId = $("#AnnualPerformanceId").val();
+                let employeeId = $("#EmployeeId").val();
+                //let asseToDate = $("#AsseToDate").val();
+                let companyId = $("#CompanyId").val();
+                let departmentId = $("#DepartmentId").val();
+                var educationListData = [];
+                $('#tblFooter tr').each(function () {
+                    var row = {};
+                    row.ExaminationDropDownTypeId = $(this).find('td').eq(1).find('select').val();
+                    row.SubjectDropDownTypeId = $(this).find('td').eq(2).find('select').val();
+                    row.Result = $(this).find('td').eq(3).find('input').val();
+                    row.PassedYear = $(this).find('td').eq(4).find('select').val();
+                    row.InstituteDropDownTypeId = $(this).find('td').eq(5).find('select').val();
+                    educationListData.push(row);
+                });
+
+                let EmpPersonalInformation = {
+                    AnnualPerformanceDetailId: annualPerformanceDetailId,
+                    EmployeeId: employeeId,
+                    PerformanceInReportingYear: performanceInReportingYear,
+                    performingPlanForNextYear: performingPlanForNextYear,
+                    PlanforNextYear: planforNextYear,
+                    AdditionalPerformance: additionalPerformance,
+                    AnnualPerformanceId: annualPerformanceId,
+                    CompanyId: companyId,
+                    DepartmentId: departmentId,
+                    MajorWorkOne: majorWorkOne,
+                    MajorWorkTwo: majorWorkTwo,
+                    MajorWorkThree: majorWorkThree,
+                    MajorWorkFour: majorWorkFour,
+                    EmployeeEqucationList: educationListData
+                }
+                if (performanceInReportingYear != null && EmpPersonalInformation.AnnualPerformanceId && (companyId > 0 || departmentId>0)) {
+                    HttpRequest.Ajax("POST", '/EmployeeResult/AnnualPerformanceDetailSaveUpdate', { "model": EmpPersonalInformation }, saveSuccess, true);
+                }else {
+                    $.alert.open("Error", "Data Can't Provide Properly!")
+                }
+
+            });
+
+            $("#btnQualification").click(() => {
+                var profileQualitiesLists = [];
+
+                $('#traitsTable').find('input[type="checkbox"]').each(function () {
+                    if ($(this).is(':checked')) {
+                        var $checkbox = $(this);
+                        var $row = $checkbox.closest('tr');
+                        var itemValue = $checkbox.val();
+                        var itemId = $row.find('td[hidden]').text();
+
+                        profileQualitiesLists.push({
+                            DropDownItemId: itemId,
+                            ItemValue: itemValue
+                        });
+                    }
+                });
+                if (profileQualitiesLists.length > 0) {
+                    HttpRequest.Ajax("POST", '/EmployeeResult/ProfileQualitiesSubmit', { "profileQualitiesLists": profileQualitiesLists }, saveSuccess, true);
+                }
+            })
+
+
+            $('#addRowBtn').click(() => {
+
+                let qualification = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLExaminations", { "DropDownItemTypeId": 7 });
+                let subjects = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLSubjects", { "DropDownItemTypeId": 42 });
+                let institutions = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLInstitutions", { "DropDownItemTypeId": 40 });
+                let years = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLYears");
+
+                let rowCount = $('#tblFooter tr').length;
+                var newRow = `<tr>
+                                        <td>${rowCount == 0 ? rowCount + 1 : ++rowCount}</td>
+                                        <td class="col-sm-2">
+                                              <select  class="form-control form-control-sm qualificationList">${qualification}</select>
+                                         </td>
+                                        <td class="col-sm-2">
+                                            <select class="form-control form-control-sm subjectsList">${subjects}</select>
+                                        </td>
+                                        <td>
+                                            <input placeholder="GPA 4.5 OurOf 5.00" class="text-center form-control from-control-sm"/>
+                                        </td>
+                                        <td class="col-sm-2">
+                                            <select class="form-control form-control-sm yearsList">${years}</select>
+                                        </td>
+                                        <td class="col-sm-2">
+                                            <select class="form-control form-control-sm institutionsList">${institutions}</select>
+                                        </td>
+                                        <td><button class="deleteRowBtn  btn btn-danger btn-sm"><i class=" fa fa-trash fa-lg" aria-hidden="true"></i></button></td>
+                                    </tr>`;
+                $('#tblFooter').append(newRow);
+
+                $(".qualificationList").select2();
+                $(".subjectsList").select2();
+                $(".institutionsList").select2();
+                $(".yearsList").select2();
+            });
+
+            //$('#tblFooter').on('change', '.qualificationList', function () {
+            //    let selectedValue = $(this).val();
+            //    console.log('Selected value:', selectedValue);
+            //    // Perform any action you need with the selected value
+            //});
+
+
+            $('#tblFooter').on('click', '.deleteRowBtn', function () {
+                $(this).closest('tr').remove();
+                updateRowIndices();
+            });
+
+            function updateRowIndices() {
+
+                $('#tblFooter tr').each(function (index) {
+                    $(this).find('td').eq(0).text(index + 1);
+                });
+            }
+
+            $('input[type="checkbox"]').on('change', function () {
+
+                let row = $(this).closest('tr');
+                row.find('input[type="checkbox"]').not(this).prop('checked', false);
+                calculateScores();
+            });
+
+            function calculateScores() {
+                let totalScore = 0;
+                let count = 0;
+
+                $('input[type="checkbox"]:checked').each(function () {
+                    let checkboxValue = parseInt($(this).val());
+                    if (isNaN(checkboxValue)) {
+                        console.log("Invalid value: " + $(this).val());
+                    } else {
+                        totalScore += checkboxValue;
+                        count++;
+                    }
+                });
+
+                let averageScore = count > 0 ? (totalScore / count).toFixed(2) : 0;
+
+                $('#totalScore').text(totalScore);
+                $('#averageScore').text(averageScore);
+                calToChkOverallEvaluation(averageScore);
+            }
+            calculateScores();
+            updateRowIndices();
+            $('#notePlanforNextYear').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+
+            $('#noteAdditionalPerformance').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+            $('#notePerformingPlanForNextYear').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+
+            $('#notePerformanceNextYear').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+            $('#noteFinalCommentOfManagement').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+
+                ],
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteHOdAdminHr').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 100
+            });
+        });
+
+        let calToChkOverallEvaluation = (calValue) => {
+            if (calValue >= 8) {
+                $("#lebOutstanding").prop("checked", true)
+            } else if (calValue >= 7 && calValue < 8) {
+                $("#lebVeryGood").prop("checked", true)
+            } else if (calValue >= 6 && calValue < 7) {
+                $("#lebGood").prop("checked", true)
+            } else if (calValue >= 5 && calValue < 6) {
+                $("#lebAboveAverage").prop("checked", true)
+            } else if (calValue >= 4 && calValue < 5) {
+                $("#lebAverage").prop("checked", true)
+            } else if (calValue >= 1 && calValue < 4) {
+                $("#lebBelowAverage").prop("checked", true)
+            }
+        }
+
+
+    </script>
+}

@@ -1,0 +1,158 @@
+﻿@model KGERP.Service.ServiceModel.SmsListVm
+@using KGERP.Utility;
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Sms List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Sms List
+        <span>
+            <a target="_blank" href="~/Report/CompanyWiseSMSReport?companyId=@Model.CompanyId&StrFromDate=@Model.StrFromDate&StrToDate=@Model.StrToDate">SMS Report</a>
+        </span>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="~/Sms/Create?companyId=@Model.CompanyId" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New Sms
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+
+                        @using (Html.BeginForm("Index", "Sms", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("Sms Type", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        <select name="type" class="form-control">
+                                            <option>--Select Sms Type--</option>
+                                            @foreach (var item in Model.SmsTypeList)
+                                            {
+                                                if (Model.type == item.Id)
+                                                {
+                                                    <option selected value="@item.Id">@item.Name</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">@item.Name</option>
+                                                }
+
+                                            }
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.type, "", new { @class = "text-danger" })
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Date</th>
+                                        <th>Phone</th>
+                                        <th>Subject</th>
+                                        <th>Message</th>
+                                        <th>Remarks</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td>@(++sl)</td>
+                                            <td>@item.Date.ToString("dd-MMM-yyyy")</td>
+                                            <td>@item.PhoneNo</td>
+                                            <td>@item.Subject</td>
+                                            <td>@item.Message</td>
+                                            <td>@item.Remarks</td>
+                                            <td>@item.EnumStatus</td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

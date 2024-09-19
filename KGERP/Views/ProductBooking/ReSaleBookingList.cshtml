@@ -1,0 +1,224 @@
+﻿@model KGERP.Service.ServiceModel.GLDLBookingViewModel
+@{
+    ViewBag.Title = "CustomerBookingList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .ui-front {
+        z-index: 2100 !important;
+    }
+
+    .ui-datepicker {
+        z-index: 2100 !important;
+    }
+
+    @@media (min-width: 768px) {
+        .modal-content {
+            width: 750px;
+        }
+    }
+
+    .input-group {
+        width: 100% !important;
+    }
+
+    .mb-2 {
+        margin-bottom: 15px !important;
+    }
+
+    .input-group .form-control {
+        max-width: 100%;
+    }
+
+    .badge-primary {
+        color: #fff;
+        background-color: #007bff;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+
+    .badge-dark {
+        color: #fff;
+        background-color: #343a40;
+    }
+
+    .badge-info {
+        color: #fff;
+        background-color: #17a2b8;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 5px 15px 5px 5px;
+        background-color: #4caf5029 !important;
+    }
+
+    .bg-danger {
+        background-color: #f2dede !important;
+    }
+
+    .bg-warning {
+        background-color: #fcf8e3 !important;
+    }
+</style>
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-sm-12">
+            <b style="font-size:20px">
+                Re-Sale Booking List
+            </b>
+        </div>
+
+    </div>
+</section>
+
+<div>
+
+</div>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>File No</th>
+                <th>Booking date</th>
+                <th>Customer Name</th>
+                <th>Project Name</th>
+                <th>Block Name</th>
+                <th>Plot No</th>
+                <th>Total Value</th>
+
+                <th>Booking Status</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.datalist)
+            {
+                <tr class="@(item.FileStatus==2?"bg-danger":item.FileStatus==3?"bg-warning":"")">
+                    <td>@(++sl)</td>
+                    <td>@item.FileNo  </td>
+                    <td>@item.BookingDate.Value.ToString("dd-MM-yyyy")</td>
+                    <td>@item.CustomerGroupName</td>
+                    <td>@item.ProjectName</td>
+                    <td>@item.BlockName</td>
+                    <td>@item.PlotName</td>
+                    <td>
+                        <span> @(item.RestofAmount) </span>
+                    </td>
+      
+                <td>
+                    @if (item.FileStatus == 2)
+                    {
+                        <b class="text-danger"> File Cancel </b>
+                    }
+
+                    @if (item.FileStatus == 3)
+                    {
+                        <b class="text-danger"> File Transfer </b>
+                    }
+
+                    @if (item.FileStatus == 4)
+                    {
+                        <b class="text-danger"> Re-Sale </b>
+                    }
+                </td>
+                    <td>
+                        @if (item.IsSubmited == true)
+                        {
+                            <span class="badge badge-success">Submited</span>
+                        }
+                        @if (item.IsSubmited ==false)
+                        {
+                            <span class="badge badge-warning">Pending</span>
+                        }
+
+                    </td>
+                    <td>
+
+                        <a href="/ProductBooking/CustomerBookingInformation?companyId=@item.CompanyId&CGId=@item.CGId" target="_blank" class="btn btn-warning btn-xs">
+                            Details
+                        </a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(function () {
+            $("#ClientNameId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/ProductBooking/CustomerAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "companyId":"' +@Model.CompanyId+'"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#BookingBy").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function statusevent(bookinid, cgid) {
+            $("#CGId").val(cgid);
+            $("#BookingId").val(bookinid);
+        }
+        function Collaction(cgid) {
+            $("#ctCGId").val(cgid);
+        }
+    function submitCollaction(companyId) {
+            $("#ctCGId").val();
+        window.location.href = '/ProductBooking/MultiCollaction?companyId=' + companyId + '&CGId=' + $("#ctCGId").val() + '&collactionType=' + $("#CollactionType").val() +'';
+        }
+
+    </script>
+}

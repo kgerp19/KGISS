@@ -1,0 +1,141 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+<div class="row">
+    <div class="col-md-12" style="background-color:lightblue">
+        @Html.Label("Profit & Loss Statement Report", new { @style = "font-size:20px" })
+    </div>
+</div>
+<br />
+
+@using (Html.BeginForm("ProfitLossServiceReport", "Report", FormMethod.Get, new { @id = "idForm" }))
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CompanyId, new { @id = "hfCompanyId" })
+    @Html.HiddenFor(model => model.ReportName, new { @id = "hidReportName" })
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                @Html.LabelFor(model => model.CostCenterId, htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownListFor(model => model.CostCenterId, new SelectList(Model.CostCenters, "Value", "Text"), new { @id = "ddlCostCenterId", @class = "searchingDropdown form-control" })
+                @Html.ValidationMessageFor(model => model.CostCenterId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-3">
+            @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+            <br />
+            @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+
+        </div>
+        <div class="col-md-3">
+            @Html.Label("ToDate", htmlAttributes: new { @class = "control-label" })
+            <br />
+            @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+
+        </div>
+
+
+
+
+        <div class="col-md-3" style="margin-top:24px;float:left">
+            <input type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+            <select class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px" name="ReportType" id="ReportType">
+                <option value="PDF">PDF</option>
+                <option value="EXCEL">EXCEL</option>
+                <option value="WORD">WORD</option>
+            </select>
+
+            @*<input type="submit" style="margin-top:20px" formtarget="_blank" value="Report" class="btn btn-success" />*@
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+        $('#btnAdd').unbind("click").bind("click", function () {
+            var form = $('#idForm');
+            var url = "/Vouchers/CreateTempVoucher";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "html",
+                data: form.serialize(),
+                beforeSend: function () {
+
+                },
+                success: function (resp) {
+                    $('#divVoucherGrid').html(resp);
+                },
+                error: function (request, status, error) {
+                    alert("Error");
+                }
+            });
+
+        });
+
+
+
+        $(function () {
+            $("#accountName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/HeadGLs/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#accountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+
+
+
+
+
+
+    </script>
+}
+
+
+
+
+

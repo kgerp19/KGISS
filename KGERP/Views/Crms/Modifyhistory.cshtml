@@ -1,0 +1,192 @@
+﻿@model KGERP.Data.CustomModel.CrmVm
+@{
+    ViewBag.Title = "Modifyhistory";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+
+
+<div class="alert alert-info text-center" role="alert">
+    Resposible Officer Modify history
+</div>
+<div class="card">
+    <div class="card-header">
+        <div class="form-row  ">
+            <div class="form-group col-md-4 offset-md-1">
+                <label for="inputState">Responsible Officer</label>
+                <select class="form-control" id="ResponsibleOfficerId" required name="ResponsibleOfficerId" asp-for="GenderId">
+                    <option  value="0">--Select Responsible Officer--</option>
+                    @foreach (var item in Model.DealingOfficerList)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="inputCity">From Date</label>
+                <input class="form-control datepicker " id="startdate">
+            </div>
+
+            <div class="form-group col-md-3">
+                <label for="inputZip">To Date</label>
+                <input class="form-control datepicker " id="FormTodate">
+            </div>
+
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-4 offset-md-1">
+                <label for="inputState">Status</label>
+                <select class="form-control" id="StatusId" name="statusId" asp-for="GenderId" >
+                    <option value="0">--Select Status--</option>
+                    @foreach (var item in Model.ServiceStatusList)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+         
+            </div>
+            <div class="form-group col-md-3 mt-4">
+                <button class="btn btn-outline-success mt-1 col-8 " id="srs">Search</button>
+            </div>
+
+        </div>
+
+
+
+
+
+    </div>
+    <div class="card-body">
+        <table class="table table-striped d-none" id="countingstatus">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Client Name </th>
+                    <th scope="col">Satus</th>
+
+                    <th scope="col">Responsible Officer name</th>
+                    <th scope="col">Create Date</th>
+                    <th scope="col">Modify Date</th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+
+<script type="text/javascript">
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+
+    $("#srs").click(function () {
+
+        $("#countingstatus").removeClass("d-none");
+        var ResId = $('#ResponsibleOfficerId').find(":selected").val();
+        var StId = $('#StatusId').find(":selected").val();
+
+        if (ResId == 0) {
+            alert("Please Select the Responsible officer")
+        }
+        else {
+           var v = {
+           'ResponsibleOfficerId': ResId,
+                'StrFrmdate': $('#startdate').val(),
+                'Todate': $('#FormTodate').val(),
+            'StatusId': StId,
+            'CompanyId':@Model.CompanyId
+         };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetModifyhistory", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+             success: function (data) {
+                 console.log(data);
+
+                 $("#countingstatus tbody").empty();
+                 $("#allcount").html(data.TotalNumberofClient);
+                 $("#countingstatus").show();
+                 var table = $("#countingstatus").DataTable();
+                 table.clear().draw();
+                 var z = 1;
+                 let rows = "";
+                 for (var i = 0; i < data.crmVms.length; i++) {
+                     var createdate = DateCustom(data.crmVms[i].CreatedDate)
+                     var modifydat = null;
+
+                     if (data.crmVms[i].ModifyDate == null) {
+                         modifydat = "Not Modify Yet"
+                     }
+                     else {
+                         modifydat = DateCustom(data.crmVms[i].ModifyDate)
+                     }
+                     //rows += "<tr><td>" + z + "</td><td>" + data.crmVms[i].Name + "</td><td>" + data.crmVms[i].StatusText
+                     //    + "</td><td >" + data.crmVms[i].ResponsibleOfficeName + "</td><td >" + createdate + "</td><td >" + modifydat + "</td></tr>";
+                     table.row.add([
+                         z,
+                         '<a href="/Crms/GetClientDetailsById?clientId=' + data.crmVms[i].ClientId + '&companyId=' + data.crmVms[i].CompanyId + '">' + data.crmVms[i].Name + '</a>',
+                      /*   data.crmVms[i].Name,*/
+                         data.crmVms[i].StatusText,
+                         data.crmVms[i].ResponsibleOfficeName,
+                         createdate,
+                         modifydat
+                     ]).draw();
+                     z++;
+                 }
+
+                 $("#countingstatus tbody").append(rows);
+                 $("#countingstatus").DataTable();
+
+             }
+
+         });
+
+        $("#countingstatus").DataTable();
+        }
+
+
+
+
+
+
+
+
+     });
+
+
+        // Attach the custom validation function to the form's submit event
+
+
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "/" + month + "/" + year;
+        return date;
+    }
+
+
+
+
+</script>
+
+}

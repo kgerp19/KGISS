@@ -1,0 +1,380 @@
+﻿@model KGERP.Service.Configuration.VMPackagingProductionRequisitions
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "General RM Requisition List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            General RM Requisition List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a href="~/Procurement/GeneralRMRequisition?companyId=@Model.CompanyFK.Value" class="btn btn-success btn-xs">Add New General RM Requisition</a></li>
+    </ol>
+</section>
+@using (Html.BeginForm("PackagingProductionGeneralRequisitionList", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Requisition No</th>
+                                        <th>Requisition Date</th>
+                                        <th>From </th>
+                                        <th>To</th>
+                                        <th>Submission</th>
+                                        <th>Status</th>
+                                       
+                                        <th>Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+
+
+                                    <tr>
+                                        <th>@(++sl)</th>
+                                        <td>
+                                            <a href="~/Report/PackagingProductionRequisitionRep?requisitionId=@item.RequisitionId&companyId=@item.CompanyId" target="_blank"> @item.RequisitionNo </a>
+                                        </td>
+
+                                        <td>
+                                            @item.RequisitionDateMsg
+                                        </td>
+
+                                        <td>@item.FromRequisitionName</td>
+                                        <td>@item.ToRequisitionName</td>
+
+                                        <td>
+                                            @if (item.IsSubmitted)
+                                            {
+                                                <span class="btn btn-success btn-xs">
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    Submission Pending
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.RequisitionStatus == "N")
+                                            {
+                                                <span class="btn btn-info btn-xs">
+                                                    New
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-primary btn-xs">
+                                                    Issued
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                        <td>
+                                            @if (!item.IsSubmitted)
+                                            {
+                                                <a onclick=" makeEditble(@item.RequisitionId);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                 
+                                                <a onclick="makeDeletale(@item.RequisitionId)" class="linkPointer"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                
+                                            }
+                                            <a href="~/Procurement/GeneralRMRequisition?companyId=@item.CompanyId&requisitionId=@item.RequisitionId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                        </td>
+                                       
+
+
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        @*@if (Model.ID > 0)
+                            {
+                                <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                            }*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+<!-- Modal -->
+
+<div class="modal fade" id="modalDiv" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="margin-bottom:0%;padding-bottom:0%">
+                <h5 class="modal-title">New message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input hidden id="modRequisitionId" />
+                    <div class="row">
+                        <div class="col-md-6" style="margin-top: 10px;">
+                            <div class="form-group">
+
+                                <label>From Department</label>
+                                @Html.DropDownListFor(model => model.FromDepartmentReqId, Model.DDLStockDepartmetn, new { @class = "form-control form-control-sm" })
+
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="margin-top: 10px;">
+                            <div class="form-group">
+                                <label>To Department</label>
+                                @Html.DropDownListFor(model => model.ToDepartmentReqId, Model.DDLStockDepartmetn, new { @class = "form-control form-control-sm" })
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Requisition Date</label>
+                            <div class="form-group">
+                                @Html.EditorFor(model => model.RequisitionDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:89%", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Product Name</label>
+                                @Html.DropDownListFor(model => model.OrderDetailsId, Enumerable.Empty<SelectListItem>(), "==Select Style No ==", new { id = "ddlOrdStyleNo", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                @Html.ValidationMessageFor(model => model.OrderDetailsId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="modUpdate">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        location.reload(true);
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        $(document).ready(function () {
+            function resetForm() {
+                $('#procurementvmSalesOrderListFormId')[0].reset();
+                $('#SOEditActionId').val(1);
+            }
+            $("#txtCommonCustomerName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCustomerId").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        })
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+            //console.log(actionId);
+            //console.log("@((int)ActionEnum.Approve)");
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+
+
+
+            function makeSubmitble(rowId) {
+                // console.log(rowId);
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglOrderMastersGet", "Procurement")",
+                        datatype: "Json",
+                    data: { orderMasterId: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftPOCIDText').text(data.OrderNo);
+
+                            if (data.Status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+                $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+
+        const makeDeletale = (requisitionId) => {
+            debugger
+            //$('#hidProcurementPurchaseOrderId').val(rowId);
+            //$('#deleteActionId').val(3);
+
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/Procurement/PackagingProductionRequisitionDelete', { "requisitionId": requisitionId }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+
+
+        function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+        const makeEditble = (requisitionId) => {
+            if (requisitionId) {
+                let dataResuisition = HttpRequest.AjaxData("POST", '/Procurement/GetResuisitionDataByRequisitionId', { 'requisitionId': requisitionId });
+                var option = "";
+                $.each(dataResuisition.DDLGerOrderList, function (key, value) {
+                    option += "<option value='" + value.Value + "'>" + value.Text + "</option>";
+
+                });
+
+
+                $("#ddlOrdStyleNo").append(option);
+
+                $("#modRequisitionId").val(requisitionId);
+                $("#FromDepartmentReqId").val(dataResuisition.FromRequisitionId);
+                $("#ToDepartmentReqId").val(dataResuisition.ToRequisitionId);
+                $("#RequisitionDate").val(dataResuisition.RequisitionDateMsg);
+                $("#ddlOrdStyleNo").val(dataResuisition.OrderDetailsId);
+                $("#modalDiv").modal('toggle');
+            }
+
+        }
+
+        $("#modUpdate").click(() => {
+           let reqId= $("#modRequisitionId").val();
+           let fromDepId= $("#FromDepartmentReqId").val();
+           let toDepId= $("#ToDepartmentReqId").val();
+           let reqDate= $("#RequisitionDate").val();
+           let orderStyle = $("#ddlOrdStyleNo").val();
+
+            let RequisitionModel = {
+                RequisitionId: reqId,
+                FromRequisitionId: fromDepId,
+                ToRequisitionId: toDepId,
+                RequisitionDate: reqDate,
+                OrderDetailsId: orderStyle
+            }
+
+
+            if (RequisitionModel != null) {
+                HttpRequest.Ajax("POST", '/Procurement/KPLRequisitonUpdate', { 'model': RequisitionModel }, saveSuccess, null, true);
+            }
+
+        })
+
+
+    </script>
+}
+

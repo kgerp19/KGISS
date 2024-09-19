@@ -1,0 +1,419 @@
+﻿@model KGERP.Service.Contracts.KGERP.Requisitions.Queries.RequestModel.PackagingProductionRequisitionDetailsRM
+@{
+    ViewBag.Title = "Product Requisition";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.RequisitionId > 0)
+        {
+            <span>
+                RM Requisition : @Model.RequisitionNo
+            </span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+        <li class="active"><a href="~/Procurement/PackagingProductionRequisitionList?companyId=@Model.CompanyId" class="btn btn-success btn-xs">RM Requisition List</a></li>
+        <li class="active"><a href="~/Procurement/PackagingProductionRequisition?companyId=@Model.CompanyId" class="btn btn-success btn-xs">Add New RM Requisition</a></li>
+
+    </ol>
+</section>
+<section class="content">
+    <div class="box">
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.CompanyId)
+
+        <div class="box-danger">
+
+            <div class="box-body">
+                @if (Model.RequisitionId > 0)
+                {
+                    <div class="col-md-1"> </div>
+                    <div class="col-md-10">
+                        <table class="table">
+
+                            <tr>
+                                <th style="width:18%">
+                                    Requisition Number
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    <label class="col-form-label">@Model.RequisitionNo</label>
+                                </td>
+                                <th style="width:18%">Requisition Date</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.RequisitionDate.ToString("dd-MMM-yyyy")</td>
+                            </tr>
+                            <tr class="col-order-2">
+                                <th style="width:18%">
+                                    From
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    @Model.FromRequisitionName
+                                </td>
+
+                                <th style="width:18%">To</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.ToRequisitionName</td>
+                            </tr>
+                            <tr class="col-order-2">
+                                <th style="width:18%">
+                                    Order No
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    @Model.OrderNo
+                                </td>
+
+                                <th style="width:18%">Product Name</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.ProductNames</td>
+                            </tr>
+                            <tr class="col-order-2">
+                                <th style="width:18%">
+                                    Order Date
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    @Model.OrderDate.ToString("dd-MMM-yyyy")
+                                </td>
+
+                                <th style="width:18%">Requisition By</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.RequisitionBy</td>
+                            </tr>
+                            <tr class="col-order-2">
+                                <th style="width:18%">
+                                    Job No
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    @Model.JobOrderNo
+                                </td>
+
+                                <th style="width:18%">Customer</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.CustomerName</td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <div class="col-md-1"> </div>
+                }
+            </div>
+
+            <div class="box-body">
+                <div class="table-responsive col-md-12  text-nowrap">
+                    <table id="KgErpDataTable" class="table table-responsive-md table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>SL</th>
+                                <th>Product Name</th>
+                                <th>Allocated Qty</th>
+                                <th>Requisition Qty</th>
+                                <th>Remaining Qty</th>
+                                @if (!Model.IsSubmited)
+                                {
+                                    <th style="text-align:center">Action</th>
+                                }
+
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.RequisitionItemDetail)
+                            {
+
+                            <tr>
+                                <td>@(++sl)</td>
+
+                                <td>@item.ProductName</td>
+                                <td>@item.AllocatedQty</td>
+                                <td>@item.RQty</td>
+                                <td>@(item.AllocatedQty - item.RQty  )</td>
+                                @if (!Model.IsSubmited)
+                                {
+                                    <td style="text-align:center">
+                                        @*<a onclick="makeEditble('@item.RequistionItemDetailId','@item.RQty','@item.RProductId','@item.ProductName')" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                &nbsp;*@
+                                        <a onclick="makeDeletale('@item.RequistionItemDetailId')" class="linkPointer" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                    </td>
+                                }
+
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Report/PackagingProductionRequisitionRep?requisitionId=@Model.RequisitionId&companyId=@Model.CompanyId" target="_blank" class="btn btn-block btn-info"> RM Requisition Print </a>
+                    </div>
+
+                    @if (Model.IsSubmited)
+                    {
+                        <div class="col-md-3 btn btn-success">  <i>Submitted Successfully</i></div>
+
+
+
+
+                    }
+                    else
+                    {
+                        <div class="col-md-3">
+
+
+                            <a id="@Model.RequisitionId" onclick="makeSubmitble(@Model.RequisitionId)" class="linkPointer btn btn-success" data-toggle="modal" style="width:100%" data-target="#submitProductRequisitionModal" data-placement="top">
+
+                                <i class="fa fa-save"></i><i>&nbsp;Submit</i>
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@using (Html.BeginForm("RequisitionSubmitied", "Procurement", FormMethod.Post, new { id = "submitOrderMastersFromSlaveFormId", @class = "formValidator" }))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProductRequisitionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>  Product Requisition Submission</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.RequisitionId, new { id = "hidsubmitRequisitionId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "hidsubmitCompanyId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Submit this Product Requisition?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-save">&nbsp; Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>}
+
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        //const makeDeletale = (id) => {
+        //    $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+        //        if (button == 'yes') {
+        //            HttpRequest.Ajax("GET", '/Procurement/RequisitionItemDetailDelete', { "id": id }, saveSuccess, true);
+        //        } else {
+
+        //        }
+        //    });
+        //}
+
+        //const makeEditble = (RequistionItemDetailId, qty, productiId,RawIteName) => {
+        //    debugger
+        //    $('#divProductionRequisitionDetailsUpdate').removeClass('hidden');
+        //    $('#txtProductName').val(RawIteName);
+        //    $('#hdnRequisitionItemDetailId').val(RequistionItemDetailId);
+        //    $('#txtQty').val(qty);
+        //    $('#ddlRProductId').val(productiId);
+        //}
+        //function saveSuccess(data) {
+        //    if (data.result == 1) {
+        //        $.alert.open({
+        //            type: 'Success',
+        //            content: data.message,
+        //            callback: function () {
+        //                $("#modalDiv").modal("hide");
+        //                location.reload(true);
+        //            }
+        //        });
+        //    }
+        //    else {
+        //        $.alert.open("error", data.message);
+        //    }
+        //}
+
+        //$("#OrderNoId").change(function () {
+        //    debugger
+        //    let orId = $("#OrderNoId").val();
+        //    if (orId != "") {
+        //        HttpRequest.DropDown("GET", "/Procurement/GetDDLOrderWiseProduct", { OrderMasterId: orId }, 'ddlOrdStyleNo', true);
+
+        //    } else {
+        //        HttpRequest.DropDownDefault("ddlOrdStyleNo");
+        //    }
+        //});
+        $(document).ready(function () {
+            @*$("#OrderNoId").select2();
+            $("#OrderNoId").val("@Model.OrderMasterId").trigger('change');*@
+
+
+            @*$("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("AutoCompleteRawPackingMaterialsGet", "Configuration")",
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.CompanyId", prefix: request.term },
+                        dataType: "json",
+                        type: "GET",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlRProductId").val(i.item.val);
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductByID", "Configuration")",
+                        datatype: "Json",
+                        data: { id: i.item.val },
+                        success: function (data) {
+                            console.log(data);
+                            var items = "";
+                            if (data) {
+                                $('.txtUnitName').text(data.UnitName);
+                            }
+                        }
+                    });
+                    $('#txtProductName').focus();
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });*@
+
+            //$('#modalDiv').on('hidden.bs.modal', function () {
+            //    $('#ddProductId').val(null).trigger('change');
+            //    ("#modQuantity").val(0);
+            //    $("#modHdnRequistionItemDetailId").val(null);
+
+            //})
+
+            //$('#ddProductId').each(function () {
+            //    $(this).select2({
+            //        dropdownParent: $(this).parent()
+            //    });
+            //});
+
+            //$("#modUpdate").click(() => {
+            //   let id= $("#modHdnRequistionItemDetailId").val();
+            //   let ProductId = $("#ddProductId").val();
+            //   let Qty = $("#modQuantity").val();
+            //    HttpRequest.Ajax("GET", '/Procurement/UpdateProductAndQuantityInRequisitionItemDetail', { "ProductId": ProductId, "Quentity": Qty, "RequistionItemDetailId": id, }, saveSuccess, true);
+            //})
+
+
+
+            @*$("#ddlOrdStyleNo").change(function () {
+                var StyleNo = $("#ddlOrdStyleNo").val();
+                $("#PackagingPurchaseOrderSlaveData").html('');
+                $.ajax({
+                    type: "GET",
+                    url:"@Url.Action("PackagingPurchaseRawItemDataList", "Procurement")",
+                    data: { StyleNo: StyleNo },
+                    success: function (response) {
+                        $("#PackagingPurchaseOrderSlaveData").html(response);
+                        $("#poCreateBtn").css("display", "");
+                    },
+                });
+            });*@
+
+            @*$("#btnSubmit").click(() => {
+                debugger
+                var requisitionId = '@Model.RequisitionId'
+                var isSubmited = '@Model.IsSubmited'
+                if (requisitionId) {
+                    $.alert.open('confirm', 'Do Your want to Submit?', function (button) {
+                        if (button == 'yes') {
+                            HttpRequest.Ajax("POST", '/Procurement/RequisitionSubmitied', { 'requisitioId': requisitionId, isSubmited: isSubmited }, saveSuccess, null, true);
+                        } else {
+
+                        }
+                    });
+                }
+            })*@
+
+            @*$("#poCreateBtn").click(() => {
+                var requisitionId = '@Model.RequisitionId'
+                debugger
+                var dataArray = [];
+                $('#PackagingPurchaseOrderSlaveData table tbody tr').each(function (index) {
+                    let productFK = $(this).find('input[name$="Common_ProductFK"]').val();
+                    let requiredQuantity = $(this).find('input[name$="RequiredQuantity"]').val();
+                    let finishProductBOMId = $(this).find('input[name$="FinishProductBOMId"]').val();
+
+                    var rowData = {
+                        FinishProductBOMId: finishProductBOMId,
+                        RequisitionId: requisitionId,
+                        RProductId: productFK,
+                        RQty: requiredQuantity
+                    };
+
+                    dataArray.push(rowData);
+                });
+                let RequisitionMasterDetailsRM = {
+                    RequisitionItemDetail: dataArray
+                }
+
+                if (dataArray.length>0) {
+                    HttpRequest.Ajax("POST", '/Procurement/RequisitionDetailsSave', { 'RequisitionItemDetailrm': RequisitionMasterDetailsRM }, saveSuccess, null, true);
+                }
+            })*@
+
+
+        })
+
+    </script>
+}

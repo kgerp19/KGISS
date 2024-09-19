@@ -1,0 +1,183 @@
+﻿@model  KGERP.Service.SMS_Service_Implementation.RealStateMessageVM
+@{
+    ViewBag.Title = "GetByMessageList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .form-control.input-validation-error:focus {
+        border-color: red !important;
+    }
+
+    .chosen-container-multi .chosen-choices li.search-field input[type=text] {
+        margin: 1px 0;
+        padding: 0;
+        height: 39px;
+        outline: 0;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none;
+        color: #999;
+        font-size: 100%;
+        font-family: sans-serif;
+        line-height: normal;
+        border-radius: 0;
+    }
+
+    .box {
+        position: relative;
+        border-radius: 3px;
+        background: #ffffff;
+        border-top: 3px solid #ffffff;
+        margin-bottom: 20px;
+        width: 100%;
+        box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
+    }
+
+    .skin-blue .content-header {
+        background: #ccffce;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 15px 15px 15px 15px;
+    }
+.dd textarea {
+         width: 100%!important; 
+    }
+</style>
+
+<section style="margin-bottom:20px;font-size:25px;">
+    <div> </div>
+    <h3 class="bg-w" style="padding-left:5px"><b>Messages List </b> </h3>
+</section>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Create Date</th>
+                <th>Address</th>
+                <th>Messages</th>
+                <th>Try-Count</th>
+                <th>Log</th>
+                <th>Status</th>
+                <th class="text-center"> Action </th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.reals)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td>@item.CreateDate.ToLongDateString()</td>
+                    <td>@item.Address</td>
+                    <td>@item.Message</td>
+                    <td>@item.TryCount</td>
+                    <td>@item.SMSLog</td>
+                    <td>
+                        @if (item.Status == 1)
+                        {
+                            <b class="text-info"> Pending</b>
+                        }
+                        @if (item.Status == 99)
+                        {
+                            <b class="text-danger"> Failed</b>
+                        }
+                        @if (item.Status == 100)
+                        {
+                            <b class="text-success"> Success</b>
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-primary btn-xs" data-toggle="modal" data-target=".bd-example-modal-lg" onclick="getSMSEdit(@item.ID)">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("NewMessage", "RealEstate_Messages", FormMethod.Post))
+            {
+
+                <div class="modal-body dd">
+                    @Html.HiddenFor(m => m.CompanyId)
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Mobile:</label>
+                        @Html.EditorFor(model => model.vM.Address, new { htmlAttributes = new { @class = "form-control customStyle", @id = "mobile", @autocomplete = "off", @style = "max-width: 100%;", required = "required" } })
+                        @Html.ValidationMessageFor(model => model.vM.Address, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Message:</label><br />
+                        @Html.TextAreaFor(model => model.vM.Message, new { rows = "10",@class = "form-control", @id = "Message", @autocomplete = "off",required = "required" })
+                        @Html.ValidationMessageFor(model => model.vM.Message, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Re-Send</button>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+
+      function getSMSEdit(id) {
+        $.ajax({
+            type: "GET",
+            url: "/RealEstate_Messages/GetByid",
+            datatype: "Json",
+            data: {id:id},
+            success: function (data) {
+                $("#mobile").val(data.Address);
+                $("#Message").val(data.Message);
+                $("#exampleModalLongTitle").text(data.Address);
+                console.log(data);
+            }
+        });
+        };
+
+
+</script>
+
+}

@@ -1,0 +1,348 @@
+﻿
+@model KGERP.Service.ServiceModel.EmployeeOperationModel
+@{
+    ViewBag.Title = "CreateOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    @using (Html.BeginForm("CreateOrEdit", "EmployeeOperation", new { id = 0 }, FormMethod.Get))
+    {
+        <div class="col-md-3">
+            <h4><b>Employee Operation/Action</b></h4>
+        </div>
+        <div class="col-md-3">
+            <div class="col-md-10">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Employee ID ..." })</div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    }
+</div>
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.OperationId)
+
+    <div class="form-horizontal">
+
+        <div class="panel panel-info" id="pnlCaseBasicInfo">
+            <div class="panel-heading"><b> Employee Basic Information </b></div>
+            <div class="panel-body">
+                @*@if (ViewBag.id != null)
+                    {*@
+                <div>
+                    @if (ViewBag.employeeInfo != null)
+                    {
+                        @Html.Raw(ViewBag.employeeInfo)
+                    }
+                </div>
+                @*}*@
+            </div>
+        </div>
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="panel panel-info">
+            <div class="panel-heading"><b>Employee Operation (Termination/Resignation/Special Leave Without Pay)</b></div>
+            <div class="panel-body">
+                <div class="form-group">
+
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmployeeId, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.EmployeeId, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmployeeOperationType, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(model => model.EmployeeOperationType, new SelectList(Model.EmployeeOperationTypes, "Text", "Text"), "---Select---", new { @id = "ddlEmployeeOperationType", @class = "dropdownsize form-control" })
+                                @Html.ValidationMessageFor(model => model.EmployeeOperationType, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6" id="actionDateDiv">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ActionDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.ActionDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:240px", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.ActionDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="fromDateDiv">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.FromDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.FromDate, new { htmlAttributes = new { @id = "fromDate", @style = "width:240px", @class = "datepicker", @onchange = "ValidateEndDate()", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="endDateDiv">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EndDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @id = "endDate", @style = "width:240px", @class = "datepicker", @onchange = "ValidateEndDate()", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Reason, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @*<textarea rows="3" cols="50" id="searchInput" name="Reason"></textarea>*@
+
+                                @Html.TextAreaFor(model => model.Reason, 4, 51, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.Reason, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.TextAreaFor(model => model.Remarks, 4, 51, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="form-group">
+                <div class="col-md-offset-10 col-md-2">
+                    @*<input type="submit" value="@Model.ButtonName" class="btn btn-primary" />*@
+                    <input type="submit" data-confirm="Are you sure to submit this Operation?" id="btnResuest" value="Save" class="btn btn-info" />
+                    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-danger" })
+                </div>
+            </div>
+        </div>
+
+
+        @*<div class="col-md-6 ">
+            <div class="form-group">
+                <div class="col-md-offset-4 left" style="padding-left:15px">
+                    <input type="submit" data-confirm="Are you sure to submit this Operation?" id="btnResuest" value="Save" class="btn btn-info" disabled />
+                    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-danger" })
+                </div>
+            </div>
+        </div>*@
+    </div>
+}
+
+@if (TempData["errMessage"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert("This Person Already Exists");
+        };
+    </script>
+}
+
+
+@if (TempData["DataSave"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert("Data Save Successfully!");
+        };
+    </script>
+}
+<div>
+    @Html.ActionLink("Back to List", "Index", new { id = Model.OperationId })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('input[type=datetime]').datepicker({
+                dateFormat: "dd/M/yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "-60:+0"
+            });
+            $("#divOnFieldDate").hide();
+            $('#fromDateDiv').hide();
+            $('#endDateDiv').hide();
+            // $("#resonLabel").text("Location");
+
+            var ddlEmployeeOperationType = $('#ddlEmployeeOperationType').val();
+
+            if (ddlEmployeeOperationType == "Special Leave Without Pay") {
+                $('#actionDateDiv').hide();
+                $('#fromDateDiv').show();
+                $('#endDateDiv').show();
+            }
+
+        });
+
+
+
+        $('#ddlEmployeeOperationType').change(function () {
+            var val = $(this).val();
+
+            if (val != "Special Leave Without Pay") {
+                $('#actionDateDiv').show();
+                $('#fromDateDiv').hide();
+                $('#endDateDiv').hide();
+            }
+
+            else {
+                $('#actionDateDiv').hide();
+                $('#fromDateDiv').show();
+                $('#endDateDiv').show();
+            }
+        });
+
+        function ValidateEndDate() {
+            var startDate = $('#fromDate').val();
+            var endDate = $('#endDate').val();
+            var ddlEmployeeOperationType = $('#ddlEmployeeOperationType').val();
+
+            if (startDate != '' && endDate != '') {
+                if (Date.parse(startDate) > Date.parse(endDate)) {
+                    alert("Start Date should not be greater than End Date");
+                    $('#fromDate').val();
+                }
+            }
+            return false;
+        }
+
+
+        //Confirm SMS
+        jQuery(document).ready(function () {
+                jQuery('[data-confirm]').click(function (e) {
+                if (!confirm(jQuery(this).attr("data-confirm"))) {
+                    e.preventDefault();
+                   window.location.href = '@Url.Action("Index", "EmployeeOperation")';
+                }
+            });
+        });
+
+    </script>
+
+    <script type='text/javascript'>
+        $(function () {
+            $('#searchInput').keyup(function () {
+                if ($(this).val() == '') {
+                    //Check to see if there is any text entered
+                    // If there is no text within the input ten disable the button
+                    $('#btnResuest').prop('disabled', true);
+                } else {
+                    //If there is text in the input, then enable the button
+                    $('#btnResuest').prop('disabled', false);
+                }
+            });
+        });
+    </script>
+    <style type="text/css">
+
+        class {
+            padding: 70px;
+            border: 1px solid #4CAF50;
+        }
+
+        .text-on-pannel {
+            background: #fff none repeat scroll 0 0;
+            height: auto;
+            margin-left: 20px;
+            padding: 3px 5px;
+            position: absolute;
+            margin-top: -47px;
+            border: 1px solid #337ab7;
+            border-radius: 8px;
+        }
+
+        .panel {
+            /* for text on pannel */
+            margin-top: 27px !important;
+        }
+
+        .panel-body {
+            padding-top: 30px !important;
+        }
+
+        .spacing-table {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 12px;
+            border-collapse: separate;
+            border-spacing: 0 5px; /* this is the ultimate fix */
+            width: 100%;
+        }
+
+            .spacing-table th {
+                text-align: left;
+                padding: 5px 5px;
+            }
+
+            .spacing-table td {
+                border-width: 3px 0;
+                /* border-color: darkred;
+                border-style: solid;*/
+                background-color: #f1f1f1;
+                color: Black;
+                padding: 5px 5px;
+            }
+
+                .spacing-table td:first-child {
+                    /*  border-left-width: 3px;*/
+                    border-radius: 5px 0 0 5px;
+                }
+
+                .spacing-table td:last-child {
+                    /*border-right-width: 3px;*/
+                    border-radius: 0 5px 5px 0;
+                }
+
+        .image {
+            float: left;
+            max-height: 50px;
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .name {
+            margin: 0;
+            padding: 0;
+        }
+
+        .username {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 1em;
+        }
+
+        .ui-autocomplete {
+            max-height: 320px;
+            overflow: auto;
+        }
+    </style>
+
+}
+
+

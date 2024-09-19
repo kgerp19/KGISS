@@ -1,0 +1,209 @@
+﻿@model KGERP.Service.ServiceModel.TeamMakingProcessViewModel
+@{
+    ViewBag.Title = "Create Team";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Create Teams (@Model.CompanyName)
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a href="~/TeamMakingProcess/TeamList?companyId=@Model.CompanyId"><i class="fa fa-plus"></i>  Teams List</a></li>
+    </ol>
+</section>
+
+
+@using (Html.BeginForm("CreateTeam", "TeamMakingProcess", FormMethod.Post))
+{
+
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(x => x.CompanyId, new { @id = "CompanyId" })
+
+                <div class="box-danger">
+
+                    <div class="box-body">
+
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Team Name</label>
+                                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @id = "NameId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <label>Select Team Leader</label>
+                                        @Html.DropDownListFor(model => model.EmployeeId, new SelectList(Model.Employee, "Value", "Text"), "---Select Team Leader---", new { id = "ddlCommon_EmployeeId", @class = "searchingDropdown", @style = "width: 100%;" })
+                                        @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div style="margin-top:20px">
+                                    <b>   Add Team Member  </b>
+                                    <div style="height:3px;width:100%;background-color:#a7ebaa;margin-bottom:20px"></div>
+                                </div>
+                            </div>
+                           
+
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Select Member</label>
+                                        @Html.DropDownListFor(model => model.MemberId, new SelectList(Model.Members, "Value", "Text"), "---Select Mewmber---", new { id = "MemberId", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                        @Html.ValidationMessageFor(model => model.MemberId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button style="width:100%" type="button" id="add" onclick="addItemToGrid()" class=" add btn btn-primary pull-left">
+                                            <i class="glyphicon glyphicon-plus-sign"></i> Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table class="table table-bordered" style="margin-top:20px">
+                                <thead>
+                                    <tr>
+                                        <th>Sl</th>
+                                        <th>Name</th>
+                                        <th>Mobile No</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemDetails">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="box-footer">
+        <div class="row">
+            <div class="col-md-8">
+
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <input id="submit" type="submit" data-confirm="Are you sure to submit?" value="Submit" class="btn btn-success pull-right" />
+
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        let EmployeeList = new Array();
+        function createRowForStock() {
+
+            var isAllValid = true;
+            console.log("hh");
+
+            if (!($('#MemberId').val().trim() !== '')) {
+                isAllValid = false;
+                $('#MemberId').siblings('span.error').css('visibility', 'visible');
+            }
+            else {
+                $('#MemberId').siblings('span.error').css('visibility', 'hidden');
+            }
+            return isAllValid;
+        }
+
+        function addItemToGrid() {
+            var id = $('#MemberId').val();
+            var res = createRowForStock();
+            if (res) {
+                $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetByMebmer", "TeamMakingProcess")",
+                datatype: "Json",
+                        data: { id: id},
+                    success: function (data) {
+                        if (data) {
+                            var eid = EmployeeList.filter(x => x.EmployeeId == id).length;
+                            console.log(eid);
+                            if (eid!==0) {
+                                alert("Already Exists Employee");
+                            } else {
+                                var item = {
+                                    "EmployeeId": data.Id,
+                                    "Name": data.Name,
+                                    "MobileNo": data.MobileNo,
+                                };
+                                EmployeeList.push(item);
+                                PopulateTableFromArray();
+                            }
+
+                        }
+
+                    }
+                });
+
+                //getSelectedItems();
+                //PopulateTableFromArray();
+            }
+            //buttonVisibility();
+        }
+
+        function PopulateTableFromArray() {
+
+            $("#itemDetails").empty();
+            if (EmployeeList.length > 0) {
+                //Customers[3].Amount
+                var html = '';
+                $.each(EmployeeList, function (key, item) {
+                    // console.log(item);
+                    html += '<tr id="' + key + '">';
+                    html += '<td> ' + (key + 1) + '</td>';
+                    html += '<td><input type="hidden" id="' + key + item.EmployeeId + '" name="TeamMember[' + key + '].EmployeeId" value="' + item.EmployeeId + '"/>' + item.Name+'</td>';
+                    html += '<td><input type="hidden" id="' + key + item.MobileNo + '"name="TeamMember[' + key + '].MobileNo" value="' + item.MobileNo + '"/>' + item.MobileNo + '</td>';
+                    html += '<td> <a onclick="removecell(' + item.EmployeeId + ',' + key + ')" class=" btn-outline-danger btn-flat btn-sm sm" style="font-size:20px;color:red"> <i class="fa fa-trash"></i></a> </td>';
+                    html += '</tr>';
+                });
+                $('#itemDetails').html(html);
+            }
+        }
+
+
+        function removecell(id, key) {
+            if (confirm("Are you sure to remove this ?")) {
+                EmployeeList.splice(EmployeeList.findIndex(x => x.EmployeeId == id), 1);
+                $("#" + key).remove();
+                PopulateTableFromArray();
+            }
+        }
+
+    </script>
+}

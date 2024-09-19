@@ -1,0 +1,125 @@
+﻿@model KGERP.Service.Implementation.IncentivesDistribution.IncentiveViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+</style>
+<div class="bg-w">
+    <b> @Model.CompanyName - Incentive Distributation  Configration Chart </b>
+</div>
+@using (Html.BeginForm("Index", "IncentiveDistributionConfigration", FormMethod.Post))
+{
+    @Html.HiddenFor(m => m.CompanyId, new { @id = "companyId" })
+    @Html.HiddenFor(m => m.Id, new { @id = "id" })
+    <div class="container-fluid" style="margin-top: 20px; border: 1px solid #f0ffff; padding: 28px 18px 21px 18px; background: #4caf501f ">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">Incentive Category<b style="color:red"> *</b> </label>
+
+                    @Html.DropDownListFor(model => model.IncentiveCatagoryId, new SelectList(Model.Catagorieslist, "Value", "Text"), "---Select Report---", new { id = "IncentiveCatagoryId", @class = "searchingDropdown  customStyle", @style = "width: 100%;", required = "required" })
+                    @Html.ValidationMessageFor(model => model.IncentiveCatagoryId, "", new { @class = "text-danger" })
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="txtBankCharge" class="col-form-label">Commission</label>
+                    @Html.TextBoxFor(model => model.Commission, new { id = "Commission", @class = "form-control", placeholder = "Commission", style = "max-width:100%", required = "required" })
+                    @Html.ValidationMessageFor(model => model.Commission, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group" style="margin-top:24px">
+                    @if (Model.Id > 0)
+                    {
+                        <button type="submit" class="btn btn-warning" id="actionId">Update</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary" id="actionId">Add Chart</button>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    if (Model.datalist != null)
+    {
+        <table class="table table-bordered border-primary" style="margin-top:20px">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Category Name</th>
+                    <th class="text-center">Commission</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.datalist)
+                {
+                    <tr>
+                        <td>@(++sl)</td>
+                        <td>@item.IncentiveCatagoryName</td>
+                        <td class="text-center">@item.Commission %</td>
+                        <td>
+                            <button type="button" class="btn btn-danger" onclick="makeDelete(@item.Id)"> Delete </button>
+                            <button type="button" class="btn btn-primary" onclick="makeEdit(@item.Id)"> Edit </button>
+                            <a href="#" onclick="makeDetails(@item.Id)" class="btn btn-info"> Details </a>
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="2" class="text-right" style="font-weight:600"> Total Commission </td>
+                    <td class="text-center" style="font-weight:600">@(Model.TotalCommission) % </td>
+                    <td> </td>
+                </tr>
+            </tbody>
+        </table>
+        //heloo
+    }
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+
+        function makeDelete(id) {
+            $.ajax({
+                type: "get",
+                url: "/IncentiveDistributionConfigration/Delete",
+                data: { id: id},
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    if (data == true) {
+                        location.reload();
+                    }
+
+                }
+            });
+        }
+        function makeEdit(id) {
+            url = "IncentiveDistributionConfigration/Index";
+            window.location.href = "/" + url + "?companyId=" + @Model.CompanyId + "&&id=" + id +"";
+        }
+    function makeDetails(id) {
+        url = "IncentiveDistributionConfigration/IncentiveDistributionDetails";
+            window.location.href = "/" + url + "?companyId=" + @Model.CompanyId + "&&id=" + id +"";
+    }
+</script>
+}

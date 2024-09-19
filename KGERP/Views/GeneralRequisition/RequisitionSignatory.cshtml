@@ -1,0 +1,262 @@
+﻿@model KGERP.Service.Implementation.General_Requisition.ViewModels.RequisitionSignatoryVM
+@{
+    ViewData["Title"] = "Requisition Signatory";
+    int i = 1;
+    int companyId = ViewBag.CompanyId ?? 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>Signatory for @Request.QueryString["integrateWith"]</h1>
+</section>
+@using (Html.BeginForm("RequisitionSignatory", "GeneralRequisition", FormMethod.Post, new { id = "procurementSalesOrderSlaveFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(x => x.UserCompanyId)
+            @Html.HiddenFor(model => model.ActionId)
+            @Html.HiddenFor(model=> model.RequisitionSignatoryId)
+            @Html.HiddenFor(model=> model.DesignationName)
+
+            <div class="box-danger">
+                <div class="box-body">
+                    <div class="row">
+                        
+                        <div class="col-md-4">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Signatory:</label>
+                                @Html.EditorFor(model => model.EmployeeName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", required = "required" } })
+                                @Html.HiddenFor(model => model.EmployeeId)
+                                @Html.ValidationMessageFor(model => model.EmployeeName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label" title="Like As : GeneralRequisition Table Name">Integrate With:</label>
+                                @Html.EditorFor(model => model.IntegrateWith, new { htmlAttributes = new { @class = "form-control", required = "required" } })
+                                @Html.ValidationMessageFor(model => model.IntegrateWith, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Up To Amount</label>
+                                <div class="input-group">
+                                    @Html.TextBoxFor(model => model.Limitation, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.Limitation, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Order By</label>
+                                <div class="input-group">
+                                    @Html.TextBoxFor(model => model.OrderBy, new { @class = "form-control", required = "required", @maxlength = "10" })
+                                    @Html.ValidationMessageFor(model => model.OrderBy, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="pull-right">
+                                <button onclick="resetForm()" class="btn btn-primary mr-1"><i class="fa fa-refresh"></i>&nbsp;Reset</button>
+                                <button type="submit" id="btnSave" class="btn btn-primary">
+                                    <i class='fa fa-plus'></i>
+                                    <span>Add Requisition Signatory</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+
+                </div>
+                <div class="box-body">                   
+                    @if (Model.DataList != null && Model.DataList.Count() > 0)
+                    {                       
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-responsive-md table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Company</th>
+                                        <th>Up To Amount</th>
+                                        <th>Signatory Name</th>
+                                        <th>Designation</th>
+                                        <th>Order By</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td>@(i++)</td>
+                                            <td>@item.CompanyName</td>
+                                            <td>@item.Limitation</td>
+                                            <td>@item.EmployeeName</td>
+                                            <td>@item.DesignationName</td>
+                                            <td>@item.OrderBy</td>
+
+                                            <td>
+                                                <a onclick="makeEditble(@item.RequisitionSignatoryId,@item.EmployeeId,'@item.EmployeeName','@item.DesignationName',@item.Limitation,@item.OrderBy)" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                <a onclick="makeDeletable(@item.RequisitionSignatoryId)" class="linkPointer" data-toggle="modal" data-target="#deleteModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+
+@using (Html.BeginForm("RequisitionSignatory", "GeneralRequisition", FormMethod.Post, new { id = "deleteForm", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Requisition Signatory</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x=> x.ActionId,new {@id="actionId"})
+                    @Html.HiddenFor(x=> x.RequisitionSignatoryId,new {@id= "requisitionSignatoryId" })
+                    @Html.HiddenFor(x=> x.UserCompanyId,new {@id= "userCompanyId" })
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this  Product Requisition  Item?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnDelete" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                $("#EmployeeName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#EmployeeId").val(ui.item.id);
+                        LoadDesignation(ui.item.id);
+                    }
+                });
+                //$("#CompanyName").autocomplete({
+                //    source: function (request, response) {
+                //        $.ajax({
+                //            type: "GET",
+                //            url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //            dataType: "json",
+                //            data: { prefix: request.term },
+                //            success: function (data) {
+                //                response($.map(data, function (item) {
+                //                    return { label: item.Name, value: item.Name, id: item.Id };
+                //                }));
+                //            },
+                //            error: function (e) {
+                //                // Handle error, if needed
+                //            }
+                //        });
+                //    },
+                //    minLength: 1,
+                //    delay: 500,
+                //    autoFocus: true,
+                //    select: function (event, ui) {
+                //        $("#CompanyId").val(ui.item.id);
+                //    }
+                //});
+            });
+        });
+        function LoadDesignation(employeeId) {          
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetEmployee",
+                data: { employeeId: employeeId },
+                success: function (res) {   
+                    $("#DesignationName").val(res.DesignationName);
+                    //alert(res.DesignationName);
+                }
+            })
+        }
+
+        function makeEditble(id, empId, empName, designationName, limitation,orderBy) {
+            $('#ActionId').val(@((int)KGERP.Utility.ActionEnum.Edit));
+            //$("#CompanyId").val(companyId);
+            $("#RequisitionSignatoryId").val(id);
+            $("#DesignationName").val(designationName);
+            $("#EmployeeId").val(empId);
+            $("#EmployeeName").val(empName);
+            $("#Limitation").val(limitation);
+            $("#OrderBy").val(orderBy);
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update Requisition Signatory");
+        }
+
+        function makeDeletable(id) {           
+            if (id !== null) {
+                $("#requisitionSignatoryId").val(id);
+                $('#actionId').val(@((int)KGERP.Utility.ActionEnum.Delete));
+                var userCompanyId = $("#UserCompanyId").val();
+                $('#userCompanyId').val(userCompanyId);
+            }
+        }
+        function resetForm() {
+           $('#ActionId').val(@((int)KGERP.Utility.ActionEnum.Add));
+           /* $("#CompanyId").val(null);*/
+            $("#RequisitionSignatoryId").val(null);
+            $("#DesignationName").val('');
+            $("#EmployeeId").val(null);
+            $("#EmployeeName").val('');
+            $("#Limitation").val(null);
+            $("#OrderBy").val(null);
+            $('#btnSave').html("<i class='fa fa-plus'></i>&nbsp;Update Requisition Signatory");
+        }
+    </script>
+}
+

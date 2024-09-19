@@ -1,0 +1,234 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+@{
+
+    ViewData["Title"] = "Inventory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+
+    @if (Model.ReportName == "GCCLFinishedStockReport")
+    {
+
+
+        <h3>Finish Inventory</h3>
+    }
+    else if (Model.ReportName == "GCCLRawStockReport")
+    {
+        <h3>Raw Inventory</h3>
+    }
+    else
+    {
+        <h3>Inventory</h3>
+    }
+
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+
+        <li class="active">Inventory</li>
+
+
+
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("InventoryReportView", "Report", FormMethod.Get, new { id = "wareHouseRawItemInventoryformId", @class = "formValidator", @target = "_blank", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            @*@Html.HiddenFor(model => model.ReportName, new { id = "ReportName" })
+                                @Html.HiddenFor(model => model.NoteReportName, new { id = "NoteReportName" })*@
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Category:</label>
+                                        @Html.DropDownListFor(model => model.ProductCategoryId, new SelectList(Model.ProductCategoryList, "Value", "Text"), "---Select Category---", new { id = "ddlCommon_ProductCategoryFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProductCategoryId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Subcategory:</label>
+                                        @Html.DropDownListFor(model => model.ProductSubCategoryId, Model.ProductSubCategoryList as SelectList, "---Select Subcategory---", new { id = "ddlCommonProductSubCategoryFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProductSubCategoryId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Item:</label>
+                                        @Html.DropDownListFor(model => model.ProductId, Model.ProductList as SelectList, "---Select Item---", new { id = "ddlCommonProductFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            <div class="col-md-6">
+                                <label for="message-text" class="col-form-label">Select Report:</label>
+                                <br />
+                                @Html.RadioButtonFor(m => m.ReportName, Model.ReportName) Stock Report
+                                @Html.RadioButtonFor(m => m.ReportName, Model.NoteReportName) Stock Summary Report
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="col-md-7">
+                                        <select asp-for="ReportType" class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px;width:100%" name="ReportType" id="ddlReportType">
+                                            <option value="PDF">PDF</option>
+                                            <option value="EXCEL">EXCEL</option>
+                                            <option value="WORD">WORD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input style="width:100%" type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+
+        $(document).ready(function () {
+
+             //$('.formValidator').bootstrapValidator();
+
+             $("#ddlCommon_ProductCategoryFk").change(function () {
+
+                var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProductSubCategory", "WareHouse")",
+                datatype: "Json",
+                         data: { id: productCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductSubCategoryFk").empty();
+                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+
+            $("#ddlCommonProductSubCategoryFk").change(function () {
+
+                var productSubCategoryFk = $("#ddlCommonProductSubCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProduct", "WareHouse")",
+                datatype: "Json",
+                         data: {  id : productSubCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductFk").empty();
+                            $("#ddlCommonProductFk").append("<option value=''>==Select Item==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+
+
+
+
+        });
+
+
+        function resetForm() {
+            $('#wareHouseRawItemInventoryformId')[0].reset();
+
+
+        }
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

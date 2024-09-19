@@ -1,0 +1,106 @@
+﻿@model KGERP.Service.ServiceModel.ProductPriceModel
+
+@{
+    ViewBag.Title = "CreateOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@using (Html.BeginForm("ProductTpPriceCreateOrEdit", "ProductPrice", FormMethod.Post))
+{
+    @Html.HiddenFor(x => x.CompanyId)
+    @Html.HiddenFor(x => x.PriceType)
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h3>Product T.P Price</h3>
+        <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.ProductId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" id="product" name="product" class="form-control col-md-6" />
+                <input type="hidden" id="hfProductId" name="productId" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PriceUpdatedDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.PriceUpdatedDate, new { htmlAttributes = new { @class = "datepicker", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.PriceUpdatedDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+       
+        <div class="form-group">
+                @Html.LabelFor(model=>model.UnitPrice, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.UnitPrice, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.UnitPrice, "", new { @class = "text-danger" })
+                </div>
+            </div>
+       
+        <div class="col-md-offset-3 col-md-3">
+            <div class="form-group">
+                <a href="@Url.Action("Index",new {companyId=Model.CompanyId, priceType=Request.QueryString["priceType"]})" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove-circle"></span>   Close
+                </a>
+                <button type="submit" class="btn btn-primary" onclick="javascript: return SubmitForm();" style="margin-left: 20px;"><span class="glyphicon glyphicon-floppy-disk"></span>@Model.ButtonName</button>
+            </div>
+        </div>
+
+    </div>
+}
+
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        function SubmitForm() {
+
+            var r = confirm("Are you sure you want to submit?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+    </script>
+
+}
+

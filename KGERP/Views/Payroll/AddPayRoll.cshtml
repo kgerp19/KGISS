@@ -1,0 +1,184 @@
+﻿@model  KGERP.Service.HR_Pay_Roll_Service.ParollServices.VmPRollPayRollDetail
+@using KG.Core.Services
+
+@{
+    ViewBag.Title = "Add Payroll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>&nbsp;</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Bank</li>
+    </ol>
+</section>
+@using (Html.BeginForm("AddPayRoll", "Payroll", FormMethod.Post, new { id = "AddPayRollFid", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+
+                    <div class="box-danger">
+
+                        <div class="box-body">
+                            <div class="box-body">
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                @*@Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                                    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })*@
+                                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="message-text" class="col-form-label">Type of Payment:</label>
+                                        <br />
+                                        @Html.RadioButtonFor(m => m.IsFestivalBonus, false, new { id = "festivalBonusFalse" }) Monthly Salary
+                                        @Html.RadioButtonFor(m => m.IsFestivalBonus, true, new { id = "festivalBonusTrue" }) Festival Bonus
+                                    </div>
+                                    <div class="col-md-4" id="divFestivalBonusDateStr">
+                                        <div class="form-group">
+                                            <label>Festival Date</label>
+                                            <div style="display:flex">
+                                                @Html.EditorFor(model => model.FestivalDateStr, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                                            </div>
+                                            @Html.ValidationMessageFor(model => model.FestivalDateStr, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label> Months </label>
+                                            @Html.DropDownListFor(model => model.Month, Model.MonthList as SelectList, "==Select Month ==", new { id = "ddlMonth", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Month, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="control-label"> Years<b style="color:red"> *</b> </label>
+                                            @Html.DropDownListFor(model => model.Year, new SelectList(Model.YearsList, "Value", "Text"), "---Select Years---", new { id = "Year", @class = "searchingDropdown  customStyle", @style = "width: 100%;", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Year, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="message-text" class="col-form-label">Note:</label>
+                                            @Html.TextAreaFor(model => model.Note, new { id = "txtBusinessAddress", @class = "form-control", @placeholder = "Note", @Rows = 1 })
+                                            @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-md-5">
+                                            <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+}
+
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+            $("#divFestivalBonusDateStr").hide();
+
+
+        });
+        $("#festivalBonusTrue").click(function () {
+            var radioValue = $('input[name="IsFestivalBonus"]:checked').val();
+
+            if (radioValue) {
+                $("#divFestivalBonusDateStr").show();
+            }
+            else {
+                $("#divFestivalBonusDateStr").hide();
+            }
+        })
+
+        $("#festivalBonusFalse").click(function () {
+            var radioValue = $('input[name="IsFestivalBonus"]:checked').val();
+
+            if (radioValue) {
+                $("#divFestivalBonusDateStr").hide();
+            }
+            else {
+                $("#divFestivalBonusDateStr").show();
+            }
+        })
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#BankId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#txtBankName').val($('#tdBankName_' + rowId).text().trim());
+                $('#TxtShortName').val($('#tdshortname_' + rowId).text().trim());
+
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            }
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#bankIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+                @*$('#CompanyFKDelete').val("@Model.CompanyFK");*@
+
+            }
+        }
+        function resetForm() {
+            $('#commonBankFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+    </script>
+}
+
+
+
+

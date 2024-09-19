@@ -1,0 +1,275 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+@{
+
+    ViewData["Title"] = "Sales RegisterReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+<style type="text/css">
+   
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+
+<style type="text/css">
+    .calender-width{
+        width: 80%;
+    }
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Sales Register
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Sales Registe</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("SalesRegisterReportView", "Report", FormMethod.Get, new { id = "salesReportformId", @class = "formValidator", @target = "_blank", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            @Html.HiddenFor(model => model.ReportName, new { id = "ReportName" })
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        <div style="display:flex">
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                                        </div>
+
+                                    </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            @Html.Label("ToDate", htmlAttributes: new { @class = "control-label" })
+                                            <br />
+                                            @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker form-control calender-width", @autocomplete = "off" } })
+                                            @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                                        </div>  
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group" style="padding:0px">
+                                            <label>Customer</label>
+                                            @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Customer Name", @id = "txtCustomerName" } })
+
+                                            @Html.HiddenFor(model => model.VendorId, new { id = "ddlCommon_CustomerFK" })
+                                            @Html.ValidationMessageFor(model => model.VendorId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Category:</label>
+                                        @Html.DropDownListFor(model => model.ProductCategoryId, new SelectList(Model.ProductCategoryList, "Value", "Text"), "---Select Category---", new { id = "ddlCommon_ProductCategoryFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProductCategoryId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Subcategory:</label>
+                                        @Html.DropDownListFor(model => model.ProductSubCategoryId, Model.ProductSubCategoryList as SelectList, "---Select Subcategory---", new { id = "ddlCommonProductSubCategoryFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProductSubCategoryId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Item:</label>
+                                        @Html.DropDownListFor(model => model.ProductId, Model.ProductList as SelectList, "---Select Item---", new { id = "ddlCommonProductFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="col-md-7">
+                                        <select asp-for="ReportType" class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px;width:100%" name="ReportType" id="ddlReportType">
+                                            <option value="PDF">PDF</option>
+                                            <option value="EXCEL">EXCEL</option>
+                                            <option value="WORD">WORD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input style="width:100%" type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $('.datepicker').datepicker({
+            dateFormat: "mm/dd/yy",
+                    showOn: 'both',
+                    changeMonth: true,
+                    changeYear: true,
+            yearRange: "2001:+50"
+        });
+            });
+ 
+
+        $(document).ready(function () {
+
+             //$('.formValidator').bootstrapValidator();
+
+             $("#ddlCommon_ProductCategoryFk").change(function () {
+
+                var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProductSubCategory", "WareHouse")",
+                datatype: "Json",
+                         data: { id: productCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductSubCategoryFk").empty();
+                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+
+            $("#ddlCommonProductSubCategoryFk").change(function () {
+
+                var productSubCategoryFk = $("#ddlCommonProductSubCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProduct", "WareHouse")",
+                datatype: "Json",
+                         data: {  id : productSubCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductFk").empty();
+                            $("#ddlCommonProductFk").append("<option value=''>==Select Item==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+
+$("#txtCustomerName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyId" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCommon_CustomerFK").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+
+        });
+
+
+        function resetForm() {
+            $('#salesReportformId')[0].reset();
+        }
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

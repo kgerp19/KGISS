@@ -1,0 +1,161 @@
+﻿@model KGERP.Service.Implementation.EmployeeResults.AnnualPerformanceEmpResultVM
+@{
+    ViewBag.Title = "AnnualEmployeeResultIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var ActionName = Model.AnnualPerformanceId > 0 ? "Update" : "Save";
+
+    int currentYear = DateTime.Now.Year;
+    var startDate = new DateTime(currentYear - 1, 7, 1);
+    var endDate = new DateTime(currentYear, 6, DateTime.DaysInMonth(currentYear, 6));
+    var aprEndDateSet = Model.AprEndingDate < DateTime.Now.AddYears(-5) ? DateTime.Now.AddDays(15).ToShortDateString() : Model.AprEndingDate.ToShortDateString();
+}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    input, select {
+        max-width: 100% !important;
+    }
+    .container {
+        font-family: 'Roboto', sans-serif;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100% !important;
+        padding-bottom: 1%;
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: end;
+        margin-top: 20px;
+    }
+
+    .card {
+        width: 45%;
+        text-align: center;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .card p {
+            font-size: 1.5em;
+            margin: 0;
+        }
+</style>
+<section class="content-header" style="margin-bottom:1%">
+    <h1>
+        @if (Model.AnnualPerformanceId > 0)
+        {
+            <span>
+                Annual Performance Report: <b>@Model.APRNO</b>
+            </span>
+        }
+        else
+        {
+    <span>
+        Annual Performance Report: @DateTime.Today.AddYears(-1).Year-@DateTime.Today.Year
+    </span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Annual Performance Report</li>
+    </ol>
+</section>
+@using (Html.BeginForm("AnnualEmployeeResultCreate", "EmployeeResult", FormMethod.Post, new { id = "frmnnualEmployeeResult", @class = "formValidator" }))
+{
+    <div class="container prevent-context-menu">
+        <div class="row" style="margin-top:1%">
+            <div class="col-md-3">
+                <label>APR No</label>
+                @Html.HiddenFor(model => model.AnnualPerformanceId)
+                <div class="form-group" style="display:flex">
+                    @Html.TextBoxFor(model => model.APRNO, new { @class = "form-control", @autocomplete = "off" })
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label>From Date</label>
+                <div class="form-group" style="display:flex">
+                    @Html.EditorFor(model => model.AssessmentFrom, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label>To Date</label>
+                <div class="form-group" style="display:flex">
+                    @Html.EditorFor(model => model.AssessmentTo, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label>APR End Date</label>
+                <div class="form-group" style="display:flex">
+                    @Html.EditorFor(model => model.AprEndingDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <label>Remarks &nbsp;<sup style="color:red">Max 1000<sup style="color:red" id="totalWordCounts"></sup> Words</sup></label>
+                <div class="form-group">
+                    @Html.TextAreaFor(model => model.Remarks, new { @class = "summernote form-control", rows = 5 })
+                </div>
+            </div>
+        </div>
+        <div class="row text-center" style="margin-top:2%">
+            <button type="submit" class="btn btn-warning" style="width:15%;color:black">@ActionName</button>
+        </div>
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+    $(() => {
+            $("#AssessmentFrom").val('@startDate.ToShortDateString()')
+            $("#AssessmentTo").val('@endDate.ToShortDateString()')
+            $("#AprEndingDate").val('@aprEndDateSet')
+            $("#APRNO").val('APR @DateTime.Today.AddYears(-1).Year-@DateTime.Today.Year')
+            $('#Remarks').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 250,
+                callbacks: {
+                    onKeyup: function (e) {
+                        let totalCount = checkCharacterCount();
+                        $("#totalWordCounts").text(totalCount);
+                    },
+                    onPaste: function (e) {
+                        setTimeout(function () {
+                            let totalCount = checkCharacterCount();
+                            $("#totalWordCounts").text(totalCount);
+                        }, 100);
+                    }
+                }
+            });
+
+            function checkCharacterCount() {
+                var content = $('.summernote').val();
+                var charCount = content.length;
+
+                if (charCount > 1000) {
+                    $.alert.open("warning",'Maximum character count of 1000 reached');
+                    var trimmedContent = content.substring(0, 1000);
+                    $('.summernote').summernote('code', trimmedContent);
+                }
+                return charCount;
+            }
+        })
+</script>
+}

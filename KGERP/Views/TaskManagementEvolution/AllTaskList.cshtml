@@ -1,0 +1,1617 @@
+﻿@model KGERP.Service.Implementation.TaskManagment.TaskManagementEvolutionVM
+@{
+    ViewBag.Title = "Task List";
+}
+
+
+
+
+
+<style>
+
+    .hidden {
+        display: none;
+    }
+
+
+
+
+    .draggable {
+        width: 300px;
+        /* height: 100px;*/
+        background-color: #3498db;
+        color: white;
+        text-align: center;
+        /*  line-height: 100px;*/
+        cursor: move;
+       
+    }
+
+    .droppable {
+        width: 303px;
+        /*height: 200px;*/
+        background-color: #f39c12;
+        color: white;
+        text-align: center;
+      /*  line-height: 200px;
+        margin-top: 20px;*/
+    }
+
+    #uploadForm {
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        max-width: 400px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+    }
+
+        #uploadForm input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #uploadForm button[type="submit"] {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            #uploadForm button[type="submit"]:hover {
+                background-color: #45a049;
+            }
+
+    .assigned-people-section11 {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 20px;
+        width: fit-content;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Center vertically */
+    }
+
+    .work-description-info11 {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+    }
+
+    .table-wrapper11 {
+        overflow-x: auto; /* Enable horizontal scrolling if content overflows */
+    }
+
+    .custom-table11 {
+        width: 100%; /* Table takes full width of its container */
+        border-collapse: collapse; /* Merge borders between cells */
+    }
+
+        .custom-table11 th, .custom-table11 td {
+            border: 1px solid #ddd; /* Add border to table cells */
+            padding: 8px;
+            text-align: left;
+        }
+
+        .custom-table11 th {
+            background-color: #f2f2f2; /* Gray background for table header */
+        }
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .comment-content {
+        display: flex;
+        justify-content: flex-end; /* Align items to the right */
+    }
+
+        .comment-content .like-icon {
+            margin-right: 5px; /* Adjust the space between the like icon and the like count */
+            margin-top: 5px;
+            margin-left: 5px; /* Adjust the space between the like icon and the like count */
+        }
+
+    .premium-heading {
+        padding: 10px 20px;
+        border-radius: 30px;
+        background-color: #ff6b6b;
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .comment-row {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .table-bordered > thead > tr > th,
+    .table-bordered > tbody > tr > th,
+    .table-bordered > tfoot > tr > th,
+    .table-bordered > thead > tr > td,
+    .table-bordered > tbody > tr > td,
+    .table-bordered > tfoot > tr > td {
+        border: none;
+    }
+
+    .comment-cell {
+        width: 100%;
+    }
+
+    .comment-action-icon {
+        margin-right: -10px;
+    }
+
+    .comment-bubble {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-radius: 20px;
+        background-color: #f5f5f5;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .comment-content {
+        flex: 1;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .comment-author {
+        font-weight: bold;
+        margin-right: 5px;
+        color: #333;
+    }
+
+    .comment-time {
+        color: #777;
+    }
+
+    .comment-text {
+        word-wrap: break-word;
+        font-size: 14px;
+    }
+
+    .edit-icon,
+    .delete-icon {
+        font-size: 18px;
+        margin-left: 20px;
+        color: #777;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+        .edit-icon:hover,
+        .delete-icon:hover {
+            color: #007bff;
+        }
+
+
+    .comment-section {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 20px;
+        border-radius: 20px;
+        background-color: #f0f3f8;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .comment-section-heading {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #3e4c6e;
+        text-transform: uppercase;
+        font-weight: bold;
+        text-align: center;
+    }
+
+
+    #commentTable {
+        width: 100%;
+        border-collapse: collapse;
+        border: none;
+    }
+
+        #commentTable th,
+        #commentTable td {
+            padding: 10px;
+            border: none;
+        }
+
+    .add-comment-form {
+        margin-top: 20px;
+    }
+
+        .add-comment-form textarea {
+            height: 100px;
+            resize: vertical;
+            font-size: 16px;
+        }
+
+        .add-comment-form button[type="submit"] {
+            margin-top: 15px;
+            padding: 12px 24px;
+            border-radius: 20px;
+            background-color: #59677b;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .add-comment-form button[type="submit"]:hover {
+                background-color: #4a5b70;
+            }
+
+
+    .delete-button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+        .delete-button i {
+            color: #e53e3e;
+        }
+
+    .assigned-people-section {
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background-color: #f7fafc;
+    }
+
+    .work-description-info {
+        color: #2d3748;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #cbd5e0;
+    }
+
+        .custom-table td, .custom-table th {
+            padding: 8px;
+            border-bottom: 1px solid #cbd5e0;
+        }
+
+        .custom-table th {
+            background-color: #edf2f7;
+        }
+
+        .custom-table tbody tr:nth-child(even) {
+            background-color: #edf2f7;
+        }
+
+    .saveeee-button {
+        background-color: #2C81BA;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 4px 2px;
+        float: right;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+        .saveeee-button:hover {
+            background-color: #357edd;
+        }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .custom-select-sm {
+        width: 91%;
+        height: 30px;
+        margin-left: 19px;
+    }
+
+    .task-list {
+        border: 1px solid #e0e0e0;
+        padding: 20px;
+        border-radius: 12px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .task-list h2 {
+            font-weight: bold;
+            color: #3366ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+        }
+
+
+    .modal {
+        display: flex;
+        justify-content: center;
+        margin-left: 400px;
+        background-color: transparent;
+        visibility: hidden;
+    }
+
+    /* .modal-dialog {
+        max-width: 100%;
+        margin: 0 auto;
+    }*/
+
+    .modal-content {
+        border-radius: 12px;
+        box-shadow: none;
+    }
+
+    .modal-header {
+        background-color: #007bff;
+        color: #fff;
+        border-bottom: 2px solid #0056b3;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .modal-title {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .close {
+        color: #fff;
+        opacity: 1;
+        font-size: 30px;
+    }
+
+    .btn-primary {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: #fff;
+    }
+
+    .select-wrapper select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .select-wrapper select:focus {
+        border-color: #007bff;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            Task List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Task List</li>
+        <li class="active">
+            <a class="link-warning" style="float:right;" href="~/TaskManagementEvolution/TaskCreateWithWoorkstate?Workstate=0&WorkbordId=@Model.WorkboardId&WorkSpaceId=@Model.workspaceid">Create New</a>
+           
+        </li>
+    </ol>
+</section>
+
+
+@*@using (Html.BeginForm("ProcurementSalesOrderfilter", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+    {
+
+        <div class="">
+            <div class="box-danger">
+                <div class="box-header">
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                    <div class="row">
+                        <div class="col-md-3">
+
+                            @Html.Label("Status", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            @Html.DropDownListFor(model => model.Status, Model.EnumStatusList as SelectList, "==Select Status==", new { id = "ddlStatusEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                            </div>
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }*@
+
+
+@{
+
+    int sl = 0;
+    bool isTask = true;
+    if (Model.DataList.Any())
+    {
+      
+        var grouped = Model.DataList.GroupBy(x => new { x.StatusName, x.Status, x.OrderBy });
+    <div  style="overflow-y:scroll;height:500px" >
+
+        
+        <table id="" class="table table-bordered table-responsive">
+            <tr>
+                @foreach (var item in grouped.OrderBy(x => x.Key.OrderBy))
+                {
+                    <td>
+                        <div class="box box-warning direct-chat direct-chat-warning droppable" >
+                            <div class="box-header with-border">
+                                <h3 class="box-title"> @item.Key.StatusName</h3>
+                            </div>
+                            <input type="hidden" class="ststusId" value="@item.Key.Status" />
+                            <table class="table table-bordered table-responsive" >
+                                @foreach (var ddd in item.OrderBy(x => x.Title))
+                                {
+                                    <tr>
+                                        <td style="padding: 0px 0px 4px 0px;"  >
+                                            <div class="draggable">
+                                                <input type="hidden" class="dragedWorkId" value="@ddd.WorkId"/>
+                                                <a class="btn btn-default" style="width: 100%; word-wrap: break-word !important;white-space:normal" data-toggle="modal" data-target="#myModal" onclick="openModal('@ddd.WorkId')" data-workid="@ddd.WorkId-@ddd.Seen">
+                                                    @ddd.Title
+                                                </a>
+                                            </div>
+                                           
+                                        </td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td style="padding: 0px 0px 4px 0px;">
+                                        <a class="btn btn-primary" style="width: 100%" href="~/TaskManagementEvolution/TaskCreateWithWoorkstate?Workstate=@item.Key.Status&WorkbordId=@Model.WorkboardId&WorkSpaceId=@Model.workspaceid">Create New</a>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </td>
+
+
+                    isTask = false;
+
+                }
+                @if (isTask)
+                {
+                    <td>
+                        <div class="container mt-5">
+                            <div class="text-center mb-4">
+                                <h4 class="task-list text-danger">Don't have any task for You! </h4>
+
+                            </div>
+                        </div>
+                    </td>
+                }
+
+            </tr>
+        </table>
+    </div>
+    }
+}
+
+
+
+<div class="modal fade modal-lg" id="myModal" data-toggle="modal" tabindex="-1" data-backdrop="static" aria-labelledby="myModalLabel" data-keyboard="false" role="dialog">
+    <div class="modal-dialog ui-front" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn btn-secondary" style="float:right" data-dismiss="modal" id="closeModalBtn"><i class="fa fa-times"></i></button>
+                <h2 class="modal-title">Modal Title</h2>
+                <span id="badgeSeen" class="badge badge-seen"></span>
+                <button type="button" class="btn btn-primary btn-sm" style="display:none;" id="updateTitleBtn">Update</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="work-description">
+                            <h5 class="text-center premium-heading">Information</h5>
+                            <h4 class="work-description-title"><span id="ManagerName"></span></h4>
+                            <h3 class="work-description-info" id="MyWorkNo"></h3>
+                            <h5 class="work-description-info"><b>Description:</b> <span id="MyworkDescription"></span> </h5>
+                            <p class="work-description-info" id="MyworkSLebel"></p>
+                            <p class="work-description-info" id="MyworkState"></p>
+                            <p class="work-description-info" id="Startdate"></p>
+                            <p class="work-description-info" id="Enddate"></p>
+                            <p class="work-description-info" id="ExpectedEndDate"></p>
+                            <input type="date" id="datePicker1" class="hidden form-contro">
+                            <button id="DateButton" class="hidden btn btn-primary">Save</button>
+                            <button id="CancelDateButton" class="hidden btn btn-danger">Cancel</button>
+                        </div>
+
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="work-description">
+                            <div>
+                                <h5 class="text-center premium-heading">Work Assignment</h5>
+                                <p hidden id="wrkid"></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="ddlInstallmentId" class="col-form-label">Employee</label>
+                                <div class="select-wrapper">
+                                    <select id="ddlInstallmentId" name="InstallmentId" class="form-control custom-select" multiple="multiple" data-placeholder="Select Employee(s)" data-dropdown-css-class="select2-purple" required style="max-width: 100%;">
+                                    </select>
+                                    <button class="btn btn-primary saveeee-button mt-3" style="float:right;">Assign</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="workLabelId" class="col-form-label">Work Label</label>
+                                <div class="select-wrapper">
+                                    <select id="workLabelId" name="workLabelId" class="form-control custom-select" style="height:40px;">
+                                    </select>
+                                    <button class="btn btn-primary buttonChangeLebel mt-3" style="float:right;">Change</button>
+                                    <input type="hidden" id="selectedValue1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="workstateId" class="col-form-label">Work State</label>
+                                <div class="select-wrapper">
+                                    <select id="workstateId" name="workstateId" class="form-control custom-select" style="height:40px;">
+                                    </select>
+                                    <button class="btn btn-primary buttonChangeState mt-3" style="float:right;">Change</button>
+                                    <input type="hidden" id="selectedValue">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*<form id="uploadForm" action="/TaskManagementEvolution/SaveAttachmentFiles" method="post" enctype="multipart/form-data">
+            <div class="custom-container" style="margin-top: 50px;">
+                <div id="fileDisplayArea" class="diplayfile" style="max-width: 550px;"></div>
+                <div class="border rounded p-3 mt-3">
+                    <div class="input-group mb-3">
+                        <div class="custom-file" style="margin-top: 10px;">
+                            <input type="file" class="custom-file-input" id="fileInput" multiple style="display: none;">
+                            <label class="custom-file-label" for="fileInput">Choose files</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button id="addFilesButton" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Add Files</button>
+                        </div>
+                    </div>
+                    <button id="saveButton" class="btn btn-success" type="submit">Save</button>
+                </div>
+            </div>
+        </form>*@
+
+                <div class="assigned-people-section" style="margin-top:30px;">
+                    <h5 class="work-description-info">Assigned People</h5>
+                    <div class="table-wrapper">
+                        <table class="custom-table">
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="assigned-people-section11" style="margin-left:150px; margin-top:25px;">
+                    <h5 class="work-description-info11">Attachment</h5>
+                    <div class="table-wrapper11">
+                        <table class="custom-table11">
+                            <tbody id="tableBody3">
+                                <!-- Content goes here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <form id="uploadForm" action="/TaskManagementEvolution/SaveAttachmentFiles" method="post" enctype="multipart/form-data">
+                    <input type="file" id="fileInput" name="files" multiple />
+                    <!-- Hidden input field to store wrkid value -->
+                    <input type="hidden" id="wrkidInput" name="wrkid" />
+                    <button type="submit">Upload Files</button>
+                </form>
+
+
+
+
+
+
+            </div>
+            <div class="modal-footer">
+
+                <div class="comment-section">
+                    <h5 class="comment-section-heading">Comments</h5>
+                    <div class="form-group">
+                        <textarea id="commentText" class="form-control" placeholder="Add a comment..."></textarea>
+                    </div>
+                    <button type="submit" id="postCommentBtn" class="btn btn-primary">Post Comment</button>
+                    <table class="table table-bordered" id="commentTable">
+                        <tbody id="tableBody1">
+                        </tbody>
+                    </table>
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+
+            $('#district').select2();
+
+            var dataTable = $('#paymentTable').DataTable();
+
+
+        });
+
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+        }
+    function openModal(workId) {
+       var workboardid=@Model.WorkboardId;
+    $.ajax({
+        url: '@Url.Action("GetByTaskAjax", "TaskManagementEvolution")',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            WorkId: workId,
+            workboardid: workboardid
+        },
+        success: function (response) {
+
+
+            response.workComentVm.forEach(function (comment) {
+                appendChatBubble(comment, response.workComentLikVm);
+            });
+            if (response) {
+                console.log("gggg", response);
+
+                if (response.Seen == "true") {
+                    $('#badgeSeen').html("seen")
+                } else {
+                    $('#badgeSeen').html("Unseen")
+                }
+
+                $('#myModal .modal-title').html(response.Title);
+                $('#updateTitleBtn').val(response.WorkId);
+                $('#wrkid').val(response.WorkId);
+                $('#MyworkDescription').html(response.Description);
+                $('#MyWorkNo').html("<strong>Work No:</strong> " + response.WorkNo);
+                if (response.WorkLebelName == null) {
+                    $('#MyworkSLebel').html("<strong>Work Label:</strong> ");
+                } else {
+                    $('#MyworkSLebel').html('<strong>Work Label:</strong> <span style="color: ' + response.WoorklabelColor + ';">' + response.WorkLebelName + '</span>');
+                }
+
+                
+
+                if (response.StartDate != null) {
+                    var startdate = DateCustom(response.StartDate);
+                    $('#Startdate').html("<strong>Start Date:</strong> " + startdate);
+                } else {
+                    $('#Startdate').html("<strong>Start Date:</strong> " + " ");
+                }
+
+                if (response.EndDate != null) {
+                    var enddate = DateCustom(response.EndDate);
+                    $('#Enddate').html("<strong>End Date:</strong> " + enddate);
+                }
+                else {
+                    $('#Enddate').html("<strong>End Date:</strong> " + " ");
+                }
+
+                if (response.ExpectedEndDate != null) {
+                    var ExpectedEndDate = DateCustom(response.ExpectedEndDate);
+                    $('#ExpectedEndDate').html("<strong>Expected End Date :</strong> " + ExpectedEndDate);
+                } else {
+                    $('#ExpectedEndDate').html("<strong>Expected End Date:</strong> " + " ");
+                }
+
+
+
+                $('#MyworkState').html("<strong>State:</strong> " + response.StatusName);
+
+                $('#ManagerName').html("<strong>Manager Name:</strong> " + response.Manager);
+                $('#workLabelId').empty();
+                $('#workstateId').empty();
+
+
+                var workLebelOptions = response.WorkLebel;
+                $.each(workLebelOptions, function (index, option) {
+                    $('#workLabelId').append($('<option>', {
+                        value: option.Value,
+                        text: option.Text,
+                        style: 'color: ' + option.ColorName + ';'
+                    }));
+                });
+                $('#workLabelId').val(response.worklebelId);
+
+                var workstateOptions = response.WoorkStateVms;
+                $.each(workstateOptions, function (index, option) {
+                    $('#workstateId').append($('<option>', {
+                        value: option.Value,
+                        text: option.Text,
+                    }));
+                });
+                var WorkAttacthment = response.WorkSAttachmentList;
+                var tableBody66 = $('#tableBody3');
+                tableBody66.empty();
+
+                $.each(WorkAttacthment, function (index, item) {
+                    var row = $('<tr>');
+                    var deleteIcon1 = $('<i>').addClass('fa fa-times delete-attachment-icon').css('cursor', 'pointer');
+
+                    // Append the delete icon to the row
+                    row.data('attachmentId', item.AttatchmentId);
+
+                    // Append the delete icon to the row
+                    row.append($('<td>').append(deleteIcon1));
+                    if (item.Extension === ".jpg" || item.Extension === ".jpeg" || item.Extension === ".webp" || item.Extension === ".png") {
+                        // Replace %20 with space in the path
+                        var decodedPath = item.Path.replace('%20', ' ');
+                        // Construct the correct image source URL
+                        //var imgSrc = 'file:///' + decodedPath;
+                        var imgSrc = decodedPath;
+                        var img = $('<img>').attr('src', imgSrc).css({
+                            'width': '200px', // Set your desired width here
+                            'height': '100px' // Set your desired height here
+                        });
+                        row.append($('<td>').append(img));
+
+                    } else if (item.Extension === ".pdf" || item.Extension === ".doc" || item.Extension === ".docx" || item.Extension === ".xls" || item.Extension === ".xlsx") {
+                        // Display a link or icon for PDF or Word documents
+                        var fileLink = $('<a>').attr('href', item.Path).attr('target', '_blank').text(item.AttatchmentText);
+                        row.append($('<td>').append(fileLink));
+                    }
+                    tableBody66.append(row);
+                });
+
+
+
+
+
+                $('#workstateId').val(response.Status);
+                var workMemberData = response.WorkmeberVm;
+                var tableBody = $('#tableBody');
+                tableBody.empty();
+                $.each(workMemberData, function (index, item) {
+                    var row = $('<tr>');
+                    row.append($('<td>').text(item.EmployeeKgId + ' - ' + item.EmployeeName));
+                    var deleteButton = $('<button>').addClass('delete-button').data('workMemberId', item.WorkMemberId);
+                    var icon = $('<i>').addClass('fa fa-times');
+                    deleteButton.append(icon);
+                    row.append($('<td>').append(deleteButton));
+                    tableBody.append(row);
+                });
+
+
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error(status, error);
+        }
+    });
+    }
+    function appendChatBubble(commentData, workComentLikVm) {
+        console.log("sah", workComentLikVm);
+        var tbody = document.getElementById('tableBody1');
+        var row = document.createElement('tr');
+        row.classList.add('comment-row');
+
+        var cell = document.createElement('td');
+        cell.classList.add('comment-cell');
+
+        var bubble = document.createElement('div');
+        bubble.classList.add('comment-bubble');
+
+        var commentContent = document.createElement('div');
+        commentContent.classList.add('comment-content');
+
+        var commentHeader = document.createElement('div');
+        commentHeader.classList.add('comment-header');
+        var commentAuthor = document.createElement('span');
+        commentAuthor.classList.add('comment-author');
+        var CreateDate = DateCustom(commentData.CreatedDate);
+
+
+        var employeeNameSpan = document.createElement('span');
+        employeeNameSpan.innerText = `${commentData.EmployeeName} - ${commentData.EmployeeKgId}`;
+
+        var createDateSpan = document.createElement('span');
+        createDateSpan.innerText = CreateDate;
+        createDateSpan.style.fontSize = 'small'; // Set font size
+        createDateSpan.style.fontWeight = 'normal'; // Remove bold style
+        createDateSpan.style.textAlign = 'left'; // Set text alignment to left
+
+
+        commentAuthor.appendChild(employeeNameSpan);
+        commentAuthor.appendChild(document.createElement('br')); // Add line break for separation
+        commentAuthor.appendChild(createDateSpan);
+
+        commentHeader.appendChild(commentAuthor);
+
+        var commentText = document.createElement('div');
+        commentText.classList.add('comment-text');
+        commentText.innerText = commentData.Comment;
+
+        var likeIcon = document.createElement('i');
+        likeIcon.classList.add('fa', 'fa-heart', 'like-icon', 'comment-action-icon', 'animated-heart');
+        likeIcon.style.cursor = 'pointer';
+        likeIcon.dataset.workQAId = commentData.WorkQAId;
+        var workQAId = commentData.WorkQAId;
+        likeIcon.addEventListener('click', function () {
+            var workQAId = commentData.WorkQAId;
+            LikeWork(workQAId);
+        });
+
+        // Append like count
+        var likeCountSpan = document.createElement('span');
+        likeCountSpan.classList.add('like-count');
+        likeCountSpan.innerText = commentData.LikeCount || 0;
+/*        likeCountSpan.setAttribute('title', 'Liked by John Doe, Jane Smith'); // Tooltip for like count*/
+        performAjaxForTooltip(likeCountSpan, commentData.WorkQAId);
+
+
+
+
+        for (var i = 0; i < workComentLikVm.length; i++) {
+            var item = workComentLikVm[i];
+            console.log("Checking item:", item);
+            console.log("Matching item found:", item);
+            likeIcon.dataset.workLikeId = item.WorkLikeId;
+            if (item.WorkQAId === commentData.WorkQAId && item.CreatedBy === commentData.UserName && item.IsActiveLike) {
+
+                likeIcon.style.color = '#ff69b4'; // Change color to premium pink
+                break;
+            }
+        }
+
+        commentContent.appendChild(commentHeader);
+        commentContent.appendChild(commentText);
+        commentContent.appendChild(likeIcon);
+        commentContent.appendChild(likeCountSpan);
+
+        if (commentData.CreatedBy === commentData.UserName) {
+            bubble.classList.add('comment-bubble-right');
+            commentContent.classList.add('comment-content-right');
+            commentHeader.classList.add('comment-header-right');
+            commentAuthor.style.color = '#008CBA';
+
+            var editIcon = document.createElement('i');
+            editIcon.classList.add('fa', 'fa-edit', 'edit-icon', 'comment-action-icon');
+            editIcon.style.color = '#777';
+            editIcon.style.cursor = 'pointer';
+            editIcon.addEventListener('click', function () {
+                var originalText = commentText.innerText;
+
+                editIcon.style.display = 'none';
+
+                deleteIcon.style.display = 'none';
+
+                var editInput = document.createElement('input');
+                editInput.type = 'text';
+                editInput.classList.add('form-control');
+                editInput.value = originalText;
+
+                commentContent.appendChild(editInput);
+                var saveCommentButton = document.createElement('button');
+                saveCommentButton.id = 'saveCommentButton';
+                saveCommentButton.classList.add('btn', 'btn-primary', 'mt-2', 'mr-2', 'btn-sm');
+                saveCommentButton.innerText = 'Comment';
+                saveCommentButton.dataset.workQAId = commentData.WorkQAId;
+
+                saveCommentButton.style.height = '30px';
+
+                saveCommentButton.addEventListener('click', function () {
+
+                });
+                commentContent.appendChild(saveCommentButton);
+
+                var cancelEditButton = document.createElement('button');
+                cancelEditButton.classList.add('btn', 'btn-danger', 'mt-2', 'mr-2', 'btn-sm');
+                cancelEditButton.innerText = 'Cancel';
+                cancelEditButton.style.height = '30px';
+                cancelEditButton.addEventListener('click', function () {
+                    commentText.style.display = 'block';
+                    commentContent.removeChild(editInput);
+                    commentContent.removeChild(saveCommentButton);
+                    commentContent.removeChild(cancelEditButton);
+                    editIcon.style.display = 'inline';
+                    deleteIcon.style.display = 'inline';
+                });
+                commentContent.appendChild(cancelEditButton);
+            });
+
+            var deleteIcon = document.createElement('i');
+            deleteIcon.classList.add('fa', 'fa-trash', 'delete-icon', 'comment-action-icon');
+            deleteIcon.style.color = '#777';
+            deleteIcon.style.cursor = 'pointer';
+            deleteIcon.dataset.workQAId = commentData.WorkQAId;
+            deleteIcon.addEventListener('click', function () {
+                var workQAId = commentData.WorkQAId;
+                triggerDeleteAlert(workQAId);
+            });
+            commentContent.appendChild(deleteIcon);
+
+            commentContent.appendChild(editIcon);
+        } else {
+            bubble.classList.add('comment-bubble-left');
+            commentContent.classList.add('comment-content-left');
+            commentHeader.classList.add('comment-header-left');
+        }
+
+        bubble.appendChild(commentContent);
+        cell.appendChild(bubble);
+        row.appendChild(cell);
+        tbody.appendChild(row);
+    }
+
+
+
+
+    function triggerDeleteAlert(workQAId) {
+        if (confirm('Are you sure you want to delete this comment?')) {
+            ajaxDeleteComment(workQAId);
+        }
+    }
+    function LikeWork(WorkQid) {
+
+        var workid = $('#wrkid').val();
+           $.ajax({
+        url: '@Url.Action("LikeUpdate", "TaskManagementEvolution")',
+        type: 'POST',
+               data: { WorkQid: WorkQid },
+        success: function () {
+            console.log('like  successfully.'); // Check if this message is logged
+            $('#tableBody1').empty();
+            openModal(workid);
+        },
+        error: function () {
+            alert('Failed to Like .');
+        }
+    });
+    }
+
+
+    function ajaxDeleteComment(workQAId) {
+        var workid = $('#wrkid').val();
+    $.ajax({
+        url: '@Url.Action("DeleteComent", "TaskManagementEvolution")',
+        type: 'POST',
+        data: { workQAId: workQAId },
+        success: function () {
+            console.log('Comment deleted successfully.'); // Check if this message is logged
+            $('#tableBody1').empty();
+            openModal(workid);
+        },
+        error: function () {
+            alert('Failed to delete comment.');
+        }
+    });
+}
+
+    //function removeCommentRow(workQAId) {
+    //    var rowToRemove = $("tr[data-workQAId='" + workQAId + "']");
+    //    if (rowToRemove.length > 0) {
+    //        rowToRemove.remove();
+    //        console.log('Comment row removed successfully.');
+    //    } else {
+    //        console.error('Unable to find comment row to remove.');
+    //    }
+    //}
+
+function performAjaxForTooltip(element, workQAId) {
+    var workid = $('#wrkid').val();
+
+    $.ajax({
+        url: '@Url.Action("LikePeople", "TaskManagementEvolution")',
+        method: 'GET',
+        data: { workQAId: workQAId },
+        success: function (response) {
+            console.log("Tii", response);
+
+            if (response.length > 0) {
+                var tooltipContent = "Liked by: ";
+                for (var i = 0; i < response.length; i++) {
+                    tooltipContent += response[i].EmployeeName;
+                    if (i < response.length - 1) {
+                        tooltipContent += ", ";
+                    }
+                }
+                element.setAttribute('title', tooltipContent);
+            } else {
+                element.setAttribute('title', 'No likes yet');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var hours = currentTime.getHours();
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+        var minutes = currentTime.getMinutes();
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        var date = day + "/" + month + "/" + year;
+        var time = hours + ":" + minutes;
+        return date + " " + time;
+    }
+
+
+
+
+
+
+
+        $(document).ready(function () {
+            $('#myModal .modal-title').click(function () {
+                $('#updateTitleBtn').css('display', 'block');
+
+                if ($(this).find('input').length === 0) {
+                    var titleText = $(this).text().trim();
+                    $(this).html('<input type="text" class="form-control" id="inputTitle" value="' + titleText + '">');
+                }
+            });
+            $('#updateTitleBtn').click(function () {
+                $('#updateTitleBtn').css('display', 'none');
+                var workid = $('#wrkid').val();
+                var newTitle = $('#myModal .modal-title input').val();
+                var buttonValue = $('#updateTitleBtn').val();
+                var data = {
+                    newTitle: newTitle,
+                    buttonValue: buttonValue
+                };
+
+                $.ajax({
+                    url: "@Url.Action("TitleUpdate", "TaskManagementEvolution")",
+                    method: 'POST',
+                    data: data,
+                    success: function (response) {
+                        $('#tableBody1').empty();
+                        openModal(workid);
+                        console.log('Title updated successfully!');
+
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+     $('.modalbtnn').click(function () {
+    var workIdSeen = $(this).data('workid').split('-');
+    var workId = workIdSeen[0];
+    var seen = workIdSeen[1];
+    if (seen !== 'true') {
+        $.ajax({
+            url: "@Url.Action("WatchButton", "TaskManagementEvolution")",
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                WorkId: workId
+            },
+            success: function (response) {
+                if (response) {
+                    openModal(workId);
+                } else {
+                    console.log("Failed to watch the work.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(status, error);
+            }
+        });
+    }
+});
+
+        $('.seen-item').click(function () {
+            var workId = $(this).data('workid');
+            var seen = $(this).data('seen');
+
+
+            $.ajax({
+                url: "@Url.Action("WatchButtonSeenUnseen", "TaskManagementEvolution")",
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    workId: workId,
+
+                },
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+
+                }
+            });
+        });
+        $(function () {
+            $('#myModal').on('shown.bs.modal', function () {
+                $('.modal').css('visibility', 'visible');
+                @*var workspaceid = @Model.workspaceid ;*@
+                var workspaceid = @Model.workspaceid
+
+
+
+                $("#ddlInstallmentId").select2({
+                    ajax: {
+                        url: "/AutoComplete/GetAllEmployeeAutoCompleteTaskManagement",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                prefix: params.term,
+                                workspaceid:workspaceid
+                            };
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: $.map(data, function (item) {
+                                    return {
+                                        text: item.Name,
+                                        id: item.Id
+                                    }
+                                })
+                            };
+                        },
+                        cache: true
+                    },
+                    placeholder: 'Select an option',
+                    minimumInputLength: 1
+                });
+            });
+        });
+        document.getElementById('closeModalBtn').addEventListener('click', function () {
+            location.reload();
+        });
+
+
+$('.saveeee-button').click(function() {
+    var selectedInstallments = $('#ddlInstallmentId').val();
+    var wokkid = $('#wrkid').val();
+
+
+    var tableBody = $('#tableBody');
+
+    $.ajax({
+        url: '@Url.Action("WorkAssign", "TaskManagementEvolution")',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            selectedInstallments: selectedInstallments,
+            wokkid: wokkid
+        },
+        success: function (response) {
+            if (response === true) {
+                openModal(wokkid);
+
+                tableBody.empty();
+
+                $.each(response.workMemberData, function (index, item) {
+
+                    var row = $('<tr>');
+                    row.append($('<td>').text(item.EmployeeKgId + ' - ' + item.EmployeeName));
+
+                    var deleteButton = $('<button>').addClass('delete-button').data('workMemberId', item.WorkMemberId);
+                    var icon = $('<i>').addClass('fa fa-times');
+                    deleteButton.append(icon);
+                    row.append($('<td>').append(deleteButton));
+
+                    tableBody.append(row);
+
+                });
+                $('#ddlInstallmentId').empty();
+            } else {
+                console.error('Failed to fetch data.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error(status, error);
+        }
+    });
+});
+
+
+
+
+$(document).on('click', '.delete-button', function () {
+    var row = $(this).closest('tr');
+    var workMemberId = $(this).data('workMemberId');
+
+
+    $.ajax({
+        url: '@Url.Action("RemoveWorkAssignEmployee", "TaskManagementEvolution")',
+        method: 'POST',
+        data: { workMemberId: workMemberId },
+        success: function (response) {
+            console.log(response)
+            if (response === true) {
+
+                row.remove();
+            } else {
+                alert('Failed to delete item.');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+            alert('An error occurred while deleting item.');
+        }
+    });
+});
+
+    $('#workstateId').change(function () {
+        var selectedValue = $(this).val();
+        $('#selectedValue').val(selectedValue);
+    });
+    $('#workLabelId').change(function () {
+        var selectedValue1 = $(this).val();
+        $('#selectedValue1').val(selectedValue1);
+    });
+
+
+$('.buttonChangeState').click(function () {
+    var selectedValue = $('#selectedValue').val();
+    var workid = $('#wrkid').val();
+
+    $.ajax({
+        url: '@Url.Action("ChangeState", "TaskManagementEvolution")',
+        type: 'POST',
+        data: { selectedValue: selectedValue, workid: workid },
+        success: function (response) {
+            $('#tableBody1').empty();
+            openModal(workid);
+            $('#myWorkState').text(selectedValue);
+
+        },
+        error: function (xhr, status, error) {
+            console.error(status, error);
+        }
+    });
+});
+    $('.buttonChangeLebel').click(function () {
+        var selectedValue1 = $('#selectedValue1').val();
+        var workid = $('#wrkid').val();
+    $.ajax({
+        url: '@Url.Action("ChangeWorkLabel", "TaskManagementEvolution")',
+        type: 'POST',
+        data: { selectedValue1: selectedValue1, workid: workid },
+        success: function (response) {
+            $('#tableBody1').empty();
+            openModal(workid);
+            $('#MyworkSLebel').text(selectedValue1);
+
+        },
+        error: function (xhr, status, error) {
+            console.error(status, error);
+        }
+    });
+});
+
+
+
+
+
+
+
+    $(document).on('click', '#MyworkDescription', function () {
+
+        if ($(this).find('textarea').length === 0) {
+            var descriptionText = $(this).text().trim();
+            $(this).html('<textarea class="form-control" id="editableDescription">' + descriptionText + '</textarea>');
+            var updateButton = $('<button id="updateDescriptionBtn" class="btn btn-primary">Update</button>'); // Adding Bootstrap button class
+            $(this).append(updateButton);
+        }
+    });
+
+
+$(document).on('click', '#updateDescriptionBtn', function (e) {
+    e.stopPropagation();
+
+    var newDescription = $('#editableDescription').val().trim();
+    var workid = $('#wrkid').val();
+
+    // Check if the description is empty or null
+    if (!newDescription) {
+        alert('You must add a description.');
+        return; // Exit the function
+    }
+
+    $.ajax({
+        url: '@Url.Action("UpdtaeDescription", "TaskManagementEvolution")',
+        type: 'POST',
+        data: { description: newDescription, workid: workid },
+        success: function (response) {
+            console.log('Description updated successfully');
+            $('#MyworkDescription').text(newDescription); // Update text content directly
+            $('#updateDescriptionBtn').remove();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error updating description:', xhr.responseText);
+        }
+    });
+});
+
+
+
+$("#postCommentBtn").click(function () {
+    var commen = document.getElementById('commentText').value.trim();
+    var workid = $('#wrkid').val();
+    $.ajax({
+        url: '@Url.Action("CommentSave", "TaskManagementEvolution")',
+        type: 'POST',
+        data: { commen: commen, workid: workid },
+        success: function (response) {
+            $('#tableBody1').empty();
+            openModal(workid)
+            document.getElementById('commentText').value = '';
+        },
+        error: function (xhr, status, error) {
+            console.error('Ajax request error:', error);
+        }
+    });
+});
+
+
+
+    $(document).on('click', '#saveCommentButton', function () {
+        var newText = $(this).closest('.comment-content').find('input[type="text"]').val();
+        var workid = $('#wrkid').val();
+        var workQAId = $(this).closest('#saveCommentButton').data('workQAId');
+
+
+        $.ajax({
+            url: '@Url.Action("UpdateComent", "TaskManagementEvolution")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ newText: newText, workQAId: workQAId }),
+            success: function (response) {
+                $('#tableBody1').empty();
+                openModal(workid)
+
+            },
+            error: function (xhr, status, error) {
+                console.error('Ajax request error:', error);
+            }
+        });
+    });
+
+
+    $('#uploadForm').submit(function (e) {
+        // Prevent the default form submission
+        e.preventDefault();
+        var workid = $('#wrkid').val();
+        // Get the value of #wrkid and assign it to the hidden input field
+        $('#wrkidInput').val(workid);
+
+        // Serialize the form data
+        var formData = new FormData(this);
+
+        // Submit the form data via AJAX
+        $.ajax({
+            url: '/TaskManagementEvolution/SaveAttachmentFiles',
+            type: 'POST',
+            data: formData,
+            processData: false, // Prevent jQuery from processing the data
+            contentType: false, // Prevent jQuery from setting content type
+            success: function (res) {
+                // Check if the upload was successful
+                if (res) {
+                    $('#tableBody1').empty();
+                    openModal(workid);
+                  
+                } else {
+                    // Handle upload failure
+                    console.error('Upload failed');
+                }
+            },
+            error: function (xhr, status, error) {
+                // Handle AJAX errors
+                console.error('AJAX error:', error);
+            }
+        });
+    });
+    $(document).on('click', '.delete-attachment-icon', function () {
+        var attachmentId = $(this).closest('tr').data('attachmentId');
+        console.log(attachmentId);
+        var workid = $('#wrkid').val();
+        // Open confirmation modal
+        if (confirm("Are you sure you want to delete this attachment?")) {
+            // Perform AJAX call to delete the attachment
+            $.ajax({
+                url: '/TaskManagementEvolution/DeleteAttachment',
+                type: 'POST',
+                data: { attachmentId: attachmentId },
+                success: function (response) {
+                    $('#tableBody1').empty();
+                    openModal(workid);
+                    console.log("Attachment deleted successfully.");
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                    console.error("Error deleting attachment:", error);
+                }
+            });
+        }
+    });
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "/" + month + "/" + year;
+        return date;
+    }
+    $('#Enddate').on('click', function () {
+        $('#datePicker1').removeClass('hidden').focus();
+        $('#DateButton').removeClass('hidden').focus();
+        $('#CancelDateButton').removeClass('hidden').focus();
+    });
+
+    $('#datePicker1').on('change', function () {
+        var selectedDate = $(this).val();
+        if (selectedDate) {
+            var dateParts = selectedDate.split("-");
+            var formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+
+        }
+
+    });
+
+    $('#CancelDateButton').on('click', function () {
+        $('#datePicker1').addClass('hidden').focus();
+        $('#DateButton').addClass('hidden').focus();
+        $('#CancelDateButton').addClass('hidden').focus();
+    });
+
+
+
+    $('#DateButton').on('click', function () {
+        var workid = $('#wrkid').val();
+        var datePicker1 = $('#datePicker1').val();
+       $.ajax({
+      url: '@Url.Action("UpdateEndDate", "TaskManagementEvolution")',
+      type: 'POST',
+           data: { workid: workid, datePicker1: datePicker1 },
+           success: function (response) {
+               $('#tableBody1').empty();
+          openModal(workid);
+          $('#datePicker1').addClass('hidden').focus();
+          $('#DateButton').addClass('hidden').focus();
+          $('#CancelDateButton').addClass('hidden').focus();
+      },
+      error: function (xhr, status, error) {
+          console.error('Error updating description:', xhr.responseText);
+      }
+  });
+
+    });
+
+
+</script>
+}

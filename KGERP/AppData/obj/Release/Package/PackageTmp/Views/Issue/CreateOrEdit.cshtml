@@ -1,0 +1,213 @@
+﻿
+@model KGERP.Service.ServiceModel.IssueMasterInfoModel
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("CreateOrEdit", "Issue", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <table class="table table-bordered">
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <td colspan="6">
+                    <b>Issue Infortation</b>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                @Html.HiddenFor(model => model.IssueMasterId)
+                                @Html.LabelFor(model => model.IssueNo, htmlAttributes: new { @class = "control-label col-md-4" })
+
+                            </div>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.IssueNo, htmlAttributes: new { @class = "form-control col-md-6" })
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.IssueDate, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.IssueDate, htmlAttributes: new { @class = "form-control col-md-6", @type = "datetime" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.StoreId, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.DropDownListFor(model => model.StoreId, new SelectList(Model.StockInfos, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.IssueBy, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.IssueBy, htmlAttributes: new { @class = "form-control col-md-6" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.ReceiveBy, htmlAttributes: new { @class = "control-label col-md-6" })
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.ReceiveBy, htmlAttributes: new { @class = "form-control col-md-6" })
+                        </div>
+                    </div>
+                  
+                </td>
+            </tr>
+
+          
+        </table>
+
+    </div>
+
+
+    <div class="row">
+        <table class="table table-bordered">
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <td colspan="6"><b>Finish Products</b></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="details">
+        <table class="table table-responsive">
+            <tr>
+
+                <th>Product</th>
+                <th>Quantity</th>
+
+                <th>&nbsp;</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+
+                <td>
+                    <input type="text" id="product" name="product" class="form-control col-md-6" />
+                    <input type="hidden" id="hfProductId" name="FPId" />
+                </td>
+                <td>
+                    <input type="text" id="qty" name="FPQ" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid quantity required</span>
+                </td>
+
+
+                <td>
+                    <button type="button" id="add" onclick="LoadRmProducts()" class="btn btn-success"> OK</button>
+
+
+                </td>
+            </tr>
+        </table>
+        <div class="row">
+            <table class="table table-bordered">
+                <tr style="background-color:#009270;color:#FFFFFF">
+                    <td colspan="6"><b>Raw Materials</b></td>
+                </tr>
+            </table>
+        </div>
+        <div id="orderItems">
+            <table class="table" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:teal;color:white;font-weight:bold">
+                        <th>Sl</th>
+                        <th>RM</th>
+                        <th>Qty</th>                       
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" style="color:red"></span>
+        </div>
+
+
+        <div class="col-md-offset-6">
+            <div style="padding:10px 0; text-align:right">
+                <input id="submit" type="submit" value="Submit" class="btn btn-success" style="padding:5px 10px" />
+            </div>
+        </div>
+
+    </div>
+}
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/IssueInformation/IssueInformation.js"></script>
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+    </script>
+}

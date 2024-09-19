@@ -1,0 +1,463 @@
+﻿@model KGERP.Data.CustomModel.CrmUploadVm
+
+@{
+    ViewBag.Title = "Upload Client Batch File";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .btn-primary {
+        color: #fff !important;
+        background-color: #3c8dbc !important;
+        border-color: #3c8dbc !important;
+    }
+
+    .bg-primary {
+        color: #fff !important;
+        background-color: #3c8dbc !important;
+        border-color: #3c8dbc !important;
+    }
+
+    .bg-warning {
+        color: #fff;
+        background-color: #f39c12;
+        border-color: #f39c12;
+    }
+
+    .bg-info {
+        color: #000;
+        background-color: #31d2f2;
+        border-color: #25cff2;
+    }
+
+    .bg-success {
+        color: #fff;
+        background-color: #00a65a;
+        border-color: #00a65a;
+    }
+
+    .bg-danger {
+        color: #fff;
+        background-color: #d9534f;
+        border-color: #d43f3a;
+    }
+
+    .btn-danger {
+        color: #fff;
+        background-color: #d9534f;
+        border-color: #d43f3a;
+    }
+</style>
+<section>
+    <table>
+        <tr>
+            <td>
+                <button class="btn btn-sm btn-secondary hvr-rectangle-out text-dark" onclick="refreshWindow()">
+                    <i class="fa fa-sync"></i> &nbsp; Refresh
+                </button>
+            </td>
+            <td>
+                <a class="btn btn-sm hvr-sweep-to-bottom text-dark border " href="@Url.Action("UploadClientBatchHistory","Crms", new {companyId=Model.CompanyId})"><i class="fa fa-list"></i> &nbsp; Upload History </a>
+            </td>
+        </tr>
+    </table>
+</section>
+<div>
+    @using (Html.BeginForm("UploadClientBatch", "Crms", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <h5>Upload Client Batch</h5>
+
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="form-group col-md-4">
+
+                <label>Select Company</label>
+                @Html.DropDownListFor(model => model.CompanyId, new List<SelectListItem> {
+                       new SelectListItem { Value = "7" , Text = "GLDL" },
+                       new SelectListItem { Value = "9" , Text = "KPL" }
+                    }, "==Select Company==", new
+                    {
+                        id = "CompanyId",
+                        @class = "form-control searchingDropdown",
+                        style = "width:100%",
+                        @required = "required"
+                    })
+                @Html.ValidationMessageFor(model => model.CompanyId, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="form-group col-md-3">
+                <label>Select a Excel File</label>
+                <input type="file" name="ExcelFile" class="form-control" required />
+            </div>
+
+            <div class="form-group col-md-3" style="margin-top:20px;">
+                <button type="submit" onclick="clicked(event)" class="btn btn-labeled btn-primary"> <span class="btn-label"><i class="glyphicon glyphicon-upload"></i> </span>Upload</button>
+            </div>
+        </div>
+
+
+    }
+</div>
+@if (Model.ResponseList == null || Model.ResponseList.Count <= 0)
+{
+
+}
+else
+{
+
+    <div class="row">
+        <div class="col col-md-12">
+            <h3 class="text-danger"> Already exists (@Model.ResponseList.Where(e => e.ResponseStatus == "Error").Count())</h3>
+        </div>
+        <br />
+        <div class="col col-md-12">
+            <div class="table-responsive">
+                <table id="KgErpDataTable2" class="table table-striped" style="font-size:12px">
+                    <thead>
+                        <tr style="background-color:#dd4b39bf; color: #FFFFFF">
+                            <th>
+                                SL
+                            </th>
+
+                            <th>
+                                Full Name
+                            </th>
+                            <th>
+                                Gender
+                            </th>
+                            <th>
+                                Designation
+                            </th>
+
+                            <th>
+                                Mobile No
+                            </th>
+                            <th>
+                                Mobile No 2
+                            </th>
+                            <th>
+                                Exists In As
+                            </th>
+                            @*<th>
+                                Responsible Officer
+                            </th>*@
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int sl = 0;
+                        }
+                        @foreach (var item in Model.ResponseList.Where(d => d.ResponseStatus == "Error"))
+                        {
+                            <tr>
+
+                                <td>
+                                    @(++sl)
+                                </td>
+
+                                <td>
+                                    @item.Name
+                                </td>
+                                <td>
+                                    @item.GenderText
+                                </td>
+                                <td>
+                                    @item.JobTitle
+                                </td>
+                                <td>
+                                    @item.MobileNo
+                                </td>
+                                <td>
+                                    @item.MobileNo2
+                                </td>
+                                <td>
+                                    @item.ProjectText
+                                </td>
+                                @*<td>
+                                    @item.ResponsibleOfficeName
+                                </td>*@
+                                <td>
+                                    <button type="button" data-toggle="modal" data-target="#NoteModal3" onclick="reassign('@item.MobileNo','@item.ProjectText')" value="Re-Assign"> Re-Assign </button>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <br />
+        <div class="col col-md-12">
+            <h3 class="text-success"> Successfully updated (@Model.ResponseList.Where(e => e.ResponseStatus == "Success").Count())</h3>
+        </div>
+        <br />
+        <div class="col col-md-12">
+            <div class="table-responsive">
+                <table id="KgErpDataTable2" class="table table-striped" style="font-size:12px">
+                    <thead>
+                        <tr style="background-color: #4CAF50; color: #FFFFFF">
+                            <th>
+                                SL
+                            </th>
+                            <th>
+                                Full Name
+                            </th>
+                            <th>
+                                Gender
+                            </th>
+                            <th>
+                                Designation
+                            </th>
+
+                            <th>
+                                Mobile No
+                            </th>
+                            <th>
+                                Mobile No 2
+                            </th>
+
+                            <th>
+                                Project Name
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int sl1 = 0;
+                        }
+                        @foreach (var item in Model.ResponseList.Where(d => d.ResponseStatus == "Success"))
+                        {
+                            <tr>
+                                <td>
+                                    @(++sl1)
+                                </td>
+                                <td>
+                                    @item.Name
+                                </td>
+                                <td>
+                                    @item.GenderText
+                                </td>
+                                <td>
+                                    @item.JobTitle
+                                </td>
+                                <td>
+                                    @item.MobileNo
+                                </td>
+                                <td>
+                                    @item.MobileNo2
+                                </td>
+
+                                <td>
+                                    @item.ProjectText
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal fade" id="NoteModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" style="width:121%">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="Clientname"></h5>
+
+                    </div>
+
+
+                    <div class="modal-body ">
+                        <h5>Re-Assign Client</h5>
+                        <div class="card-body px-2 py-2 ">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 id="ClName"></h6>
+                                    <input hidden value="" id="cl" />
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <h6 id="Mob"></h6>
+                                    <input hidden value="" id="mb" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 id="response"></h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 id="Servc"></h6>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 id="project"></h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 id="projectid"></h6>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div>
+                                    <div>
+                                        <select name="" id="QSearch" class="form-control form-control select2">
+                                            <option selected="selected" value="">Select Resposible Officer</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div>
+                                        <div class="">
+                                            <select name="" id="PSearch" class="form-control form-control select2">
+                                                <option selected="selected" value="">Select Service Status</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div>
+                                    <div>
+                                        <select name="" id="Dsearch" class="form-control form-control ">
+                                            <option selected="selected" value="">Select Project</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="Resave">Save</button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section Scripts{
+
+    <script>
+        function clicked(e) {
+            if (!confirm('Are you sure?')) {
+                e.preventDefault();
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        $("#KgErpDataTable2").DataTable({
+            "bDeferRender": true,
+            sDom: '<"pull-left mrg25B"B><"clearfix"><"pull-left"l><"pull-right"f>rtip',
+            buttons: [
+                {
+                    extend: 'copyHtml5',
+                    text: '<i class="fa fa-files-o"></i>&nbsp;Copy',
+                    orientation: 'landscape',
+                    footer: true
+
+                },
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fa fa-file-excel-o"></i>&nbsp;Excel',
+                    orientation: 'landscape',
+                    footer: true
+
+                },
+                {
+                    extend: 'print',
+                    footer: true,
+                    text: '<i class="fa fa-print"></i>&nbsp;Print',
+                    customize: function (win) {
+                        $(win.document.body).find('thead').prepend('<div class="header-print">' + $('#dt-header').val() + '</div>');
+                    }
+                }
+
+
+            ]
+        })
+
+        function reassign(gg, projectName) {
+
+            $("#ClName").empty();
+            $("#Mob").empty();
+            $("#Servc").empty();
+            $("#response").empty();
+            $("#project").empty();
+               $.ajax({
+                type: "Post",
+            url: "@Url.Action("GetExistClient","Crms")",
+
+                datatype: "Json",
+                   data: { MobileNumber: gg, CompanyId:@Model.CompanyId },
+                success: function (data) {
+                  /*  $('#ClName').val(data.Clientdata.FullName);*/
+                    $("#ClName").append(" Client Name: " + data.Clientdata.FullName);
+                    $("#Mob").append(" Mobile Number: " + data.Clientdata.MobileNo);
+                    $("#response").append(" Responsible Officer: " + data.Clientdata.ResponsibleOfficer);
+                    $("#project").append("Project : " + data.Clientdata.ProjectName);
+                    $("#Servc").append(" Service Status : " + data.Clientdata.ServiceStatusName);
+                    $("#cl").val(data.Clientdata.ClientId);
+                    $("#mb").val(data.Clientdata.MobileNo);
+                   /* $("#project").val(data.Clientdata.projectId);*/
+                    console.log(data);
+
+                    var select = $("#QSearch");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('Select ResposibleOffice'));
+                    $(data.DealingOfficerList).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.Id + "'>").val(item.Id).text(item.Name));
+                    });
+                    var select1 = $("#PSearch");
+                    select1.children().remove();
+                    select1.append($("<option>").val('').text('Select Service Status'));
+                    $(data.ServiceStatusList).each(function (index, item1) {
+                        select1.append($("<option data-toggle='tooltip' title='" + item1.Id + "'>").val(item1.Id).text(item1.Name));
+                    });
+
+                    var select3 = $("#Dsearch");
+                    select3.children().remove();
+                    select3.append($("<option>").val('').text('Select Projects'));
+                    $(data.ProjectList).each(function (index2, item3) {
+                        select3.append($("<option data-toggle='tooltip' title='" + item3.Id + "'>").val(item3.Id).text(item3.Name));
+                    });
+                }
+            });
+        }
+
+        $("#Resave").click(function () {
+            var clientb = $("#cl").val();
+            var mbn = $("#mb").val();
+            var resid = $('#QSearch').find(":selected").val();
+            var serv = $('#PSearch').find(":selected").val();
+            var projectid = $('#Dsearch').find(":selected").val();
+            var v = {
+                'ClientId': clientb,
+                'ResponsibleOfficerId': resid,
+                'StatusId': serv,
+                'CompanyId':@Model.CompanyId,     
+                'ProjectId': projectid  }
+             $.ajax({
+
+                    type: "Post",
+                    url: "@Url.Action("Reassign", "Crms")",
+                    datatype: "Json",
+                    data: { model: v },
+                    success: function (data) {
+                        reassign(mbn)
+                    }
+             });
+        });
+    </script>
+}

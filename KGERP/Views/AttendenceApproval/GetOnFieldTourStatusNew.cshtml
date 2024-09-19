@@ -1,0 +1,267 @@
+﻿@model KGERP.Data.CustomModel.AttendenceApproval
+@using KGERP.Utility
+@{
+    ViewBag.Title = "GetPersonalAttendenceStatus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 1em 0.7em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        width: 80px;
+    }
+
+    .badge-warning {
+        color: #212529;
+        background-color: #ffc107;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        background-color: #d9534f;
+        color: #ffffff;
+    }
+</style>
+
+<section class="content-header">
+    <h3>
+        <h3><b>OnField/ Tour History</b></h3>
+    </h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("CreateOnFieldTour", new { id = 0 })" title="New Application" class="btn btn-primary pull-right">
+                <span class="glyphicon glyphicon-user"></span>&nbsp; OnField/ Tour Request
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+
+                        @using (Html.BeginForm("GetOnFieldTourStatusNew", "AttendenceApproval", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            <div class="row">
+                                <div class="col-md-3">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <hr />
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>KGID</th>
+                                        <th>Name</th>
+                                        <th>Application Date</th>
+                                        <th>Application For</th>
+                                        <th>From Date</th>
+                                        <th>To Date</th>
+                                        <th>Days</th>
+                                        <th>Location and Reason</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">
+                                                @(++sl)
+                                            </td>
+                                            <td>@item.EmployeeKGId</td>
+                                            <td>@item.ApplicantName</td>
+                                            <td>@item.ApplicationDate</td>
+                                            <td>@item.ApplicationType</td>
+                                            <td>@item.FromDateForOnField</td>
+                                            <td>@item.ToDateForOnField</td>
+                                            <td>@item.TourDays</td>
+                                            <td>@item.ReasonAndLocation</td>
+                                            <td>
+                                                @if (item.LeaveStatus == (int)LeaveStatusEnum.Pending)
+                                                {
+                                                    <span class="badge badge-warning">Pending</span>
+
+                                                }
+                                                else if (item.LeaveStatus == (int)LeaveStatusEnum.Approved)
+                                                {
+                                                    <span class="badge badge-success">Approved</span>
+
+                                                }
+                                                else if (item.LeaveStatus == (int)LeaveStatusEnum.Denied)
+                                                {
+                                                    <span class="badge badge-danger">Rejected</span>
+                                                }
+                                                <a href="/Report/NewLeaveManagement?CompanyId=@item.ComID&LeaveApplicationID=@item.Id&reportType=PDF&applicationType=@item.TableName" target="_blank" class="btn btn-sm btn-primary" title="Application">
+                                                    <i class="glyphicon glyphicon-envelope"></i>
+                                                </a>
+
+                                                <a href="#" onclick="ViewReport(@item.Id)" class="btn btn-info btn-sm" data-toggle="modal" data-target=".bd-example-modal-lg">
+                                                    <i class="glyphicon glyphicon-eye-open"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"> <b id="exampleModalScrollableTitle"> </b></h4>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Sl</th>
+                                <th>Authorized By</th>
+                                <th>ID</th>
+                                <th> Approved date </th>
+                                <th>Status </th>
+                            </tr>
+                        </thead>
+                        <tbody id="Installment">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+    if(message){
+        alert(message);
+        }
+    function ViewReport(id) {
+    //var text = $("#copyId").text();
+    //$("#exampleModalScrollableTitle").text(LObj.ReportCategoryName + " for (" +text +")");
+    $.ajax({
+        type: "GET",
+        url: "@Url.Action("LeaveSignatories", "AttendenceApproval")",
+        datatype: "Json",
+        data: { applicationId:id},
+        success: function (data) {
+            console.log(data);
+            var tag = '';
+            var count = data.SignatoryDataList.length-1;
+            console.log("ffff", count);
+            $.each(data.SignatoryDataList, function (key, item) {
+
+                tag += '<tr id="' + key + '">';
+                tag += '<td> ' + (key + 1) + '</td>';
+                if (item.SigIndID === item.UserId && item.ApprovalStatus ==0) {
+                    tag += '<td style="background-color: #ffeb3b!important;"> ' + item.SigName + '</td>';
+                } else {
+                    tag += '<td> ' + item.SigName + '</td>';
+                }
+                tag += '<td> ' + item.KgID + '</td>';
+                if (item.ApproveDate == null) {
+                    tag += '<td> <span> ...... </span></td>';
+                } else {
+                    var StringApprovdate = DateCustom(item.ApproveDate);
+                    tag += '<td> ' + StringApprovdate + '</td>';
+                }
+                if (item.SigApprovalStatus =="Approved") {
+                    tag += '<td> <span class="badge badge-success"> ' + item.SigApprovalStatus + '</span></td>';
+                } else if (item.SigApprovalStatus == "Pending") {
+                    tag += '<td> <span class="badge badge-warning"> ' + item.SigApprovalStatus + '</span></td>';
+                } else if (item.SigApprovalStatus == "Rejected") {
+                    tag += '<td> <span class="badge badge-danger"> ' + item.SigApprovalStatus + '</span></td>';
+                } else if (item.SigApprovalStatus == "-") {
+                    tag += '<td> <span class="badge badge-success"> ' + item.SigApprovalStatus + '</span></td>';
+                }
+                tag += '</tr>';
+            })
+            $('#Installment').html(tag);
+        }
+    });
+}
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "-" + month + "-" + year;
+        return date;
+    }
+</script>
+}
+
+
+

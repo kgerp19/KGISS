@@ -1,0 +1,331 @@
+﻿@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Packaging Issue Item List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+    .hasDatepicker {
+        position: relative;
+        z-index: 9999;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Issue Item List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Issue Item List</li>
+    </ol>
+</section>
+@using (Html.BeginForm("PackagingIssueItemList", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>IssueNo</th>
+                                        <th>Issue Date</th>
+                                        <th>From Requisition</th>
+                                        <th>To Requisition</th>
+                                        <th>
+                                            Achknolagement
+                                        </th>
+                                        <th>Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+
+                                            <td>
+                                                <a style="color:blue" href="~/Report/PackagingIssueProductReport?IssuedMasterId=@item.IssueMasterId" target="_blank"> @item.IssueNo </a>
+                                            </td>
+                                            <td>
+                                                @if (item.IssueDate != null)
+                                                {<span>@item.IssueDate.ToString("dd-MM-yyyy")</span>}
+                                            </td>
+                                            <td>@item.FromDepartmentIssueName</td>
+                                            <td>@item.ToDepartmentIssueName</td>
+                                            <td>
+                                                @if (item.Achknolagement)
+                                                {
+                                                    <span class="text-success">
+                                                        Acknowledged
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-warning">
+                                                        Pending
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a onclick="makeEditble(@item.IssueMasterId,@item.RequisitionId,'@item.RequisitionNo','@item.IssueDate',@item.FromDepartmentIssueId,'@item.IssueBy',@item.IssueById,)" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                &nbsp;
+                                                <a onclick="makeDeletale(@item.IssueMasterId)" class="linkPointer"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                &nbsp;
+                                                <a target="_blank" href="~/Procurement/PackagingIssueProductFromStore?companyId=20&issueMasterId=@item.IssueMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+@using (Html.BeginForm("KPLRequisitionIssueUpdate", "Procurement", FormMethod.Post, new {id= "frmKPLRequisitionIssueUpdate", @class= "formValidator" }))
+{
+<div class="modal fade" id="modalDiv" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg ui-front" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="margin-bottom:0%;padding-bottom:0%">
+                <h5 class="modal-title">Packaging Issue Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Issue Date</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.HiddenFor(model=>model.IssueMasterId,new {id="hdnIssuedMasterId"})
+                                    @Html.EditorFor(model => model.IssueDate, new { htmlAttributes = new { @class = "form-control datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Requisition No</label>
+                                @Html.EditorFor(model => model.RequisitionNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Supplier Name", @id = "txtRequisitionNo",@disabled = "disabled" } })
+
+                                @Html.HiddenFor(model => model.RequisitionId, new { id = "ddlRequisitionId" })
+                                @Html.ValidationMessageFor(model => model.RequisitionId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div id="RequisitionMasteData">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Requisition Date</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.EditorFor(model => model.RequisitionDate, new { htmlAttributes = new { @class = "form-control datepicker", @style = "width:95%", @autocomplete = "off", @disabled = "disabled" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+
+                                    <label>From Requisition</label>
+                                    @Html.DropDownListFor(model => model.FromDepartmentReqId, Model.DDLStockDepartment, new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                    @Html.ValidationMessageFor(model => model.FromDepartmentIssueName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>To Requisition</label>
+                                    @Html.DropDownListFor(model => model.ToDepartmentReqId, Model.DDLStockDepartment, new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                    @Html.ValidationMessageFor(model => model.ToDepartmentReqId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding:0px">
+                                    <label for="message-text" class="col-form-label">Employee</label>
+                                    @Html.EditorFor(model => model.IssueBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Title", @id = "txtEmployeeKGId", @style = "max-width: 100%" } })
+                                    @Html.HiddenFor(model => model.IssueById, new { id = "ddlREmployeeKGId" })
+                                    @Html.ValidationMessageFor(model => model.IssueBy, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+
+                                    <label>Issue From</label>
+                                    @Html.DropDownListFor(model => model.FromDepartmentIssueId, Model.DDLStockDepartment, new { @class = "form-control form-control-sm" })
+                                    @Html.ValidationMessageFor(model => model.FromDepartmentIssueId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Issue To</label>
+                                    @Html.DropDownListFor(model => model.ToDepartmentIssueId, Model.DDLStockDepartment, new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                    @Html.HiddenFor(model => model.ToDepartmentIssueId, new { id = "hdnToDepartmentIssueId" })
+                                    @Html.ValidationMessageFor(model => model.ToDepartmentIssueId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="modUpdate">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        let RequisitionMasterGETData = (requisitionId) => {
+            let rData = HttpRequest.AjaxData("POST", '/Procurement/GetResuisitionDataByRequisitionId', { 'requisitionId': requisitionId });
+            if (rData != null) {
+                $(".ui-datepicker-trigger").addClass("hidden");
+                $("#RequisitionDate").val(rData.RequisitionDateMsg);
+                $("#FromDepartmentReqId").val(rData.FromRequisitionId);
+                $("#ToDepartmentReqId").val(rData.ToRequisitionId);
+                $("#ToDepartmentIssueId").val(rData.FromRequisitionId);
+                $("#hdnToDepartmentIssueId").val(rData.FromRequisitionId);
+
+
+            }
+        }
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        location.reload(true);
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        $(document).ready(function () {
+
+            $('#modalDiv').on('hidden.bs.modal', function () {
+                $("#txtRequisitionNo").val('');
+                $("#ddlRequisitionId").val('');
+                $("#IssueDate").val(null);
+                $("#FromDepartmentIssueId").val('');
+                $("#txtEmployeeKGId").val('');
+                $("#ddlREmployeeKGId").val('');
+                $("#hdnIssuedMasterId").val('');
+                $("#txtRequisitionNo").val('');
+                $("#RequisitionDate").val('');
+                $("#FromDepartmentReqId").val('');
+                $("#ToDepartmentReqId").val('');
+                $("#ToDepartmentIssueId").val('');
+                $("#hdnToDepartmentIssueId").val('');
+            })
+
+            $("#txtRequisitionNo").change(function () {
+                var newValue = $(this).val();
+                RequisitionMasterGETData(newValue);
+            });
+
+            $("#txtEmployeeKGId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url:"@Url.Action("getallEmployeeId", "Configuration")",
+                        data: { prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            console.log('data', data);
+                            response($.map(data, function (item) {
+                                return item;
+                            }));
+                        },
+                        error: function (response) {
+                            // Handle error
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            // Handle failure
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    console.log(i);
+                    $("#ddlREmployeeKGId").val(i.item.val);
+                    $('#ddlREmployeeKGId').focus();
+                }
+            });
+        })
+
+
+        const makeDeletale = (issuedMasterId) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/Procurement/KPLRequisitionIssuedDelete', { "masterId": issuedMasterId }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+
+
+        const makeEditble = (issuedMasterId,requisitionId,requisitionNo ,IssuedDate, fromIssuedId, issuedBy, issuedById) => {
+
+            $("#txtRequisitionNo").val(requisitionId).trigger("change");
+            $("#ddlRequisitionId").val(requisitionId);
+            $("#IssueDate").val(IssuedDate);
+            $("#FromDepartmentIssueId").val(fromIssuedId);
+            $("#txtEmployeeKGId").val(issuedBy);
+            $("#ddlREmployeeKGId").val(issuedById);
+            $("#hdnIssuedMasterId").val(issuedMasterId);
+            $("#modalDiv").modal('toggle');
+            $("#txtRequisitionNo").val(requisitionNo);
+        }
+
+
+    </script>
+}
+

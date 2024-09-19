@@ -1,0 +1,138 @@
+﻿@model KGERP.Service.KGSalesAchivementDetailVm
+@{
+    ViewBag.Title = "SaleTagetFix";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .custom-card {
+        background: linear-gradient(145deg, #f3f3f3, #e7e7e7);
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s;
+    }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .card-body {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .card-title {
+        color: #007bff;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+
+    .card-text span {
+        font-size: 1.5rem;
+        color: #555;
+    }
+</style>
+@{
+    string[] monthNames = new string[] {
+        "Invalid month",
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+}
+<div class="card custom-card shadow mb-4 border-0 rounded-lg">
+    <div class="card-body p-4">
+        <span class="d-block"><strong>Monthly Targeted List:</strong> </span>
+        <h5 class="card-title text-primary font-weight-bold">@Model.Title</h5>
+        <p class="card-text">
+            <span class="d-block mb-2"><strong>Month:</strong> @(Model.Month >= 1 && Model.Month <= 12 ? monthNames[Model.Month] : "Invalid month")</span><br />
+            <span class="d-block"><strong>Monthly Targeted Amount:</strong> @Model.MonthlySalesTergetedAmount</span>
+        </p>
+    </div>
+</div>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" class="table table-striped" width="100%">
+        <thead class="thead-light">
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Salary</th>
+                <th>Target</th>
+                <th> Target Amount</th>
+                <th>Target Qty</th>
+                <th>Target Collection</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.offcierAssignsList)
+            {
+                <tr>
+                    <td>@item.EmployeeId</td>
+                    <td>@item.EmployeeName</td>
+                    <td class="salaryColumn">@item.Salary</td>
+                    <td>@item.EmpTarget</td>
+
+                    <td>
+                        <input type="number" class="form-control empTargetInput" value="@item.EmpTarget" data-empid="@item.Id" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control empTargetQty" value="@item.TargetQty" data-empid="@item.Id" />
+                        <span>@Model.UnitName</span>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control empTargetCollec" value="@item.TargetCollection" data-empid="@item.Id" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<button id="saveEmpTargets" class="btn btn-primary">Save Employee Targets</button>
+@section Scripts {
+    <script>$(document).ready(function () {
+
+    $('#saveEmpTargets').on('click', function () {
+     
+                var empTargets = [];
+                $('.empTargetInput').each(function () {
+                    var empId = $(this).data('empid');
+                    var empTarget = $(this).val();
+                    var KGCompanyMonthlySaleTergetId =@Model.KGCompanyMonthlySaleTergetId;
+                    var salary = $(this).closest('tr').find('.salaryColumn').text().trim();
+                    var targetQty = $(this).closest('tr').find('.empTargetQty').val();
+                    var targetCollec = $(this).closest('tr').find('.empTargetCollec').val();
+
+
+                    empTargets.push({ EmployeeId: empId, EmpTarget: empTarget, KGCompanyMonthlySaleTergetId: KGCompanyMonthlySaleTergetId, SalaryAmount: salary, TargetQty: targetQty, TargetCollection: targetCollec });
+                });
+
+              
+                $.ajax({
+                    url: '/SalesManagement/SaveEmployeeTargets',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(empTargets),
+                    success: function (response) {
+                        console.log(response);
+
+                        if (response == true) {
+                            console.log('Employee targets saved successfully.');
+                            alert('Employee targets  saved.');
+                            location.reload();
+                        } else {
+                            // Handle failure case
+                            console.log('Employee targets not saved.');
+                            alert('Employee targets not saved.');
+                        }
+
+                       
+                    },
+                    error: function (xhr, status, error) {
+                        
+                        console.error('Error saving employee targets:', error);
+                    }
+                });
+            });
+        });</script>
+}

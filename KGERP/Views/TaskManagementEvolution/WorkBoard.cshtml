@@ -1,0 +1,608 @@
+﻿@model KGERP.Service.Implementation.TaskManagment.WorkBoardVm
+
+@{
+    ViewBag.Title = "GetWorkSpace";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+
+
+    .container {
+        margin: 20px auto;
+        max-width: 1200px;
+    }
+
+    .card {
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        background-color: #f9f9f9; 
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); 
+        color: #fff;
+        padding: 20px;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        text-align: center;
+    }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid #fff; 
+            padding-bottom: 10px;
+        }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 24px;
+        margin-bottom: 10px;
+        position: relative;
+        color: #333; /* Dark gray text color */
+    }
+
+        .card-title::after {
+            content: "";
+            display: block;
+            width: 50px;
+            height: 2px;
+            background-color: #333; /* Dark gray line */
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+        }
+
+    .card-content {
+        margin-bottom: 20px;
+    }
+
+    .card-footer {
+        text-align: center;
+        padding: 20px;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        background-color: #fff; /* White background */
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-image: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* Gradient background */
+        color: #fff;
+    }
+
+        .btn-primary:hover {
+            background-color: #0043b6; /* Darker blue on hover */
+        }
+
+    /* Select wrapper */
+    .select-wrapper {
+        margin-bottom: 20px;
+    }
+
+    /* Table */
+    #workspaces-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        #workspaces-table tbody {
+            background-color: #fff; /* White background */
+        }
+
+    /* Modal */
+    .modal-content {
+        border-radius: 20px;
+    }
+
+    .modal-header {
+        background-image: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* Gradient background */
+        color: #fff;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+    .modal-footer {
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h1 class="mb-0">@Model.WorkSpaceName</h1>
+                    <h3 class="mb-4">Work Board <br />Details </h3>
+           
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6" id="mem">
+                            <h3 class="mb-3">Member Assign</h3>
+                            <div class="form-group">
+                                <select id="ddlInstallmentId" name="InstallmentId" class="form-control custom-select mb-3" multiple="multiple" data-placeholder="Select Employee(s)" data-dropdown-css-class="select2-purple" required style="max-width: 100%;"></select>
+                                <button class="btn btn-primary saveeee-button float-right">Assign</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="mb-3">Workspaces Member</h3>
+                            <table id="workspaces-table">
+                                <tbody>
+                                    <!-- Data will be appended here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@using (Html.BeginForm("CreateBoard", "TaskManagementEvolution", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    @Html.HiddenFor(model => model.WorkSpacesId)
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myModalLabel">Add New Board</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="workspaceTitle">Work Board Title</label>
+                            <input type="text" class="form-control" name="BoardName" id="BoardName" placeholder="Enter Board Name">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal for Delete -->
+<!-- Modal for Delete Confirmation -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Are you sure you want to delete the workboard "<span id="workboardTitle"></span>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="alertMessage" class="alert alert-success" style="display: none;"></div>
+<!-- Displaying workboards in cards -->
+<div class="container ">
+    <div style="text-align: right;">
+        <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Add New Board</a>
+    </div>
+    <div class="row" style="margin-top:15px;">
+        @if (Model.DataList != null && Model.DataList.Any())
+        {
+            foreach (var workboard in Model.DataList)
+            {
+                var hue = (workboard.GetHashCode() * 40) % 360;
+                var color = "hsl(" + hue + ", 70%, 50%)";
+
+                <div class="col-md-3">
+                    <div class="card" style="border-top: 5px solid @color; position: relative;">
+                        <div class="btn-delete">
+                            <a href="#" class="btn-delete-link" data-workboard-id="@workboard.WorkBoardId" data-workboard-title="@workboard.BoardName">
+                                <i class="fa fa-times premium-icon" style="color: red;"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">@workboard.BoardName</h3>
+                            <div class="card-content">
+                                <p><strong>Created By:</strong> @workboard.CreatedBy</p>
+                            </div>
+                        </div>
+                        <div class="card-footer" style="border-top: 2px solid @color">
+                            <a href="/TaskManagementEvolution/AllTaskList?WorkbordId=@workboard.WorkBoardId&WorkSpaceId=@workboard.WorkSpacesId" class="btn btn-go">Go</a>
+                            <a href="/TaskManagementEvolution/AllTaskList?WorkbordId=@workboard.WorkBoardId&WorkSpaceId=@workboard.WorkSpacesId" class="btn btn-arrow">&#8594;</a>
+                            <!-- Setting icon -->
+                            <a href="#" class="btn-settings" title="Settings" onclick="OpenSeeting('@workboard.WorkBoardId', '@workboard.BoardName')" data-toggle="modal" data-target="#settingsmodal" style="position: absolute; top: 5px; right: 5px;">
+                                <i class="fa fa-cog" style="color: #808080;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No workboards found.</p>
+        }
+    </div>
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsmodal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table id="workLabelTable" class="table mb-3">
+                        <thead>
+                            <tr>
+                                <th>SL</th>
+                                <th>Work Label Name</th>
+                             
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody1">
+                            <!-- Table rows will be appended here -->
+                        </tbody>
+                    </table>
+                    <a style="float:right;" id="workboardid" onclick="CreateLabel()" class="btn btn-go">Lebel Settings</a>
+                    <table id="workStateTable" class="table">
+                        <thead>
+                            <tr>
+                                <th>SL</th>
+                                <th>Work State Name</th>
+                        
+
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody2">
+                            <!-- Table rows will be appended here -->
+                        </tbody>
+                    </table>
+                    <a style="float:right" onclick="CreateState()" class="btn btn-go"> State Settings</a>
+                </div>
+                <div class="modal-footer">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+       $(document).ready(function () {
+
+$.ajax({
+    url: '/TaskManagementEvolution/WorkSpaceMember', // Change the URL to match your controller action
+    type: 'GET', // Change to GET since your action is decorated with [HttpGet]
+    data: { workspaceId: '@Model.WorkSpacesId' }, // Assuming Model.WorkSpacesId contains the workspaceId
+    dataType: 'json', // Expect JSON response
+    success: function (response) {
+      
+       
+        if (response.IsAdmin === true) {
+            document.getElementById('mem').style.display = 'block';
+        } else {
+            document.getElementById('mem').style.display = 'none';
+        }
+
+        $.each(response.DataList, function (index, workspace) {
+    var row = $('<tr>');
+            var serialNumber = $('<td>').text(index + 1).appendTo(row);
+    var cell = $('<td>').text(workspace.Name).appendTo(row);
+
+    if (response.IsAdmin === true) {
+        var deleteIcon1 = $('<span>').addClass('delete-icon1').text('❌').appendTo(cell);
+        deleteIcon1.on('click', function () {
+            // Call the deleteWorkspace function passing the workspace id
+            deleteWorkspace(workspace.WorkSpacesMemberId);
+            $(this).closest('tr').remove();
+        });
+
+        var checkbox = $('<input>')
+            .attr('type', 'checkbox')
+            .addClass('admin-checkbox')
+            .prop('checked', workspace.IsAdmin)  
+            .appendTo(cell);
+        
+        checkbox.on('change', function () {
+            var isChecked = $(this).is(':checked');
+            if ($(this).is(':checked')) {
+                $.ajax({
+                    url: '/TaskManagementEvolution/MakeAdmin',  
+                    type: 'POST',
+                    data: {
+                        WorkSpacesMemberId: workspace.WorkSpacesMemberId,
+                        isChecked: isChecked,
+                        workspaceid: workspace.WorkSpacesId
+                    },
+                    success: function (response) {
+                        console.log('Server response:', response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            } else {
+                $.ajax({
+                    url: '/TaskManagementEvolution/MakeAdmin',
+                    type: 'POST',
+                    data: {
+                        WorkSpacesMemberId: workspace.WorkSpacesMemberId,
+                        isChecked: false,
+                        workspaceid: workspace.WorkSpacesId
+                    },
+                    success: function (response) {
+                        console.log('Server response:', response);
+                        if (response === false) {
+                            alert('You Can not remove the creator from admin');
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+        })
+       
+    }
+
+    $('#workspaces-table tbody').append(row);
+});
+
+       
+
+    },
+    error: function (xhr, status, error) {
+        // Handle errors
+        console.error(xhr.responseText);
+    }
+});
+
+
+           $("#ddlInstallmentId").select2({
+               ajax: {
+                   url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                   dataType: 'json',
+                   delay: 250,
+                   data: function (params) {
+                       return {
+                           prefix: params.term
+                       };
+                   },
+                   processResults: function (data) {
+                       return {
+                           results: $.map(data, function (item) {
+                               return {
+                                   text: item.Name,
+                                   id: item.Id
+                               }
+                           })
+                       };
+                   },
+                   cache: true
+               },
+               placeholder: 'Select an option',
+               minimumInputLength: 1
+           });
+
+
+
+});
+
+        function openDeleteModal(workboardId, workboardTitle) {
+            console.log("Workboard ID:", workboardId);
+            console.log("Workboard Title:", workboardTitle);
+
+            // Set the workboard ID and title in the modal
+            $('#deleteModal').data('workboard-id', workboardId);
+            $('#workboardTitleee').text(workboardTitle);
+            $('#deleteModal').find('.modal-title').text('Confirm Deletion of Workboard "' + workboardTitle + '"');
+
+            // Show the delete modal
+            $('#deleteModal').modal('show');
+        }
+
+
+        $('.btn-delete-link').click(function (e) {
+            e.preventDefault();
+            var workboardId = $(this).data('workboard-id');
+            var workboardTitle = $(this).data('workboard-title');
+            $('#workboardTitle').text(workboardTitle);
+            $('#deleteModal').data('workboard-id', workboardId);
+            $('#deleteModal').modal('show');
+        });
+
+        $('#confirmDelete').click(function () {
+            var workboardId = $('#deleteModal').data('workboard-id');
+            $('#deleteModal').modal('hide');
+
+            $.ajax({
+                url: '/TaskManagementEvolution/DeleteConfirmedWOrkbord/' + workboardId,
+                type: 'POST',
+                success: function (response) {
+                    location.reload();
+                }
+            });
+        });
+
+
+
+
+
+
+
+         $('.saveeee-button').click(function() {
+    var selectedInstallments = $('#ddlInstallmentId').val();
+    var wokkid = $('#wrkid').val();
+    var tableBody = $('#tableBody');
+    $.ajax({
+        url: '@Url.Action("WorkAssignForBoard", "TaskManagementEvolution")',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            selectedInstallments: selectedInstallments,
+            workspaceId: @Model.WorkSpacesId,
+        },
+        success: function (response) {
+            location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error(status, error);
+        }
+    });
+});
+
+
+
+    function deleteWorkspace(workspaceMemberId) {
+        $.ajax({
+            url: '/TaskManagementEvolution/DeleteWorkspaceMember',
+            type: 'POST',
+            data: { workspaceMemberId: workspaceMemberId },
+            dataType: 'json',
+            success: function (response) {
+                console.log(response);
+                // Remove the row from the table
+                $('.delete-icon1[data-id="' + workspaceMemberId + '"]').closest('tr').remove();
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
+
+        function OpenSeeting(workBoardId, boardname) {
+            $("#settingsModalLabel").html(boardname);
+        $.ajax({
+            url: '/TaskManagementEvolution/GetSpaceWiseWorklebl',
+            type: 'GET', // or 'POST' depending on your server-side implementation
+            dataType: 'json',
+            data: {
+                workBoardId: workBoardId
+            },
+            success: function(response) {
+
+                $('#tableBody1').empty();
+                $('#tableBody2').empty();
+
+                // Loop through the DataList array and append each WorkLabelName to the table
+              var serialNumber = 1;
+
+                // Loop through the DataList array and append each WorkLabelName to the table
+                response.LabelDataList.forEach(function (item) {
+                    $('#tableBody1').append('<tr>' +
+                        '<td>' + serialNumber++ + '</td>' +
+                        '<td style="color: ' + item.ColorName + ';">' + item.WorkLabelName + '</td>' +
+                        '</tr>');
+                });
+
+
+
+                var se = 1;
+                response.SpaceDataList.forEach(function (item) {
+                    $('#tableBody2').append('<tr><td>' + se++ + '</td><td>' + item.WorkLabelName + '</td></tr>');
+                });
+                $('#workboardid').val(workBoardId);
+
+
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error('AJAX call failed');
+            }
+        });
+    }
+
+      function CreateLabel() {
+    var workboardid = $('#workboardid').val();
+    var workspaceid = @Model.WorkSpacesId;
+    var url = "/TaskBasic/WorkLabel?workboardid=" + workboardid + "&workspaceid=" + workspaceid;
+    window.location.href = url;
+}
+
+    function CreateState() {
+    var workboardid = $('#workboardid').val();
+    var workspaceid = @Model.WorkSpacesId;
+        var url = "/TaskBasic/WorkState?workboardid=" + workboardid + "&workspaceid=" + workspaceid;
+    window.location.href = url;
+        }
+
+
+
+
+        $(document).on('click', '.delete-icon', function () {
+            var labelId = $(this).data('id');
+            var $row = $(this).closest('tr');
+            // Open confirmation modal
+            if (confirm("Are you sure you want to delete this item?")) {
+                // Perform AJAX call to delete the item
+                $.ajax({
+                    url: '/TaskManagementEvolution/DeleteWorkLabel',
+                    type: 'POST',
+                    data: { labelId: labelId },
+                    success: function (response) {
+                       
+                        console.log("Item deleted successfully.");
+                        alert("Item deleted successfully.");
+                        // Fade out the row
+                        $row.fadeOut(400, function () {
+                            $(this).remove();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        console.error("Error deleting item:", error);
+                    }
+                });
+            }
+        });
+
+
+
+    </script>
+
+
+}

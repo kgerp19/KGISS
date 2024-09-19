@@ -1,0 +1,364 @@
+﻿@model KGERP.Service.ServiceModel.TicketingViewModel
+@{
+    ViewBag.Title = "Request Ticke List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .btn-primary {
+        color: #fff !important;
+        background-color: #3c8dbc !important;
+        border-color: #3c8dbc !important;
+    }
+
+    .bg-primary {
+        color: #fff !important;
+        background-color: #3c8dbc !important;
+        border-color: #3c8dbc !important;
+    }
+
+    .bg-warning {
+        color: #fff;
+        background-color: #f39c12;
+        border-color: #f39c12;
+    }
+
+    .bg-info {
+        color: #000;
+        background-color: #31d2f2;
+        border-color: #25cff2;
+    }
+
+    .bg-success {
+        color: #fff;
+        background-color: #00a65a;
+        border-color: #00a65a;
+    }
+
+    .bg-danger {
+        color: #fff;
+        background-color: #d9534f;
+        border-color: #d43f3a;
+    }
+
+    .btn-danger {
+        color: #fff;
+        background-color: #d9534f;
+        border-color: #d43f3a;
+    }
+
+    .badge1 {
+        display: inline-block;
+        min-width: 10px;
+        padding: 3px 7px;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-radius: 10px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-4">
+        <h3 class="text-info">Self Request List </h3>
+    </div>
+    <div class="col-md-4">
+        <h3 class="text-info">  </h3>
+    </div>
+    <div class="col-md-4">
+        <div class="text-right">
+            <a class="btn btn-primary" href="/Ticket/Request_Ticket?companyId=@Model.CompanyId">New Request</a>
+        </div>
+
+    </div>
+
+</div>
+
+<hr />
+<br />
+
+<div class="table-responsive col-md-12  text-nowrap">
+
+    <table id="KgErpDataTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th style="padding:5px;text-align:center;">SL</th>
+                <th style="padding:5px">Subject</th>
+                <th style="padding:5px">Company</th>
+                <th style="padding:5px;text-align:left;width:200px">Services</th>
+                <th style="padding:5px">Status</th>
+                <th style="padding:5px">Date</th>
+                <th style="padding:5px;text-align:center;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.DataList)
+            {
+                <tr>
+                    <td style="padding:5px;text-align:center;">@(++sl)</td>
+                    <td style="padding:5px">@item.Subject</td>
+                    <td style="padding:5px">@item.CompanyName</td>
+                    <td style="padding:5px;text-align:left; width:200px">
+                        @if (item.TaskType == 1)
+                        {
+                            <b class="text-info"> ERP </b>
+                        }
+                        @if (item.TaskType == 2)
+                        {
+                            <b class="text-secondary"> IT </b>
+                        }
+                        @if (item.TaskType == 3)
+                        {
+                            <b class="text-secondary"> Admin </b>
+                        }
+                        @if (item.TaskType == 4)
+                        {
+                            <b class="text-secondary"> Accounts </b>
+                        }
+                        @if (item.TaskType == 5)
+                        {
+                            <b class="text-secondary"> Engineers </b>
+                        }
+
+                    </td>
+                    <td style="padding:5px">
+                        @if (item.Status == 1)
+                        {
+                            <span class="badge bg-warning text-dark"> Pending </span>
+                        }
+
+                        @if (item.Status == 2)
+                        {
+                            <span class="badge bg-primary text-dark"> In progress </span>
+                        }
+
+                        @if (item.Status == 3)
+                        {
+                            <span class="badge bg-success text-dark"> Done </span>
+                        }
+                        @if (item.Status == 4)
+                        {
+                            <span class="badge bg-danger text-dark"> Cancel </span>
+                        }
+                    </td>
+                    <td style="padding:5px">@item.Date</td>
+
+                    <td style="padding:5px;text-align:center;">
+                        @if (item.Status == 1)
+                        {
+                            <button type="button" class="btn btn-sm btn-primary" onclick="makeEdit(@item.Id)" data-toggle="modal" data-target="#EditProcurementPurchaseOrderSlaveModal" style="background-color: #a7d0f3;border-color: #ffc107;">  <i class="fa fa-edit" aria-hidden="true"></i> </button>
+                            <button type="button" onclick="makeDeletale(@item.Id)" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal">  <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-sm btn-primary disabled"> <i class="fa fa-edit" aria-hidden="true"></i> </button>
+                            <button type="button" class="btn btn-sm btn-danger disabled"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></button>
+
+                        }
+                        <button type="button" class="btn btn-sm btn-success" onclick="makeView(@item.Id)" data-toggle="modal" data-target="#viewProcurementPurchaseOrderSlaveModal" style=" background-color: #00a65a; border-color: #00a65a;"> <i class="glyphicon glyphicon-new-window"></i>  </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+@using (Html.BeginForm("DeleteRequest", "Ticket", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b> Delete Request</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(model => model.Id, new { id = "hidDeleteProcurementPurchaseOrderSlaveId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyFK" })
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this  request?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-danger fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+<div class="modal fade" id="viewProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b> Request Details  </b></h5>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <b class="col-lg-3"> Create By</b><b class="col-lg-9" id="empname"> </b>
+                </div>
+                <div class="row">
+                    <b class="col-lg-3"> Employee Id</b><b class="col-lg-9" id="createby"> </b>
+                </div>
+                <div class="row">
+                    <b class="col-lg-3"> Create Date</b><b class="col-lg-9"> <b id="createdate"> </b> </b>
+                </div>
+                <div class="row">
+                    <b class="col-lg-3 text-info"> Subject </b><b class="col-lg-9 text-info"> <b id="Subject" style="text-decoration: underline;"> </b> </b>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3"> Description</div><div class="col-lg-9"> <p id="Description"> </p> </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+@using (Html.BeginForm("EditRequst", "Ticket", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="EditProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b> Edit</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        @Html.HiddenFor(model => model.Id, new { id = "fid" })
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                        <div class="col-md-6">
+                            @Html.Label("Services", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            @Html.DropDownListFor(model => model.TaskType, Model.TaskTypeList as SelectList, "==Select Department==", new { id = "ddlStatusEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+
+                            @Html.ValidationMessageFor(model => model.TaskType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Company", htmlAttributes: new { @class = "control-label" })
+
+                                <br />
+                                @Html.DropDownListFor(model => model.CompanyName, new SelectList(Model.Companies, "Value", "Text"), "==Select Company==", new { @class = "dropdownsize form-control", @id = "ddlCompanyIdFK", required = "required" })
+                                @Html.HiddenFor(model => model.CompanyIdFK, new { id = "ddlCompanyIdFK" })
+                                @Html.ValidationMessageFor(model => model.CompanyIdFK, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Subject, htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.Subject, new { htmlAttributes = new { @style = "max-width:100%", @class = "form-control", @id = "idSubject" } })
+
+                                @Html.ValidationMessageFor(model => model.Subject, "", new { @class = "text-danger" })
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="Description" class="form-label">
+                                Reason
+                            </label>
+                            <textarea class="form-control" style="max-width: 100%" required name="Description" id="idDescription" rows="4"></textarea>
+                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger", @id = "idDescription" })
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-offset-3 col-md-10">
+                                    <button type="submit" class="btn btn-primary" onclick="javascript: return SubmitForm();" style="margin-left: 20px;"> Submit </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@section scripts {
+
+    <script type="text/javascript">
+    var data=@Html.Raw(Json.Encode(Model.DataList));
+        function makeDeletale(rowId) {
+            $('#hidDeleteProcurementPurchaseOrderSlaveId').val(rowId);
+        }
+
+        function makeView(row) {
+            var datalist = data.find(d => d.Id == row);
+            document.getElementById('empname').innerText = datalist.EmpName;
+            document.getElementById('createby').innerText = datalist.CreatedBy;
+            document.getElementById('createdate').innerText = datalist.Date;
+            document.getElementById('Subject').innerText = datalist.Subject;
+            document.getElementById('Description').innerText = datalist.Description;
+        }
+
+        function makeEdit(row) {
+
+            var datalist = data.find(d => d.Id == row);
+            console.log(datalist);
+            $('#idSubject').val(datalist.Subject);
+            $('#fid').val(datalist.Id);
+            $('#idDescription').val(datalist.Description);
+            $('#ddlStatusEnumFK').val(datalist.TaskType);
+            $('#ddlCompanyIdFK').val(datalist.CompanyIdFK).change();
+            $('#CompanyName').val(datalist.CompanyName);
+        }
+
+        $("#ddlCompanyIdFK").change(function () {
+
+        })
+
+        function resetProcurementPurchaseRequisitionSlaveForm() {
+            $('#procurementPurchaseRequisitionSlaveFormId')[0].reset();
+        }
+    </script>
+}

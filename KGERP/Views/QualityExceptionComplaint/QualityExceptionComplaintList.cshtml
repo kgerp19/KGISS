@@ -1,0 +1,359 @@
+﻿@model KGERP.Service.Implementation.QualityExceptionComplaints.QualityExceptionComplaintDetailVM
+@{
+    ViewBag.Title = "QualityExceptionComplaintList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    .badge {
+        display: inline-block;
+        padding: 1em 0.7em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        width: 80px;
+    }
+
+    .marks-section {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 1.25rem;
+        padding: 20px;
+        margin-bottom: 4%;
+    }
+
+    .marks-header {
+        font-size: 2.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .marks-item {
+        font-size: 1.7rem;
+        margin-bottom: 5px;
+    }
+
+    .marks-total {
+        font-size: 1.7rem;
+        font-weight: 700;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .badge-warning {
+        color: #212529;
+        background-color: #ffc107;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        background-color: #d9534f;
+        color: #ffffff;
+    }
+
+    #tblFooter tr {
+        cursor: move;
+    }
+
+    .ui-state-highlight {
+        height: 2em;
+        line-height: 1.2em;
+        background-color: #f2f2f2;
+        border: 1px dashed #aaa;
+    }
+
+    .forCustomHeading {
+        margin-top: 1%;
+        margin-bottom: 1%;
+        background: whitesmoke;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
+        padding: 10px 20px;
+        font-size: 19px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .empFormGroup {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+        .empFormGroup label {
+            margin-right: 10px;
+        }
+
+        .empFormGroup span {
+            flex-grow: 1;
+        }
+
+    .container {
+        font-family: 'Roboto', sans-serif;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100% !important;
+        padding-bottom: 1%;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 10px;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    h3 {
+        font-size: 2em;
+        margin-bottom: 10px;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    th {
+        background-color: #343a40;
+        color: #fff;
+        text-align: center;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    .score {
+        margin: 0;
+    }
+
+    p {
+        font-size: 1.2em;
+    }
+
+    #IncreaseProMonth {
+        width: 10%;
+        background-color: darkblue;
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        border-radius: 7%;
+    }
+
+    #totalScore, #averageScore {
+        font-weight: bold;
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: end;
+        margin-top: 20px;
+    }
+
+    .card-containers {
+        display: flex;
+        justify-content: space-evenly;
+        margin-top: 20px;
+    }
+
+    .card {
+        width: 45%;
+        text-align: center;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .card p {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+    .demonstrated-traits-row {
+        font-weight: bold;
+        text-align: center;
+        background-color: #e9ecef;
+    }
+
+        .demonstrated-traits-row > td {
+            text-align: left;
+        }
+
+    .traitRowTd {
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .thead-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+        .thead-fixed th {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+    .radio-group {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+    }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    @using (Html.BeginForm("QualityExceptionComplaintListFilter", "QualityExceptionComplaint", FormMethod.Post))
+                    {
+                        <div class="container" style="padding:1%">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="from" class="form-label">From Date</label>
+                                    <div class="form-group" style="display:flex">
+
+                                        @Html.EditorFor(model=>model.FormDate, new { htmlAttributes = new { @id = "formDate", @class = "form-control text-box single-line datepicker", @autocomplete = "off" } })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="from" class="form-label">To Date</label>
+                                    <div class="form-group" style="display:flex">
+
+                                        @Html.EditorFor(model => model.ToDate, new { htmlAttributes = new { @id = "toDate", @class = "form-control text-box single-line datepicker", @autocomplete = "off" } })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <table id="KgErpDataTable"  class="table table-striped" width="100%">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Sl</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Delivery Date</th>
+                                    <th>Affected Weight</th>
+                                    <th>Affected Qty</th>
+                                    <th>Reporting Person</th>
+                                    <th>Responsible Person</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DataList)
+                                {
+                                    int sl = 0;
+                                    <tr>
+                                        <td>@(++sl)
+                                        
+                                        </td>
+                                        <td>@item.VendorName  
+                                        </td>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.DeliveryDate.Value.ToShortDateString()</td>
+                                        <td>@item.DeliveredAffectedWeight</td>
+                                        <td>@item.DeliveredAffectedQty</td>
+                                        <td>@item.ReportingPersonName</td>
+                                        <td>@item.PersonsResponsible</td>
+                                        <td>
+                                            <a href="/QualityExceptionComplaint/QualityExceptionComplaint?companyId=@Model.CompanyId&QualityExceptionComplaintId=@item.QualityExceptionComplaintId&QualityExceptionComplaintDetailId=@item.QualityExceptionComplaintDetailId" target="_blank" class="btn btn-success btn-sm">Details</a>
+                                            &nbsp;
+                                            <a href="/Report/QualityExceptionComplaintReport?QualityExceptionComplaintId=@item.QualityExceptionComplaintId&QualityExceptionComplaintDetailId=@item.QualityExceptionComplaintDetailId" target="_blank" class="btn btn-primary btn-sm">Report</a>
+                                            &nbsp;
+                                            <button onclick="makeDeletale('@item.QualityExceptionComplaintId')" class="btn btn-danger btn-sm">Delete</button>
+
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        location.reload(true);
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+
+        const makeDeletale = (qecId) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/QualityExceptionComplaint/QualityExceptionComplaintDelete', { "QualityExceptionComplaintId": qecId }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+
+
+
+        $(document).ready(function () {
+            
+        })
+
+
+    </script>
+}
+

@@ -1,0 +1,394 @@
+﻿@model KGERP.ViewModel.VendorViewModel
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("CreateOrEdit", "Vendor", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return jQueryAjaxPost(this);" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Vendor.Condition)
+    @Html.HiddenFor(x => x.Vendor.CompanyId)
+    <div class="row">
+        <div class="col-md-6">
+            <span style="font-size:20px;font-weight:bold">@(Request.QueryString["vendorTypeId"].ToString().Equals("2") ? "Customer" : "Supplier")</span>
+        </div>
+    </div>
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 10px;margin-bottom: 10px; border-width: 2px;" />
+    <div class="form-horizontal">
+        <div class="row">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.Vendor.VendorId)
+            @Html.HiddenFor(model => model.Vendor.VendorTypeId, new { id = "vendorTypeId" })
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.HeadGLId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.Vendor.HeadGLId, new SelectList(Model.CustomerCodes, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control" })
+                        @Html.ValidationMessageFor(model => model.Vendor.HeadGLId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.Name, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.Name, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.ContactName, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.ContactName, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.ContactName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.NID, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.NID, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.NID, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.CountryId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.Vendor.CountryId, new SelectList(Model.Countries, "Value", "Text"), "---Select---", htmlAttributes: new { @class = "dropdownsize form-control" })
+                        @Html.ValidationMessageFor(model => model.Vendor.CountryId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group" style='display:@(Model.Vendor.VendorTypeId == 2 ? "None":"inline")'>
+                    @Html.LabelFor(model => model.Vendor.State, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.State, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.State, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.DistrictId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.Vendor.DistrictId, new SelectList(Model.Districts, "Value", "Text"), "---Select---", htmlAttributes: new { @class = "dropdownsize form-control", @id = "ddlDistrict" })
+                        @Html.ValidationMessageFor(model => model.Vendor.DistrictId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.UpazilaId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.Vendor.UpazilaId, new SelectList(Model.Upazilas, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlUpazila" })
+                        @Html.ValidationMessageFor(model => model.Vendor.UpazilaId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                @if (Model.Vendor.VendorTypeId == 2)
+                {
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Vendor.ZoneId, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.DropDownListFor(model => model.Vendor.ZoneId, new SelectList(Model.Zones, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlZone" })
+                            @Html.ValidationMessageFor(model => model.Vendor.ZoneId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Vendor.SubZoneId, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(model => model.Vendor.SubZoneId, new SelectList(Model.SubZones, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlSubzone" })
+                                @Html.ValidationMessageFor(model => model.Vendor.SubZoneId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    
+
+                }
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.Phone, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.Phone, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.Phone, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.Email, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.Email, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.Email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+
+
+                <div class="form-group" style='display:@(Model.Vendor.VendorTypeId == 1 ? "None":"inline")'>
+                    @Html.LabelFor(model => model.Vendor.CustomerType, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        Cash
+                        @Html.RadioButtonFor(model => model.Vendor.CustomerType, "Cash", new { @id = "cash", @name = "Vendor.CustomerType" })
+                        Credit
+                        @Html.RadioButtonFor(model => model.Vendor.CustomerType, "Credit", new { @id = "credit", @name = "Vendor.CustomerType" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.ImageUrl, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        <img src="@Url.Content(Model.Vendor.ImageUrl)" style="margin:5px;" height="150" width="150" id="imagePreview" />
+                        <input type="file" name="VendorImageUpload" accept="image/jpg, image/jpeg, image/png" onchange="showImagePreview(this, document.getElementById('imagePreview'))" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.Address, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.Address, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.Address, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.NomineeName, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.NomineeName, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.NomineeName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.NomineePhone, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.NomineePhone, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.NomineePhone, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.GuarantorName, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.GuarantorName, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.GuarantorName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.GurantorMobileNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.GurantorMobileNo, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Vendor.GurantorMobileNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.NomineeImageUrl, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        <img src="@Url.Content(Model.Vendor.NomineeImageUrl)" style="margin:5px;" height="150" width="150" id="nomineeImagePreview" />
+                        <input type="file" name="NomineeImageUpload" accept="image/jpg, image/jpeg, image/png" onchange="showNomineeImagePreview(this, document.getElementById('nomineeImagePreview'))" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        
+      
+        <div class="row">
+        
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.Remarks, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.Remarks, new { htmlAttributes = new { @class = "form-control" } })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="creditParty col-md-6" style="display:none">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.NoOfCheck, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.NoOfCheck, new { htmlAttributes = new { @class = "form-control" } })
+                    </div>
+                </div>
+            </div>
+            <div class="creditParty col-md-6" style="display:none">
+                <div class="form-group">
+                    @Html.Label("Check No (Comma Separated)", htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.Vendor.CheckNo, new { htmlAttributes = new { @class = "form-control" } })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Vendor.IsActive, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Vendor.IsActive, new { htmlAttributes = new { @style = "margin-left:1px" } })
+                            @Html.ValidationMessageFor(model => model.Vendor.IsActive, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                  
+                    <input type="submit" value="@Model.Vendor.ButtonName" id="apply" class="btn btn-success pull-right" style="margin-left:2px" />
+                    <a href="@Url.Action("Index",new { companyId=Model.Vendor.CompanyId, vendorTypeId=Model.Vendor.VendorTypeId,isActive=Model.Vendor.IsActive})" class="btn btn-danger pull-right">
+                        Close <i class="fa fa-close" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+       
+        //JQuery Ajax Form Submit Begin
+        function jQueryAjaxPost(form) {
+            $validator.unobtrusive.parse(form);
+            if ($(form).valid()) {
+                var ajaxConfig = {
+                    type: "POST",
+                    url: from.action,
+                    data: new FormData(form),
+                    success: function (response) {
+                        var url = '@Url.Action("Index", "Vendor",new { companyId=Request.QueryString["companyId"], vendorTypeId= Request.QueryString["vendorTypeId"] })';
+                        window.location.href = url;
+                    }
+                };
+
+                if ($(form).attr('enctype') == "multipart/form-data") {
+                    ajaxConfig["contentType"] = false;
+                    ajaxConfig["processData"] = false;
+                }
+                $ajax(ajaxConfig);
+            }
+            return false;
+        }
+
+        //JQuery Ajax Form Submit End
+
+        //Image Preview Begin
+        function showImagePreview(imageUploader, previewImage) {
+            if (imageUploader.files && imageUploader.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(previewImage).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(imageUploader.files[0]);
+            }
+        }
+
+        //Image Preview End
+
+        //Nominee Image Preview Begin
+        function showNomineeImagePreview(imageUploader, previewImage) {
+            if (imageUploader.files && imageUploader.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(previewImage).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(imageUploader.files[0]);
+            }
+        }
+
+        //Nominee Image Preview End
+
+
+
+
+        $('#ddlZone').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Zone/GetSubZoneSelectModelsByZone",
+                data: { zoneId: $('#ddlZone').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var SubZone = "<select>";
+                    SubZone = SubZone + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        SubZone = SubZone + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    SubZone = SubZone + '</select>';
+                    $('#ddlSubzone').html(SubZone);
+                }
+            });
+        });
+
+        $('#ddlDistrict').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Upazila/GetUpazilaSelectModelsByDistrict",
+                data: { districtId: $('#ddlDistrict').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var Upazila = "<select>";
+                    Upazila = Upazila + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        Upazila = Upazila + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    Upazila = Upazila + '</select>';
+                    $('#ddlUpazila').html(Upazila);
+                }
+            });
+        });
+
+        $('input[type="radio"]').click(function () {
+            var inputValue = $(this).attr("value");
+            if (inputValue == 'Credit') {
+                $('#txtCreditCommission').val(0.5);
+                $('#divCreditCommission').show();
+                $('.creditParty').show();
+            }
+            else {
+                $('#txtCreditCommission').val(0);
+                $('#divCreditCommission').hide();
+                $('.creditParty').hide();
+            }
+
+        });
+
+        $('#ddlUpazila').change(function () {
+            if (!$('#ddlUpazila').val()) {
+                alert("Plese Select an Upazila");
+                return false;
+            }
+            $.ajax({
+                type: "post",
+                url: "/Vendor/GetAutoGeneratedVendorCode",
+                data: { upazilaId: $('#ddlUpazila').val(), vendorTypeId: $('#vendorTypeId').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    $('#txtVendor').val(data);
+                },
+                error: function () {
+                    alert("error");
+                }
+            });
+        });
+
+    </script>
+
+}

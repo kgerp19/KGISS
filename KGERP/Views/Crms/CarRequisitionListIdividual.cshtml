@@ -1,0 +1,239 @@
+﻿
+@{
+
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+<style>
+    table {
+        font-family: Arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #e0e0e0;
+    }
+
+    td {
+        font-size: 14px;
+    }
+
+    /* Custom styling for table columns */
+    .officer-column {
+        color: rgba(0, 0, 0, 0.7); /* Set the text color to a dark color with an alpha value */
+        font-weight: bold;
+    }
+
+
+    .day-type-column {
+        color: #28a745;
+    }
+
+    .time-column {
+        color: #dc3545;
+    }
+
+    .location-column {
+        color: #ffc107;
+    }
+
+    .total-persons-column {
+        color: #17a2b8;
+    }
+
+    .project-name-column {
+        color: #6610f2;
+    }
+
+    .driver-name-column {
+        color: #6c757d;
+    }
+
+    /* Marquee styles */
+    .tim {
+        width: 100%;
+        padding: 10px 0;
+        background-color: lightblue;
+        text-align: center;
+        font-family: Bahnschrift;
+    }
+
+    .clock-container {
+        background-color: #333; /* Clock background color */
+        color: #fff; /* Clock text color */
+        text-align: center;
+        padding: 20px;
+    }
+
+    #clock {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 3rem;
+        letter-spacing: 0.05em;
+        text-shadow: 0 0 20px rgba(10, 175, 230, 1), 0 0 20px rgba(10, 175, 230, 0);
+    }
+
+    #date {
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+    /* Style for the datepicker input */
+    .datepicker {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 16px;
+        width: 100%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.2s;
+    }
+
+        .datepicker:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+</style>
+
+
+<div class="clock-container">
+    <div id="clock"></div>
+    <div id="date"></div> <!-- Added a new div for displaying the date -->
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+
+        // Convert hours to 12-hour format
+        const formattedHours = (hours % 12) || 12;
+
+        const timeString = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+        document.getElementById('clock').textContent = timeString;
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('en-US', options);
+        document.getElementById('date').textContent = dateString;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock(); // Call the function once to initialize the clock.
+</script>
+<br />
+<br />
+<hr />
+
+<a class="btn btn-outline-dark " style="float:right;" href="CarRequisition?CompanyId=@Model.CompanyId">Add New</a>
+<table id="KgErpDataTable" >
+
+    <thead>
+        <tr>
+            <th class="officer-column">Sl</th>
+            <th class="officer-column">Officer Name</th>
+            <th class="officer-column">Date</th>
+            <th class="officer-column">Time</th>
+            <th class="officer-column">Location</th>
+            <th class="officer-column text-center ">Total Persons</th>
+            <th class="officer-column">Project Name</th>
+            <th class="officer-column">Reason</th>
+            <th class="officer-column">Driver Name</th>
+            <th class="officer-column">Action</th>
+        </tr>
+    </thead>
+    @{int sl = 0;
+    }
+    <tbody>
+        @foreach (var item in Model.DataList)
+        {
+
+
+            <tr>
+                <td>   @(++sl)</td>
+                <td>@item.OfficerName</td>
+                <td>@item.Date.ToString("dd-MMM-yyyy") </td>
+                <td>@item.Time</td>
+                <td>@item.Location</td>
+                <td class="text-center" >@item.TotalPersion</td>
+                <td>@item.ProjectName</td>
+                <td>@item.Reason</td>
+                <td><b>@item.DriverName</b> </td>
+                <td>
+                    @if (@item.DriverName == "Not Assign Yet")
+                    {
+                        <a href="CarRequisition?CompanyId=@Model.CompanyId&id=@item.VehicleRequisitionId" class="btn btn-primary fa-sm"><i class="fa fa-pen"></i></a>
+                        <a onclick='deleteItem(@item.VehicleRequisitionId)' class="btn btn-danger fa-sm"><i class="fa fa-times"></i></a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary fa-sm disabled"><i class="fa fa-pen"></i></a>
+                        <a onclick='deleteItem(@item.VehicleRequisitionId)' class="btn btn-danger fa-sm"><i class="fa fa-times"></i></a>
+                    }
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <script>
+        function deleteItem(id) {
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+                  $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteCarRequision", "Crms")",
+                datatype: "Json",
+                data: { id: id },
+                success: function (data) {
+                location.reload();
+
+                }
+                })
+
+                }
+                },
+                close: function () {
+                }
+                }
+                });
+                }
+
+    </script>
+
+}

@@ -1,0 +1,272 @@
+﻿@model KGERP.Service.Implementation.RealEstateReturnSystemService.RealEstateReturnListVM
+@using KGERP.Utility
+@{
+    ViewBag.Title = "KGEREReturnList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+
+<style>
+    .datepickeronPage {
+        z-index: 1400;
+        position: absolute;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12" style="background-color:lightblue">
+        @Html.Label("Real Estate Returns List", new { @style = "font-size:20px" })
+    </div>
+</div>
+<br />
+
+@if (Model.message != null)
+{
+    <div id="#myElem">
+        <div>
+            <h4 class="text-danger"> @Model.message! </h4>
+        </div>
+    </div>
+}
+
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive" style="font-size=13px">
+                            <table id="KgErpDataTable" class="table table-striped table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+
+                                        <th>
+                                            Project  Name
+                                        </th>
+                                        <th>
+                                            File Name
+                                        </th>
+                                        <th>
+                                            Group Name
+                                        </th>
+                                        <th>
+                                            File Value
+                                        </th>
+
+                                        <th>
+                                            Return Status
+                                        </th>
+                                        <th>
+                                            Particular
+                                        </th>
+                                        <th> Download</th>
+                                        <th>
+                                            Request Stutas
+                                        </th>
+
+                                        <th> Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.datalist)
+                                    {
+                                        <tr>
+                                            <td width="5%">
+                                                @(++sl)
+                                            </td>
+
+                                            <td>
+                                                <span> @(item.ProjectName+"_"+item.BlockName+"_"+item.PlotName)</span>
+                                            </td>
+                                            <td width="20%">
+                                              @item.FileNo
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ClientName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.FileValue)
+                                            </td>
+
+                                            <td>
+                                                <span> @Enum.GetName(typeof(RealStateReturnsStatus), item.StatusId)</span>
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Particular)
+                                            </td>
+                                            <td>
+                                                <a target="_blank" class="btn btn-primary btn-sm" title="Download File" href="/Upload/DownloadFTP?docid=@item.DocId"> <i class="glyphicon glyphicon-download"> </i> </a>
+                                            </td>
+                                            <td>
+                                                @if (item.IsAccAproval == 0)
+                                                {
+
+
+                                                    <b class="text-info"> Draft</b>
+                                                }
+                                                else
+                                                {
+                                                    <b class="text-success"> Success</b>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.IsAccAproval == 0)
+                                                {
+                                                    <a class="btn-sm btn btn-danger" href="/RealEstateReturns/Remove?id=@item.ReturnId&&companyid=@item.CompanyId"  onclick="confirmreturn(@item.ReturnId,@item.CGId,@item.StatusId)"> Delete  </a>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn-sm btn btn-success"> submited  </button>
+                                                }
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- Modal -->
+@using (Html.BeginForm("AccConfirmReturn", "RealEstateReturns", FormMethod.Post, new { @class = "from2" }))
+{
+    @Html.HiddenFor(m => m.CompanyId)
+    @Html.HiddenFor(m => m.ReturnId, new { @id = "ReturnId" })
+    @Html.HiddenFor(m => m.CGId, new { @id = "CGIdfi" })
+    @Html.HiddenFor(m => m.StatusId, new { @id = "StatusId" })
+
+    <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog ui-front" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Accounting Head:</label>
+
+                                @Html.EditorFor(model => model.AccountingHeadName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtAccountingHeadName", required = "required", style = "max-width:100%" } })
+
+                                @Html.HiddenFor(model => model.Accounting_BankOrCashId, new { id = "ddlAccounting_HeadFK" })
+                                @Html.ValidationMessageFor(model => model.Accounting_BankOrCashId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="StringSubmidtate" class="col-form-label"> Submited Date </label>
+                                <div style="display:flex">
+                                    <input name="StringSubmidtate" required value="@Model.StringSubmidtate" required class="form-control datepickeronPage" id="TransactionDateString" placeholder="--- Select Date ---" autocomplete="off">
+                                </div>
+                                @Html.ValidationMessageFor(model => model.StringSubmidtate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class=" rrr btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+
+    $(document).ready(function () {
+        lodedata();
+        $('.datepickeronPage').datepicker({
+            dateFormat: 'dd-M-yy',
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "1950:+150"
+        });
+        $('.select2').select2()
+    });
+
+        function confirmreturn(ReturnId, cgid, StatusId) {
+            $("#ReturnId").val(ReturnId);
+            $("#CGIdfi").val(cgid);
+            $("#StatusId").val(StatusId);
+            console.log(ReturnId, cgid);
+            @*window.location.href = "/RealEstateReturns/AccConfirmReturn?companyid=" +@Model.CompanyId+"&&CGId=" + cgid + "&&ReturnId=" + ReturnId +"";*@
+        }
+        function lodedata() {
+setTimeout(() => {
+  const box = document.getElementById('#myElem');
+  box.style.visibility = 'hidden';
+}, 5000);
+        }
+
+        $("#txtAccountingHeadName").autocomplete({
+                                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteHeadGLGet", "Vouchers")",
+                        data: { prefix: request.term, companyId: "@Model.CompanyId" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                                            response($.map(data, function (item) {
+                                                return item;
+                                            }))
+                        },
+                        error: function (response) {
+                                            //alert(response.responseText);
+                                        },
+                        failure: function (response) {
+                                            //alert(response.responseText);
+                                        }
+                                    });
+                                },
+             select: function (e, i) {
+                 $("#ddlAccounting_HeadFK").val(i.item.val);
+
+               },
+             minLength: 1,
+             cache: true
+         }).focus(function () {
+             $(this).autocomplete("search");
+         });
+
+
+
+
+    </script>
+}
+

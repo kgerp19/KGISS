@@ -1,0 +1,349 @@
+﻿@using KG.Core.Services
+
+@{
+
+    ViewData["Title"] = "Finish Product BOM";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMFinishProductBOM
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Finish Product BOM
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Finish Product BOM</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <div class="table-responsive text-nowrap">
+                                <table class="table">
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>:</th>
+                                        <td>@Model.CategoryName</td>
+
+                                        <th>Subcategory</th>
+                                        <th>:</th>
+                                        <td>@Model.SubCategoryName</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>:</th>
+                                        <td>@Model.Name</td>
+                                        <th>MRPPrice per @Model.UnitName</th>
+                                        <th>:</th>
+                                        <td>@Model.MRPPrice</td>
+
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+
+                        
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="box-header">
+                                <h3>Add Raw Item</h3>
+                            </div>
+                            <div class="col-md-12">
+                                @using (Html.BeginForm("CommonFinishProductBOM", "Configuration", FormMethod.Post, new { id = "commonFinishProductBOMformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    @Html.HiddenFor(model => model.ID, new { id = "finishProductBOMId" })
+                                    @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                                    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                                    @Html.HiddenFor(model => model.FProductFK, new { id = "FProductFK" })
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Raw Item:</label>
+                                                @Html.EditorFor(model => model.RawProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
+
+                                                @Html.HiddenFor(model => model.RProductFK, new { id = "ddlRProductFK" })
+                                                @Html.ValidationMessageFor(model => model.RProductFK, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Required Quantity</label>
+                                                <div class="input-group">
+                                                    @Html.EditorFor(model => model.RequiredQuantity, new { htmlAttributes = new { id = "txtRequiredQuantity",  @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Required Quantity", required = "Required" } })
+
+                                                    @Html.ValidationMessageFor(model => model.RequiredQuantity, "", new { @class = "text-danger" })
+
+                                                    <div class="input-group-addon">
+                                                        <span class="txtUnitName"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">&nbsp;</label>
+                                                <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-plus'></i> Add</button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <div class="box-body">
+                            <div class="table-responsive text-nowrap">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>
+                                                Category
+                                            </th>
+                                            <th>
+                                                SubCategory
+                                            </th>
+                                            <th>
+                                                Product
+                                            </th>
+
+
+                                            <th style="text-align:center;">
+                                                Required Quantity
+                                            </th>
+
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    @{int sl = 0;
+                                    }
+                                    <tbody>
+                                        @if (Model.DataListProductBOM != null)
+                                        {
+                                            foreach (var item in Model.DataListProductBOM)
+                                            {
+
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>
+                                                        @item.CategoryName
+                                                    </td>
+                                                    <td>
+                                                        @item.SubCategoryName
+                                                    </td>
+                                                    <td>
+                                                        @item.Name
+                                                    </td>
+
+                                                    <td style="text-align:center;">
+                                                        @String.Format("{0:0.000}", item.RequiredQuantity) @item.UnitName
+                                                    </td>
+
+                                                    <td>
+                                                        <a id="@item.ID" onclick=" makeEditble(@item.ID);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                                        <a id="@item.ID" onclick="makeDeletable(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#deleteModal" title="Delete"
+                                                           data-placement="top">
+                                                            <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+</section>
+
+
+
+@using (Html.BeginForm("CommonFinishProductBOM", "Configuration", FormMethod.Post, new { id = "CommonFinishProductBOMDeleteformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.ID, new { id = "finishProductBOMIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFKDelete" })
+    @Html.HiddenFor(model => model.FProductFK, new { id = "FProductFKDelete" })
+
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Item Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this item?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i>Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+            $('#txtProductName').focus();
+
+             $('.formValidator').bootstrapValidator();
+
+
+            });
+        $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GCCLAutoCompleteRawPackingMaterialsGet", "Configuration")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.CompanyFK", prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                    $("#ddlRProductFK").val(i.item.val);
+
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductByID", "Configuration")",
+                        datatype: "Json",
+                        data: { id: i.item.val },
+                        success: function (data) {
+                            console.log(data);
+                            var items = "";
+                            if (data) {
+
+                                $('.txtUnitName').text(data.UnitName);
+
+                            }
+                        }
+                    });
+                    $('#txtProductName').focus();
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        function makeEditble(id) {
+            if (id !== null) {
+                $.ajax({
+                type: "get",
+                url: "@Url.Action("FinishProductBOMsByIDGet", "Configuration")",
+                    data: { id: id },
+                    datatype: "json",
+                    traditional: true,
+                    success: function (data) {
+                        console.log(data);
+
+                        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                        $('#finishProductBOMId').val(data.ID);
+                        $('#FProductFK').val(data.FProductFK)
+                        $('#ActionId').val(2);
+                        $('#CompanyFK').val(data.CompanyFK);
+                        $('#txtProductName').val(data.RawProductName);
+                        $('#ddlRProductFK').val(data.RProductFK);
+                        $('#txtRequiredQuantity').val(data.RequiredQuantity);
+                        $('.txtUnitName').text(data.UnitName);
+
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            }
+        }
+        //.load(function () {
+        //                    $('#ddlCommonProductCategoryFk').val(data.common_ProductCategoryFk);
+
+        //});
+
+
+
+
+        function resetForm() {
+            $('#commonProductformId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#finishProductBOMIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+               
+
+            }
+        }
+
+
+    </script>
+}
+

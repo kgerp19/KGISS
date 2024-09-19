@@ -1,0 +1,115 @@
+﻿@model KGERP.Service.Implementation.ComparativeStatementService.Comparative_Statement.ComparativeStatementVm
+@{
+    ViewBag.Title = "EditCStament";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h4 class="text-center" style="background-color: #F2F2F2; margin-top: 10px; border: 2px solid #F2F2F2; padding:5px; "><b>EditCStament</b></h4>
+@using (Html.BeginForm("CreateStatement", "ComparativeStatement", FormMethod.Post))
+{
+    <div class="row">
+        @Html.HiddenFor(model => model.CompanyId, new { @class = "form-control" })
+        @Html.HiddenFor(model => model.CSID, new { @class = "form-control" })
+        
+        <!-- Divided into three equal parts -->
+        <!-- First column -->
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.CSNO)
+            @Html.TextBoxFor(model => model.CSNO, new { @class = "form-control", @readonly = "readonly" })
+
+            @Html.ValidationMessageFor(model => model.CSNO, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.CSDate)
+            @Html.TextBoxFor(model => model.CSDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker" })
+            @Html.ValidationMessageFor(model => model.CSDate, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.DeliveryDate)
+            @Html.TextBoxFor(model => model.DeliveryDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker" })
+            @Html.ValidationMessageFor(model => model.DeliveryDate, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.PrductName)
+            @Html.HiddenFor(model => model.ProductID, new { @class = "form-control", id = "ProductId" })
+            @Html.TextBoxFor(model => model.PrductName, new { @class = "form-control", id = "ProductName" })
+        </div>
+
+
+
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.Brand)
+            @Html.EditorFor(model => model.Brand, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Brand, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.Origin)
+            @Html.EditorFor(model => model.Origin, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Origin, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(model => model.RequiredQuantity)
+            @Html.EditorFor(model => model.RequiredQuantity, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.RequiredQuantity, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-groupcol-md-4 col-md-8">
+            @Html.LabelFor(model => model.Specification)
+            @Html.TextAreaFor(model => model.Specification, new { @class = "form-control", style = "height: 50px;" })
+            @Html.ValidationMessageFor(model => model.Specification, "", new { @class = "text-danger" })
+        </div>
+
+
+
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+}
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+    <script>
+      
+        $("#ProductName").autocomplete({
+            source: function (request, response) {
+                
+
+                    $.ajax({
+                        url:"@Url.Action("GetProducts", "ComparativeStatement")",
+                        data: { companyId: "@Model.CompanyId", prefix: request.term, productType : "R" },
+                        dataType: "json",
+                        type: "GET",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return item
+                            }));
+                        },
+
+                        error: function (response) {
+
+                        },
+                        failure: function (response) {
+
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i.item.val);
+                //$("#ProductName").val(i.item.label);
+                $("#ProductId").val(i.item.val);
+
+            },
+            minLength: 1,
+            cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+    </script>
+}

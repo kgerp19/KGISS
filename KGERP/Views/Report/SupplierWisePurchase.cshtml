@@ -1,0 +1,112 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+
+<div class="row">
+    <div class="col-md-12" style="background-color:#f1f1f1;padding:5px">
+        <span style="font-size:20px;color:#000000">@Model.Title</span>
+    </div>
+</div>
+<br />
+@using (Html.BeginForm("GetSupplierWisePurchaseSale", "Report", FormMethod.Get, new { @id = "idForm" }))
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CompanyId , new {@id= "texCompanyId" })
+    @Html.HiddenFor(model => model.ReportName)
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="form-group">
+                @Html.Label("Supplier", htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-10">
+                    @Html.HiddenFor(x => x.VendorId, htmlAttributes: new { @id = "VendorId", @Name = "VendorId" })
+                    @Html.EditorFor(model => model.Supplier, new { htmlAttributes = new { @style = "width: 140%;", @class = "form-control", @name = "VendorName", @id = "txtVendor" } })
+                    @Html.ValidationMessageFor(model => model.Supplier, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group pull-left">
+                <br />
+                <select class="pull-left" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px" name="ReportType" id="ReportType">
+                    <option value="PDF">PDF</option>
+                    <option value="EXCEL">EXCEL</option>
+                    <option value="WORD">WORD</option>
+                </select>
+                <input type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-left" formtarget="_blank" />
+
+            </div>
+        </div>
+
+
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+
+    var companyId = $("#texCompanyId").val();
+
+         $("#txtVendor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                       url:"@Url.Action("GetSupplierAutoComplete", "Vendor")",
+                        data: { prefix: request.term, companyId: companyId },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            console.log('data',data)
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                $("#VendorId").val(i.item.val);
+              
+                },
+
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+</script>
+}
+
+
+
+
+

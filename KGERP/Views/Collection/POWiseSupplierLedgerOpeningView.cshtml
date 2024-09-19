@@ -1,0 +1,286 @@
+﻿@using KG.Core.Services;
+
+@model KGERP.Services.Procurement.VmTransaction
+@{
+    Layout = null;
+    decimal closingBalance = 0m;
+    decimal TotalCr = 0m;
+    decimal TotalDr = 0m;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width" />
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>Supplier Ledger</title>
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/onsen/2.10.6/css/ionicons/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.8/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.8/css/skins/_all-skins.min.css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+    <style>
+                /* h4 {
+                    border-bottom: 2px solid black;
+                    display: inline;
+                }
+        */
+                /*.footer {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    text-align: center;
+                }*/
+
+                .trclass {
+                    border: 1px solid #000;
+                    font-size: 12px;
+                    font-weight: 800;
+                    background-color: #C0C0C0;
+                    line-height: 20px;
+                }
+
+        #page {
+            background-color: #fff;
+            width: 900px;
+            margin: 0px auto;
+            position: relative;
+            font-size: 16px
+        }
+
+
+
+            /*#page #imageWaterMark {
+                vertical-align: middle;*/
+                /*filter: brightness(100%);*/
+                /*opacity: .1;
+            }
+
+            #page .content {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+            }*/
+
+        #topLogo {
+            float: left;
+        }
+
+
+
+                @@media print {
+                    .trclass {
+                        background-color: #C0C0C0 !important;
+                        -webkit-print-color-adjust: exact;
+                        line-height: 20px;
+                    }
+
+                    body {
+                        margin-top: 5px;
+                    }
+                    /*body {
+                        margin: 1.6cm;
+                    }*/
+                    #haderTitle {
+                        color: white !important;
+                        background-color: black !important;
+                        font-weight: bold !important;
+                        border-radius: 25px;
+                        padding: 5px;
+                    }
+
+                    #haderTitleh3 {
+                        background-color: black !important;
+                        padding: 4px;
+                    }
+
+                    a[href]:after {
+                        content: none !important;
+                    }
+
+                    #print, #print * {
+                        display: none !important;
+                    }
+                }
+                /*div.divfooter {
+                        margin-top: 15px;
+                        bottom: 0;
+                        display: inherit;
+                    }*/
+                /*#divfooter {
+                        display: block !important;
+                    }*/
+                }
+    </style>
+
+    <script>
+        function printDiv() {
+            window.print();
+        }
+    </script>
+</head>
+
+
+<body>
+    <span id="print" style="float: right; position: fixed;right: 0; vertical-align: top; display: inline-block;" onclick="printDiv()" class="btn btn-default">
+        Print
+    </span>
+    <div id="page">
+        @*<img id="imageWaterMark" src="~/Images/Logo/Mollika Logo-01.jpg" />*@
+        <img style="opacity:0.09; position:absolute; margin-top:200px; width:500px; margin-left:200px;" src="~/Images/ReportLogo/Seed_203004464.png" />
+        <div style="min-height: 900px;" class="content">
+            <div class="text-center">
+                <table width="100%">
+                    <tr>
+                        <td style="width:20%"></td>
+                        <td style="width:10%">
+                            <img height="80" width="80" id="topLogo" src="~/Images/Logo/Seed_203004464.png" />
+
+                        </td>
+                        <td style="width:70%">
+
+                            <p style="text-align: left; font-size: 25px; font-weight: bold;margin-bottom: 0;">@Model.CompanyName</p>
+                            <p style="text-align: left; font-size: 16px; font-weight: bold; margin-bottom: 0;">@Model.CompanyAddress</p>
+                            <p style="text-align: left; font-size: 16px; font-weight: bold;margin-bottom: 0;">  Phone : @Model.CompanyPhone, Email : @Model.CompanyEmail</p>
+
+                        </td>
+                        <td style="width:20%"></td>
+
+                    </tr>
+                </table>
+            </div>
+            <div class="text-center">
+                <table style="width:100%">
+                    <tr style="text-align:center">
+                        <td style="font-size:22px"><b>Ledger of @Model.Name</b></td>
+
+                    </tr>
+                    <tr>
+                        <td style="border-bottom:double;font-size:18px">From @Model.FromDate.ToShortDateString() To @Model.ToDate.ToShortDateString()</td>
+
+                    </tr>
+                </table>
+            </div>
+
+
+            <table id="tbl1" border="1" style="width: 100%; margin-top: 15px;">
+                <thead style="background-color:#c0c0c0">
+                    <tr>
+                        <th style="text-align: left;padding-left:5px;width:15%">Date</th>
+                        <th style="text-align: left;padding-left:5px;width:40%">Description</th>
+                        <th style="text-align: right;padding-right:5px;width:15%;">Credit</th>
+                        <th style="text-align: right;padding-right:5px;width:15%;">Debit</th>
+                        <th style="text-align: right;padding-right:5px;width:15%;">Balance</th>
+                    </tr>
+                </thead>
+                @{ int sl = 0;}
+                <tbody>
+                    @foreach (var item in Model.DataList)
+                    {
+                        closingBalance = item.Balance;
+                        TotalCr += item.Credit;
+                        TotalDr += item.Debit;
+                        <tr>
+                            <th style="text-align: left;padding-left:5px;">@item.Date.Value.ToString("dd-MM-yyyy")</th>
+                            <td style="text-align: left;padding-left:5px;"><b>PO ID : <a target="_blank" title="PO Details" href="~/Procurement/ProcurementPurchaseOrderReport?companyId=21&purchaseOrderId=@item.PurchaseOrdersId">@item.Description</a></b></td>
+                            <td style="text-align: right;padding-right:5px;"><b>@String.Format("{0:0.00}", item.Credit)</b></td>
+                            <td style="text-align: right;padding-right:5px;"> <b>@String.Format("{0:0.00}", item.Debit)</b></td>
+                            <td style="text-align: right;padding-right:5px;"><b> @String.Format("{0:0.00}", item.Balance)</b></td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold;">
+                        <th></th>
+                        <th style="text-align: right;padding-right:5px;font-size:16px;">Grand Total</th>
+                        <th style="text-align: right;padding-right:5px;font-size:16px;">@String.Format("{0:0.00}", TotalCr)</th>
+                        <th style="text-align: right;padding-right:5px;font-size:16px;">@String.Format("{0:0.00}", TotalDr)</th>
+
+
+                        <th style="text-align: right;padding-right:5px;font-size:16px;">@String.Format("{0:0.00}", closingBalance)</th>
+                    </tr>
+                </tfoot>
+            </table>
+
+
+        </div>
+
+
+
+        <div id="divfooter" class="divfooter text-center footer">
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <td style="width: 20%"></td>
+                        <td style="width: 20%"></td>
+                        <td style="width: 20%"></td>
+                        <td style="width: 20%"></td>
+                        <td style="width: 20%"></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center;">
+                            <span style="border-top: 2px solid #000000;">
+                            </span>
+
+                        </td>
+                        <td style="text-align: center;"><span style="border-top: 2px solid #000000;"></span></td>
+                        <td style="text-align: center;">
+                            <span style="border-top: 2px solid #000000;">
+                            </span>
+
+                        </td>
+                        <td style="text-align: center;"><span style="border-top: 2px solid #000000;"></span></td>
+                        <td style="text-align: center;">
+                            <span style="border-top: 2px solid #000000;text-align:right;">
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+
+    </div>
+    <!-- /.content -->
+    <!-- /.content-wrapper -->
+    <!-- ./wrapper -->
+    <!-- jQuery 3 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- FastClick -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.8/js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.8/js/demo.js"></script>
+
+    
+</body>
+
+
+</html>
+
+
+
+

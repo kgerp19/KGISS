@@ -1,0 +1,155 @@
+﻿@model KGERP.ViewModel.WorkAssignViewModel
+@{
+    ViewBag.Title = "Work Assign Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-9">
+        <h4><b>Assign Members <span style="color:#0066CC"> (Work Title : @Model.WorkAssign.WorkTopic)</span></b></h4>
+    </div>
+    <div class="col-md-3">
+        <button id="btnAdd" class="btn btn-primary pull-right">
+            <span class="glyphicon glyphicon-plus-sign"></span> Add
+        </button>
+        <a href="@Url.Action("Index")" class="btn btn-danger pull-right" style="margin-right:20px">
+            <span class="glyphicon glyphicon-arrow-left"></span> Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <hr style="border-color:#32527B; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#000080;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                Member ID
+            </th>
+            <th>
+                Member
+            </th>
+
+            <th>
+                Designation
+            </th>
+            <th>
+                Member Status
+            </th>
+
+            <th>
+                Report
+            </th>
+            <th>
+                Files
+            </th>
+            <th class="text-center">Action</th>
+        </tr>
+
+        @foreach (var item in Model.WorkAssigns.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @(item.Index + 1)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Employee.EmployeeId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Employee.Name)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Employee.Designation.Name)
+                </td>
+                <td>
+                    <button class='@(item.Data.WorkStateId==9?"btn btn-success btn-xs":"btn btn-primary btn-xs")'>@Html.DisplayFor(modelItem => item.Data.WorkState.State)</button>
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Report)
+                </td>
+                <td>
+                    <a href="@Url.Action("FileIndex","Work", new { workId=item.Data.WorkId, workAssignId = item.Data.WorkAssignId})" class="btn btn-primary btn-xs">
+                        <i class="fa fa-file" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+                </td>
+                <td class="text-center">
+                    @if (item.Data.WorkStateId == 9)
+                    {
+                        <button class="btn btn-danger btn-xs" disabled title="Not allowed">
+                            <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("DeleteMember","Work", new { workId=item.Data.WorkId, workAssignId = item.Data.WorkAssignId})" onclick="return confirm('Are you sure to delete Member?');" title="Delete" class="btn btn-danger btn-xs">
+                            <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+                        </a>
+                    }
+
+                </td>
+
+            </tr>
+        }
+
+    </table>
+
+</div>
+
+@using (Html.BeginForm("WorkAssign", "Work", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="modal fade bd-example-modal-lg" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="modal-title" id="exampleModalLongTitle" style="color:blue">Assign Member</b>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <div class="form-horizontal">
+                        <div class="row">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(x => x.WorkAssign.WorkId)
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.WorkAssign.MemberId, htmlAttributes: new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.DropDownListFor(model => model.WorkAssign.MemberId, new SelectList(Model.AssignMembers, "Value", "Text"), "--Select--", htmlAttributes: new { @class = "dropdownsize form-control" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <input type="submit" value="Add" id="apply" class="btn btn-info pull-right" />
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script>
+        $('#btnAdd').click(function () {
+            $("#exampleModalLong").modal({
+                show: true,
+                backdrop: 'static',
+                keyboard: false
+            });
+        });
+
+    </script>
+}

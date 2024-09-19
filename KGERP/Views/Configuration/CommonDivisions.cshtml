@@ -1,0 +1,187 @@
+﻿
+@using KG.Core.Services
+
+@{
+    ViewData["Title"] = "Divisions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMCommonDivisions
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Divisions
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Divisions</li>
+    </ol>
+</section>
+@using (Html.BeginForm("CommonDistricts", "Configuration", FormMethod.Post, new { id = "commonDivisionsFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-3">
+                    <div class="box">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="box-danger">
+                            <div class="box-header">
+                                <h4>Update Divisions</h4>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="form-group">
+
+                                @Html.HiddenFor(model => model.ID, new { Value = "", id = "DivisionId" })
+                            </div>
+                            <div class="box-body">
+                                @Html.HiddenFor(model => model.ID, new { Value = "", id = "unitId" })
+                                @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionId" })
+
+                                <div class="form-group">
+                                    @Html.TextBoxFor(model => model.Name, new { id = "txtDivisionsName", @class = "form-control input-sm", @placeholder = "Unit Name", required = "true", })
+                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-5">
+                                        <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="box">
+                        <div class="box-danger">
+                            <div class="box-header">
+                                <h4>Divisions List</h4>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+
+                                <div class="table-responsive col-md-12">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>Districts Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td id="tdDivisionsName_@item.ID">@item.Name</td>
+                                                    <td>
+                                                        <a id="@item.ID" onclick="EditItem(@item.ID);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                                        <a href="~/Configuration/CommonDistricts?divisionsId=@item.ID" class="btn btn-success btn-sm">Districts</a>
+                                                        <a href="~/Configuration/CommonUpazilas?divisionsId=@item.ID" class="btn btn-warning btn-sm">Upazilas</a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+        });
+
+
+        $("#btnSave").click(function () {
+
+                var v = {
+                    'Name': $("#txtDivisionsName").val(),
+                    'DivisionId': $("#DivisionId").val(),
+
+                }
+                $.ajax({
+                    url: "/Configuration/SaveDivision",
+                    method: "Post",
+                    data: { Model: v },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                    }
+                });
+            location.reload();
+        });
+
+        ////function makeEditble(elem) {
+        ////    if (elem !== null) {
+        ////        var rowId = elem.id;
+        ////        $('#unitId').val(rowId);
+        ////        $('#ActionId').val(2);
+        ////        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+        ////        $('#txtDivisionsName').val($('#tdDivisionsName_' + rowId).text().trim());
+        ////        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        ////    }
+        ////}
+
+        function EditItem(id) {
+
+            var eid = id;
+
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetDivisionById", "Configuration")",
+                datatype: "Json",
+            data: { id: eid },
+                success: function (data) {
+                    console.log(data);
+                    $("#txtDivisionsName").val(data.Name);
+                    $("#DivisionId").val(data.DivisionId);
+                    $("#btnSave").html(" <span>Update</span>");
+                   //// $("#sbmt").css('red');
+                }
+            });
+
+        }
+
+        function resetForm() {
+            $('#commonDivisionsFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+    </script>
+}
+
+
+
+
+

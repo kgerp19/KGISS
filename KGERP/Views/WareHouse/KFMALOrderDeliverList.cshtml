@@ -1,0 +1,179 @@
+﻿
+@model KGERP.Services.WareHouse.VMOrderDeliver
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Delivery Challan List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Delivery Challan List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Delivery Challan</li>
+    </ol>
+</section>
+@using (Html.BeginForm("KFMALOrderDeliverList", "WareHouse", FormMethod.Post, new { id = "wareHouseOrderDeliverListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Challan NO</th>
+                                        <th>Delivery Date</th>
+                                        <th>Order No</th>
+                                        <th>Order Date</th>
+
+                                        <th>Customer</th>
+                                        <th>Status</th>
+
+                                        <th>Detail</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+                                            <td><a target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetailReport?companyId=@item.CompanyFK&orderDeliverId=@item.OrderDeliverId">@item.ChallanNo</a></td>
+                                            <td>@item.DeliveryDate.Value.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.OrderNo</td>
+                                            <td>@item.OrderDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.CustomerName</td>
+                                            <td>
+                                                @if (item.IsSubmitted)
+                                                {
+                                                    <span class="text-success">
+                                                        Submitted
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-warning">
+                                                        Pending
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="~/WareHouse/KfmalOrderDeliver?companyId=@item.CompanyFK&orderDeliverId=@item.OrderDeliverId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+                                                 
+                                            </td> 
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        @*@if (Model.ID > 0)
+                            {
+                                <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                            }*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+
+        })
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+            function makeEditble(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+
+                            $('#pPOCIDText').text(data.CID);
+                            $("#hidPOID").val(data.PurchaseOrderId);
+                            $('#POEditActionId').val(2);
+                            //$("#POEditCompanyFK").val(data.CompanyFK);
+
+                            var orderDate = DateCustom(data.OrderDate);
+
+                            $('#txtOrderDate').val(orderDate);
+                            $('#txtDescription').val(data.Description);
+                            $('#ddlSupplierPaymentMethodEnumFK').val(data.SupplierPaymentMethodEnumFK).change();
+
+                            $('#txtDeliveryAddress').val(data.DeliveryAddress);
+                            var deliveryDate = DateCustom( data.DeliveryDate);
+                            $('#txtDeliveryDate').val(deliveryDate);
+                            $('#ddlCommon_SupplierFK').val(data.Common_SupplierFK);
+                            $('#txtSupplierName').val(data.SupplierName);
+
+
+
+                            //$('#ddlPOTypeEnumFK').val(data.poTypeEnumFK).change();
+                            //$('#ddlProcurementOriginTypeEnumFK').val(data.procurementOriginTypeEnumFK).change();
+                            //$('#ddlCommon_CurrencyFK').val(data.common_CurrencyFK).change();
+
+                        }
+                 });
+            }
+
+
+    </script>
+}
+

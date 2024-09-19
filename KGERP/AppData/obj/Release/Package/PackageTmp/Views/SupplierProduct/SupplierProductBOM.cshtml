@@ -1,0 +1,257 @@
+﻿@model KGERP.Service.ServiceModel.SupplierProductViewModel
+
+@{
+
+    ViewData["Title"] = "Supplier Product BOM";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Supplier Product BOM
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Finish Product BOM</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <div class="table-responsive text-nowrap">
+                                <table class="table">
+                                    <tr>
+                                        <th>Supplier</th>
+                                        <th>:</th>
+                                        <td>@Model.VendorName</td>
+
+                                        <th>Phone</th>
+                                        <th>:</th>
+                                        <td>@Model.Phone</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Address</th>
+                                        <th>:</th>
+                                        <td>@Model.Address</td>
+                                        <th>Zone </th>
+                                        <th>:</th>
+                                        <td>@Model.Zone</td>
+
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="box-header">
+                                <h3>Add Product</h3>
+                            </div>
+                            <div class="col-md-12">
+                                @using (Html.BeginForm("Create", "SupplierProduct", FormMethod.Post, new { id = "commonFinishProductBOMformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyFK" })
+                                    @Html.HiddenFor(model => model.VendorId, new { id = "VendorIdFK" })
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Raw Item:</label>
+                                                @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
+                                                @Html.HiddenFor(model => model.ProductId, new { id = "ddlRProductFK" })
+                                                @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">&nbsp;</label>
+                                                <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-plus'></i> Add</button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <div class="box-body">
+                            <div class="table-responsive text-nowrap">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>
+                                                Product
+                                            </th>
+
+
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    @{int sl = 0;
+                                    }
+                                    <tbody>
+                                        @if (Model.DataList != null)
+                                        {
+                                            foreach (var item in Model.DataList)
+                                            {
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>
+                                                        @item.ProductName
+                                                    </td>
+
+                                                    <td class="text-center">
+
+                                                        <a id="@item.Id" onclick="makeDeletable(@item.Id);" class="linkPointer text-danger" data-toggle="modal" data-target="#unitDeleteModal" title="Delete"
+                                                           data-placement="top">
+                                                            <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@using (Html.BeginForm("Delete", "SupplierProduct", FormMethod.Post, new { id = "commonUnitFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.Id, new { Value = "", id = "SupplierId" })
+    @Html.HiddenFor(model => model.CompanyId)
+    @Html.HiddenFor(model => model.VendorId)
+
+    <div class="modal fade" id="unitDeleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Supplier Product Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#txtProductName').focus();
+
+             $('.formValidator').bootstrapValidator();
+        });
+
+
+        $("#txtProductName").autocomplete({
+
+            source: function (request, response) {
+                console.log("bom");
+                    $.ajax({
+                        url:"@Url.Action("GCCLAutoCompleteRawPackingMaterialsGet", "Configuration")",
+                        data: { companyId: "@Model.CompanyId", prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                    $("#ddlRProductFK").val(i.item.val);
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductByID", "Configuration")",
+                        datatype: "Json",
+                        data: { id: i.item.val },
+                        success: function (data) {
+                            console.log(data);
+                            var items = "";
+                            if (data) {
+                                $('.txtUnitName').text(data.UnitName);
+                            }
+                        }
+                    });
+                    $('#txtProductName').focus();
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        function makeDeletable(id) {
+            $('#SupplierId').val(id);
+        }
+
+
+
+
+    </script>
+}
+

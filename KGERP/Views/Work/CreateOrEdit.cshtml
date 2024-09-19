@@ -1,0 +1,157 @@
+﻿@model KGERP.ViewModel.WorkViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row" style="background-color:#000080;color:#FFFFFF">
+    @if (Model.Work.WorkId > 0)
+    {
+        <span style="font-size:20px;padding:5px;font-weight:bold">Task Update</span>
+    }
+    else
+    {
+        <span style="font-size:20px;padding:5px;font-weight:bold">New Task</span>
+    }
+</div>
+<br />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Work.WorkId)
+    @Html.HiddenFor(x => x.Work.ManagerId)
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.WorkNo, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Work.WorkNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.Work.WorkNo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.WorkTopic, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Work.WorkTopic, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.Work.WorkTopic, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.WorkDetail, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Work.WorkDetail, 2, 50, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.Remarks, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Work.Remarks, 2, 50, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.EntryDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Work.EntryDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                <br />
+                @Html.ValidationMessageFor(model => model.Work.EntryDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.ExpectedEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Work.ExpectedEndDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                <br />
+                @Html.ValidationMessageFor(model => model.Work.ExpectedEndDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        @if (Model.Work.WorkId > 0)
+        {
+            <div class="form-group">
+                @Html.LabelFor(model => model.Work.WorkStateId, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.Work.WorkStateId, new SelectList(Model.ManagerWorkStates, "Value", "Text"), "--Select--", htmlAttributes: new {@id="ddlStatus", @class = "dropdownsize form-control",@onchange="showEndDate()"})
+                    @Html.ValidationMessageFor(model => model.Work.WorkStateId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+
+        <div class="form-group" style="display:none" id="divEndDate">
+            @Html.LabelFor(model => model.Work.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Work.EndDate, new { htmlAttributes = new {@id= "endDate", @class = "datepicker", @autocomplete = "off" } })
+                <br />
+                @Html.ValidationMessageFor(model => model.Work.EndDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Work.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <div class="checkbox">
+                    @Html.EditorFor(model => model.Work.IsActive,new { @style = "margin-left: 20px" })
+                    @Html.ValidationMessageFor(model => model.Work.IsActive, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-md-offset-3 col-md-6">
+                <a href="@Url.Action("Index")" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove-circle"></span>   Close
+                </a>
+                <button type="submit" class="btn btn-primary" onclick="javascript: return SubmitForm();" style="margin-left: 20px;"><span class="glyphicon glyphicon-floppy-disk"></span>@Model.Work.ButtonName</button>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            if ($('#ddlStatus').val() == 9) {
+                $('#divEndDate').show();
+            }
+            else {
+                $('#divEndDate').hide();
+            }
+        });
+
+
+        function SubmitForm() {
+            var r = confirm("Are you sure to save task?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        function showEndDate() {
+            if ($('#ddlStatus').val() == 9) {
+                $('#divEndDate').show();
+            }
+            else {
+                $('#divEndDate').hide();
+            }
+        }
+
+    </script>
+}

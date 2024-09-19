@@ -1,0 +1,456 @@
+﻿@model KGERP.Data.CustomModel.CrmViewModel
+@{
+    ViewData["Title"] = "Krishibid Realstate";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+
+
+<section>
+    <table>
+        <tr>
+            <td>
+                <button class="btn btn-sm btn-secondary hvr-rectangle-out text-dark" onclick="refreshWindow()">
+                    <i class="fa fa-sync"></i> &nbsp; Refresh
+                </button>
+            </td>
+            <td>
+                <a class="btn btn-sm hvr-sweep-to-bottom text-dark border " href="@Url.Action("AddNewClient","Crms", new {companyId=Model.CompanyId})"><i class="fa-plus"></i> &nbsp; New Client</a>
+            </td>
+            <td>
+                <button class="btn btn-sm hvr-sweep-to-top text-dark border" data-toggle="modal" data-target="#searchClientModal"><i class="fa fa-search"></i> &nbsp; Client Search </button>
+            </td>
+            <td>
+                <a class="btn btn-sm hvr-sweep-to-bottom text-dark border "
+                   href="@Url.Action("PendingScheduleList","Crms", new {companyId=Model.CompanyId})"><i class="fa fa-sync"></i> &nbsp; Pending Schedule</a>
+            </td>
+            <td>
+                <a class="btn btn-sm hvr-sweep-to-bottom text-dark border "
+                   href="@Url.Action("CompletedScheduleList","Crms", new {companyId=Model.CompanyId})"><i class="fa fa-sync"></i> &nbsp; Completed Schedule</a>
+            </td>
+        </tr>
+    </table>
+</section>
+<div class="row">
+
+    <div class="col-md-2">
+        <table class="table table-sm font-weight-normal table-striped" style="font-size:14px;">
+            <thead>
+                <tr><th>Total Number of Client &nbsp; <span class="badge badge-secondary">@Model.TotalNumberofClient</span></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var sc in Model.ClientStatusDataList)
+                {
+                    <tr>
+                        <td class="p-1" id="stats">
+                            <a onclick="show(@sc.StatusId,'@sc.StatusText')" class="hvr-overline-from-left">
+                                @sc.StatusText &nbsp; <span class="badge badge-info">
+                                    @sc.TotalNumberofClient
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-6" id="schedule">
+        <div>
+            <b>Today Schedule &nbsp;  @DateTime.Now.ToShortDateString()</b> 
+            <span class="badge badge-info">
+                @Model.CountTodaySchedule
+            </span>
+        </div>
+        <table class="table table-sm font-weight-normal table-striped" id="dataaatable1" style="font-size:14px;">
+            <thead>
+                <tr>
+                    <th>Client Name</th>
+                    <th>Phone</th>
+                    <th>Responsible Officer</th>
+                    <th>Time</th>
+                    <th>Schedule Type</th>
+                    <th>Status</th>
+                    <th>Note</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+              
+                @foreach (var ts in Model.TodayScheduleList)
+                {
+                    <tr>
+                        <td class="p-1 hvr-underline-from-left">
+                            <a href="@Url.Action("GetClientDetailsById", "Crms", new {clientId= ts.ClientId, companyId=ts.CompanyId})"> @ts.ClientName@*<i class="fa fa-info-circle"></i>*@</a>
+                        </td>
+                        @*<td>@ts.ClientMobileNo</td>*@
+
+                        <td class=" text-center">
+                            @ts.ClientMobileNo
+                            <br />
+                            <a href="https://wa.me/+88@(ts.ClientMobileNo)" target="_blank" rel="noopener noreferrer">
+                                <i style="color: #25D366;" class="fab fa-whatsapp"></i>
+                            </a>
+                            <a class="ml-2" href="tel:@ts.ClientMobileNo">
+                                <i class="fa fa-phone text-info "></i>
+                            </a>
+                        </td>
+                        <td>@ts.ResponsibleOfficeName</td>
+                        <td>@ts.ScheduleTime</td>
+                        <td>@ts.ScheduleType</td>
+                        <td>
+
+                            <div style="display:flex;">
+                                @if (ts.IsComplete)
+                                {
+                                    <a style="color: green; cursor: pointer;" id="unassign_@ts.ScheduleId" onclick=" menuAssign(@ts.ScheduleId, false);" title="Unassign"
+                                       data-placement="top">
+                                        <i class="fa fa-check" aria-hidden="true"></i>Complete
+                                    </a>
+                                    <a style="color: orange; display: none; cursor: pointer;" id="assign_@ts.ScheduleId" onclick=" menuAssign(@ts.ScheduleId,true);" title="Assign"
+                                       data-placement="top">
+                                        <i class="fa fa-times " aria-hidden="true"></i>Pending
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a style="color: orange; cursor: pointer;" id="assign_@ts.ScheduleId" onclick=" menuAssign(@ts.ScheduleId,true);" title="Assign"
+                                       data-placement="top">
+                                        <i class="fa fa-times" aria-hidden="true"></i>Pending
+                                    </a>
+                                    <a style="color: green; display: none; cursor: pointer;" id="unassign_@ts.ScheduleId" onclick=" menuAssign(@ts.ScheduleId,false);" title="Unassign"
+                                       data-placement="top">
+                                        <i class="fa fa-check" aria-hidden="true"></i>Complete
+                                    </a>
+                                }
+
+                            </div>
+
+
+                        </td>
+
+                        <td>@ts.Note</td>
+                        @*<td>
+            <a href="@Url.Action("GetClientDetailsById", "Crms", new {clientId= ts.ClientId, companyId=ts.CompanyId})"><i class="fa fa-link"></i> details</a>
+        </td>*@
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4" id="schedule1">
+        <b>Upcoming Schedule &nbsp;  @DateTime.Now.AddDays(1).ToShortDateString() - @DateTime.Now.AddMonths(1).ToShortDateString()</b> 
+        <span class="badge badge-info">
+            @Model.CountUpcommingSchedule
+        </span>
+        <table class="table table-sm font-weight-normal table-striped" id="dataaatable"  style="font-size:14px;">
+            <thead>
+                <tr>
+                    <th>Client Name</th>
+                    <th>Phone</th>
+                    <th>Officer</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Schedule Type</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+           
+                @foreach (var ts in Model.UpcomeingScheduleList)
+                {
+                    <tr>
+                        <td class="p-1 hvr-underline-from-left">
+                            <a href="@Url.Action("GetClientDetailsById", "Crms", new {clientId= ts.ClientId, companyId=ts.CompanyId})"> @ts.ClientName@*<i class="fa fa-info-circle"></i>*@</a>
+                        </td>
+                        <td class=" text-center">
+                            @ts.ClientMobileNo
+                            <br />
+                            <a href="https://wa.me/+88@(ts.ClientMobileNo)" target="_blank" rel="noopener noreferrer">
+                                <i style="color: #25D366;" class="fab fa-whatsapp"></i>
+                            </a>
+                            <a class="ml-2" href="tel:@ts.ClientMobileNo">
+                                <i class="fa fa-phone text-info "></i>
+                            </a>
+                        </td>
+                        <td>@ts.ResponsibleOfficeName</td>
+                        <td>@ts.ScheduleDate.ToString("dd-MMM-yyyy")</td>
+                        <td>@ts.ScheduleTime</td>
+                        <td>@ts.ScheduleType</td>
+                        <td>@ts.Note</td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-10">
+        <div class="px-2 py-2 d-none" id="crd" style="min-height: 431px">
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="display:flex">
+                        <h4 class="headline" id="txt"></h4> &nbsp; <a class="btn btn-sm btn-info" id="scheduleListId">Back</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="ClientList" class="col-md-12">
+                    <table id="" class="table table-sm table-striped" >
+                        <thead style="background-color: #dcefe5;">
+
+                            <tr>
+                                <th scope="col" style="width:5% ; text-align:right; padding:3px !important;">Sl</th>
+                                <th scope="col" style="width: 30%; text-align: left; padding: 3px !important;">Name</th>
+                                <th scope="col" style="width: 20%; text-align: center; padding: 3px !important;">Mobile Number</th>
+                                <th scope="col" style="width: 20%; text-align: center; padding: 3px !important;">Job Title</th>
+                                <th scope="col" style="width: 20%; text-align: center; padding: 3px !important;">Organization</th>
+                                <th scope="col" style="width: 20%; text-align: center; padding: 3px !important;">Remarks</th>
+                                <th scope="col" style="width: 20%; text-align: left; padding: 3px !important;">Project Name</th>
+                                <th scope="col" style="width: 20%; text-align: center; padding: 3px !important;">Status</th>
+                                <th scope="col" style="width: 20%; text-align: center; padding: 3px !important;">Created Date</th>
+                                @*<th style="width: auto; padding: 3px !important;"></th>*@
+                            </tr>
+                        </thead>
+                        <tbody class="text-center ">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="searchClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Search Client</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="textSearchClientByName" class="form-label">Client Name</label>
+
+                            <input type="text" class="form-control" id="textSearchClientByName" autocomplete="on" placeholder="Search Client Name ...">
+                            <input type="hidden" id="txtClientId" />
+                        </div>
+                        <div class="row">
+                        </div>
+                        <div class="col-12">
+                            <label for="textSearchClientByMobile" class="form-label">Mobile No</label>
+                            <input type="text" class="form-control" id="textSearchClientByMobile" placeholder="Search Client Mobile ...">
+                            <input type="hidden" id="txtClientId" />
+                        </div>
+                    </div>
+                    <div>
+                        <p id="txtClientId"></p>
+                        <p id="textSearchClientByName"></p>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a onclick="clientDetails()" class="btn btn-primary">Client Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#ClientListDTable').DataTable({
+                "language":
+                {
+                    "processing": "<div class='overlay custom-loader-background'><i class='fa fa-cog fa-spin custom-loader-color'></i></div>"
+                },
+                "processing": true,
+            });
+        });
+
+
+
+
+    $('#scheduleListId').click(function () {
+        $("#schedule").removeClass("d-none");
+        $("#schedule1").removeClass("d-none");
+        $("#crd").addClass("d-none");
+    });
+
+        function show(id, v) {
+            $("#schedule").addClass("d-none");
+            $("#schedule1").addClass("d-none");
+            $("#crd").removeClass("d-none");
+            $('#ClientList tbody').empty();
+            document.getElementById("txt").innerHTML = v+" Client List";
+
+            $.ajax({
+    type: "GET",
+    url: "@Url.Action("GetServiceByClientList", "Crms")",
+    dataType: "json",
+    data: { StatusId: id, companyId: @Model.CompanyId },
+    success: function (data) {
+        $("#ClientList").show();
+
+        let z = 1;
+        let table = $("#ClientList").find("table");
+
+        if ($.fn.dataTable.isDataTable(table)) {
+            table.DataTable().destroy();
+            table.find("tbody").empty();
+        }
+
+        for (let i = 0; i < data.DataList.length; i++) {
+            let crtdate = DateCustom(data.DataList[i].CreatedDate);
+            let clntid = data.DataList[i].ClientId;
+            /*  table.find("tbody").append("<tr><td>" + z + "</td><td style='text-align: left; padding:3px !important;'><a href='/Crms/GetClientDetailsById?clientId=" + clntid + "&&companyId=" + data.DataList[i].CompanyId + "'>" + data.DataList[i].Name + "</a></td> <td>" + data.DataList[i].MobileNo + "</td><td>" + data.DataList[i].JobTitle + "</td> <td>" + data.DataList[i].OrganizationText + "</td> <td>" + data.DataList[i].Remarks + "</td><td>" + data.DataList[i].ProjectText + "</td><td>" + data.DataList[i].StatusText + "</td><td>" + crtdate + "</td></tr>");*/
+            table.find("tbody").append("<tr><td>" + z + "</td><td style='text-align: left; padding:3px !important;'><a href='/Crms/GetClientDetailsById?clientId=" + clntid + "&&companyId=" + data.DataList[i].CompanyId + "'>" + data.DataList[i].Name + "</a></td> <td class='text-center'>" +
+                data.DataList[i].MobileNo +
+                "<br />" +
+                "<a href='https://wa.me/+88" + data.DataList[i].MobileNo + "' target='_blank' rel='noopener noreferrer'>" +
+                "<i style='color: #25D366;' class='fab fa-whatsapp'></i>" +
+                "</a>" +
+                "<a class='ml-2' href='tel:" + data.DataList[i].MobileNo + "'>" +
+                "<i class='fa fa-phone text-info'></i>" +
+                "</a>" +
+                "</td><td>" + data.DataList[i].JobTitle + "</td> <td>" + data.DataList[i].OrganizationText + "</td> <td>" + data.DataList[i].Remarks + "</td><td>" + data.DataList[i].ProjectText + "</td><td>" + data.DataList[i].StatusText + "</td><td>" + crtdate + "</td></tr>");
+
+            z++;
+            /*<td><a href=" + data.DataList[i].ActionLink + " class='btn btn-sm btn-secondary'>Details</a></td>*/
+        }
+
+        table.DataTable({
+            paging: true, // Enable pagination
+            searching: true, // Enable search bar
+            ordering: true, // Enable ordering
+            lengthMenu: [10, 25, 50, 75, 100], // Display options for number of records per page
+            pageLength: 10, // Default number of records per page
+            order: [], // Initial ordering (You can specify the default ordering here, e.g., [0, 'asc'] for the first column)
+            columnDefs: [
+                { targets: [0, 1], orderable: false }, // Disable ordering on specific columns (adjust the column indices)
+                // Additional column definitions as needed
+            ],
+            // Add other options you may need
+            // Example: "info": true, "responsive": true, "scrollX": true, etc.
+        });
+    }
+});
+
+
+        }
+
+        $("#textSearchClientByName").autocomplete({
+
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteClientName", "Crms")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#txtClientId").val(i.item.val);
+                $("#textSearchClientByName").val(i.item.label);
+
+            },
+            minLength: 3,
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+
+        $("#textSearchClientByMobile").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteClientMobile", "Crms")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#txtClientId").val(i.item.val);
+                $("#textSearchClientByName").val(i.item.label);
+
+            },
+            minLength: 3,
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+    $('#searchClientModal').on('hidden.bs.modal', function () {
+        $(this).find('form').trigger('reset');
+    });
+
+    function clientDetails() {
+        var c = $('#txtClientId').val();
+        window.location = '/Crms/GetClientDetailsById?clientId=' + c + '&companyId=' +@Model.CompanyId;
+        }
+    function menuAssign(id) {
+
+
+    var companyId = @Model.CompanyId;
+
+            $.ajax({
+                type: "post",
+                url: "@Url.Action("SaveTask","Crms")",
+                data: { ScheduleId: id, SelectedCompanyId: companyId },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+
+                    if (data.IsCompleted) {
+                        $('#assign_' + data.ScheduleId).hide();
+                        $('#unassign_' + data.ScheduleId).show();
+
+                    } else {
+                        $('#assign_' + data.ScheduleId).show();
+                        $('#unassign_' + data.ScheduleId).hide();
+                    }
+                }
+            });
+        }
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+        }
+
+
+    </script>
+
+}

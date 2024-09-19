@@ -1,0 +1,136 @@
+﻿@model List<KGERP.Data.Models.OrderDeliveryPreview>
+
+<table class="table table-bordered">
+    <tr>
+        <td><b>Challan No</b></td>
+        <td>@Model.First().ChallanNo</td>
+        <td><b>Challan Date</b></td>
+        <td>
+            @if (Model.First().DeliveryDate.HasValue)
+            {
+                @Model.First().DeliveryDate.Value.ToString("dd MMM yyyy")
+            }
+
+        </td>
+    </tr>
+    <tr>
+        <td><b>Bill No</b></td>
+        <td>@Model.First().InvoiceNo</td>
+        <td><b>Bill Date</b></td>
+        <td>
+            @if (Model.First().InvoiceDate.HasValue)
+            {
+                @Model.First().InvoiceDate.Value.ToString("dd MMM yyyy")
+            }
+        </td>
+    </tr>
+    <tr>
+        <td><b>Agency/ Party</b></td>
+        <td>@Model.First().Party</td>
+        <td><b>Address</b></td>
+        <td>@Model.First().Address</td>
+    </tr>
+    <tr>
+        <td><b>Phone</b></td>
+        <td>@Model.First().Phone</td>
+        <td><b>Vehicle No</b></td>
+        <td>@Model.First().VehicleNo</td>
+    </tr>
+    <tr>
+        <td><b>Driver Name</b></td>
+        <td>@Model.First().DriverName</td>
+        <td><b>Store</b></td>
+        <td>@Model.First().StoreName</td>
+    </tr>
+</table>
+
+<table class="table table-bordered">
+    <tr style="background-color:lightgrey">
+        <th>SL</th>
+        <th>Description</th>
+        <th>Qty(Kg)</th>
+        <th>Rate</th>
+        <th>Gross</th>
+        @if (Model.First().CompanyId != 29)
+        {
+            <th>Addition Price</th>
+            <th>Commossion</th>
+            <th>Carrying</th>
+            <th>Special Discount</th>
+
+        }
+
+    </tr>
+
+    @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+    {
+        <tr style='background-color:@(item.Data.ReadyToDeliver>0?"#FFFFFF":"#FF0000")'>
+            <td>@(item.Index + 1)</td>
+            <td>@item.Data.ProductName</td>
+            <td>@item.Data.ReadyToDeliver</td>
+            <td>@item.Data.UnitPrice</td>
+            <td>@(Math.Ceiling(item.Data.ReadyToDeliver * item.Data.UnitPrice))</td>
+            @if (Model.First().CompanyId != 29)
+            {
+                <td>@(Convert.ToDecimal(item.Data.ReadyToDeliver) * item.Data.AdditionPrice)</td>
+                <td>@(Math.Ceiling(Convert.ToDecimal(item.Data.ReadyToDeliver) * item.Data.EBaseCommission))</td>
+                <td>@(Convert.ToDecimal(item.Data.ReadyToDeliver) * item.Data.ECarryingCommission)</td>
+                <td>@(Math.Ceiling(Convert.ToDecimal(item.Data.ReadyToDeliver) * item.Data.SpecialDiscount))</td>
+            }
+        </tr>
+    }
+
+    <tr style="background-color:#FBF063">
+        <th colspan="2">Total Quantity=</th>
+        <th>@(Model.Sum(x => x.ReadyToDeliver).ToString("0.00"))</th>
+        <th colspan="2">@("Total Gross = " + Model.Sum(x => (Math.Ceiling(x.ReadyToDeliver * x.UnitPrice))).ToString("0.00"))</th>
+        @if (Model.First().CompanyId != 29)
+        {
+            <th>@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.AdditionPrice)).ToString("0.00")</th>
+            <th>@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.EBaseCommission)).ToString("0.00")</th>
+            <th>@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.ECarryingCommission)).ToString("0.00")</th>
+            <th>@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.SpecialDiscount)).ToString("0.00")</th>
+        }
+    </tr>
+
+
+</table>
+
+<table class="table table-bordered" style="width:50%;margin-left:285px">
+    <tr>
+        <th>Total Gross</th>
+        <th class="text-right">@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver * x.UnitPrice))).ToString("0.00")</th>
+    </tr>
+    @if (Model.First().CompanyId != 29)
+    {
+        <tr>
+            <th>Addition Price(+)</th>
+            <th class="text-right">@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.AdditionPrice)).ToString("0.00")</th>
+        </tr>
+        <tr>
+            <th>Base Commission(-)</th>
+            <th class="text-right">@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.EBaseCommission)).ToString("0.00")</th>
+        </tr>
+        <tr>
+            <th>Carrying Commission(-)</th>
+            <th class="text-right">@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.ECarryingCommission)).ToString("0.00")</th>
+        </tr>
+        <tr>
+            <th>Cash Commission(-)</th>
+            <th class="text-right">@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.ECashCommission)).ToString("0.00")</th>
+        </tr>
+        <tr>
+            <th>Special Discount(-)</th>
+            <th class="text-right">@Model.Sum(x => Math.Ceiling(Convert.ToDecimal(x.ReadyToDeliver) * x.SpecialDiscount)).ToString("0.00")</th>
+        </tr>
+    }
+    <tr style="background-color:#FBF063">
+        <th>Net Payable Amount</th>
+        <th class="text-right">@(((Convert.ToDecimal(Model.Sum(x => (Convert.ToDecimal(x.ReadyToDeliver * x.UnitPrice))) + Model.Sum(x => Convert.ToDecimal(x.ReadyToDeliver) * x.AdditionPrice)) - Model.Sum(x => Convert.ToDecimal(x.ReadyToDeliver) * x.EBaseCommission)) - Model.Sum(x => Convert.ToDecimal(x.ReadyToDeliver) * x.ECarryingCommission) - Model.Sum(x => Convert.ToDecimal(x.ReadyToDeliver) * x.ECashCommission) - Model.Sum(x => Convert.ToDecimal(x.ReadyToDeliver) * x.SpecialDiscount)).ToString("0.00"))</th>
+    </tr>
+</table>
+
+
+
+
+

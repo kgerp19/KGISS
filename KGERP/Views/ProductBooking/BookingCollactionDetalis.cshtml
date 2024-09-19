@@ -1,0 +1,271 @@
+﻿@model KGERP.Service.ServiceModel.CollactionBillViewModel
+@{
+    ViewBag.Title = "BookingCollactionDetalis";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 1;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .form-control.input-validation-error:focus {
+        border-color: red !important;
+    }
+</style>
+<section style="margin-bottom:20px;font-size:25px">
+    <h4 class="bg-w" style="padding-left:5px"><b> Collection History of <span style="color:maroon">@Model.CustomerGroupName</span> </b> </h4>
+</section>
+
+<div class="row">
+    <table class="table">
+        <tr>
+            <th style="width:18%">
+                Collection No
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">@Model.PaymentNo</label>
+            </td>
+            <th style="width:18%">Collection Date</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.TransactionDate.Value.ToLongDateString()</td>
+        </tr>
+        <tr>
+            <th style="width:18%">
+                @Model.BankChargeName
+            </th>
+            <th style="width:2%">:</th>
+
+            <td style="width:30%" colspan="4">@Model.BankCharge</td>
+        </tr>
+        <tr>
+            <th style="width:18%">
+                Referenc
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">@Model.ReferenceNo</label>
+            </td>
+            <th style="width:18%">Payment To</th>
+            <th style="width:2%">:</th>
+            <th style="width:30%">@Model.BankCashHeadName</th>
+        </tr>
+
+        <tr>
+            <th style="width:18%">
+                Money Receipt No
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">@Model.MoneyReceiptNo</label>
+            </td>
+            <th style="width:18%">Cheque No</th>
+            <th style="width:2%">:</th>
+            <th style="width:30%">@Model.ChequeNo</th>
+        </tr>
+
+    </table>
+</div>
+
+@if (Model.IsFinalized == false)
+{
+    if (Model.Schedule.Count() != 0)
+    {
+        using (Html.BeginForm("AddnewCollaction", "ProductBooking", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.CompanyId, new { @id = "nCompanyId" })
+            @Html.HiddenFor(m => m.CGId, new { @id = "nCGId" })
+            @Html.HiddenFor(m => m.PaymentMasterId, new { @id = "nPaymentMasterId" })
+            @Html.HiddenFor(m => m.ChequeNo, new { @id = "nChequeNo" })
+            @Html.HiddenFor(m => m.Accounting_BankOrCashParantId, new { @id = "nAccounting_BankOrCashParantId" })
+            @Html.HiddenFor(m => m.MoneyReceiptNo, new { @id = "nMoneyReceiptNo" })
+            @Html.HiddenFor(m => m.ReferenceNo, new { @id = "nReferenceNo" })
+            @Html.HiddenFor(m => m.TransactionDate, new { @id = "nTransactionDate" })
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label> Installment </label>
+                        @Html.DropDownListFor(model => model.InstallmentId, new SelectList(Model.Schedule, "Value", "Text"), "---Select Installment---", new { id = "ddlInstallmentId", @class = "form-control ddlReset", @required = "required", @style = "width:100%" })
+                        @Html.ValidationMessageFor(model => model.InstallmentId, "", new { @class = "text-danger", @id = "InstallmentIdError" })
+                    </div>
+
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtBankCharge" class="col-form-label">Receivable Amount:</label>
+                        @Html.TextBoxFor(model => model.ReceivableAmount, new { id = "txtReceivableAmount", @class = "form-control", @readonly = "readonly", placeholder = "Receivable Amount:" })
+                        @Html.ValidationMessageFor(model => model.ReceivableAmount, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtPaidAmount" class="col-form-label">Collected Amount:</label>
+                        @Html.TextBoxFor(model => model.InAmount, new { id = "txtInAmount", @class = "form-control", placeholder = "Paid", @required = "required" })
+                        @Html.ValidationMessageFor(model => model.InAmount, "", new { @class = "text-danger", @id = "InAmountError" })
+                    </div>
+                </div>
+                <div class="col-sm-2" style="margin-top:22px">
+                    <input type="submit" class="btn btn-success btn-block" value="Add" />
+                </div>
+            </div>
+        }
+    }
+}
+<div class="row">
+    <div class="table-responsive ">
+        <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+            <thead>
+                <tr>
+                    <th> Sl</th>
+                    <th> Title</th>
+                    <th> Installment Date  </th>
+                    <th> Amount </th>
+                    @if (!Model.IsFinalized)
+                    {
+                        <th> Action </th>
+                    }
+                    </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PaymentList)
+                {
+                <tr>
+                    <th> @i</th>
+                    <th>@item.Title</th>
+                    <th>@item.InstallmentDate.ToLongDateString()</th>
+                    <th>@item.InAmount</th>
+                    @if (!Model.IsFinalized)
+                    {
+                        <th>
+                            <a data-toggle="modal" data-target="#exampleModalCenter" onclick="deleteColl(@item.PaymentId)" class="btn btn-sm btn-danger">  <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> </a>
+                        </th>
+                    }
+                    </tr>
+                    i++;
+                }
+
+                <tr>
+                    <th colspan="3" class="text-right"> Total Installment : </th>
+                    <th colspan="2"> @Model.TotalInstallment</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        @if (Model.IsFinalized)
+        {
+            <button type="button" disabled class="btn btn-primary ">Payment Confirm</button>
+            <a href="/ProductBooking/BookingCollactionList?companyId=@Model.CompanyId" class="btn btn-danger"> Cancel</a>
+
+            <a style="width:100%" href="@Url.Action("GetVoucherReport","Report",
+                                        new { companyId=@Model.CompanyId,
+                                        voucherId=@Model.VoucherId}
+                                        )" title="Challan Copy" target="_blank" class="btn btn-info">
+                <i class="fa fa-print" aria-hidden="true"></i>&nbsp; Voucher Report
+
+            </a>
+        }
+        else
+        {
+            <a href="/ProductBooking/BookingCollactionList?companyId=@Model.CompanyId" class="btn btn-danger"> Cancel</a>
+            <button type="button" data-toggle="modal" data-target="#exampleModal" class="btn btn-success">Payment Confirm</button>
+        }
+    </div>
+    <div class="col-md-4" style="margin-top:20px">
+
+    </div>
+</div>
+
+
+<!-- Modal -->
+@using (Html.BeginForm("PaymentConfirmation", "ProductBooking", FormMethod.Post))
+{
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"> Payment Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4> Are You Sure  Confirm Payment ! </h4>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.CompanyId, new { @id = "nCompanyId" })
+                    @Html.HiddenFor(m => m.CGId, new { @id = "nCGId" })
+                    @Html.HiddenFor(m => m.PaymentMasterId, new { @id = "nPaymentMasterId" })
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-primary" value="Save changes" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal -->
+@using (Html.BeginForm("DeleteItemCollaction", "ProductBooking", FormMethod.Post))
+{
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="text-danger"> Are You Sure  Confirm Delete ! </h4>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.CompanyId, new { @id = "nwCompanyId" })
+                    @Html.HiddenFor(m => m.CGId, new { @id = "nwCGId" })
+                    @Html.HiddenFor(m => m.PaymentMasterId, new { @id = "nwPaymentMasterId" })
+                    @Html.HiddenFor(m => m.InstallmentId, new { @id = "nwInstallmentId" })
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-danger" value="Delete Confirm" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    @section Scripts {
+
+        @Scripts.Render("~/bundles/jqueryui")
+        @Styles.Render("~/Content/cssjqryUi")
+        <script>
+    var Schedule = @Html.Raw(Json.Encode(Model.Schedule));
+    $("#ddlInstallmentId").change(function () {
+        var Installment = $("#ddlInstallmentId").val();
+        var LObj = Schedule.find(x => x.Value == Installment);
+        $("#txtReceivableAmount").val(LObj.Amount);
+        $("#txtInAmount").val(LObj.Amount);
+        validation();
+    })
+            function deleteColl(id) {
+                $("#nwInstallmentId").val(id);
+        }
+        </script>
+    }

@@ -1,0 +1,227 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.KgReCrmModel>
+@using PagedList;
+@{
+    ViewBag.Title = "ForwardedByTMN";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //int companyId = Convert.ToInt32(Session["CompanyId"]);
+}
+<style>
+    /* Tooltip container */
+
+
+    /* Tooltip text */
+    .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        /* Position the tooltip text - see examples below! */
+        position: absolute;
+        z-index: 1;
+    }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+    }
+</style>
+<div class="row">
+    @using (Html.BeginForm("ForwardedByTM", "KGRECRM", FormMethod.Get))
+    {
+        <table class="table">
+            <tr>
+                <td>From Date</td>
+                <td>
+                    <input type="datetime" class="datepicker pull-left " name="StartDate"  autocomplete="off">
+                </td>
+                <td>To Date</td>
+                <td>
+                    <input type="datetime" class="datepicker pull-left " name="EndDate"   autocomplete="off">
+                </td>
+                <td>
+                    @Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search..." })
+                </td>
+                <td>
+                    <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+                </td>
+                <td>
+                    <a href="@Url.Action("CreateOrEdit", new { id = 0,companyId=Session["CompanyId"] !=null ? (int)Session["CompanyId"]: 0 })" title="New Client" class="btn btn-primary pull-right">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Add
+                    </a>
+                </td>
+            </tr>
+        </table>
+        @*<div class="col-md-3">
+                <h4><b>KGRE Client List</b></h4>
+            </div>
+            <div class="col-md-3">
+                <div class="col-md-10">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search..." })</div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("CreateOrEdit", new { id = 0,companyId=Session["CompanyId"] !=null ? (int)Session["CompanyId"]: 0 })" title="New Client" class="btn btn-primary pull-right">
+                    <span class="glyphicon glyphicon-plus-sign"></span> Add New Client
+                </a>
+            </div>*@
+    }
+</div>
+<h4><b>KGRE Client List</b></h4>
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+<div style="width: 100%; height: 100%; overflow-x: visible; overflow-y: scroll;">
+    <style>
+        table td th {
+            border: solid 1px #fab;
+            width: 100px;
+            word-wrap: inherit;
+        }
+    </style>
+
+    <table class="table">
+        <tr style="background-color:#009270;color:#FFFFFF">
+            <th>
+                SL.
+            </th>
+            <th>
+                Forwarding Date
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ResponsibleOfficer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Designation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().DepartmentOrInstitution)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().SourceOfMedia)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().MobileNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StatusLevel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Remarks)
+            </th>
+            <th>Action</th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.ModifiedDate)
+                </td>
+                <td>
+                    <span title="@("Name : "+item.Data.ResponsibleOfficer)">@item.Data.EmployeeId</span>
+                </td>
+                <td>
+                    @if (@item.Data.FullName != null)
+                    {
+                        @Html.DisplayFor(modelItem => item.Data.FullName)
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Designation)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.DepartmentOrInstitution)
+                </td>
+                <td nowrap>
+                    @Html.DisplayFor(modelItem => item.Data.SourceOfMedia)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.MobileNo)
+                </td>
+
+                @if (item.Data.StatusLevel == "New")
+                {
+                    <td style="background-color:red; font-weight:bold; color:white;">
+                        @Html.DisplayFor(modelItem => item.Data.StatusLevel)
+                    </td>
+                }
+                else
+                {
+                    if (item.Data.ModifiedBy == "KG0458")
+                    {
+                        <td style="background-color: greenyellow; color:black; font-weight: bold;">
+                            @Html.DisplayFor(modelItem => item.Data.StatusLevel)<span style="color:blueviolet">- Nupur</span>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Data.StatusLevel)
+                        </td>
+                    }
+                }
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Remarks)
+                </td>
+                <td>
+                    <a href="@Url.Action("CreateOrEdit", new { id = item.Data.ClientId,
+                    companyId = (int)Session["CompanyId"]> 0 ? (int)Session["CompanyId"] : 0, })" title="Edit Case" class="btn btn-success btn-xs">
+                        Details
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No =>
+                Url.Action("ForwardedByTM", "KGRECRM",
+                new
+                     {
+                         Page_No,
+                         Sorting_Order = Request.QueryString["Search"],
+                    startDate = Request.QueryString["StartDate"],
+                    endDate = Request.QueryString["EndDate"],
+                SearchText = Request.QueryString["searchText"]
+                     }))
+        </span>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $(function () {
+                $('.datepicker').datepicker({
+                    dateFormat: "yy/mm/dd",
+                    showOn: 'both',
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "2001:+50"
+                });
+            });
+
+        });
+    </script>
+
+}

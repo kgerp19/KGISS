@@ -1,0 +1,320 @@
+﻿
+@model KGERP.Service.ServiceModel.EmployeeLoanModel
+@{
+    ViewBag.Title = "CreateOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    @using (Html.BeginForm("CreateOrEdit", "EmployeeLoan", new { id = 0 }, FormMethod.Get))
+    {
+        <div class="col-md-3">
+            <h4><b>Employee Loan Operation </b></h4>
+        </div>
+        <div class="col-md-3">
+            <div class="col-md-10">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Employee ID ..." })</div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    }
+</div>
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.LoanID)
+    @Html.HiddenFor(model => model.CreatedBy)
+    @Html.HiddenFor(model => model.CreatedDate)
+
+    <div class="form-horizontal">
+        <div class="panel panel-info" id="pnlCaseBasicInfo">
+            <div class="panel-heading"><b> Employee Basic Information </b></div>
+            <div class="panel-body">
+                <div>
+                    @if (ViewBag.employeeInfo != null)
+                    {
+                        @Html.Raw(ViewBag.employeeInfo)
+                    }
+                </div>
+            </div>
+        </div>
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="panel panel-info">
+            <div class="panel-heading"><b>Employee Loan Operation </b></div>
+            <div class="panel-body">
+                <div class="form-group">
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmployeeId, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.EmployeeId, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LoanType, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(model => model.LoanType, new SelectList(Model.LoanTypes, "Value", "Text"), "---Select---", new { @id = "ddlEmployeeLoanType", @class = "dropdownsize form-control" })
+                                @Html.ValidationMessageFor(model => model.LoanType, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.Amount, new { htmlAttributes = new {@class= "form-control",   @id = "loanAmount" } })
+                                @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.NoOfInstallment, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.NoOfInstallment, new { htmlAttributes = new { @class = "form-control", @id = "noOfInstallment", @onchange = "LoanInstallAmountOnTotalAmount()", @placeholder = "No of Installment" } })
+                                @Html.ValidationMessageFor(model => model.NoOfInstallment, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.InstallmentAmount, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.InstallmentAmount, new { htmlAttributes = new {   @id = "perInstallmentAmount", @class = "form-control", @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.InstallmentAmount, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.InstallStartDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8"> 
+                                    @Html.EditorFor(model => model.InstallStartDate, new { htmlAttributes = new { @class = "datepicker form-control", @style = "width:240px", @placeholder = "dd/mm/yyyy"  } })
+                                    @Html.ValidationMessageFor(model => model.InstallStartDate, "", new { @class = "text-danger" })
+                                    
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LoanApplyDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.LoanApplyDate, new { htmlAttributes = new { @id = "fromDate", @style = "width:240px", @class = "datepicker",  @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.LoanApplyDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LoanEndDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.LoanEndDate, new { htmlAttributes = new { @id = "endDate", @style = "width:240px", @class = "datepicker",   @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.LoanEndDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LoanPurpose, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.TextAreaFor(model => model.LoanPurpose, 4, 51, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.LoanPurpose, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.TextAreaFor(model => model.Remarks, 4, 51, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="form-group">
+                <div class="col-md-offset-10 col-md-2">
+                    <input type="submit" data-confirm="Are you sure to submit this Operation?" id="btnResuest" value="Save" class="btn btn-info" />
+                    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-danger" })
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["errMessage"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert("This Person Already Exists");
+        };
+    </script>
+}
+
+
+@if (TempData["DataSave"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert("Data Save Successfully!");
+        };
+    </script>
+}
+<div>
+    @Html.ActionLink("Back to List", "Index", new { id = Model.LoanID })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('input[type=datetime]').datepicker({
+                dateFormat: "dd/M/yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "-60:+0"
+            });
+        });
+
+        function LoanInstallAmountOnTotalAmount() {
+            var perInstallmentAmount = $('#perInstallmentAmount').val();
+            var loanAmount = $('#loanAmount').val();
+            var noOfInstallment = $('#noOfInstallment').val();
+            if (loanAmount != '' && noOfInstallment != '') {
+
+                var iamount = loanAmount / noOfInstallment;
+                $('#perInstallmentAmount').val(parseInt(iamount));
+
+            }
+            return false;
+        }
+
+
+        //Confirm SMS
+        jQuery(document).ready(function () {
+                jQuery('[data-confirm]').click(function (e) {
+                if (!confirm(jQuery(this).attr("data-confirm"))) {
+                    e.preventDefault();
+                   window.location.href = '@Url.Action("Index", "EmployeeLoan")';
+                }
+            });
+        });
+
+    </script>
+
+    <script type='text/javascript'>
+        $(function () {
+            $('#searchInput').keyup(function () {
+                if ($(this).val() == '') {
+                    //Check to see if there is any text entered
+                    // If there is no text within the input ten disable the button
+                    $('#btnResuest').prop('disabled', true);
+                } else {
+                    //If there is text in the input, then enable the button
+                    $('#btnResuest').prop('disabled', false);
+                }
+            });
+        });
+    </script>
+    <style type="text/css">
+
+        class {
+            padding: 70px;
+            border: 1px solid #4CAF50;
+        }
+
+        .text-on-pannel {
+            background: #fff none repeat scroll 0 0;
+            height: auto;
+            margin-left: 20px;
+            padding: 3px 5px;
+            position: absolute;
+            margin-top: -47px;
+            border: 1px solid #337ab7;
+            border-radius: 8px;
+        }
+
+        .panel {
+            /* for text on pannel */
+            margin-top: 27px !important;
+        }
+
+        .panel-body {
+            padding-top: 30px !important;
+        }
+
+        .spacing-table {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 12px;
+            border-collapse: separate;
+            border-spacing: 0 5px; /* this is the ultimate fix */
+            width: 100%;
+        }
+
+            .spacing-table th {
+                text-align: left;
+                padding: 5px 5px;
+            }
+
+            .spacing-table td {
+                border-width: 3px 0;
+                /* border-color: darkred;
+                border-style: solid;*/
+                background-color: #f1f1f1;
+                color: Black;
+                padding: 5px 5px;
+            }
+
+                .spacing-table td:first-child {
+                    /*  border-left-width: 3px;*/
+                    border-radius: 5px 0 0 5px;
+                }
+
+                .spacing-table td:last-child {
+                    /*border-right-width: 3px;*/
+                    border-radius: 0 5px 5px 0;
+                }
+
+        .image {
+            float: left;
+            max-height: 50px;
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .name {
+            margin: 0;
+            padding: 0;
+        }
+
+        .username {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 1em;
+        }
+
+        .ui-autocomplete {
+            max-height: 320px;
+            overflow: auto;
+        }
+    </style>
+
+}
+
+

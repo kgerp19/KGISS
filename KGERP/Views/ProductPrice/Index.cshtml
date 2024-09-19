@@ -1,0 +1,105 @@
+﻿@model KGERP.Service.ServiceModel.ProductPriceModel
+
+@{
+    ViewBag.Title = "Product Sale List";
+    var message = TempData["successMessage"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h3>Product Sale Price List</h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+    </ol>
+</section>
+
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">            
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color: #ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;">SL</th>
+                                        <th style="width:10%;">ProductCode</th>
+                                        <th style="width:15%;">Product</th>
+                                        <th style="width:10%;">Sale Rate</th>
+                                        <th style="width:10%;">Sale Commission</th>
+                                        <th style="width:10%;">Price Date</th>
+                                        <th style="width:10%;">Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">@(++sl)</td>
+                                            <td>@item.ProductCode</td>
+                                            <td>@item.ProductName</td>
+                                            @if (item.PriceType.Equals("Sale"))
+                                            {
+                                                <td> @item.UnitPrice</td>
+                                                if (Request.QueryString["companyId"].Equals("10"))
+                                                {
+                                                    <td>@item.CreditSellPrice</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@item.SaleCommissionRate</td>
+                                                }
+                                            }
+                                            @if (item.PriceType.Equals("Purchase"))
+                                            {
+                                                <td>@item.PurchaseRate</td>
+                                                <td>@item.PurchaseCommissionRate</td>
+                                            }
+
+                                            <td>
+                                                @if (item.PriceUpdatedDate!= null)
+                                                {
+                                                    @item.PriceUpdatedDate.Value.ToString("dd-MMM-yyyy")
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="@Url.Action("UpdateProductSalePrice","ProductPrice", new {companyId=item.CompanyId, productId=item.ProductId, priceType= item.PriceType})" class="btn btn-info btn-xs">
+                                                    Update Price
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+    </script>
+}

@@ -1,0 +1,334 @@
+﻿
+@model KGERP.Service.Implementation.Configuration.IncentiveDistributionDetailVm
+@{
+    ViewBag.Title = ".";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+    double sum = 0;
+}
+
+<style>
+    .ui-widget-content {
+        border: 1px solid #dddddd;
+        background: #ffffff;
+        color: #333333;
+        z-index: 12000;
+        height: 500PX;
+        overflow: auto;
+    }
+
+</style>
+
+<div style="border:2px solid green; " class="text-center">
+    <h4><b>  @Model.catagoryname</b></h4>
+    <h5> <b>Total Commission: @Model.commition %</b></h5>
+</div>
+
+<button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onclick="add(@Model.IncentiveDistributionChartId)" style="float:right;margin-top:10px;">Add New</button>
+
+<table class="table table-bordered border-primary" style="margin-top:20px">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Category Name</th>
+            <th class="text-center">Commission</th>
+            <th>Action</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model.datalist)
+        {
+            <tr>
+                <td>@(++sl)</td>
+                <td>@item.EmployeeName</td>
+                <td class="text-center">@item.PromotionalPercentage %</td>
+                <td hidden id="inid">@item.</td>
+
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="makeDelete(@item.Id)"> Delete </button>
+                    <button type="button" data-toggle="modal" data-target="#exampleModal1"  class="btn btn-primary" onclick="makeEdit(@item.Id)"> Edit </button>
+
+                </td>
+            </tr>
+            sum += item.PromotionalPercentage;
+
+        }
+        <tr>
+            <td colspan="2" class="text-right"> <b>Total: </b></td>
+            <td class="text-center"><b>@sum</b> </td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="catagory"></h5>
+                <h5 class="" id="comm" ></h5>
+                <input hidden value="" id="commm" />
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-md-6  " >
+                        <label for="message-text" class="col-form-label ">Select Employee</label>
+                        @Html.EditorFor(model => model.EmployeeName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName", @style = "max-width:100%" } })
+
+                        @Html.HiddenFor(model => model.EmployeeId, new { id = "ddlRProductFK" })
+                        @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-2" >
+               
+               
+                    </div>
+
+                    <div class="form-group col-md-4 ">
+                        <label for="message-text" class="col-form-label row">Percentage</label>
+                        <input id="ppadvantages" class="form-group form-control"  value=""/>
+                    </div>
+
+
+                </div>
+               
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="svaepersent" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Update Commission</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+             <input id="emp" class="form-control form-group" readonly value="" />
+             <input id="propPer" class="form-control form-group" value="" />
+             <input type="hidden" id="inceid"  class="form-control form-group" value="" />
+             <input type="hidden" id="incartid"  class="form-control form-group" value="" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="PercentgaeSave" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+
+
+    var b = 0;
+
+    function add(id) {
+        $.ajax({
+            type: "Get",
+            url: "@Url.Action("AddNewIncentiveDetails", "IncentiveDistributionConfigration")",
+            datatype: "Json",
+            data: { id: id,companyId:@Model.CompanyId },
+            success: function (data) {
+                console.log(data);
+                console.log(data.catagoryname)
+                $("#catagory").html(data.catagoryname)
+                var com = "Total Commission: " + data.commition
+
+                $("#comm").html(com)
+                $("#commm").val(data.commition)
+                b == id;
+            }
+        });
+    }
+
+
+    $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                       url:"@Url.Action("AllEmployeeforIncentive", "Configuration")",
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            console.log('data',data)
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                $("#ddlRProductFK").val(i.item.val);
+
+        },
+
+        minLength: 1,
+        cache: true
+
+    }).focus(function () {
+        $(this).autocomplete("search");
+    });
+    $("#svaepersent").click(function () {
+      var v = {
+
+           /* 'Name': $('#InName').val(),*/
+
+          'CompanyId': '@Model.CompanyId',
+          'commition': $('#commm').val(),
+          'IncentiveDistributionChartId': '@Model.IncentiveDistributionChartId',
+          'EmployeeId': $('#ddlRProductFK').val(),
+          'PromotionalPercentage': $('#ppadvantages').val()
+        };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("SaveIncentiive", "IncentiveDistributionConfigration")",
+                datatype: "Json",
+             data: { model: v },
+             success: function (data) {
+                 if (data == "True" || data == "True") {
+                     alert("Successfully Added")
+                 }
+                 else {
+                 alert("Proposional Percentage Amount Is More than the Total Percentage")
+
+             }
+                 location.reload();
+
+                    }
+         });
+
+     });
+
+    function makeEdit(id) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("EditIncentive", "IncentiveDistributionConfigration")",
+            datatype: "Json",
+            data: { id: id },
+            success: function (data) {
+                console.log(data);
+                $("#emp").val(data.EmployeeName);
+                $("#propPer").val(data.PromotionalPercentage);
+                $("#inceid").val(data.Id);
+                $("#incartid").val(data.IncentiveDistributionChartId);
+
+
+            }
+        });
+    }
+    $("#PercentgaeSave").click(function () {
+      var v = {
+          'Id': $('#inceid').val(),
+          'PromotionalPercentage': $('#propPer').val(),
+          'IncentiveDistributionChartId': $('#incartid').val()
+        };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("EditSaveIncentive", "IncentiveDistributionConfigration")",
+                datatype: "Json",
+             data: { model: v },
+             success: function (response) {
+                 console.log(response)
+                 if (response == "True" || response=="true") {
+                     alert("Update SuccesFull")
+                 } else {
+                     console.log(typeof(response));
+                     alert("Proposional Percentage Amount Is More than the Total Percentage");
+                 }
+                 location.reload();
+             }
+         });
+
+    });
+
+
+    function makeDelete(id) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Deleteincentive", "IncentiveDistributionConfigration")",
+            datatype: "Json",
+            data: { id: id },
+            success: function (data) {
+
+
+
+            }
+        });
+    }
+
+
+
+    function makeDelete(id) {
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+               $.ajax({
+            type: "POST",
+            url: "@Url.Action("Deleteincentive", "IncentiveDistributionConfigration")",
+            datatype: "Json",
+            data: { id: id },
+                   success: function (data) {
+                       if (data == "True") {
+
+                           alert("Delete SuccesFully")
+                       } else {
+
+                           alert("Not Delete")
+                       }
+                       location.reload();
+
+
+            }
+        });
+
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+        }
+
+
+
+</script>
+}

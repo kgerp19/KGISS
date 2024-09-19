@@ -1,0 +1,465 @@
+﻿
+@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "Bill Of Metarials";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            General RM Requisition
+        </span>
+    </h1>
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">General RM Requisition</li>
+        <li class="active"><a href="~/Procurement/GeneralRMRequisition?companyId=@Model.CompanyFK.Value" class="btn btn-success btn-xs">Add New General RM Requisition</a></li>
+
+    </ol>
+</section>
+
+<section class="content">
+
+
+
+    <div class="row">
+        <div class="box">
+
+            <!-- /.box-header -->
+            <div class="box-body">
+                @if (Model.RequisitionId > 0)
+                {
+                    <div class="col-md-1"> </div>
+                    <div class="col-md-10">
+                        <table class="table">
+
+                            <tr>
+                                <th style="width:18%">
+                                    Requisition Number
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    <label class="col-form-label">@Model.RequisitionNo</label>
+                                </td>
+                                <th style="width:18%">Requisition Date</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.RequisitionDate.Value.ToString("dd-MMM-yyyy")</td>
+                            </tr>
+                            <tr class="col-order-2">
+                                <th style="width:18%">
+                                    From
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    @Model.FromRequisitionName
+                                </td>
+
+                                <th style="width:18%">To</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.ToRequisitionName</td>
+                            </tr>
+
+                            <tr class="col-order-2">
+                                <th style="width:18%">
+                                    Status
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                </td>
+
+                                <th style="width:18%">Requisition By</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.RequisitionBy</td>
+                            </tr>
+
+
+                        </table>
+                    </div>
+                    <div class="col-md-1"> </div>
+                }
+
+
+                @using (Html.BeginForm("GeneralRMRequisition", "Procurement", FormMethod.Post, new { id = "procurementRequisitionFormId", @class = "formValidator" }))
+                {
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                    @Html.HiddenFor(model => model.RequisitionId, new { id = "RequisitionId" })
+                    @Html.HiddenFor(model => model.RequistionItemDetailId, new { id = "hidRequistionItemDetailIdAdd" })
+                    @Html.HiddenFor(model => model.RequisitionId, new { id = "hidModelRequisitionIdAdd" })
+
+                    if (Model.RequisitionId == 0)
+                    {
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                <label>Requisition Date</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.EditorFor(model => model.RequisitionDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+
+                                    <label>From Department</label>
+                                    @Html.DropDownListFor(model => model.FromDepartmentReqId, Model.DDLStockDepartmetn, "Select From Department", new { @class = "form-control form-control-sm" })
+                                    @Html.ValidationMessageFor(model => model.FromDepartmentReqId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>To Department</label>
+                                    @Html.DropDownListFor(model => model.ToDepartmentReqId, Model.DDLStockDepartmetn, "Select To Department", new { @class = "form-control form-control-sm" })
+                                    @Html.ValidationMessageFor(model => model.ToDepartmentReqId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Raw Item:</label>
+
+                                @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
+
+                                @Html.HiddenFor(model => model.RProductId, new { id = "ddlRProductId" })
+                                @Html.ValidationMessageFor(model => model.RProductId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Purchasing Qty</label>
+                                <div class="input-group">
+                                    @Html.EditorFor(model => model.Qty, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtQty", type = "number" } })
+                                    @Html.ValidationMessageFor(model => model.Qty, "", new { @class = "text-danger" })
+                                    <div class="input-group-addon">
+                                        <span class="txtUnitName"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div>
+                                <button id="btnDivUpdate" type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa fa-plus"></i>
+
+                                    @if (Model.RequisitionId == 0)
+                                    {
+                                        <span>Create New </span>
+                                    }
+                                    else
+                                    {
+                                        <span>Add Item </span>
+                                    }
+
+                                </button>
+                            </div>
+
+                            @*<div class="hidden"  id="btnDivUpdate">
+
+                        <button id="btnUpdate" class="btn btn-danger btn-block">Update</button>
+                    </div>*@
+                        </div>
+                    </div>
+
+
+                }
+            </div>
+        </div>
+
+    </div>
+
+
+    @if (Model.RequisitionId > 0 && Model.DataListPro != null)
+    {
+        <div class="box-body">
+            <div class="table-responsive col-md-12  text-nowrap">
+                <table id="KgErpDataTable" class="table table-responsive-md table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>SL</th>
+                            <th>Product Name</th>
+
+                            <th>Requisition Qty</th>
+                            <th style="text-align:center">Action</th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.DataListPro)
+                        {
+
+                            <tr>
+                                <td>@(++sl)</td>
+
+                                <td>@item.ProductName</td>
+
+                                <td>@item.RQty</td>
+                                <td style="text-align:center">
+                                    <a onclick="makeEditble('@item.ProductName','@item.RequistionItemDetailId','@item.RQty','@Model.RequisitionId','@Model.CompanyFK','@item.RProductId')" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    &nbsp;
+                                    <a onclick="makeDeletale('@item.RequistionItemDetailId','@Model.RequisitionId')" data-toggle="modal" style="width:100%" data-target="#RequisitionItemDetailDeleteModal" data-placement="top" class="linkPointer" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="row">
+                <div class="col-md-6" style="margin-top:2%">
+                    <a href="~/Report/PackagingProductionRequisitionRep?requisitionId=@Model.RequisitionId&companyId=@Model.CompanyId" target="_blank" class="btn btn-block btn-info"> Print Report </a>
+                </div>
+
+                <div class="col-md-6" style="margin-top:2%">
+                    @if (!Model.IsSubmited)
+                    {
+                        <a id="@Model.RequisitionId" onclick="makeSubmitble(@Model.RequisitionId)" class="linkPointer btn btn-success" data-toggle="modal" style="width:100%" data-target="#submitProductRequisitionModal" data-placement="top">
+                            Submit
+                        </a>
+
+                    }
+                    else
+                    {
+                        <button class="btn btn-success btn-block" data-toggle="modal" style="width:100%" data-target="#submitProductRequisitionModal" data-placement="top" id="btnSubmitted">Undo Submit</button>
+                    }
+
+                </div>
+            </div>
+        </div>
+    }
+
+
+    @using (Html.BeginForm("GeneralRMRequisitionSubmit", "Procurement", FormMethod.Post, new { id = "SubmitProcurementPurchaseOrderFromSlaveFormId", @class = "formValidator" }))
+    {
+        @Html.HiddenFor(model => model.RequisitionId, new { id = "hidRequisitionId" })
+        @Html.HiddenFor(model => model.CompanyId, new { id = "hidCompanyId" })
+        @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
+        @Html.HiddenFor(model => model.IsSubmited, new { id = "modelIsSubmit" })
+        @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="submitProductRequisitionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+
+                        <div style="text-align:center">
+                            <h3 id="modePopupText">Are you sure to Sbmit this Requisition?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnsave1" style="width:100%" class="btn btn-primary fa fa-remove">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @using (Html.BeginForm("RequisitionItemDetailDelete", "Procurement", FormMethod.Post, new { id = "RequisitionItemDetailDelete", @class = "formValidator" }))
+    {
+        @Html.HiddenFor(model => model.RequistionItemDetailId, new { id = "hidRequistionItemDetailId" })
+        @Html.HiddenFor(model => model.RequisitionId, new { id = "hidModelRequisitionId" })
+        @Html.HiddenFor(model => model.CompanyId, new { id = "hidCompanyId" })
+        @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="RequisitionItemDetailDeleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+
+                        <div style="text-align:center">
+                            <h3 >Are you sure to Delete This?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnsave1" style="width:100%" class="btn btn-primary fa fa-remove">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+</section>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+
+
+    const makeEditble = (RawItemName, RequistionItemDetailId, RQty, RequisitionId, CompayIdFK, RProductId) => {
+            /* $('#btnDiv').html('');*/
+            $('#btnDivUpdate').text('Update');
+            $('#txtProductName').val(RawItemName);
+            $('#hidRequistionItemDetailIdAdd').val(RequistionItemDetailId);
+            $('#ddlRProductId').val(RProductId);
+            $('#txtQty').val(RQty);
+            $('#ActionId').val(2);
+            
+            
+        }
+
+        const makeDeletale = (RequistionItemDetailId,RequisitionId) => {
+            $('#hidRequistionItemDetailId').val(RequistionItemDetailId);
+            $('#hidModelRequisitionId').val(RequisitionId);
+        }
+
+        $(document).ready(function () {
+            @*$('#btnUpdate').click(() => {
+                debugger
+                let requisitionItemDetailId = $('#hidRequistionItemDetailId').val();
+                let rQty = $('#txtQty').val();
+                let ProductId=$('#hdnProductIdForRequisitionItemDetail').val();
+
+            $.ajax({
+                url: "@Url.Action("RequisitionItemDetailUpdate", "Procurement")",
+                data: JSON.stringify({
+                    requisitionId: '@Model.RequisitionId',
+                    CompanyId: '@Model.CompanyFK',
+                    RQuantity: rQty,
+                    RproductioId: ProductId,
+                    RequistionItemDetailId: requisitionItemDetailId
+                }),
+                dataType: "json",
+                type: "POST",
+                cache: false,  // Set cache to false to avoid caching issues
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    // Handle success
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", status, error);
+                }
+            });*@
+        //});
+
+            @*$("#btnSubmit").click(() => {
+               var requisitionId = '@Model.RequisitionId'
+              if (requisitionId) {
+                  $.alert.open('confirm', 'Do Your want to Submit?', function (button) {
+                      if (button == 'yes') {
+                          HttpRequest.Ajax("POST", '/Procurement/RequisitionSubmitied', { 'id': requisitionId }, saveSuccess, null, true);
+                      } else {
+
+                      }
+                  });
+              }
+            })*@
+
+            $("#btnSubmitted").click(() => {
+                $('#modePopupText').text('Are you sure to Undo Sbmit this Requisition?');
+            })
+            $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("AutoCompleteRawPackingMaterialsGet", "Configuration")",
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.CompanyFK", prefix: request.term },
+                        dataType: "json",
+                        type: "GET",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlRProductId").val(i.item.val);
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductByID", "Configuration")",
+                        datatype: "Json",
+                        data: { id: i.item.val },
+                        success: function (data) {
+                            console.log(data);
+                            var items = "";
+                            if (data) {
+                                $('.txtUnitName').text(data.UnitName);
+                            }
+                        }
+                    });
+                    $('#txtProductName').focus();
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+        });
+
+
+</script>
+
+}
+

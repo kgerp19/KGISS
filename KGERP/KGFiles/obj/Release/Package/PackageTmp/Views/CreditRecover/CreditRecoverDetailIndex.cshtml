@@ -1,0 +1,149 @@
+﻿@model KGERP.Service.ServiceModel.CreditRecoverModel
+@{
+    ViewBag.Title = "Credit Recovery List";
+    long creditRecoverId = Model.CreditRecoverId;
+}
+
+<style>
+    .notifyjs-happyblue-danger {
+        color: white;
+        background-color: red;
+    }
+</style>
+<div class="row">
+    <table class="table table-striped">
+        <tr>
+            <td>Company</td>
+            <td><b>@Model.CompanyName</b></td>
+            <td>Customer</td>
+            <td><b>@Model.CustomerName</b></td>
+            <td><a class="btn btn-info btn-sm pull-right" onclick="PopupForm('@Url.Action("DetailCreateOrEdit","CreditRecover",new {id=0,creditRecoverId=Model.CreditRecoverId })')" style="margin-bottom:10px"> <i class="fa fa-plus"></i> New Payment</a></td>
+        </tr>
+    </table>
+
+
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table id="creditRecoverDetailSearch" class="table table-striped" style="width:100%">
+        <thead>
+            <tr style="background-color:#4CAF50;color:#FFFFFF">
+                <th>Payment Date</th>
+                <th>Payment Amount</th>
+                <th>Note</th>
+                <th nowrap></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+
+
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    @*<script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>*@
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        var Popup, dataTable;
+        $(document).ready(function () {
+            var creditRecoverId='@creditRecoverId'
+            dataTable = $("#creditRecoverDetailSearch").DataTable({
+                "ajax": {
+                    "url": "/CreditRecover/CreditRecoverDetails?creditRecoverId=" + creditRecoverId,
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "StrRecoverDate", "name": "StrRecoverDate"},
+                    { "data": "RecoverAmount", "name": "RecoverAmount" },
+                    { "data": "Note", "name": "Note" },
+                    {
+                        'data': "CreditRecoverDetailId", 'render': function (data) {
+                            return "<a class='btn btn-default btn-xs' onclick=PopupForm('@Url.Action("DetailCreateOrEdit", "CreditRecover")?id=" + data + "&creditRecoverId=" + creditRecoverId+ "')><i class='fa fa-edit'></i> Edit</a><a class='btn btn-danger btn-xs' onclick=DetailDelete(" + data + ") style='margin-left:5px'><i class='fa fa-trash'></i> Delete</a>";
+                        },
+                        "orderable": false,
+                        "width": "200px"
+                    }
+                ],
+                "language": {
+
+                    "emptyTable": "No data found, Please click on <b>Add New</b> Button"
+                },
+                "serverSide": "true",
+                "order": [0, "asc"],
+                "processing": "true"
+
+
+            });
+        });
+
+        function PopupForm(url) {
+            var formDiv = $('<div/>');
+            $.get(url)
+                .done(function (response) {
+                    formDiv.html(response);
+                    Popup = formDiv.dialog({
+                        autoOpen: true,
+                        resizable:false,
+                        title: "Fill Credit Recover Detail",
+                        height: 500,
+                        width: 400,
+                        close: function () {
+                            Popup.dialog('destroy').remove();
+                        }
+                    })
+                })
+        }
+
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid) {
+                console.log(form.action);
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "danger"
+                            })
+
+                        }
+                    }
+                })
+            }
+            return false;
+        }
+
+        function DetailDelete(id) {
+            if (confirm("Are you sure to delete Detail Record ?")) {
+                $.ajax({
+                "type": "POST",
+                "url": '@Url.Action("DetailDelete","CreditRecover")/' + id,
+                success: function (data) {
+                    if (data.success) {
+                        dataTable.ajax.reload();
+
+                        $.notify(data.message, {
+                            globalPosition: "top center",
+                            className: "danger"
+                        })
+
+                    }
+                }
+            });
+            };
+
+        }
+
+    </script>
+}
+

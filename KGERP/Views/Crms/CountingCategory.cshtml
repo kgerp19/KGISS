@@ -1,0 +1,128 @@
+﻿@model KGERP.Data.CustomModel.CrmVm
+@{
+    ViewBag.Title = "CountingCategory";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+
+
+<div class="alert alert-info text-center" role="alert">
+    Resposible Officer Working Update
+</div>
+<div class="card">
+    <div class="card-header">
+        <div class="form-row  ">
+            <div class="form-group col-md-4 offset-md-1">
+                <label for="inputState">Responsible Officer</label>
+                <select class="form-control" value="0" id="ResponsibleOfficerId" name="ResponsibleOfficerId" asp-for="GenderId">
+                    <option value="">--Select Responsible Officer--</option>
+                    @foreach (var item in Model.DealingOfficerList)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="inputCity">From Date</label>
+                <input   class="form-control datepicker " id="startdate">
+            </div>
+
+            <div class="form-group col-md-3">
+                <label for="inputZip">To Date</label>
+                <input  class="form-control datepicker " id="FormTodate">
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6 text-center">
+                <button class="btn btn-outline-success col-5 mt-3" id="srs">Search</button>
+            </div>
+            <div class="col-3"></div>
+        </div>
+
+        
+    </div>
+    <div class="card-body">
+        <table class="table table-striped d-none" id="countingstatus">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Status <span id="allcount" class="badge badge-secondary"></span></th>
+                
+                    <th scope="col">Total</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                
+               
+               
+            </tbody>
+        </table>
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+    $("#srs").click(function () {
+
+        $("#countingstatus").removeClass("d-none");
+        var ResId = $('#ResponsibleOfficerId').find(":selected").val();
+        if (ResId == 0) {
+            alert("Please Select Responsible Officer")
+        } else {
+
+ var v = {
+           'ResponsibleOfficerid': ResId,
+                'FormDate': $('#startdate').val(),
+                'startTodate': $('#FormTodate').val()
+         };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetCountingResponsible", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+             success: function (data) {
+                 console.log(data);
+
+                 $("#countingstatus tbody").empty();
+                 $("#allcount").html(data.TotalNumberofClient);
+                 $("#countingstatus").show();
+                 var z = 1;
+                 let rows = "";
+                 for (var i = 0; i < data.ClientStatusDataList.length; i++) {
+                     rows += "<tr><td>" + z + "</td><td style='text-align: left;'>" + data.ClientStatusDataList[i].StatusText + "</td><td style='text-align: left;'>" + data.ClientStatusDataList[i].TotalNumberofClient + "</td></tr>";
+                     z++;
+                 }
+
+                 $("#countingstatus tbody").append(rows);
+
+             }
+                });
+        }
+
+
+
+
+     });
+
+
+
+
+
+
+</script>
+
+}

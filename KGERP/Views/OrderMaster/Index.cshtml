@@ -1,0 +1,201 @@
+﻿@model KGERP.Service.ServiceModel.OrderMasterModel
+@using KGERP.Utility;
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Sale Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Sale Order List
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("FeedSalesOrderSlave" ,"Procurement",new {companyId= Model.CompanyId, productType= Request.QueryString["productType"]})" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New Order
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "OrderMaster", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            @Html.HiddenFor(model => model.ProductType, new { id = "ProductType" })
+
+                            <div class="row">
+                                <div class="col-md-3">
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Order Date</th>
+                                        <th>OrderNo</th>
+                                        <th>Customer</th>
+                                        <th>Total Amount</th>
+                                        <th>Remarks</th>
+                                        <th>Status</th>
+                                        <th>Download</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">
+                                                @(++sl)
+                                            </td>
+                                            <td>
+                                                @item.OrderDate.Value.ToString("dd/MMM/yyyy")
+                                            </td>
+                                            <td>@item.OrderNo</td>
+                                            <td>
+                                                @item.Customer
+                                            </td>
+                                            <td>
+                                                @item.TotalAmount
+                                            </td>
+                                            <td>
+                                                @item.Remarks
+                                            </td>
+                                          
+                                            <td style="text-align:center">
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Draft)
+                                                {
+                                                    <span class="btn btn-info btn-xs">
+                                                        Submit Pending
+                                                    </span>
+                                                }
+
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Submit)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        GM Approval Pending
+                                                    </span>
+                                                }
+                                                @*@if (item.Status == (int)EnumFeedSalesStatus.GMApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        MD Approval Pending
+                                                    </span>
+                                                }*@
+                                                @if (item.Status == (int)EnumFeedSalesStatus.MDApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Accounts Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.AccountsApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Deliver Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.StoreAcceptance)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Accepted By Store
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.PartialDelivered)
+                                                {
+                                                    <span class="btn btn-primary btn-xs">
+                                                        Partially Delivered
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Delivered)
+                                                {
+                                                    <span class="btn btn-success btn-xs">
+                                                        Delivered
+                                                    </span>
+                                                }
+                                            </td>
+
+                                            <td>
+                                                <a class="btn btn-info btn-xs" target="_blank" href="~/Report/GetFeedInvoiceReport?orderMasterId=@item.OrderMasterId"><i class="fa fa-print"></i> Sales Invoice</a>
+
+                                            </td>
+                                            <td style="text-align:center; width:50px;">
+
+                                                <a href="@Url.Action("FeedProcurementSalesOrderSlave","Procurement",  new {companyId = item.CompanyId,productType=item.ProductType,  orderMasterId=item.OrderMasterId})" title="Details" class="btn btn-primary btn-xs">
+                                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}
+

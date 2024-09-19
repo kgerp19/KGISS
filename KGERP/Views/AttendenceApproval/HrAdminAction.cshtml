@@ -1,0 +1,231 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Data.CustomModel.AttendenceApprovalAction>
+@using PagedList;
+
+@{
+    ViewBag.Title = "ManagerAction";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+<div class="row">
+    @using (Html.BeginForm("HrAdminAction", "AttendenceApproval", FormMethod.Get, new { @class = "example" }))
+    {
+        <div class="col-md-8">
+            <h4>
+                <b>HR  Approval</b> 
+            </h4>
+        </div>
+        <div class="col-md-4">
+            @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..." } })
+            <button type="submit"><i class="fa fa-search "></i></button>
+        </div>
+    }
+</div>
+
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                ID
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Department
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ApproveFor)
+            </th>
+            <th>
+                Modified Date
+            </th>
+            <th>
+                Actual InTime
+            </th>
+            <th>
+                Actual OutTime
+            </th>
+
+            <th>
+                Modified InTime
+            </th>
+            <th>
+                Modified OutTime
+            </th>
+
+            <th>
+                Reason
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().ManagerStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().HrStatus)
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @*@("[" + item.Data.EmployeeId + "] " + " " + item.Data.Name + " / " + item.Data.Department + " / " + item.Data.Designation)*@
+                    @Html.DisplayFor(modelItem => item.Data.EmployeeId)
+                </td>
+                <td nowrap>
+                    <span title="@("Designation : "+item.Data.Designation)">@item.Data.Name</span>
+                    @*@Html.DisplayFor(modelItem => item.Data.Name)*@
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Department)
+                </td>
+                <td nowrap>
+                    @Html.DisplayFor(modelItem => item.Data.ApproveFor)
+                </td>
+                <td nowrap>
+                    @Html.DisplayFor(modelItem => item.Data.AttendenceDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.InTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.OutTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.ModifiedInTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.ModifiedOutTime)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Resion)
+                </td>
+                <td nowrap>
+                    @if (item.Data.ManagerStatus == 0)
+                    {
+                        <span class="btn btn-warning btn-xs" style="width:70px">Pending</span>
+                    }
+                    @if (item.Data.ManagerStatus == 1)
+                    {
+                        <span class="btn btn-success btn-xs" style="width:70px">Approved</span>
+                    }
+
+                    @if (item.Data.ManagerStatus == 2)
+                    {
+                        <span class="btn btn-danger btn-xs" style="width:70px">Denied</span>
+                    }
+                </td>
+
+                <td nowrap>
+                    @if (item.Data.HrStatus == 0)
+                    {
+                        <span class="btn btn-info btn-xs" style="width:70px">New</span>
+                    }
+                    @if (item.Data.HrStatus == 1)
+                    {
+                        <span class="btn btn-success btn-xs" style="width:70px">Approved</span>
+                    }
+
+                    @if (item.Data.HrStatus == 2)
+                    {
+                        <span class="btn btn-danger btn-xs" style="width:70px">Denied</span>
+                    }
+                </td>
+                <td nowrap>
+                    @if (item.Data.ManagerStatus != 0 && item.Data.HrStatus == 0)
+                    {
+                        using (Html.BeginForm("HrApprove", "AttendenceApproval", FormMethod.Get))
+                        {<input type="hidden" id="id" name="id" value="@item.Data.Id" />
+                            <input type="hidden" id="status" name="status" value="Approved" />
+                            <div id="approveModal" class="modal fade" role="dialog">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">HR Comments</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="text" name="comments" class="form-control" required min="5" />
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+                                            <input id="submit" type="submit" class="btn btn-success btn-xs pull-right" />
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+
+                        using (Html.BeginForm("HrDenied", "AttendenceApproval", FormMethod.Get))
+                        {<input type="hidden" id="id" name="id" value="@item.Data.Id" />
+                            <input type="hidden" id="status" name="status" value="Approved" />
+                            <div id="deniedModal" class="modal fade" role="dialog">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">HR Comments</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="text" name="comments" class="form-control" required min="5" />
+                                            <input type="hidden" name="type" value="Manager" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+                                            <input id="submit" type="submit" class="btn btn-success btn-xs pull-right" />
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <a class="btn btn-success btn-xs" href="@Url.Action("HrApprove", "AttendenceApproval", new { id = item.Data.Id })" title="Approve">
+                            <i class="fa fa-check" aria-hidden="true"></i>
+                        </a>
+                        @*<button id="approve" class="btn btn-success btn-xs" data-toggle="modal" data-target="#approveModal" title="Approve"><i class="fa fa-check" aria-hidden="true"></i></button>*@
+                        <button id="denied" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#deniedModal" title="Denied"><i class="fa fa-check" aria-hidden="true"></i></button>
+
+
+                        @*<a class="btn btn-danger btn-xs" href="@Url.Action("HrDenied", "AttendenceApproval", new { id = item.Id })" title="Deny">
+                                <i class="fa fa-close" aria-hidden="true"></i>
+                            </a>*@
+                    }
+
+                </td>
+            </tr>
+        }
+
+    </table>
+
+</div>
+@if (Model.PageCount > 1)
+{
+    <span class="btn btn-success">
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    </span>
+    <span class="checkbox">
+        @Html.PagedListPager(Model, Page_No => Url.Action("HrAdminAction", "AttendenceApproval",
+                     new { Page_No, Sorting_Order = Request.QueryString["searchText"] }))
+    </span>
+}
+@*<script src="~/Content/bootstrap/js/bootstrap.min.js"></script>
+    <link href="~/Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" />*@

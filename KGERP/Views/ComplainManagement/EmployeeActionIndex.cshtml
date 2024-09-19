@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "Customer Complain List ";
+    int companyId = Convert.ToInt32(Session["CompanyId"]);
+}
+<div class="row">
+    <span style="font-size:20px;font-weight:bold">Customer Complain List</span>
+</div>
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table id="tblComplain" class="table table-striped" style="width:100%">
+        <thead>
+            <tr style="background-color:#4CAF50;color:#FFFFFF">
+                <th style="width:10px">Id</th>
+                <th>Customer Name</th>
+                <th>Mobile No</th>
+                <th>Complain Type</th>
+                <th>Complain Details</th>
+                <th>Invoice No</th>
+                <th>Invoice Date</th>
+                <th>Receiver</th>
+                <th>Complain Date</th>
+                <th>Action Description</th>
+                <th>Assign To</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        var Popup, dataTable;
+        $(document).ready(function () {
+            //$("#colDetail").hide();
+            dataTable = $("#tblComplain").DataTable({
+                "ajax": {
+                    "url": "/ComplainManagement/GetComplainListForAction",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+
+                "columns": [
+
+                    { "data": "ComplainId", "name": "ComplainId" },
+                    { "data": "CustomerName", "name": "CustomerName" },
+                    { "data": "MobileNo", "name": "MobileNo" },
+                    { "data": "ComplainTypeName", "name": "ComplainTypeName" },
+                    { 'data': 'ComplainDescription', "name": "ComplainDescription" },
+                    { 'data': 'InvoiceNo', "name": "InvoiceNo" },
+                    { 'data': 'OrderDate', "name": "OrderDate" },
+                    { 'data': 'CreatedBy', "name": "CreatedBy" },
+                    { 'data': 'ComplainDate', "name": "ComplainDate" },
+                    { 'data': 'ActionDescription', "name": "ActionDescription" },
+                    { 'data': 'ActionAssignTo', "name": "ActionAssignTo" },
+                    {
+                        'data': "ComplainId", 'render': function (data) {
+                            return "<a class='btn btn-default btn-xs' onclick=PopupForm('@Url.Action("CreateOrEdit", "ComplainManagement")/" + data + "')><i class='fa fa-edit'></i> </a><a class='btn btn-danger btn-xs' onclick=Delete(" + data +") style='margin-left:5px'><i class='fa fa-trash'></i> </a>";
+                        },
+                        "orderable": false,
+                        "width": "150px"
+                    }
+                ],
+
+                "language": {
+
+                    "emptyTable": "No data found, Please click on <b>Add New</b> Button"
+                },
+                "serverSide": "true",
+                "order": [0, "asc"],
+                "processing": "true"
+
+
+
+            });
+
+
+        });
+
+        function PopupForm(url) {
+            var formDiv = $('<div/>');
+            $.get(url)
+                .done(function (response) {
+                    formDiv.html(response);
+                    Popup = formDiv.dialog({
+                        autoOpen: true,
+                        resizable: false,
+                        title: "Customer Complains",
+                        height: 550,
+                        width: 750,
+                        close: function () {
+                            Popup.dialog('destroy').remove();
+                        }
+                    })
+                })
+        }
+
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid) {
+                console.log(form.action);
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+
+                        }
+                    }
+                })
+            }
+            return false;
+        }
+        function Delete(id) {
+            if (confirm("Are you sure to delete Customer Complain ?")) {
+                $.ajax({
+                "type": "POST",
+                "url": '@Url.Action("Delete", "ComplainManagement")/' + id,
+                success: function (data) {
+                    if (data.success) {
+                        dataTable.ajax.reload();
+
+                        $.notify(data.message, {
+                            globalPosition: "top center",
+                            className: "danger"
+                        })
+
+                    }
+                }
+            });
+            };
+
+        }
+
+
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

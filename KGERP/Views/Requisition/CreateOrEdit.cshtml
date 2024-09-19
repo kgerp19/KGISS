@@ -1,0 +1,409 @@
+﻿@model KGERP.Service.ServiceModel.RequisitionModel
+
+@{
+    ViewData["Title"] = "Requisition";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.RequisitionId > 0)
+        {
+            <span> Requisition No <a target="_blank" href="#">@Model.RequisitionNo</a> </span>
+        }
+        else
+        {
+            <span>  Requisition Information </span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Requisition Information</li>
+    </ol>
+
+</section>
+
+
+@using (Html.BeginForm("CreateOrEdit", "Requisition", FormMethod.Post))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(x => x.CompanyId, new { id = "CompanyFK" })
+
+                <div class="box-danger">
+                    <div class="box-header">
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.RequisitionId == 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Production Date</label>
+
+                                        <input name="RequisitionDate" asp-for="RequisitionDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                               required="required" class="datePicker form-control" id="txtRequisitionDate" placeholder="Date" autocomplete="off">
+
+                                        @Html.ValidationMessageFor(model => model.RequisitionDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Description</label>
+                                        <textarea class="form-control" rows="1" name="Description" asp-for="Description"></textarea>
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row mb-2">
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(x => x.CompanyId, new { id = "CompanyFK" })
+
+                                <div class="col-md-1"> </div>
+                                <div class="col-md-10">
+                                    <table class="table">
+                                        <tr>
+                                            <td width="15%"><b>Requsition No</b></td>
+                                            <td width="1%">:</td>
+                                            <th width="34%">@Model.RequisitionNo</th>
+                                            <td width="15%"><b>Requsition Date</b></td>
+                                            <td width="1%">:</td>
+                                            <td width="34%">@Model.RequisitionDate</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th>:</th>
+                                            <td colspan="4">@Model.Description</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-1"> </div>
+
+                            </div>
+
+
+                        }
+                        @Html.HiddenFor(model => model.RequisitionId, new { id = "RequisitionIdId" })
+
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding:0px">
+                                    <label for="message-text" class="col-form-label">Product</label>
+
+                                    @Html.EditorFor(model => model.ProductName, new
+                               {
+                                   htmlAttributes = new
+                                   { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" }
+                               })
+
+                                    @Html.HiddenFor(model => model.ProductId, new { id = "hfProductId" })
+                                    @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Qty</label>
+                                    <div class="input-group">
+                                        <input type="text" id="qty" name="Qty" asp-for="Qty" TabIndex="2" class="qty form-control" onkeyup="calculateInputQty()" style="text-align:left" autocomplete="off" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Prcess Loss (%)</label>
+                                    <input type="text" id="processLoss"
+                                           asp-for="ProcessLoss" TabIndex="2" name="ProcessLoss" class="processLoss form-control"
+                                           autocomplete="off" style="text-align:left" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Input Qty</label>
+                                    <input type="text" id="inputQty" TabIndex="2"
+                                           class="inputQty form-control" asp-for="InputQty" name="InputQty" autocomplete="off" style="text-align:left" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="reqCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        @if (Model.RequisitionId > 0)
+                                        {
+                                            <span>Add Item</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Create</span>
+                                        }
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+                        @if (Model.RequisitionId > 0)
+                        {
+
+
+                            <div class="table-responsive col-md-12 text-nowrap">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th class="center">Product Name </th>
+                                            <th class="center">Quantity</th>
+                                            <th class="center">Prcess Loss (%)</th>
+                                            <th class="center">Input Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Items)
+                                        {
+                                            <tr>
+                                                <td>@(++sl)</td>
+                                                <td>@item.ProductName</td>
+                                                <td>@item.Qty</td>
+                                                <th>@item.ProcessLoss</th>
+                                                <th>@item.InputQty</th>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+
+
+
+                    </div>
+
+
+
+                    <div class="box-footer">
+                        @if (Model.RequisitionId > 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-6">
+
+                                </div>
+
+                                <div class="col-md-6">
+                                    <a id="@Model.RequisitionId" onclick="makeSubmitble(@Model.RequisitionId)" class="linkPointer btn btn-success" data-toggle="modal" style="width:100%" data-target="#submitProcurementPurchaseOrderModal" data-placement="top">
+
+                                        @if (Model.IsSubmitted)
+                                        {
+                                            <i>Submitted Successfully</i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fa fa-save"></i><i>&nbsp;Submit</i>
+                                        }
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+
+@using (Html.BeginForm("ProductionBulkUpdate", "Store", FormMethod.Post, new { id = "submitOrderMastersFromSlaveFormId", @class = "formValidator" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Sales Order (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.RequisitionId, new { id = "hidsubmitOrderMasterId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "hidsubmitCompanyFK" })
+
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="submitOrDraftText"></span> this Sales Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include jQuery UI library -->
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+<!-- Include the Datepicker stylesheet (optional) -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+<script>
+    // DOM ready function
+    $(document).ready(function () {
+
+        // Datepicker initialization
+        $("#txtRequisitionDate").datepicker({
+            dateFormat: 'yy-mm-dd',
+            showOn: 'both',
+            //buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "1950:+150",
+            minDate: -2
+        });
+    });
+</script>
+
+
+@section Scripts {
+    @*<script src="~/Scripts/ApplicationScripts/Inventory_Feed/ProductionRequisition/ProductionRequisition.js"></script>*@
+
+    @*@Scripts.Render("~/bundles/jqueryui")
+        @Styles.Render("~/Content/cssjqryUi")*@
+
+
+
+
+    <script type="text/javascript">
+
+
+
+         function makeSubmitble(rowId) {
+
+             $('#hidsubmitOrderMasterId').val(rowId);
+             $('#hidsubmitCompanyFK').val(8);
+    }
+
+
+
+                                    $(function () {
+                                        $("#txtProductName").autocomplete({
+                                            source: function (request, response) {
+                                                $.ajax({
+                                                    url: '/Products/AutoComplete/',
+                                                    data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                                                    dataType: "json",
+                                                    type: "POST",
+                                                    contentType: "application/json; charset=utf-8",
+                                                    success: function (data) {
+                                                        response($.map(data, function (item) {
+                                                            return item;
+                                                        }))
+                                                    },
+                                                    error: function (response) {
+                                                        //alert(response.responseText);
+                                                    },
+                                                    failure: function (response) {
+                                                        //alert(response.responseText);
+                                                    }
+                                                });
+                                            },
+                                            select: function (e, i) {
+                                                $("#hfProductId").val(i.item.val);
+                                            },
+                                            minLength: 1,
+                                            change: function (event, ui) {
+                                                loadProcessLoss(ui.item.val);
+                                            }
+
+
+                                        }).focus(function () {
+                                            $(this).autocomplete("search");
+                                        });
+                                    });
+
+                                    function loadProcessLoss(productId) {
+                                        $.ajax({
+                                            url: '/Products/GetProductPoressLoss?productId=' + productId,
+                                            type: "Post",
+                                            async: true,
+                                            processData: false,
+                                            cache: false,
+                                            success: function (response) {
+                                                $Product = $("#product").val();
+                                                if (response == 0) {
+                                                    if (!confirm("Process loss is not definded for " + $Product + ". Are you Confirm ?")) {
+                                                        $("#product").val("");
+                                                        return false;
+                                                    }
+                                                }
+                                                $('#processLoss').val(response);
+                                            },
+                                            error: function (xhr) {
+                                                //alert('error');
+                                            }
+                                        });
+
+                                    }
+
+
+                                    function calculateInputQty() {
+                                        var inputQty = $("#qty").val();
+                                        var processLoss = $("#processLoss").val();
+                                        $("#inputQty").val(parseFloat(inputQty) + parseFloat(inputQty * (processLoss / 100)));
+                                    }
+
+
+
+                                    @*function makeEditble(rowId) {
+
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("SingleProcurementPurchaseOrderSlave", "Procurement")",
+                  datatype: "Json",
+                  data: { id: rowId },
+                  success: function (data) {
+                      console.log(data);
+                      $('#reqCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidPurchaseOrderId").val(data.PurchaseOrderId);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val(data.CompanyFK);
+                      $("#txtProductName").val(data.ProductName);
+                      $("#ddlRProductFK").val(data.Common_ProductFK);
+                      $("#txtPurchaseQuantity").val(data.PurchaseQuantity);
+                      $('#txtPurchasingPrice').val(data.PurchasingPrice);
+                      $("#hidPurchaseOrderDetailId").val(data.PurchaseOrderDetailId)
+                      $('.txtUnitName').text(data.UnitName);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                 });
+            }*@
+
+    </script>
+}

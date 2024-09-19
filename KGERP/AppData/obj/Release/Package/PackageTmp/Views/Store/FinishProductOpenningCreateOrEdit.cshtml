@@ -1,0 +1,270 @@
+﻿@model KGERP.ViewModel.StoreViewModel
+
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("FinishProductOpenningCreateOrEdit", "Store", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Store.CompanyId, new { @id = "companyId" })
+    <div class="row">
+        <div class="panel panel-success">
+            <div class="panel-heading" style="background-color:#009270;color:#FFFFFF">
+                <span style="font-size:15px;font-family:Arial;font-weight:bold">Finish Goods Openning Balance Entry</span>
+            </div>
+            <div class="panel-body" style="padding-left:0px;padding-right:0px">
+                <div class="col-md-4">
+                    @Html.LabelFor(model => model.Store.VendorId, htmlAttributes: new { @class = "control-label" })
+                    @Html.HiddenFor(model => model.Store.Type, new { @Value = "F" })
+
+                    @Html.EditorFor(model => model.Store.SupplierName, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "VendorName" } })
+                    @Html.HiddenFor(x => x.Store.VendorId, new { @id = "hfVendor", @name = "vendorId" })
+                    @Html.ValidationMessageFor(model => model.Store.VendorId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-4">
+                    <label for="CompanyName" class="control-label">Company Name</label>
+                    <input type="text" class="form-control" id="CompanyName" name="CompanyName" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="Address" class="control-label">Address</label>
+                    <input type="text" class="form-control" id="Address" name="Address" readonly>
+                </div>
+                <div class="col-md-4">
+                    @Html.LabelFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "control-label" })
+                    @Html.TextBoxFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-4">
+                    @Html.LabelFor(model => model.Store.ReceivedDate, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.TextBoxFor(model => model.Store.ReceivedDate, htmlAttributes: new { @class = "datepicker", @autocomplete = "off" })
+                </div>
+                <div class="col-md-4">
+                    @Html.LabelFor(model => model.Store.StockInfoId, htmlAttributes: new { @class = "control-label" })
+                    @Html.DropDownListFor(model => model.Store.StockInfoId, new SelectList(Model.StockInfos, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row details">
+        <table class="table table-responsive">
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Amount</th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+                <td style="width:275px">
+                    <input type="text" id="product" name="product" class="form-control" />
+                    <input type="hidden" id="hfProductId" name="productId" />
+                </td>
+                <td>
+                    <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid quantity required</span>
+                </td>
+
+                <td>
+                    <input type="text" id="unitPrice" class="qty form-control" autocomplete="off"  style="text-align:right" />
+                    <span class="error">Valid Unit Price required</span>
+                </td>
+
+                <td hidden>
+                    <input type="hidden" id="avgPrice" class="qty form-control" autocomplete="off" readonly style="text-align:right" />
+                    <span class="error">Valid Unit Price required</span>
+                </td>
+
+                <td>
+                    <input type="text" id="amount" class="qty form-control" autocomplete="off" style="text-align:right" readonly />
+                </td>
+                <td>
+                    <button type="button" id="add" class="btn btn-success pull-right"><i class="fa fa-plus-circle"></i>&nbsp; Add</button>
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems">
+            <table class="table" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:#009270;color:#FFFFFF">
+                        <th>Sl</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" class="danger"></span>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-offset-9 pull-right">
+            <table>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input id="submit" type="submit" value="Submit" class="btn btn-success pull-right" onclick="javascript: return SubmitForm();" style="padding:5px 10px;margin-top:5px" />
+                        <a href="@Url.Action("Index",new { companyId=Model.Store.CompanyId})" id="cancel" class="btn btn-danger pull-right" style="padding:5px 10px;margin-right:10px;margin-top:5px">Cancel</a>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+}
+
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/StockEntry.js"></script>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        function SubmitForm() {
+            var r = confirm("Are you sure to submit?");
+            if (!r) {
+                return false;
+            }
+        }
+
+        $(function () {
+            $("#VendorName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/SupplierAutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    console.log(ui);
+                    loadCustomerInformation(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+        function loadCustomerInformation(customerId) {
+            $.ajax({
+                url: '/Vendor/GetCustomerInformation?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#CompanyName').val(result.Name)
+                    $('#Address').val(result.Address)
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+
+        }
+
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1,
+                //change: function (event, ui) {
+                //    loadProductPrice(ui.item.val);
+                //}
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        //function loadProductPrice(productId) {
+        //    $.ajax({
+        //        type: "GET",
+        //        url: "/OrderMaster/GetProductUnitPrice",
+        //        data: { 'id': productId },
+        //        success: function (data) {
+        //            $('#unitPrice').val(data.UnitPrice);
+        //        },
+        //        error: function (error) {
+        //            console.log(error);
+        //        }
+        //    });
+        //}
+    </script>
+}

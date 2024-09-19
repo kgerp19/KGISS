@@ -1,0 +1,238 @@
+﻿@model KGERP.Services.Procurement.VmCustomerAgeing
+@using KGERP.Utility;
+@using Newtonsoft.Json
+
+@{
+    ViewData["Title"] = "Customer Ageing";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+    decimal totalGrossSaleAmount = 0;
+    decimal totalSaleReturnAmount = 0;
+    decimal totalRecoverAmount = 0;
+    decimal totalBalanceAmount = 0;
+    decimal totalZeroToThirtyDayes = 0;
+    decimal totalThirtyOneToSixtyDayes = 0;
+    decimal totalSixtyOneToNintyDayes = 0;
+    decimal totalNintyOneTo120Dayes = 0;
+    decimal totalOneH21To150Dayes = 0;
+    decimal totalOneH51To180Dayes= 0;
+    decimal totalOneH81To210Dayes= 0;
+    decimal totalTwoH11To240Dayes= 0;
+    decimal totalTwoH41To270Dayes= 0;
+    decimal totalTwoH71To360Dayes= 0;
+    decimal totalOver360Dayes = 0;
+    decimal totalCurrentMonthCollection = 0;
+    //string.CurrentMonthCollection) strDataList = JsonConvert.SerializeObject(Model.DataList);
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+
+    .d-none {
+        display: none;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Customer Business Ageing (As on @Model.AsOnDate)
+        </span>
+        
+    </h1>
+    <ol class="breadcrumb">
+        <li>
+            <a class="btn btn-success" target="_blank" href="~/Collection/CustomerAgeingReportViewGet?ReportType=PDF&CompanyFK=24&AsOnDate=@(Model.AsOnDate)&ZoneId=@(Model.ZoneId??0)&SubZoneId=@(Model.SubZoneId??0)"><i class="fa fa-file-pdf-o"></i> PDF</a>
+        </li>
+        <li class="active">
+            <a class="btn btn-warning" target="_blank" href="~/Collection/CustomerAgeingReportViewGet?ReportType=EXCEL&CompanyFK=24&AsOnDate=@Model.AsOnDate&ZoneId=@(Model.ZoneId??0)&SubZoneId=@(Model.SubZoneId??0)"><i class="fa fa-file-excel-o"></i> EXCEL</a>
+        </li>
+        <li class="active">
+            <a class="btn btn-danger" target="_blank" href="~/Collection/CustomerAgeingReportViewGet?ReportType=WORD&CompanyFK=24&AsOnDate=@Model.AsOnDate&ZoneId=@(Model.ZoneId??0)&SubZoneId=@(Model.SubZoneId??0)"><i class="fa fa-file-word-o"></i> WORD</a>
+        </li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">                  
+
+                    <div class="table-responsive col-md-12  text-nowrap">
+
+                        <table id="AgeingDataTable" class="table table-striped text-nowrap table-bordered border-dark" width="100%">
+                            <thead>
+
+                                <tr style="background-color:aqua;">
+                                    <th style="text-align:center;">Details</th>
+                                    <th>Customer</th>
+                                    <th>Customer Code</th>
+                                    <th>Zone</th>
+                                    @*<th>Zone Code</th>*@
+                                    <th>Zone Incharge</th>
+                                    <th>Territory</th>
+                                    @*<th>Territory Code</th>*@
+                                    <th>Sales Officer</th>
+                                    <th>Mode</th>
+                                    <th style="text-align: right;"> Gross Sale</th>
+                                    <th style="text-align: right;">Sale Return</th>
+                                    <th style="text-align: right;">Realization Amount</th>
+                                    <th style="text-align: right;">Net Outstanding</th>
+                                    <th style="text-align: right;">0 - 30</th>
+                                    <th style="text-align: right;">31 - 60</th>
+                                    <th style="text-align: right;">61 - 90</th>
+                                    <th style="text-align: right;">91 - 120</th>
+                                    <th style="text-align: right;">121 - 150</th>
+                                    <th style="text-align: right;">151 - 180</th>
+                                    <th style="text-align: right;">181 - 210</th>
+                                    <th style="text-align: right;">211 - 240</th>
+                                    <th style="text-align: right;">241 - 270</th>
+                                    <th style="text-align: right;">271 - 360</th>
+                                    <th style="text-align: right;">Over 360</th>
+                                    <th style="text-align: right;" title="Current Month Collection">Current Month Collection</th>
+                                    <th style="text-align: right;" title="Current Month Collection">Current Month Sale</th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DataList)
+                                {
+                                    totalGrossSaleAmount += item.GrossSaleAmount;
+                                    totalSaleReturnAmount += item.SaleReturnAmount;
+                                    totalRecoverAmount += item.RecoverAmount;
+                                    totalBalanceAmount += item.GrossSaleAmount - item.SaleReturnAmount - item.RecoverAmount; ;
+                                    totalZeroToThirtyDayes += item.ZeroToThirtyDayes ;
+                                    totalThirtyOneToSixtyDayes += item.ThirtyOneToSixtyDayes;
+                                    totalSixtyOneToNintyDayes += item.SixtyOneToNintyDayes;
+                                    totalNintyOneTo120Dayes += item.NintyOneTo120Dayes;
+                                    totalOneH21To150Dayes += item.OneH21To150Dayes;
+                                    totalOneH51To180Dayes += item.OneH51To180Dayes;
+                                    totalOneH81To210Dayes += item.OneH81To210Dayes;
+                                    totalTwoH11To240Dayes += item.TwoH11To240Dayes;
+                                    totalTwoH41To270Dayes += item.TwoH41To270Dayes;
+                                    totalTwoH71To360Dayes += item.TwoH71To360Dayes;
+                                    totalOver360Dayes += item.Over360Dayes;
+                                    totalCurrentMonthCollection += item.CurrentMonthCollection;
+
+                                    <tr>
+                                        <th style="text-align:center;">
+                                            @*<a title="Detail Info in PDF Format" target="_blank" href="~/Collection/GCCLCustomerAgeingDetails?CompanyId=@Model.CompanyFK&CustomerId=@item.VendorId&AsOnDate=@Model.AsOnDate&reportName=GCCLCustomerAgeingDetailsReport&reportFormat=PDF"><span class="fa fa-file-pdf-o"></span></a>*@
+                                            <a title="Detail Info in Excel Format" target="_blank" href="~/Collection/GCCLCustomerAgeingDetails?CompanyId=@Model.CompanyFK&CustomerId=@item.VendorId&AsOnDate=@Model.AsOnDate&reportName=GCCLCustomerAgeingDetailsReport&reportFormat=EXCEL"><span class="fa fa-file-excel-o"></span></a>
+
+                                        </th>
+                                        <td>
+                                            @Html.Raw( item.VendorName)
+
+
+                                        </td>
+
+                                        <td>
+                                            @item.VendorCode
+
+
+                                        </td>
+                                        <td>@item.ZoneName</td>
+                                        @*<td>@item.ZoneCode</td>*@
+                                        <td>@item.ZoneIncharge</td>
+                                        <td>@item.SubZoneName</td>
+                                        @*<td>@item.SubZoneCode</td>*@
+                                        <td>@item.SalesOfficerName</td>
+                                        <td>@item.CustomerMode</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.GrossSaleAmount)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.SaleReturnAmount)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.RecoverAmount)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", (item.GrossSaleAmount) - (item.SaleReturnAmount + item.RecoverAmount))</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.ZeroToThirtyDayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.ThirtyOneToSixtyDayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.SixtyOneToNintyDayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.NintyOneTo120Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.OneH21To150Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.OneH51To180Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.OneH81To210Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.TwoH11To240Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.TwoH41To270Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.TwoH71To360Dayes)</td>
+                                        <td style="text-align: right;">@String.Format("{0:0.00}", item.Over360Dayes)</td>
+                                        <td style="text-align: right;"> @String.Format("{0:0.00}", item.CurrentMonthCollection)</td>
+                                        <td style="text-align: right;"> @String.Format("{0:0.00}", item.CurrentMonthGrossSale)</td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th colspan="7">
+                                        TOTAL
+                                    </th>
+
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalGrossSaleAmount)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalSaleReturnAmount)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalRecoverAmount)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalBalanceAmount)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalZeroToThirtyDayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalThirtyOneToSixtyDayes)</th>
+
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalSixtyOneToNintyDayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalNintyOneTo120Dayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalOneH21To150Dayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalOneH51To180Dayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalOneH81To210Dayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalTwoH11To240Dayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalTwoH41To270Dayes)</th>
+                                    <th style="text-align: right;">@String.Format("{0:0.00}", totalTwoH71To360Dayes)</th>
+                                    <th style="text-align: right;"> @String.Format("{0:0.00}", totalOver360Dayes)</th>
+                                    <th style="text-align: right;"> @String.Format("{0:0.00}", totalCurrentMonthCollection)</th>
+
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @*@if (Model.ID > 0)
+                        {
+                            <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                        }*@
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+            $("#AgeingDataTable").DataTable()
+
+
+
+        })
+        //function PrintbtnClick() {
+
+        //    var myPrintContent = document.getElementById('printdiv');
+        //    var myPrintWindow = window.open(window.location, "Print");
+        //    myPrintWindow.document.write(myPrintContent.innerHTML);
+        //    myPrintWindow.document.getElementById('hidden_div').style.display = 'block'
+        //    myPrintWindow.document.close();
+        //    myPrintWindow.focus();
+        //    myPrintWindow.print();
+        //    myPrintWindow.close();
+        //    return false;
+        //}
+    </script>
+}
+

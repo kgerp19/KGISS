@@ -1,0 +1,98 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.KgReCrmModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Previous7DaysClientSchedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+ 
+@using (Html.BeginForm("Previous7DaysClientSchedule", "KGRECRM", FormMethod.Get))
+{
+    <div class="row" style="max-width:1000px;">
+        <div class="col-md-5">
+            <div class="form-group">
+                <h4><b>Previous 7 Days Client Schedule</b></h4>
+            </div>
+        </div>
+        <div class="col-md-5 pull-right">
+            <div class="form-group">
+                <div class="col-md-8">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search.." })</div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+@if (Model.Count() == 0)
+{
+    <div><h2>No Case found !</h2></div>
+}
+else
+{
+    <table class="table table-striped" id="bdsms">
+        <tr style="background-color:#009270;color:#FFFFFF">
+            <th>
+                SL.
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().DepartmentOrInstitution)
+            </th>
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().Designation)
+            </th>
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().ResponsibleOfficer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().PresentAddress)
+            </th>
+
+            <th nowrap> @Html.DisplayNameFor(model => model.First().NextScheduleDate)</th>
+
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.DepartmentOrInstitution)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Designation)
+                </td>
+                <td nowrap>
+                    @Html.DisplayFor(modelItem => item.Data.ResponsibleOfficer)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.PresentAddress)
+                </td>
+                <td nowrap>
+                    @Html.DisplayFor(modelItem => item.Data.NextScheduleDate)
+                </td>
+            </tr>
+        }
+    </table>
+
+}
+@if (Model.PageCount > 1)
+{
+    <span class="btn btn-success">
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    </span>
+    <span class="checkbox">
+        @Html.PagedListPager(Model, Page_No => Url.Action("Previous7DaysClientSchedule", "KGRECRM", new { Page_No, Sorting_Order = Request.QueryString["Search"], SearchText = Request.QueryString["searchText"] }))
+    </span>
+}
+

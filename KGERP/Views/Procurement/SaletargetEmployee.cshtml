@@ -1,0 +1,374 @@
+﻿@model KGERP.Services.Procurement.OfficerSalestargetVm
+@using KGERP.Utility;
+@{
+    ViewBag.Title = "Sale Target Employee";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px; 
+    }
+
+    .card-title {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .info-row {
+        background-color: #f2f2f2;
+    }
+
+    .info-cell {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+        .info-cell strong {
+            font-weight: bold;
+            color: #333;
+        }
+
+    .total-row {
+        font-weight: bold;
+    }
+
+
+    .card-container {
+        margin-bottom: 20px;
+    }
+
+   
+    .edit-icon {
+        color: #007bff; 
+        cursor: pointer;
+    }
+
+ 
+    .total-row td {
+        font-weight: bold;
+    }
+
+    .form-group {
+        display: inline-block;
+        margin-right: 10px; 
+    }
+
+    #monthInputs {
+        border: 2px solid #ccc; 
+        padding: 10px; 
+        border-radius: 5px; 
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+        background-color: #f9f9f9; 
+        margin-top: 20px; 
+    }
+
+    #saveButton {
+        width: 200px; 
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row justify-content-center card-container">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Select Employee</h5>
+                    @using (Html.BeginForm())
+                    {
+                        @Html.DropDownListFor(m => m.EmployeeId,
+                                              new SelectList(Model.SelectModels, "Value", "Text"),
+                                              "Select Employee",
+                                              new { @class = "form-control select2", id = "EmpId" })
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Select Year</h5>
+                    <select class="form-control select2" id="YearId">
+                        <option value="">Select Year</option>
+                        @for (int year = 2000; year <= 2050; year++)
+                        {
+                            <option value="@year">@year</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="monthInputs" style="display: none;">
+       
+        <div class="card-container">
+
+        </div>
+    </div>
+
+
+    <div class="row justify-content-center card-container" id="btnnn" style="display: none;">
+        <div class="col-md-12">
+            <div class="card ">
+                <div class="card-body text-center ">
+                    <button type="button" id="saveButton" class="btn btn-primary ">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="txt" class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="text-center bg-info text-white p-4">
+            <h2>No target</h2>
+        </div>
+    </div>
+    <div class="row justify-content-center card-container" id="apptbl">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <table id="dataTable" class="table table-striped table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Month</th>
+                                <th>Targeted Quantity</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Your data has been successfully saved.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Successful</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Your data has been successfully updated.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('.select2').select2();
+
+        $('#EmpId').change(function () {
+            $('#monthInputs').empty(); 
+            $('#monthInputs').show();
+            $('#btnnn').show();
+            $('#monthInputs').append('<h4 style="border-bottom: 2px solid #ccc; text-align: center; font-family: Arial, sans-serif; font-weight: bold; background-color: #f0f0f0; padding: 10px;">Add Target</h4>');
+            $('#dataTable tbody').empty();
+
+
+
+            for (var i = 1; i <= 12; i++) {
+                var monthLabel = $('<label>').attr('for', 'month' + i).text(getMonthName(i));
+                var monthInput = $('<input>').attr({ type: 'text', id: 'month' + i, name: 'month' + i }).addClass('form-control');
+                var container = $('<div>').addClass('form-group').append(monthLabel, monthInput);
+                $('#monthInputs').append(container);
+            }
+        });
+
+        $('#saveButton').click(function () {
+            var employeeId = $('#EmpId').val();
+            var yearId = $('#YearId').val();
+            var monthInputs = [];
+
+            for (var i = 1; i <= 12; i++) {
+                var monthInput = $('#month' + i).val();
+                monthInputs.push({ Month: i, TargetedQuantity: monthInput });
+            }
+
+           $.ajax({
+    url: '/Procurement/FeedSaveSalesTargets',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+        EmployeeId: employeeId,
+        Year: yearId,
+        officerSalestargetVms: monthInputs,
+        CompanyId: @Model.CompanyId
+    }),
+    success: function (response) {
+        if (response === true) {
+        
+            $('#successModal').modal('show');
+
+          
+            $('#successModal').on('hidden.bs.modal', function (e) {
+                location.reload();
+            });
+        } else {
+            console.log("Response is not true.");
+        }
+    },
+    error: function (xhr, status, error) {
+        console.error("Error occurred while saving data:", error);
+    }
+});
+
+        });
+    });
+
+    function getMonthName(monthNumber) {
+        var monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"];
+        return monthNames[monthNumber - 1];
+    }
+    $('#YearId').on('change', function () {
+        var employeeSelected = $('#EmpId').val();
+        if (!employeeSelected) {
+            alert('Please select an employee first.');
+            location.reload();
+        } else {
+            var selectedYear = $(this).val();
+            $.ajax({
+                url: '/Procurement/GetEmplyeeByYear',
+                type: 'GET',
+                data: { year: selectedYear, EmpId: employeeSelected },
+                success: function (response) {
+                    console.log(response);
+                    if (response.officerSalestargetVms.length === 0) {
+                        $('#txt').show();
+                        $('#dataTable tbody').empty();
+                        $('#apptbl').hide();
+                        $('#monthInputs').show();
+                        $('#btnnn').show();
+                    } else {
+                        $('#monthInputs').hide();
+                        $('#txt').hide();
+                        $('#btnnn').hide();
+
+                        $('#dataTable tbody').empty();
+                        var infoRow = $('<tr>').addClass('info-row');
+                        infoRow.append($('<td>').addClass('info-cell').html('<strong>Employee:</strong> ' + response.officerSalestargetVms[0].EmployeeName));
+                        infoRow.append($('<td>').addClass('info-cell').html('<strong>Year:</strong> ' + response.officerSalestargetVms[0].Year));
+                        $('#dataTable tbody').append(infoRow);
+                        var totalQuantity = 0;
+
+                        $.each(response.officerSalestargetVms, function (index, item) {
+                            var row = $('<tr>');
+                            var monthCell = $('<td>').text(getMonthName(item.Month));
+                            var quantityCell = $('<td>').text(item.TargetedQuantity);
+                            var quantityInput = $('<input>').attr('type', 'number').val(item.TargetedQuantity);
+                            var editIcon = $('<i>').addClass('fa fa-edit edit-icon').attr('aria-hidden', 'true');
+                            editIcon.click(function () {
+                                quantityCell.empty().append(quantityInput);
+                                editIcon.removeClass('fa-edit').addClass('fa-save');
+                                editIcon.off('click').click(function () {
+                                    UpdateInformation(item.OfficerSalesTargetId, quantityInput.val());
+                                    quantityCell.text(item.TargetedQuantity);
+                                    editIcon.removeClass('fa-save').addClass('fa-edit');
+                                });
+                            });
+
+                            row.append(monthCell);
+                            row.append(quantityCell);
+                            row.append($('<td>').append(editIcon));
+
+                            totalQuantity += item.TargetedQuantity;
+                            $('#dataTable tbody').append(row);
+                        });
+
+                        
+                        var totalRow = $('<tr>').addClass('total-row');
+                        totalRow.append($('<td>').html('<strong>Yearly</strong>'));
+                        totalRow.append($('<td>').html('<strong>' + totalQuantity + '</strong>'));
+                        $('#dataTable tbody').append(totalRow);
+                        $('#apptbl').show();
+
+
+
+
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+    });
+
+    $('#apptbl').hide();
+    $('#txt').hide();
+    function UpdateInformation(OfficerSalesTargetId, newQuantity) {
+     
+        $.ajax({
+            url: '/Procurement/EditSaleTarget',
+            method: "POST",
+            data: {
+                OfficerSalesTargetId: OfficerSalesTargetId,
+                newQuantity: newQuantity
+            },
+            success: function (response) {
+                if (response === true) {
+                    $('#updateModal').modal('show');
+                    $('#updateModal').on('hidden.bs.modal', function (e) {
+                        location.reload();
+                    });
+                } else {
+                    console.log("Response is not true.");
+                }
+            },
+            error: function (xhr, status, error) {
+                alert("Error updating information: " + error);
+            }
+        });
+    }
+
+
+
+
+</script>

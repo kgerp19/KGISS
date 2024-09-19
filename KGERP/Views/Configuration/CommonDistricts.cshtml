@@ -1,0 +1,249 @@
+﻿
+@{
+
+    ViewData["Title"] = "Districts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+}
+@model KGERP.Service.Configuration.VMCommonDistricts
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Districts
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Districts</li>
+    </ol>
+</section>
+@using (Html.BeginForm("CommonDistricts", "Configuration", FormMethod.Post, new { id = "commonDistrictsFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-3">
+                    <div class="box">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="box-danger">
+                            <div class="box-header">
+                                <h4>Update Districts</h4>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                @Html.HiddenFor(model => model.ID, new { Value = "", id = "unitId" })
+                                @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionId" })
+                                <div class="form-group">
+                                    @Html.HiddenFor(model => model.ID, new { Value = "", id = "DistrictId" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Division:</label>
+                                    @Html.DropDownListFor(model => model.Common_DivisionsFk, Model.DivisionList as SelectList, "---Select Division---", new { id = "ddlCommon_DivisionsFk", @class = "searchingDropdown form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.Common_DivisionsFk, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    @Html.TextBoxFor(model => model.Name, new { id = "txtDistrictsName", @class = "form-control input-sm", @placeholder = "Unit Name", required = "true", })
+                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    @Html.TextBoxFor(model => model.ShorName, new { id = "txtShortName", @class = "form-control input-sm", @placeholder = "Short Name", required = "true", })
+                                    @Html.ValidationMessageFor(model => model.ShorName, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-5">
+                                        <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <button type="button" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="box">
+                        <div class="box-danger">
+                            <div class="box-header">
+                                <h4>Districts List</h4>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+
+                                <div class="table-responsive col-md-12">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>Districts Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td id="tdDistrictsName_@item.ID">
+                                                        @item.Name
+                                                        <input type="hidden" id="hidCommon_DivisionsFk_@item.ID" value="@item.Common_DivisionsFk" />
+                                                    </td>
+                                                    <td>
+                                                        <a id="@item.ID" onclick="EditItem(@item.ID);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+
+                                                        <a id="@item.ID" onclick="deleteItem(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#productCategoryDeleteModal" title="Delete"
+                                                           data-placement="top">
+                                                            <i class="glyphicon glyphicon-trash text-danger" aria-hidden="true"></i>
+                                                        </a>
+
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+        });
+
+        //function makeEditble(elem) {
+        //    if (elem !== null) {
+        //        var rowId = elem.id;
+        //        $('#unitId').val(rowId);
+        //        $('#ActionId').val(2);
+        //        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+        //        $('#txtDistrictsName').val($('#tdDistrictsName_' + rowId).text().trim());
+        //        $('#ddlCommon_DivisionsFk').val($('#hidCommon_DivisionsFk_' + rowId).val()).change()
+        //        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        //    }
+        //}
+
+        $("#btnSave").click(function () {
+            var stnm = $("#txtShortName").val();
+            var conceptName = $('#ddlCommon_DivisionsFk').find(":selected").val();
+            if (stnm.length > 10) {
+                alert("Short Name Must Be Greater than 10 Charecter");
+            }
+            else {
+                var v = {
+                    'Name': $("#txtDistrictsName").val(),
+                    'DivisionId': conceptName,
+                    'ShortName': $("#txtShortName").val(),
+                    'DistrictId': $("#DistrictId").val(),
+                }
+                $.ajax({
+                    url: "/Configuration/SaveDistrict",
+                    method: "Post",
+                    data: { Model: v },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+
+
+                    }
+
+                });
+
+
+            }
+
+            location.reload();
+        });
+
+
+
+        function EditItem(id) {
+
+            var eid = id;
+
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetDistrictById", "Configuration")",
+                datatype: "Json",
+            data: { id: eid },
+                success: function (data) {
+                    console.log(data);
+                    $("#txtDistrictsName").val(data.Name);
+                    $("#txtShortName").val(data.ShortName);
+                    $("#ddlCommon_DivisionsFk").val(data.DivisionId).change();
+                    $("#DistrictId").val(data.DistrictId);
+                    $("#btnSave").html(" <span>Update</span>");
+                   //// $("#sbmt").css('red');
+                }
+            });
+
+        }
+
+
+        function deleteItem(id) {
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+                  $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteDistrict", "Configuration")",
+                datatype: "Json",
+                      data: { id: id },
+                      success: function (data) {
+                          location.reload();
+
+                }
+             })
+
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+        }
+
+
+
+        function resetForm() {
+            $('#commonDistrictsFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+    </script>
+}
+

@@ -1,0 +1,101 @@
+﻿@model KGERP.ViewModel.IngredientStandardViewModel
+@{
+    ViewBag.Title = "Create";
+}
+
+
+@using (Html.BeginForm("CreateOrEdit", "IngredientStandard", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+<div class="form-horizontal">
+    <span style="font-size:25px">
+        <span>Raw Material Add</span>
+    </span>
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.IngredientStandard.IngredientStandardId)
+    @Html.HiddenFor(model => model.IngredientStandard.CompanyId)
+    <div class="form-group">
+        @Html.LabelFor(model => model.IngredientStandard.ProductSubCategoryId, htmlAttributes: new { @class = "control-label col-md-4" })
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.IngredientStandard.ProductSubCategoryId, new SelectList(Model.ProductSubCategories, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlProductSubCategory" })
+            @Html.ValidationMessageFor(model => model.IngredientStandard.ProductSubCategoryId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.IngredientStandard.ProductId, htmlAttributes: new { @class = "control-label col-md-4" })
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.IngredientStandard.ProductId, new SelectList(Model.Products, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlProduct" })
+            @Html.ValidationMessageFor(model => model.IngredientStandard.ProductId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    
+    <div class="form-group">
+        @Html.LabelFor(model => model.IngredientStandard.IsActive, htmlAttributes: new { @class = "control-label col-md-4" })
+        <div class="col-md-8">
+            @Html.EditorFor(model => model.IngredientStandard.IsActive)
+        </div>
+
+    </div>
+    <div class="col-md-offset-4 col-md-4">
+        <div class="form-group">
+            <a href="@Url.Action("Index",new { companyId = Model.IngredientStandard.CompanyId })" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove-circle"></span>   Close
+            </a>
+            <button type="submit" class="btn btn-primary" onclick="javascript: return SubmitForm();" style="margin-left: 20px;"><span class="glyphicon glyphicon-floppy-disk"></span>Save</button>
+
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        function SubmitForm() {
+            var r = confirm("Are you sure to save this?");
+            if (r == false) {
+                return false;
+            }
+        }
+        $('#ddlProductSubCategory').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Products/GetProductSelectModelsByProductSubCategory",
+                data: { productSubCategoryId: $('#ddlProductSubCategory').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var Products = "<select>";
+                    Products = Products + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        Products = Products + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    Products = Products + '</select>';
+                    $('#ddlProduct').html(Products);
+                }
+            });
+        });
+        
+    </script>
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

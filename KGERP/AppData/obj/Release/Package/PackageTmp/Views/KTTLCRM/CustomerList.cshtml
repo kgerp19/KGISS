@@ -1,0 +1,89 @@
+﻿@{
+    ViewBag.Title = "CustomerList";
+}
+
+@*<head>*@
+<link href="~/Content/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="~/Content/plugins/datatables/jquery.dataTables.min.js"></script>
+@*</head>*@
+@*<body>*@
+<div class="col-sm-12" style="padding-top: 10px">
+    <table class="ClientTable table-bordered table-hover table-responsive" id="ClientListTableMain">
+        <thead>
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <td style="text-align: center">SL</td>
+                <td style="text-align: center">Full Name</td>
+                <td style="text-align: center">Mobile No</td>
+                <td style="text-align: center">Present Address</td>
+                <td style="text-align: center">Permanent Address</td>
+                <td style="text-align: center">Passport No</td>
+                <td style="text-align: center">Religion</td>
+                <td style="text-align: center">Resp. Officer</td>
+                <td style="text-align: center">Action</td>
+            </tr>
+        </thead>
+        <tbody id="ClientListTableBody">
+        </tbody>
+    </table>
+
+</div>
+<script>
+
+    $(document).ready(function () {
+        LoadClientInfo();
+    });
+
+    function LoadClientInfo() {
+        $.ajax({
+            type: "POST",
+            url: "/KTTLCRM/LoadCustomerDataList",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data.length > 0) {
+                    var stockRecord = data;
+                    var table = "";
+                    var count = 1;
+                    $("#ClientListTableBody").empty();
+                    $.each(stockRecord, function (key, value) {
+                        var id = value.ClientId;
+                        table += "<tr>" +
+                            "<td style='padding-left:5px;'>" + count + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.FullName + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.MobileNo + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.PresentAddress + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.PermanentAddress + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.PassportNo + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.Religion + "</td>" +
+                            "<td style='padding-left:5px;'>" + value.ResponsiblePerson + "</td>" +
+                            "<td style='width:10%'>";
+                        if (1) {
+                            table += " <a href=/KTTLCRM/CreateOrEdit?id=" + parseInt(value.ClientId) + "><span class='btn btn-info btn-xs glyphicon glyphicon-edit'></span></a>";
+                            table += "  <a target='_blank' href=/KTTLCRM/ClientInformation?clientId=" + parseInt(value.ClientId) + "><span class='btn btn-info btn-xs glyphicon glyphicon-download'></span></a>";
+                        }
+                        table += "</td>" +
+                            "</tr>";
+                        count++;
+                    })
+
+                    $("#ClientListTableBody").append(table);
+                    $('#ClientListTableMain').DataTable({
+                        "scrollY": "500px",
+                        "scrollCollapse": true,
+                        "paging": true,
+                        "bInfo": true
+                    });
+                }
+            }
+        });
+    }
+
+
+</script>
+<script src="~/Scripts/KGREScript/date-convert.js"></script>
+@*</body>*@
+
+
+
+

@@ -1,0 +1,135 @@
+﻿@model KGERP.Service.Implementation.ComparativeStatementService.Comparative_Statement.ComparativeStatementVm
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .disabled {
+        opacity: 0.5; /* Or any other styling to visually indicate it's disabled */
+        pointer-events: none; /* This prevents clicks on the element */
+        /* You can add additional styling as needed */
+    }
+</style>
+
+
+
+
+@* Display Comparative Statement List here *@
+
+@if (Model.ComparetiveStatemnetList != null && Model.ComparetiveStatemnetList.Any())
+{
+    <h2>Comparative Statement List</h2>
+    <table class="table table-striped" id="KgErpDataTable" >
+        <thead>
+            <tr>
+                <th>Serial Number</th>
+
+                <th>CSNO</th>
+
+                <th>Product Name</th>
+           
+                <th>Origin</th>
+                <th>Brand</th>
+                <th>Specification</th>
+
+                <th>CS Date</th>
+                <th>Delivery Date</th>
+                <th>Required Quantity</th>
+                <th>Status</th>
+                <th>Action</th>
+
+
+                <!-- Add more headers as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var serialNumber = 1;
+            }
+
+            @foreach (var item in Model.ComparetiveStatemnetList)
+            {
+                <tr>
+                    <td>@serialNumber</td>
+
+                    <td>@item.CSNO</td>
+
+                    <td>@item.PrductName</td>
+                  
+                    <td>@item.Origin</td>
+                    <td>@item.Brand</td>
+                    <td>@item.Specification</td>
+                    <td>@item.CSDate.ToString("dd/MM/yyyy")</td>
+                    <td>@(item.DeliveryDate.HasValue ? item.DeliveryDate.Value.ToString("dd/MM/yyyy") : "N/A")</td>
+                    <td>@(item.RequiredQuantity.HasValue ? item.RequiredQuantity.Value.ToString() : "N/A")</td>
+
+                    <td>
+                        @if (item.Status == false)
+                        {
+                            <button class="btn btn-primary btn-sm" onclick="redirectToCreateStatement('@item.CompanyId', '@item.CSID')">Not Submit</button>
+
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-success btn-sm" disabled> Submit</button>
+                        }
+
+                    </td>
+                    <td>
+
+                        @if (item.Status == true)
+                        {
+                            <a class="disabled" href="@Url.Action("EditCStament", "ComparativeStatement", new { CsId = item.CSID })"><i class="fa fa-pencil text-warning "></i></a>
+                            <a class="disabled" href="@Url.Action("DelteCStament", "ComparativeStatement", new { CsId = item.CSID, CompanyId = item.CompanyId })"><i class="fa fa-trash text-danger "></i></a>
+                        }
+                        else
+                        {
+                            <a  href="@Url.Action("EditCStament", "ComparativeStatement", new { CsId = item.CSID })"><i class="fa fa-pencil text-warning "></i></a>
+                            <a  href="@Url.Action("DelteCStament", "ComparativeStatement", new { CsId = item.CSID, CompanyId = item.CompanyId })"><i class="fa fa-trash text-danger "></i></a>
+                        }
+
+                        <a href="@Url.Action("CreateStatement", "ComparativeStatement", new { CompanyId = item.CompanyId, CsId = item.CSID })"><i class="fa fa-eye text-primary "></i></a>
+
+                    </td>
+
+                </tr>
+                serialNumber++;
+            }
+
+
+        </tbody>
+    </table>
+}
+
+<script>
+    function redirectToCreateStatement(companyId, csId) {
+        // Show a confirmation dialog
+        if (confirm("Are you sure you want to submit the data?")) {
+            var data = {
+                CompanyId: companyId,
+                CSID: csId
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/ComparativeStatement/SubmitCS',
+                data: data,
+                success: function (response) {
+                    // Show a success message
+                    alert('Data submitted successfully!');
+                    // Reload the page or perform any other action as needed
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    // Show an error message
+                    alert('Error occurred while submitting data.');
+                }
+            });
+        } else {
+            // User clicked Cancel, do nothing
+            return;
+        }
+    }
+
+</script>

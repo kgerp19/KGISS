@@ -1,0 +1,842 @@
+﻿@model KGERP.Service.ServiceModel.GLDLBookingViewModel
+@{
+    ViewBag.Title = "Customer Booking";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .content-header {
+        padding: 10px 0.5rem;
+    }
+
+        .content-header .breadcrumb {
+            background-color: white;
+            line-height: 1.8rem;
+            margin-bottom: 0;
+            padding: 5px;
+        }
+
+    content-header .breadcrumb {
+        line-height: 1.5rem;
+    }
+
+    .shadow {
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    }
+
+    .align-items-center {
+        -webkit-align-items: center !important;
+        -ms-flex-align: center !important;
+        align-items: center !important;
+    }
+
+    .justify-content-between {
+        -webkit-justify-content: space-between !important;
+        -ms-flex-pack: justify !important;
+        justify-content: space-between !important;
+    }
+
+    .d-flex {
+        display: -webkit-flex !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+    }
+
+    .breadcrumb {
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        list-style: none;
+        background-color: #e9ecef;
+        border-radius: 0.25rem;
+    }
+
+    .card {
+        box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+        margin-bottom: 1rem;
+    }
+
+    .card {
+        position: relative;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #fff;
+        background-clip: border-box;
+        border: 0 solid rgba(0,0,0,.125);
+        border-radius: 0.25rem;
+    }
+
+    .card-header:first-child {
+        border-radius: calc(.25rem - 0) calc(.25rem - 0) 0 0;
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0,0,0,.125);
+        padding: 0.75rem 1.25rem;
+        position: relative;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+    }
+
+    .card-header {
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0;
+        background-color: #3f51b51f;
+        border-bottom: 0 solid rgba(0,0,0,.125);
+    }
+
+    .card-body {
+        -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        min-height: 1px;
+        padding: 1.25rem;
+    }
+
+    .text-sm .card-title {
+        font-size: 1rem;
+    }
+
+    .card-title {
+        float: left;
+        font-size: 2.1rem;
+        font-weight: 400;
+        margin: 0;
+    }
+
+    .card-title {
+        margin-bottom: 0.75rem;
+    }
+
+    .mt-2 {
+        margin-top: 15px
+    }
+
+    .mt-3 {
+        margin-top: 20px
+    }
+
+    /*    .select2-container--default .select2-selection--single, .select2-selection .select2-selection--single {
+            border: 1px solid #d2d6de;
+            border-radius: 0;
+            padding: 6px 12px;
+            height: 49px;
+        }
+    */
+    element.style {
+        max-width: 100%;
+    }
+
+    .form-control:not(select) {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    .form-control:not(select) {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #d2d6de;
+    }
+
+    /*    .form-control {
+            height: 49px;
+        }*/
+
+    .ui-datepicker-trigger .fa {
+        padding: 10px;
+        background: #ff9800;
+        color: #fff;
+    }
+
+    .ui-datepicker-trigger {
+        background: #ff9800;
+        border: none;
+    }
+
+    .bg-div {
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0;
+        background-color: #3f51b51f;
+        border-bottom: 0 solid rgba(0,0,0,.125);
+    }
+
+    .error {
+        color: orangered;
+    }
+
+    .table > thead > tr > th,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        padding: 5px;
+        line-height: 1.42857143;
+        vertical-align: baseline !important;
+        border-top: 1px solid #ddd;
+    }
+</style>
+<div class="content-header">
+    <div class="container-fluid ">
+        <div class="breadcrumb d-flex justify-content-between align-items-center shadow pl-3 pr-3">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item active"> Customer Booking </li>
+            </ol>
+            <div>
+                <a href="#"><i class="fa fa-plus"></i>  Booking List</a>
+            </div>
+        </div>
+    </div>
+</div>
+@using (Html.BeginForm("CustomerBooking", "KGRECRM", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.ClientId, new { @id = "ClientId" })
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fa fa-plus"></i>
+                        Customer Booking
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content mt-2 p-0">
+                        <div class="row">
+                            @Html.HiddenFor(m => m.CompanyId, new { @id = "companyId" })
+                            @Html.HiddenFor(m => m.AdvancePercentage, new { @id = "AdvancePercentageId" })
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.Label("Customer Group Name", htmlAttributes: new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(model => model.CustomerGroupName, new { htmlAttributes = new { @class = "form-control customStyle", @id = "CustomerGroupNameId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                        @Html.ValidationMessageFor(model => model.CustomerGroupName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.Label("Customer No", htmlAttributes: new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(model => model.PrimaryContactNo, new { htmlAttributes = new { @class = "form-control customStyle", @id = "PrimaryContactNoId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                        @Html.ValidationMessageFor(model => model.PrimaryContactNo, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mt-2">
+                                @Html.Label("Customer Address", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.PrimaryContactAddr, new { htmlAttributes = new { @class = "form-control customStyle", @id = "PrimaryContactAddrId", @row = "3", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                    @Html.ValidationMessageFor(model => model.PrimaryContactAddr, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Customer Email", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.PrimaryEmail, new { htmlAttributes = new { @class = "form-control customStyle", @id = "PrimaryEmailId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                    @Html.ValidationMessageFor(model => model.PrimaryEmail, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Project", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.ProductCategoryId, new SelectList(Model.ProductCategoryList, "Value", "Text"), "---Select Project---", new { id = "ddlCommon_ProductCategoryFk", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                    @Html.ValidationMessageFor(model => model.ProductCategoryId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Block", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.ProductSubCategoryId, Model.ProductSubCategoryList as SelectList, "---Select Block---", new { id = "ddlCommonProductSubCategoryFk", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                    @Html.ValidationMessageFor(model => model.ProductSubCategoryId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Plot", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.ProductId, Model.ProductList as SelectList, "---Select Plot---", new { id = "ddlCommonProductFk", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                    @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Plot No", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.PlotNo, new { htmlAttributes = new { @id = "txtPlotNo", @readonly = "readonly", @class = "form-control", @style = "max-width: 100%;" } })
+                                    @Html.ValidationMessageFor(model => model.PlotNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Plot Size", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.PlotSize, new { htmlAttributes = new { @id = "txtPlotSize", @readonly = "readonly", @class = "form-control", @style = "max-width: 100%;" } })
+                                    @Html.ValidationMessageFor(model => model.PlotSize, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Rate Per Katha", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.RatePerKatha, new { htmlAttributes = new { @id = "txtRatePerKatha", @class = "form-control", @style = "max-width: 100%;" } })
+                                    @Html.ValidationMessageFor(model => model.RatePerKatha, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Application Date", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <div style="display:flex">
+                                        @*@Html.EditorFor(model => model.ApplicationDate, new { htmlAttributes = new { @id = "txtApplicationData", @type = "date", @class = "datepickeronPage form-control", @style = "max-width: 100%;", @onchange = "getDemandNo()" } })*@
+                                        <input  name="ApplicationDate" id ="txtApplicationData" value="@Model.ApplicationDate.ToString("yyyy-MM-dd")" type="date" class="form-control datepicker" style = "max-width: 100%;"/>
+                                        @*@Html.TextBoxFor(model => model.ApplicationDate, "{0:dd/MM/yyyy}", new { @id = "txtApplicationData",@type="date", @class = "form-control", @style = "max-width: 100%;" })*@
+
+                                        @*@Html.ValidationMessageFor(model => model.ApplicationDate, "", new { @class = "text-danger" })*@
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("Sales Person", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.EmployeeId, new SelectList(Model.Employee, "Value", "Text"), "---Select Sales Person---", new { id = "ddlCommon_ProductCategoryFk", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                    @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3" id="hideDive">
+                        <div class="bg-div">
+                            <b> Mode of Payment </b>
+
+                        </div>
+
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>First</th>
+                                    <th>Last</th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+                                <tr>
+                                    <td> </td>
+                                    <td> Land Value </td>
+                                    <td>
+                                        @Html.EditorFor(model => Model.LandValue, new { htmlAttributes = new { id = "LandValueId", @class = "form-control", @style = "max-width: 100%;" } })
+                                    </td>
+                                </tr>
+
+                                @{int sl = 0; }
+                                @for (int i = 0; i < Model.LstPurchaseCostHeads.Count; i++)
+                                {
+                                    <tr>
+                                        <th>@(++sl) </th>
+                                        <td>@Model.LstPurchaseCostHeads[i].CostName</td>
+                                        <td>
+                                            @Html.HiddenFor(model => Model.LstPurchaseCostHeads[i].CostId)
+                                            @Html.EditorFor(model => Model.LstPurchaseCostHeads[i].Amount, new { htmlAttributes = new { @class = "form-control costHead", @style = "max-width: 100%;" } })
+
+                                        </td>
+                                    </tr>
+                                }
+                                <tr class="text-right">
+                                    <td colspan="2">
+                                        <b> Total Amount </b>
+                                    </td>
+                                    <td> @Html.EditorFor(model => Model.TotalAmount, new { htmlAttributes = new { id = "TotalAmountId", @readonly = "readonly", @class = "form-control", @style = "max-width: 100%;" } }) </td>
+
+                                </tr>
+                                <tr>
+                                    <td> Discount </td>
+                                    <td> @Html.EditorFor(model => Model.Discount, new { htmlAttributes = new { id = "DiscountId", @class = "form-control", @style = "max-width: 100%;" } }) </td>
+                                    <td> @Html.EditorFor(model => Model.TotalDiscount, new { htmlAttributes = new { id = "TotalDiscountId", @readonly = "readonly", @class = "form-control", @style = "max-width: 100%;" } }) </td>
+                                </tr>
+                                <tr class="text-right">
+                                    <td colspan="2">
+                                        <b>Grand Total </b>
+                                    </td>
+                                    <td> @Html.EditorFor(model => Model.GrandTotalAmount, new { htmlAttributes = new { id = "GrandTotalAmountId", @readonly = "readonly", @class = "form-control", @style = "max-width: 100%;" } }) </td>
+                                </tr>
+                                <tr class="text-right">
+                                    <td colspan="2">
+                                        <b>Booking Money 20% </b>
+                                    </td>
+                                    <td> @Html.EditorFor(model => Model.BookingMoney, new { htmlAttributes = new { id = "BookingMoneyId", @class = "form-control", @style = "max-width: 100%;" } }) </td>
+                                </tr>
+
+                                <tr class="text-right">
+                                    <td colspan="2">
+                                        <b>Rest of Amount </b>
+                                    </td>
+                                    <td> @Html.EditorFor(model => Model.RestofAmount, new { htmlAttributes = new { id = "RestofAmountId", @readonly = "readonly", @class = "form-control", @style = "max-width: 100%;" } }) </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.Label("InstallmentType", htmlAttributes: new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.DropDownListFor(model => model.BookingInstallmentTypeId, new SelectList(Model.BookingInstallmentType, "Value", "Text"), "---Select Booking Installment Type---", new { id = "BookingInstallmentTypeId", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                        @Html.ValidationMessageFor(model => model.BookingInstallmentTypeId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group row showmonth"> 
+                                    <label for="exampleInputEmail1" class="control-label col-md-4">Number of Installment</label>
+                                    <input type="text" value="1" id="NoOfInstallment" class="form-control col-md-8 valid" aria-describedby="NoOfInstallment-error" aria-invalid="false"> 
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:10px;margin-bottom:20px">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr class="bg-div">
+                                        <th>Sl</th>
+                                        <th>Title</th>
+                                        <th>Installment Date</th>
+                                        <th>Payable Amount</th>
+                                        @*<th>Action</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="Installment">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="" style="margin-top:15px">
+                            <table class="table table-responsive">
+                                <tr class="bg-div">
+                                    <th>Customer</th>
+                                    <th>Share Percentage</th>
+                                    <th>Action</th>
+                                </tr>
+                                <tr class="mycontainer" id="mainrow">
+                                    <td width="40%">
+                                        <input type="text" id="Customer" name="Customer" class="form-control" style="width:270px" />
+                                        <input type="hidden" id="VendorId" name="VendorId" />
+                                        <span class="error">Customer  required</span>
+                                    </td>
+                                    <td width="40%">
+                                        <input type="text" id="SharePercentage" class="qty form-control" autocomplete="off" style="text-align:right" />
+                                        <span class="error">Share Percentage required</span>
+                                    </td>
+
+                                    <td style="display:flex;justify-content:start!important;width:20%">
+                                        <button type="button" id="add" onclick="addItemToGrid()" class=" add  btn btn-primary pull-left"><i class="glyphicon glyphicon-plus-sign"></i> Add</button>
+                                        <button type="button" id="itemClose" onclick="CloseItemToGrid()" class=" Close btn btn-danger pull-right" style="margin-right:15px">Close <i class="fa fa-close" aria-hidden="true"></i></button>
+                                        <button type="button" id="itemEdit" onclick="EditItemToGrid()" class=" edit btn btn-warning pull-left"><i class="glyphicon glyphicon-pencil-sign"></i>Update</button>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div id="orderItems">
+                                <table class="table table-striped" id="orderdetailsItems">
+                                    <thead>
+                                        <tr class="bg-div">
+                                            <th>Sl</th>
+                                            <th>Customer</th>
+                                            <th>Share Percentage</th>
+                                            <th>Customer Land Value</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails">
+                                    </tbody>
+                                </table>
+                                <span id="orderItemError" style="color:red"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div>
+                                <input id="submit" type="submit" data-confirm="Are you sure to submit?" value="Submit" class="btn btn-success pull-right" />
+                                <a @*href="@Url.Action("Index","Demand",new { companyId=Model.CompanyId})"*@ class="btn btn-danger pull-right" style="margin-right:15px">
+                                    Close <i class="fa fa-close" aria-hidden="true"></i>
+                                </a>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.datepickeronPage').datepicker({
+                dateFormat: 'yy-mm-dd',
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "1950:+150"
+            });
+            
+        });
+        
+        
+
+
+    var installmentType = @Html.Raw(Json.Encode(Model.BookingInstallmentType));
+    let customersList = new Array();
+
+        $("#BookingInstallmentTypeId ").change(function () {
+
+            var typeid = $('#BookingInstallmentTypeId').val();
+            var datalist = installmentType.find(d => d.Value == parseFloat(typeid));
+            
+            if (parseFloat(typeid) > 0) {
+                if (datalist.IsOneTime) {
+                    document.getElementById('NoOfInstallment').readOnly = true;
+                }
+                else {
+                    document.getElementById('NoOfInstallment').readOnly = false;
+                }
+                onlode();
+            }
+
+        });
+        $("#NoOfInstallment").keyup(function () {
+
+            var no = $('#NoOfInstallment').val();
+            if (no == null || no == '' || no == undefined || no == 0) {
+                $('#NoOfInstallment').val(1);
+            }
+            else {
+                $('#NoOfInstallment').val(parseInt(no));
+                
+            }
+            onlode();
+        });
+        
+        
+        
+        function onlode() {
+            var typeid = $('#BookingInstallmentTypeId').val();
+            var datalist = installmentType.find(d => d.Value == parseFloat(typeid));
+            var restofAmountId = $("#RestofAmountId").val();
+            var noOfInstallMent = $("#NoOfInstallment").val();
+            console.debug(noOfInstallMent);
+              $.ajax({
+                type: "POST",
+                url: "@Url.Action("InstallmentSchedule", "KGRECRM")",
+                datatype: "Json",
+                  data: { conmpanyId:@Model.CompanyId, installmentId: datalist.Value, NoOfInstallment: noOfInstallMent, restofAmount: restofAmountId },
+                  success: function (data) {
+                      //console.log("ffffffffff",data);
+                        if (data) {
+                            var tag = '';
+                            $.each(data.LstSchedules, function (key, item) {
+                                var InstallmentDate = DateCustom(item.InstallmentDate);
+                                //console.log(InstallmentDate);
+                                tag += '<tr id="' + key + '">';
+                                tag += '<td> ' + (key + 1) + '</td>';
+                                tag += '<td><input  type="hidden" id="' + key + item.Title + '" name="Schedule[' + key + '].Title" value="' + item.Title + '"/>' + item.Title + '</td>';
+                                tag += '<td><input class="form-control" type="date" name="Schedule[' + key + '].InstallmentDate" value="' + InstallmentDate+ '"/></td>';
+                                tag += '<td><input type="hidden" id="' + key + item.PayableAmount + '"name="Schedule[' + key + '].PayableAmount" value="' + item.PayableAmount + '"/>' + item.PayableAmount + '</td>';
+                               // tag += '<td> <a onclick="removecell(' + item.VendorId + ',' + key + ')" class=" btn-outline-danger btn-flat btn-sm sm"> <i class="fa fa-trash"></i></a> <a onclick="Editcell(' + item.VendorId + ',' + key + ')" class=" btn-outline-danger btn-flat btn-sm sm"> <i class="fa fa-pencil-square-o"></i></a></td>';
+                                tag += '</tr>';
+                            });
+                            $('#Installment').empty();
+                            $('#Installment').html(tag);
+                            rebuildDatePicker();
+                        }
+                  },
+                  error: function (xhr) {
+                      //console.log(xhr);
+                  }
+
+                });
+    }
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            if (day < 10) {
+                day = "0" + day;
+            }
+            var year = currentTime.getFullYear();
+            var date = year + '-' + month + '-' + day;
+            return date;
+        }
+
+
+    $("#ddlCommon_ProductCategoryFk").change(function () {
+                var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProductSubCategory", "WareHouse")",
+                datatype: "Json",
+                         data: { id: productCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductSubCategoryFk").empty();
+                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+    $("#ddlCommonProductSubCategoryFk").change(function () {
+                var productSubCategoryFk = $("#ddlCommonProductSubCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProduct", "WareHouse")",
+                datatype: "Json",
+                         data: {  id : productSubCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductFk").empty();
+                            $("#ddlCommonProductFk").append("<option value=''>==Select Item==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+                        }
+                    }
+                });
+            })
+
+    $("#ddlCommonProductFk").change(function () {
+        var ProductId = $("#ddlCommonProductFk").val();
+        var companyId = $("#companyId").val();
+        hideShowDiv();
+        $.ajax({
+            url: '@Url.Action("GetProductCostHeadsbyId", "KGRECRM")',
+            data: { productid: ProductId, companyId: companyId },
+            type: "POST",
+            datatype: "Json",
+            success: function (data) {
+                $('#txtPlotSize').val(data.product.PackSize);
+                $('#txtRatePerKatha').val(data.product.UnitPrice);
+                $('#txtPlotNo').val(data.product.ProductCode);
+                $('#LandValueId').val(data.product.PackSize * data.product.UnitPrice)
+                CalculateAll();
+
+                var lan = customersList.length;
+                if (lan === 0) {
+                    DefultCustomer();
+                    PopulateTableFromArray();
+                    buttonVisibility();
+                }
+                else {
+                    RecalculatCustomerlandvalue();
+                }
+            },
+            error: function (xhr) {
+                //console.log(xhr);
+            }
+        });
+
+    })
+
+        $("#txtRatePerKatha").keyup(function () {
+            var siz = $('#txtPlotSize').val();
+            var rpk = $('#txtRatePerKatha').val();
+            $('#LandValueId').val(siz * rpk)
+            CalculateAll();
+
+        });
+
+        $("#LandValueId").keyup(function () { CalculateAll();});
+        $("#BookingMoneyId").keyup(function () { CalculateAll();});
+        $("#DiscountId").keyup(function () { CalculateAll();});
+        $(".costHead").keyup(function () { CalculateAll();});
+
+
+        //$("#txtRatePerKatha").change(function () {
+        //    var siz = $('#txtPlotSize').val();
+        //    var rpk = $('#txtRatePerKatha').val();
+        //    $('#LandValueId').val(siz * rpk)
+        //    CalculateAll()
+        //})
+
+        function CalculateAll() {
+            //console.log('triggered')
+            var LandValue = $('#LandValueId').val();
+            var AdvancePercentage = $('#AdvancePercentageId').val();
+            var TotalAmount = $('#TotalAmountId').val();
+            var DiscountPercentage = $('#DiscountId').val();
+            var calculatedDiscount = CalculateDiscount(LandValue, DiscountPercentage);
+            $('#TotalDiscountId').val(calculatedDiscount);
+            var costHeads = document.getElementsByClassName("costHead");
+            //console.log(costHeads);
+            var costTotal = 0.0;
+
+            for (var i = 0; i < costHeads.length; i++) {
+                costTotal = parseFloat(costTotal) + parseFloat(costHeads[i].value);
+            }
+            var total = parseFloat(LandValue) + parseFloat(costTotal);
+            var grandTotal = parseFloat(total) - parseFloat(calculatedDiscount);
+            var advanceAmount = ((parseFloat(grandTotal) / 100) * parseFloat(AdvancePercentage));
+            var RestOfAmount = (parseFloat(grandTotal) - parseFloat(advanceAmount));
+            $('#TotalAmountId').val(total);
+            $('#GrandTotalAmountId').val(grandTotal);
+            $('#BookingMoneyId').val(advanceAmount);
+            $('#RestofAmountId').val(RestOfAmount);
+            var id = $('#BookingInstallmentTypeId').val();
+            //console.log("fffffff",id);
+            if (id>0) {
+                onlode();
+            }
+
+        }
+
+        function CalculateDiscount(LandValue, DiscountPercentage) {
+            return ((LandValue / 100) * DiscountPercentage).toFixed(2);
+        }
+
+        $(function () {
+            $("#Customer").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/ClientAutoComplete/',
+                     /*   data: { companyId: "7", prefix: request.term },*/
+                        data: "{ 'prefix': '" + request.term + "','companyId': '" +7+ "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#VendorId").val(i.item.val);
+                },
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        //function myfunc() {
+        //    var valueList = [];
+        //    $('#itemDetails tr').each(function () {
+        //        $(this).find("input[name='chk']:checked").each(function () {
+        //            var values = [];
+        //            $(this).closest("td").siblings("td").each(function () {
+        //                values.push($(this).text());
+        //            });
+        //            //console.log(values[0]);
+        //            valueList.push(values[0]);
+        //        });
+        //    });
+        //    //console.log(valueList);
+        //    return valueList;
+        //    //console.log("(" + valueList.join("),(") + ")");
+        //}
+    </script>
+    <script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/GLDLCustomerBokkingEntry.js"></script>
+
+   
+    <script>
+        function rebuildDatePicker() {
+            $('.js-date').datepicker({
+                format: 'yy-mm-dd'
+            });
+        }
+    </script>
+    
+
+
+}

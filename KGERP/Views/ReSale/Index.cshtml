@@ -1,0 +1,90 @@
+﻿
+@model KGERP.Service.ServiceModel.GLDLBookingViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-12" style="background-color:lightblue">
+        @Html.Label("Real Estate Returns", new { @style = "font-size:20px" })
+    </div>
+</div>
+<br />
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="form-group">
+            <label>Project</label>
+            @Html.DropDownListFor(model => model.ProjectId, new SelectList(Model.ProjectList, "Value", "Text"), "==Select Project==", new { id = "ddlProjectId", @class = "form-control", required = "required", style = "max-width:100%" })
+            @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>File Info</label>
+            @Html.DropDownListFor(model => model.CGId, Model.GroupList as SelectList, "==Select File No==", new { id = "ddlCGId", @class = "form-control searchingDropdown", required = "required", style = "max-width:100%" })
+            @Html.ValidationMessageFor(model => model.CGId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <button type="button" onclick="information()" class="btn btn-primary">Show File Information</button>
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+
+    $("#ddlProjectId").change(function () {
+        var projectId = $("#ddlProjectId").val();
+        console.log(projectId);
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("ResaleGetByProjectId", "RealStateMoneyReceipt")",
+                  datatype: "Json",
+                    data: { companyId: "@Model.CompanyId", projectId: projectId },
+                success: function (data) {
+                      if (data) {
+                          $("#ddlCGId").empty();
+                          $("#ddlCGId").append("<option value=''>==Select File No==</option>");
+                          $(data).each(function (index, item) {
+                              $("#ddlCGId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                      }
+                  }
+            });
+    });
+        function information() {
+            var cgid = $("#ddlCGId").val();
+            window.location.href = "/RealEstateReSale/ReSaleBooking?companyid=" +@Model.CompanyId+"&&CGId=" + cgid + "";
+        }
+    </script>
+}
+
+
+
+
+
+
+

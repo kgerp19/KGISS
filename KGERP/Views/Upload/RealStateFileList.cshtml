@@ -1,0 +1,328 @@
+﻿@model KGERP.Service.ServiceModel.FileArchiveViewModel
+@{
+    ViewBag.Title = "RealStateFileList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .form-control.input-validation-error:focus {
+        border-color: red !important;
+    }
+
+    .chosen-container-multi .chosen-choices li.search-field input[type=text] {
+        margin: 1px 0;
+        padding: 0;
+        height: 39px;
+        outline: 0;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none;
+        color: #999;
+        font-size: 100%;
+        font-family: sans-serif;
+        line-height: normal;
+        border-radius: 0;
+    }
+
+    .box {
+        position: relative;
+        border-radius: 3px;
+        background: #ffffff;
+        border-top: 3px solid #ffffff;
+        margin-bottom: 20px;
+        width: 100%;
+        box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
+    }
+
+    .skin-blue .content-header {
+        background: #ccffce;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 15px 15px 15px 15px;
+    }
+</style>
+
+<section style="margin-bottom:20px;font-size:25px;">
+    <div> </div>
+    <h3 class="bg-w" style="padding-left:5px"><b> @Model.CompanyName - File List </b> </h3>
+
+</section>
+
+
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>File No</th>
+                <th>Title</th>
+                <th>Download</th>
+                <th class='text-center'>Action</th>
+            </tr>
+        </thead>
+        @{
+        int sl = 0;
+        string icon = "";
+
+        }
+        <tbody>
+            @foreach (var item in Model.FileArchive)
+            {
+
+
+            if (item.fileext == ".pdf")
+            {
+            icon = "fa fa-file-pdf-o";
+            }
+            else if (item.fileext == ".xlsx" || item.fileext == ".xls")
+            {
+            icon = "fa fa-file-excel-o text-green";
+            }
+            else if (item.fileext == ".doc" || item.fileext == ".docx")
+            {
+            icon = "fa fa-file-word-o text-blue";
+            }
+
+            else
+            {
+            icon = "fa fa-download";
+            }
+
+
+            <tr>
+                <td>@(++sl)</td>
+                <td>@item.FileNo</td>
+                <td>@item.Title</td>
+                <td>
+                    <a class='@item.docid' onclick='downloadArchiveFile(@item.docid)'
+                       data-toggle='tooltip' data-placement='right'
+                       title='ডাউনলোড করতে ক্লিক করুণ'>
+
+                        <i class='@icon'></i>
+                    </a>
+                </td>
+                <td class='text-center'>
+                    <a class='archive_@item.docid' data-toggle="modal" data-target="#exampleModal" onclick='deleteArchiveFile(@item.docid)'
+                       data-placement='right'
+                       title='Delete'>
+                        <i class='fa fa-trash-o'></i>
+                    </a>
+                </td>
+
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@using (Html.BeginForm("RealStateDeleteFTP", "Upload", FormMethod.Post))
+{
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                @Html.HiddenFor(m =>m.docid, new { @id = "docid" })
+                @Html.HiddenFor(m =>m.CompanyId, new { @id = "companyId" })
+                <h3 class="text-danger"> Are you sure remove this file!! </h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+
+    function downloadArchiveFile(id) {
+        console.log(id);
+        $.confirm({
+            title: "",
+            content: "<span class='alert_content'> ফাইলটি ডাউনলোড করতে চান? </span>",
+            columnClass: 'small',
+            buttons: {
+                confirm: {
+                    text: "<span class='alert_text'>হ্যাঁ</span>",
+                    btnClass: 'btn-blue',
+                    keys: ['enter'],
+                    action: function () {
+                        //$.alert('Confirmed');
+                        // return "confirmed"
+                        var url = '@Url.Action("DownloadFTP", "Upload", new { docid = "_id"} )'
+                        url = url.replace('_id', id);
+                        window.open(url, "_blank");
+                        //window.location.href = "//" + "?fileName1=" + fname + "&filepath=" + fpath;
+                    }
+                },
+                cancel: {
+                    text: "না",
+                    btnClass: 'btn-warning',
+                    keys: ['esc'],
+                    //action: function () {
+                    //    $.alert("<h5 class='bg-default text-dark'>Your file was not deleted!!</h3>");
+                    //    // return "cancelled"
+                    //}
+                }
+            }
+        });
+        return;
+    }
+    //PermanentDeleteFTP
+    function PermanentDeleteFile(id) {
+
+
+        $.confirm({
+            title: "",
+            content: "<span class='alert_content'> ফাইলটি সম্পুর্ণ ডিলিট করতে চান? </span>",
+            columnClass: 'small',
+            buttons: {
+                confirm: {
+                    text: "<span class='alert_text'>হ্যাঁ</span>",
+                    btnClass: 'btn-blue',
+                    keys: ['enter'],
+                    action: function () {
+                        //$.alert('Confirmed');
+                        // return "confirmed"
+                        var url = '@Url.Action("PermanentDeleteFTP", "Upload", new { docid = "_id"} )'
+                        url = url.replace('_id', id);
+
+                        window.location.href = url;
+                    }
+                },
+                cancel: {
+                    text: "না",
+                    btnClass: 'btn-warning',
+                    keys: ['esc'],
+                    //action: function () {
+                    //    $.alert("<h5 class='bg-default text-dark'>Your file was not deleted!!</h3>");
+                    //    // return "cancelled"
+                    //}
+                }
+            }
+        });
+        return;
+    }
+    //btnEmptyBin
+    $('#btnEmptyBin').on('click', function () {
+        $.confirm({
+            title: "",
+            content: "<span class='alert_content'> রিসাইকেল বিন খালি করতে চান? </span>",
+            columnClass: 'small',
+            buttons: {
+                confirm: {
+                    text: "<span class='alert_text'>হ্যাঁ</span>",
+                    btnClass: 'btn-blue',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '@Url.Action("EmptyBin","Upload")',
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (data) {
+                                if (data) {
+                                    alert('Successfully Cleared Bin');
+                                    window.location.reload();
+                                }
+                                else {
+                                    alert('Failed to  Clear Bin');
+                                }
+                            },
+                            error: function (response) {
+                                console.error(response.responseText);
+                                alert('Failed to  Clear Bin');
+                            },
+                            failure: function (response) {
+                                console.error(response.responseText);
+                                alert('Failed to  Clear Bin');
+                            }
+                        });
+                    }
+                },
+                cancel: {
+                    text: "না",
+                    btnClass: 'btn-warning',
+                    keys: ['esc'],
+                    //action: function () {
+                    //    $.alert("<h5 class='bg-default text-dark'>Your file was not deleted!!</h3>");
+                    //    // return "cancelled"
+                    //}
+                }
+            }
+        });
+    });
+
+    function deleteArchiveFile(id) {
+        $("#docid").val(id);
+        $("#companyId").val(@Model.CompanyId);
+    }
+
+
+    function RestoreArchiveFile(id) {
+
+
+        $.confirm({
+            title: "",
+            content: "<span class='alert_content'> ফাইলটি রিস্টোর করতে চান? </span>",
+            columnClass: 'small',
+            buttons: {
+                confirm: {
+                    text: "<span class='alert_text'>হ্যাঁ</span>",
+                    btnClass: 'btn-blue',
+                    keys: ['enter'],
+                    action: function () {
+                        //$.alert('Confirmed');
+                        // return "confirmed"
+                        var url = '@Url.Action("RestoreFTP", "Upload", new { docid = "_id"} )'
+                        url = url.replace('_id', id);
+
+                        window.location.href = url;
+                    }
+                },
+                cancel: {
+                    text: "না",
+                    btnClass: 'btn-warning',
+                    keys: ['esc'],
+                    //action: function () {
+                    //    $.alert("<h5 class='bg-default text-dark'>Your file was not deleted!!</h3>");
+                    //    // return "cancelled"
+                    //}
+                }
+            }
+        });
+        return;
+    }
+</script>
+
+}
+
+
+

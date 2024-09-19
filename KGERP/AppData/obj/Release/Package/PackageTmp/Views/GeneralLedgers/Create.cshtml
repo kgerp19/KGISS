@@ -1,0 +1,407 @@
+﻿@model KGERP.ViewModel.GeneralLedgerViewModel
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+@using (Html.BeginForm("SaveVoucher", "GeneralLedgers", FormMethod.Post, new { @id = "idForm" }))
+{
+
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.GeneralLedger.GeneralLedgerId)
+    @Html.HiddenFor(model => model.GeneralLedger.CompanyId, new { @id = "hfCompanyId" })
+
+    <div class="form-horizontal">
+
+        <div class="row">
+            <div class="col-md-6">
+                <h4><b>New Voucher</b></h4>
+            </div>
+            <div class="col-md-4">
+
+            </div>
+
+            <div class="col-md-2">
+                <a href="@Url.Action("Index",new { companyId=Request.QueryString["companyId"]})" class="btn btn-danger pull-right" id="btnBack">
+                    <span class="glyphicon glyphicon-arrow-left"></span> Back
+                </a>
+            </div>
+        </div>
+
+        <hr style="border-color:#006747; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="col-md-12">
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.PaymentModeId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.GeneralLedger.PaymentModeId, new SelectList(Model.PaymentModes, "Value", "Text"), "---Select---", new { @id = "ddlPaymentMode", @class = "dropdownsize form-control" })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.PaymentModeId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.TransactionType, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8" style="width: 277px;font-weight: bold;background-color: greenyellow;margin-left: 16px;">
+                        <input type="radio" checked="checked" name="TransactionType" value="N" />Normal &nbsp;
+                        <input type="radio" name="TransactionType" value="O" />Opening &nbsp;
+                        <input type="radio" name="TransactionType" value="C" />Closing &nbsp;
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.VoucherType, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.GeneralLedger.VoucherType, new SelectList(Model.VoucherTypes, "Value", "Text"), "---Select---", new { @id = "ddlVoucherType", @class = "dropdownsize form-control", @onchange = "generateVoucher()" })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.VoucherType, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.VoucherNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.VoucherNo, new { htmlAttributes = new { @class = "form-control", @id = "txtVoucherNo", @readonly = "readonly" } })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.VoucherNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.VoucherDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.VoucherDate, new { htmlAttributes = new { @class = "datepicker", @id = "txtVoucherDate", @autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.VoucherDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="bankHead col-md-6" id="divBank" style="display:none">
+                <div class="form-group">
+                    @Html.Label("Bank", htmlAttributes: new { @id = "lblRefAccountHead", @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.AccountHead1.AccName, new { htmlAttributes = new { @class = "form-control", @name = "bankName", @id = "bankName" } })
+                        @Html.HiddenFor(x => x.GeneralLedger.RefAccountHeadId, new { @id = "refAccountHeadId", @name = "refAccountHeadId" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="bankHead col-md-6" style="display:none">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.ChqNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.ChqNo, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.ChqNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="bankHead col-md-6" style="display:none">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.ChqDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.ChqDate, new { htmlAttributes = new { @class = "datepicker", @id = "txtChqDate", @autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.ChqDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="bankHead col-md-6" style="display:none">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.Chq_Name, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.Chq_Name, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.Chq_Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.AccountHeadId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.AccountHead.AccName, new { htmlAttributes = new { @class = "form-control", @name = "accountName", @id = "accountName" } })
+                        @Html.HiddenFor(x => x.GeneralLedger.AccountHeadId, new { @id = "accountHeadId", @name = "accountHeadId" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="bank col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.Type, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8" style="width: 279px;font-weight: bold;background-color: greenyellow;margin-left:16px !important">
+                        @Html.RadioButtonFor(model => model.GeneralLedger.Type, "D", new { @id = "rbtnDebit", @checked = "checked" })
+                        Debit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        @Html.RadioButtonFor(model => model.GeneralLedger.Type, "C", new { @id = "rbtnCredit" })
+                        Credit
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.Amount, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.GeneralLedger.Amount, new { htmlAttributes = new { @class = "amount form-control", @id = "amount", @onkeyup = "enableAddButton()" } })
+                        @Html.ValidationMessageFor(model => model.GeneralLedger.Amount, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <div class="col-md-12">
+            <div class="col-md-8">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GeneralLedger.Description, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.TextAreaFor(model => model.GeneralLedger.Description, new { @class = "form-control", @id = "txtDescription" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input type="button" value="Add" id="btnAdd" class="btn btn-success" />
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="divGeneralLedgerGrid"></div>
+}
+
+
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $('#btnAdd').unbind("click").bind("click", function () {
+            var form = $('#idForm');
+            // var url = form.attr('action');
+            var url = "/GeneralLedgers/Create";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "html",
+                data: form.serialize(),
+                beforeSend: function () {
+
+                },
+                success: function (resp) {
+                    $('#divGeneralLedgerGrid').html(resp);
+                },
+                error: function (request, status, error) {
+                    alert("Error");
+                }
+            });
+
+        });
+
+        $(document).ready(function () {
+            if ($('.amount').val() == 0) {
+                $('#btnAdd').prop("disabled", true);
+            }
+        });
+
+        function enableAddButton() {
+            if (parseInt($('#amount').val()) > 0) {
+                $('#btnAdd').prop("disabled", false);
+                $('#btnBack').hide();
+            }
+            else {
+                $('#btnAdd').prop("disabled", true);
+            }
+        }
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+
+        $("#ddlPaymentMode").change(function () {
+            if ($('#ddlPaymentMode option:selected').text() === "Bank") {
+                $("#lblRefAccountHead").html("Bank")
+                $('.bankHead').show();
+                $('#bankCharge').show();
+
+            }
+
+            if ($('#ddlPaymentMode option:selected').text() === "Adjustment") {
+                $('.bankHead').hide();
+                $('#divBank').show();
+                $("#lblRefAccountHead").html("Account No")
+                $('#txtChqDate').val('');
+            }
+
+            if ($('#ddlPaymentMode option:selected').text() === "Cash") {
+                $('.bankHead').hide();
+
+                $('#bankCharge').hide();
+                $('#txtChqDate').val('');
+
+                //------------আগে ছিল  $('#divBank').show();
+                //-------------আর এখন$ ('#divBank').show()
+
+                $('#divBank').hide();
+            }
+
+            if ($('#ddlPaymentMode option:selected').text() === "Contra") {
+                $('.bankHead').show();
+                $('#divBank').show();
+            }
+        });
+
+        $(function () {
+            $("#accountName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#accountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        $(function () {
+            $("#bankName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#refAccountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        $(function () {
+            $("#txtDescription").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/GeneralLedgers/AutoCompleteDescription/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#txtDescription").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        function generateVoucher() {
+            var voucherType = $("#ddlVoucherType option:selected").val();
+            var companyId = $("#hfCompanyId").val();
+
+            $.ajax({
+                url: '/GeneralLedgers/GenerateVoucherNo?voucherType=' + voucherType + "&companyId=" + companyId,
+                type: "GET",
+                success: function (data) {
+                    console.log(data);
+                    $("#txtVoucherNo").val(data);
+                },
+                error: function (response) {
+                    //alert(response.responseText);
+                },
+            })
+        }
+    </script>
+}

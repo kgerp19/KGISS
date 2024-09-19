@@ -1,0 +1,311 @@
+﻿@model KGERP.Service.ServiceModel.BusinessHeadModel
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "Clearance Signatory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 1;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>Clearance Signatory</h1>
+</section>
+@using (Html.BeginForm("ClearanceSignatory", "Employee", FormMethod.Post, new { id = "entryForm", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.Id)
+            @Html.HiddenFor(model => model.ActionType)
+            <div class="box">
+                <div class="box-body">
+                    @*<div class="row">
+                            <div style="display:flex;">
+                                @Html.RadioButtonFor(x => x.BusinessType, BusinessTypeEnum.Company, new { @class = "form-check-inline", @id = "radioC", style = "margin-left:48%;" })
+                                <label class="form-check-label" for="radioC">
+                                    Company
+                                </label>
+                                @Html.RadioButtonFor(x => x.BusinessType, BusinessTypeEnum.Division, new { @class = "form-check-inline", @id = "radioD" })
+                                <label class="form-check-label" for="radioD">
+                                    Division
+                                </label>
+                            </div>
+                        </div>*@
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="BusinessType" class="control-label">Business Type</label>
+                                @Html.EnumDropDownListFor(x => x.BusinessType, "--Select--", new { @class = "form-control", @data_val = "true", @onchange = "loadarFunction()" })
+                                @Html.ValidationMessageFor(x => x.BusinessType, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="BusineesId_Fk" class="control-label">Company/Division</label>
+                                @Html.DropDownListFor(x => x.BusineesId_Fk, new SelectList(String.Empty, "value", "text"), new { @class = "form-control", @data_val = "true" })
+                                @Html.ValidationMessageFor(x => x.BusineesId_Fk, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="EmployeeName" class="control-label">Employee</label>
+                                @Html.EditorFor(model => model.EmployeeName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", required = "required" } })
+                                @Html.HiddenFor(model => model.EmployeeId)
+                                @Html.ValidationMessageFor(model => model.EmployeeName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        @*<div class="col-md-2">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Precedence, htmlAttributes: new { @class = "control-label" })
+                                    @Html.EditorFor(model => model.Precedence, new { htmlAttributes = new { @autocomplete = "off", @class = "form-control", @required = "required",@maxvalue="5" } })
+                                    @Html.ValidationMessageFor(x => x.Precedence, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>*@ 
+                        @*<div class="col-md-2">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.FromDate, htmlAttributes: new { @class = "control-label" })
+                                    @Html.EditorFor(model => model.FromDate, new { htmlAttributes = new { @autocomplete = "off", @class = "datepicker form-control", @data_val = "false" } })
+                                    @Html.ValidationMessageFor(x => x.FromDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>*@
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" id="btnSave" class="btn btn-primary pull-right" style="margin-left:3px;">
+                                <i class='fa fa-plus'></i>
+                                <span>Add</span>
+                            </button>
+                            <label onclick="resetForm()" class="btn btn-primary pull-right"><i class="fa fa-refresh"></i>&nbsp;Reset</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @*<div class="row">
+                            <div class="col-md-12 pull-right">
+                                <button type="submit" id="btnSave" class="btn btn-primary pull-right">
+                                    <i class='fa fa-plus'></i>
+                                    <span>Add</span>
+                                </button>
+                                <label onclick="resetForm()" class="btn btn-primary pull-right"><i class="fa fa-refresh"></i>&nbsp;Reset</label>
+                            </div>
+                        </div>*@
+                </div>
+                <div class="box-body">
+                    @if (Model.DataList != null && Model.DataList.Count() > 0)
+                    {
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-responsive-md table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Business</th>
+                                        <th>Name</th>
+                                        <th>Employee</th>
+                                        @*<th>Precedence</th>*@
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+                                        <tr>
+                                            <td>@(i++)</td>
+                                            <td>@item.BusinessType</td>
+                                            <td>@item.BusinessName</td>
+                                            <td>@item.EmployeeName</td>
+                                            @*<td>@item.Precedence</td>*@
+                                            <td>
+                                                <a id="@item.Id" onclick="makeEditble(@item.Id)" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                <a id="@item.Id" onclick="makeDeletale(@item.Id)" class="linkPointer"  title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash text-danger" aria-hidden="true"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(function () {
+                $("#EmployeeName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#EmployeeId").val(ui.item.id);
+                    }
+                });
+            });
+        });
+
+        function makeEditble(id) {
+            $("#btnSave").text("Update");
+              $("#ActionType").val('@(ActionEnum.Edit)');
+             bindProperty(id);
+        };
+        function loadarFunction() {
+
+            var businessTypeId = $("#BusinessType").val();
+            if (businessTypeId == 0) {
+                return;
+            }
+            if (businessTypeId == @((int)BusinessTypeEnum.Company)) {
+                LoadCompany();
+            }
+            if (businessTypeId == @((int)BusinessTypeEnum.Division))
+            {
+                LoadDepartment();
+            }
+        }
+
+        function bindProperty(id) {
+                $.ajax({
+                    type: "GET",
+                    url: "/Employee/GetClearanceSignatoryById",
+                    data: { id: id },
+                    success: function (data) {
+                        console.log(data);
+                        const fieldsToDisplay = ['Id', 'EmployeeId', 'EmployeeName', 'FromDateString', 'ToDateString', 'BusinessTypeInt', 'BusineesId_Fk'];
+                        fieldsToDisplay.forEach((item) => {
+                            if (item == "BusinessTypeInt") {
+                                if (data['BusinessType'] == @((int)BusinessTypeEnum.Company)) {
+                                    $("#BusinessType").val(data[item]);
+                                    LoadCompany(data['BusineesId_Fk']);
+                                }
+                                if (data['BusinessType'] == @((int)BusinessTypeEnum.Division)) {
+                                    $("#BusinessType").val(data[item]);
+                                    LoadDepartment(data['BusineesId_Fk']);
+                                }
+                            }
+                            if (item == "FromDateString") {
+                                var f = $("#FromDate");
+                                if (f != null) {
+                                    f.val(data[item]);
+                                }
+                            }
+                            var formField = $("#" + item);
+                            if (formField != null) {
+                                formField.val(data[item]);
+                            }
+
+                        });
+                    }
+                })
+
+        }
+    function LoadCompany(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                success: function (res) {
+                    $("#BusineesId_Fk").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+                    $("#BusineesId_Fk").append(content)
+                    if (id != null) {
+                        $("#BusineesId_Fk").val(id);
+                    }
+                }
+            })
+        }
+        function LoadDepartment(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+               // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#BusineesId_Fk").html("");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+                    $("#BusineesId_Fk").append(content);
+                    if (id != null) {
+                        $("#BusineesId_Fk").val(id);
+                    }
+                }
+            })
+    }
+    //$('.datepicker').datepicker({
+    //    dateFormat: "yy/mm/dd",
+    //    showOn: 'both',
+    //    buttonText: "<i class='fa fa-calendar'></i>",
+    //    changeMonth: true,
+    //    changeYear: true,
+    //    yearRange: "2001:+50"
+    //});
+    function resetForm() {
+        $("#FromDate").val("@(DateTime.Today.ToString("yyyy/MM/dd"))");
+        $("#btnSave").text("Add");
+        $("#ActionType").val('@(ActionEnum.Add)');
+        const fieldsToDisplay = ['Id', 'EmployeeId', 'EmployeeName', 'FromDate', 'ToDate', 'BusinessType', 'BusineesId_Fk','Precedence'];
+        fieldsToDisplay.forEach((item) => {
+            var f = $("#" + item);
+            if (f != null) {
+                if (item == "Id") {
+                    f.val(0);
+                } else {
+
+                    f.val('');
+                }
+            }
+
+        });
+    }
+
+    </script>
+    <script type="text/javascript">
+      
+        function makeDeletale(id) {
+            var isConfirmed = confirm("Are you sure you want to delete this signatory ");
+
+            if (isConfirmed) {
+                // If confirmed, redirect to the action with the ID
+                window.location.href = "/Employee/RemoveClearanceSignatory/" + id;
+            } else {
+                // If not confirmed, do nothing or show a message
+               // alert("Item not deleted.");
+            }
+        }
+    </script>
+}

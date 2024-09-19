@@ -1,0 +1,135 @@
+﻿
+@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.VendorModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+<div class="row">
+    @using (Html.BeginForm("Index", "Vendor", FormMethod.Get, new { @class = "example" }))
+    {
+        <div class="form-group">
+            <div class="col-md-6">
+                @Html.Label("Supplier List", new { @style = "font-size:20px" })
+                <div class="btn-group btn-toggle">
+                        <a href="@Url.Action("Index", new {companyId=Request.QueryString["companyId"], vendorTypeId=1, isActive = true })" class="btn btn-success active">Active</a>
+                        <a href="@Url.Action("Index", new {companyId=Request.QueryString["companyId"], vendorTypeId=1,isActive = false })" class="btn btn-danger active">Inactive</a>
+                    </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-6">
+                @Html.Hidden("companyId")
+                <input type="hidden" name="vendorTypeId" value="1" />
+                <input type="hidden" value="@Request.QueryString["isActive"]" name="isActive" />
+
+                @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..", @style = "width:75%" } })
+                <button type="submit"><i class="fa fa-search"></i></button>
+
+
+                <a href="@Url.Action("CreateOrEdit", new { id = 0,vendorTypeId = Request.QueryString["vendorTypeId"]})" class="btn btn-primary pull-right">
+                    <span class="glyphicon glyphicon-plus-sign"></span> Add Supplier
+                </a>
+
+            </div>
+        </div>
+    }
+</div>
+
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>SL</th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Code)
+            </th>
+            @*<th>
+                    @Html.DisplayNameFor(model => model.First().DistrictId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().UpazilaId)
+                </th>*@
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().Address)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Phone)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.First().IsActive)
+            </th>
+            <th style="text-align:center">
+                Action
+            </th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Code)
+                </td>
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.Data.District.Name)
+                    </td>
+                    <th>
+                        @Html.DisplayFor(modelItem => item.Data.Upazila.Name)
+                    </th>*@
+
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Address)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.IsActive)
+                </td>
+                <td style="text-align:center">
+                    <a href="@Url.Action("CreateOrEdit", new { id = item.Data.VendorId,vendorTypeId=item.Data.VendorTypeId })" title="Edit" class="btn btn-info btn-xs">
+                        <i class="fa fa-edit" aria-hidden="true"></i>
+                    </a>
+                    <a href="@Url.Action("Delete", new { id = item.Data.VendorId,vendorTypeId=item.Data.VendorTypeId,isActive=item.Data.IsActive})" onclick="return confirm('Are you sure to delete this record?');" title="Delete" class="btn btn-danger btn-xs">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </a>
+                </td>
+
+            </tr>
+        }
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("Index", "Vendor",
+                                                                      new {companyId = Request.QueryString["companyId"], Page_No, searchText = Request.QueryString["searchText"], vendorTypeId = Request.QueryString["vendorTypeId"],isActive=Request.QueryString["isActive"] }))
+        </span>
+    }
+</div>
+
+
+
+@section Scripts {
+    <script>
+
+    </script>
+
+}

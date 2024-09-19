@@ -1,0 +1,506 @@
+﻿@model KGERP.Service.Implementation.Recruitment.ViewModels.RecruitmentVM
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "Recruitment Requisition";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 1;
+    int sl = 1;
+    decimal totalSalary = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+@if (Model != null && !string.IsNullOrEmpty(Model.FeedbackMessage))
+{
+    <div id="MessageDiv" style="text-align: center;">
+        @Html.Raw(Model.FeedbackMessage)
+    </div>
+}
+<section class="content-header" style="margin-bottom:10px;">
+    @*<h1>
+            @if (Model.Id > 0)
+            {
+                <span>
+                    Product Requisition  History of : @Model.RequisitionNumber
+                </span>
+            }
+            else
+            {
+                <span>
+                    General Requisition
+                </span>
+            }
+        </h1>*@
+    <h2>Recruitment Requisition</h2>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        @*<li class="active"><a href="~/GeneralRequisition/Index?CompanyId=@companyId">Requisition List</a></li>*@
+    </ol>
+</section>
+    <section class="content">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(x => x.ActionEnum)
+            @Html.HiddenFor(x => x.CompanyId)
+            @Html.HiddenFor(x => x.Id)
+            <div class="box-danger">
+                <!-- /.box-header -->
+                <div class="box-body">
+                    @if (Model.Id > 0)
+                    {
+                        @Html.HiddenFor(x => x.ActionEnum)
+                        @Html.HiddenFor(model => model.Id)
+                        <div class="col-md-1"> </div>
+                        <div class="col-md-10">
+                            <table class="table">
+                                <tr class="order-1">
+                                    <th style="width:18%">
+                                        Requisition Number
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.RequisitionNumber</label>
+                                    </td>
+                                    <th style="width:18%">Requisition Date</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@Model.RequisitionDate.ToString("dd-MM-yyyy")</td>
+                                </tr>
+                                <tr class="order-2">
+                                    <th style="width:18%">
+                                        Submited By
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.CreatedBy</label>
+                                    </td>
+
+                                    <th style="width:18%">Status</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@Model.RecruitmentStatus</td>
+                                </tr>
+                                <tr class="order-3">
+                                    <th style="width:18%">Remarks</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:80%" colspan="2">@Model.Remarks</td>
+                                </tr>
+                            </table>
+                        </div>
+                    }
+                    <div class="box-footer">
+                        @if (Model.RecruitmentDetailsList != null && Model.RecruitmentDetailsList.Count() > 0)
+                        {
+                            <div class="table-responsive-md">
+                                <table id="KgErpDataTable" class="table table-responsive-md table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Job Title</th>
+                                            <th>Company/Department</th>
+                                            <th>Manager</th>
+                                            <th>Job Location</th>
+                                            <th>Total Recruitment</th>
+                                            <th>Target Salary</th>
+                                            <th>Type</th>
+                                            <th>Expected Joining</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.RecruitmentDetailsList)
+                                        {
+
+                                            <tr>
+                                                <td>
+                                                    @(sl++)
+                                                </td>
+                                                <td>@item.JobTitle</td>
+                                                <td>@(item.BusinessType== BusinessTypeEnum.Company?item.CompanyName:item.DepartmentName)</td>
+                                                <td>@item.ManagerName</td>
+                                                <td>@item.JobLocation</td>
+                                                <td>@item.NumberOfRecruitment</td>
+                                                <td>@item.TargetSalary</td>
+                                                <td>@item.JobType</td>
+                                                <td>
+                                                    @(item.ExpectedDateOfJoining.HasValue ? item.ExpectedDateOfJoining.Value.ToString("yyyy-MM-dd") : "")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-1">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <th>Grand Total</th>
+                                            <th>@Model.RecruitmentDetailsList.Sum(x => x.NumberOfRecruitment)</th>
+                                            <th>@String.Format("{0:0.00}", Model.RecruitmentDetailsList.Sum(x => x.TargetSalary * x.NumberOfRecruitment))</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="box-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <a href="~/Report/GeneralRequisitionReport?masterId=@Model.Id" target="_blank" class="btn btn-block btn-info disabled"> Print Report </a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        @if (Model.RecruitmentStatus == RecruitmentStatusEnum.Draft)
+                                        {
+                                            <a data-toggle="modal" onclick="updateStatusModal(@Model.Id,'@KGERP.Utility.RecruitmentStatusEnum.Open')" data-target="#updateStatusModal" title="Submit" data-placement="top" class="btn btn-block btn-success linkPointer">Submit</a>
+                                        }
+                                        else
+                                        {
+                                            <a class="btn btn-primary btn-block disabled">Submitted</a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+                        @if (Model.RecruitmentStatus > RecruitmentStatusEnum.Draft && Model.RequisitionApprovalLists != null)
+                        {
+                            <h3>Signatory List</h3>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Signatory</th>
+                                        <th scope="col">Designation</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Approved Time</th>
+                                        <th scope="col">Comment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.RequisitionApprovalLists != null)
+                                    {
+                                        int ii = 1;
+                                        foreach (var item in Model.RequisitionApprovalLists)
+                                        {
+                                            <tr>
+                                                <td>@(ii++)</td>
+                                                <td>@item.EmployeeName</td>
+                                                <td>@item.DesignationName</td>
+                                                <td>@item.Status</td>
+                                                <td>@item.ApprovedTime</td>
+                                                <td>@item.Comment</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row">             
+                <div class="col-md-4">
+                    <a href="#" class="btn btn-primary" onclick="goBack()">Back to Index</a>
+                </div>
+                <div class="col-md-8"></div>
+            </div>
+</section>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            ToggleShowHide();
+           // LoadDepartment(departmentId);
+            $(function () {
+                $("#ManagerName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#ManagerId").val(ui.item.id);
+                        //LoadDesignation(ui.item.id);
+                    }
+                });
+            });
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function LoadCompany() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CompanyId").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CompanyId").append(content)
+                }
+            })
+        }
+        function LoadDepartment(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+                // data: { prefix: "" },
+                success: function (res) {
+                    $("#DepartmentId").html("");
+                    var content = '<option>Select Department</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#DepartmentId").append(content)
+                    if (id > 0) {
+                        $("#DepartmentId").val(id);
+                    }
+                }
+            })
+    }
+    function goBack() {
+        window.history.back();
+    }
+        //function LoadProject() {
+        //    var companyId = $("#CompanyId").val();
+        //    $("#ProjectId").html("");
+        //    $.ajax({
+        //        type: "GET",
+        //        url: "/AutoComplete/GetAllProjectList",
+        //         data: { companyId: companyId },
+        //        success: function (res) {
+        //            var content = '<option value="0">Select Project</option>';
+        //            $.each(res,
+        //                function (index, itemData) {
+        //                    content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+        //                })
+
+        //            $("#ProjectId").append(content)
+        //        }
+        //    })
+        //}
+
+        function makeDeletable(id, companyId) {
+            alert(id);
+            $("#id").val(id);
+            $("#companyId").val(companyId);
+        }
+
+    function makeEditable(id, businessType) {
+            loadRequisitionItemDetails(id);
+        }
+    function updateStatusModal(id,status) {
+            $("#Id").val(id);
+            //$("#status").val(@(RecruitmentStatusEnum.Open.ToString()));
+            $("#status").val(''+status);
+        }
+        function resetStatusModal() {
+            $("#sId").val(null);
+            $("#sStatus").val("");
+            $("#sUserCompanyId").val(null);
+        }
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        //function ToggleShowHide() {
+        //    var success = $("#SuccessMessageDiv").html();
+        //    var error = $("#ErrorMessageDiv").html();
+        //    if (!(success == '' && error == '')) {
+        //        setTimeout(function () {
+        //            // $("#MessageDiv").toggle("hide");
+        //        },
+        //            5000);
+        //    }
+        //}
+        function ToggleShowHide() {
+            var success = $("#MessageDiv").html();
+            if (!(success == '')) {
+                setTimeout(function () {
+                    $("#MessageDiv").toggle("hide");
+                },
+                    5000);
+            }
+    };
+
+        function loadRequisitionItemDetails(id) {
+        $.ajax({
+            type: "GET",
+            url: "/Recruitment/GetRequisitionItemDetailById",
+                data: { id: id },
+            success: function (res) {
+                $.each(res,
+                    function (index, itemData) {
+                        var attr = $("#childDiv #" + index);
+                        if (attr && itemData != null) {
+                            if (index.toLowerCase().includes("date")) {
+                                var stringDate = moment(itemData).format("DD/MM/YYYY");
+                                attr.val(stringDate);
+                            }
+                            else {
+                                attr.val(itemData);
+                            }
+                        }
+
+
+                    })
+
+
+               // console.log(res);
+                if (res.BusinessType == @((int)BusinessTypeEnum.Company)) {
+                    LoadCompany2(res.BusineesId_Fk);
+                } else {
+                    LoadDepartment2(res.BusineesId_Fk);
+                }
+            $("#ActionEnum").val("@ActionEnum.Edit.ToString()");
+            $("#actionBtn").html("Update Item");
+            }
+        })
+    };
+    function resetForm() {
+        $("#childDiv input,#childDiv textarea").each(function () {
+            var inputElement = $(this);
+            inputElement.val("");
+        });
+        $("#childDiv select, #childDiv hidden").each(function () {
+            var inputElement = $(this);
+            inputElement.val(0);
+        });
+        $("#RequisitionDetailId").val(0);
+            $("#ActionEnum").val("@ActionEnum.Add.ToString()");
+            $("#actionBtn").html("Add New Item");
+    };
+    </script>
+
+
+
+    <script type="text/javascript">
+
+
+      function loadarFunction2() {
+
+            var businessTypeId = $("#BusinessType").val();
+          if (businessTypeId == 0) {
+              $("#BusineesId_Fk").val("");
+                return;
+            }
+          if (businessTypeId == @((int)BusinessTypeEnum.Company)) {
+
+                LoadCompany2();
+            }
+            if (businessTypeId == @((int)BusinessTypeEnum.Division))
+            {
+                LoadDepartment2();
+            }
+        }
+
+        function bindProperty2(id) {
+                $.ajax({
+                    type: "GET",
+                    url: "/Company/GetBusinessHeadById",
+                    data: { id: id },
+                    success: function (data) {
+                        console.log(data);
+                        const fieldsToDisplay = ['Id', 'EmployeeId', 'EmployeeName', 'FromDateString', 'ToDateString', 'BusinessTypeInt', 'BusineesId_Fk'];
+                        fieldsToDisplay.forEach((item) => {
+                            if (item == "BusinessTypeInt") {
+                                if (data['BusinessType'] == @((int)BusinessTypeEnum.Company)) {
+                                    $("#BusinessType").val(data[item]);
+                                    LoadCompany2(data['BusineesId_Fk']);
+                                }
+                                if (data['BusinessType'] == @((int)BusinessTypeEnum.Division)) {
+                                    $("#BusinessType").val(data[item]);
+                                    LoadDepartment2(data['BusineesId_Fk']);
+                                }
+                            }
+                            if (item == "FromDateString") {
+                                var f = $("#FromDate");
+                                if (f != null) {
+                                    f.val(data[item]);
+                                }
+                            }
+                            var formField = $("#" + item);
+                            if (formField != null) {
+                                formField.val(data[item]);
+                            }
+
+                        });
+                    }
+                })
+
+        }
+    function LoadCompany2(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                success: function (res) {
+                    $("#BusineesId_Fk").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+                    $("#BusineesId_Fk").append(content)
+                    if (id != null) {
+                        $("#BusineesId_Fk").val(id);
+                    }
+                }
+            })
+        }
+        function LoadDepartment2(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+               // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#BusineesId_Fk").html("");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+                    $("#BusineesId_Fk").append(content);
+                    if (id != null) {
+                        $("#BusineesId_Fk").val(id);
+                    }
+                }
+            })
+    }
+
+
+    </script>
+}

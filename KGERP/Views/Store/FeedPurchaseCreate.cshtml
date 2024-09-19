@@ -1,0 +1,561 @@
+﻿@model KGERP.Service.ServiceModel.StoreModel
+
+@using System.Web
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int Sl = 0;
+    double totalQty = 0;
+    double totalBagQty = 0;
+    double totalAmount = 0;
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 8px;
+        background-color: #dd4b39;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+<section class="content-header">
+    <h1>Feed Purchase List</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="~/Store/FeedPurchaseIndex/?companyId=8&productType=F" class="pull-right">
+                <span class="fa fa-list"></span> Feed Purchase
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    @{
+                        if (Model == null || Model.StoreId == 0)
+                        {
+                            using (Html.BeginForm("FeedPurchaseCreate", "Store", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.CompanyId, new { @id = "companyFk" })
+                                @Html.HiddenFor(model => model.Type)
+                                @Html.HiddenFor(model => model.SupplierName)
+                                <input hidden="hidden" name="ReceivedByName" id="ReceivedByName" />
+
+                                <div class="row">
+                                    <div class="form-horizontal">
+                                        <div class="row mb-1">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Received Code</label>
+                                                    <div class="col-md-9">
+                                                        @Html.EditorFor(model => model.ReceivedCode, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", } })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Received Date</label>
+                                                    <div class="col-md-9">
+                                                        @Html.EditorFor(model => model.ReceivedDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                                                        @Html.ValidationMessageFor(model => model.ReceivedDate, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Supplier</label>
+                                                    <div class="col-md-9">
+                                                        @Html.HiddenFor(x => x.VendorId, new { id = "CustomerId", name = "CustomerId" })
+                                                        @Html.EditorFor(model => model.SupplierName, new { htmlAttributes = new { @class = "form-control", @name = "SupplierName", @id = "txtSupplierName" } })
+                                                        @Html.ValidationMessageFor(model => model.SupplierName, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Proprietor Name</label>
+                                                    <div class="col-md-9">
+                                                        @Html.TextBox("Name", null, new { @class = "form-control", @readonly = "readonly", @id = "txtName" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Address</label>
+                                                    <div class="col-md-9">
+                                                        @Html.TextBox("Address", null, new { @class = "form-control", @readonly = "readonly", @id = "txtAddress" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Phone</label>
+                                                    <div class="col-md-9">
+                                                        @Html.TextBox("Phone", null, new { @class = "form-control", @readonly = "readonly", @id = "txtPhone" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-1">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Store</label>
+                                                    <div class="col-md-9">
+                                                        @Html.DropDownListFor(model => model.StockInfoId, new SelectList(Model.StockInfos, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+                                                        @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Received By</label>
+                                                    <div class="col-md-9">
+                                                        @Html.EditorFor(model => model.ReceiverName, new { htmlAttributes = new { @readOnly = "readonly", @class = "form-control", @name = "receiverName", @id = "receiverName" } })
+                                                        @*@Html.ValidationMessageFor(model => model.ReceivedBy, "", new { @readOnly = "readonly", @class = "text-danger" })*@
+                                                        @Html.HiddenFor(x => x.ReceivedBy, new { @id = "receivedBy", @name = "receivedBy" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Remarks</label>
+                                                    <div class="col-md-9">
+                                                        @Html.EditorFor(model => model.Remarks, new { htmlAttributes = new { @class = "form-control" } })
+                                                        @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">&nbsp;</label>
+                                                    <div class="col-md-9">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table class="table table-responsive">
+                                    <thead style="background-color:#ddd;">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Purchase Qty</th>
+                                            <th>Rate</th>
+                                            <th>Bag Qty</th>
+                                            <th>Amount</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tr class="mycontainer" id="mainrow">
+                                        <td style="width:275px">
+                                            <input type="text" id="product" name="product" class="form-control" />
+                                            <input type="hidden" id="hfProductId" name="productId" />
+                                            <input type="hidden" id="hfTpPrice" name="TPPrice" />
+                                            <input type="hidden" id="hfBagId" name="BagId" />
+                                            <input type="hidden" id="hfBagUnitPrice" name="BagUnitPrice" />
+
+                                        </td>
+                                        <td>
+                                            <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                                            <span class="error">Valid quantity required</span>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="unitPrice" class="qty form-control" autocomplete="off" style="text-align:right" />
+                                            <span class="error">Valid Rate required</span>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="BagQty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                                            <span class="error">Valie BagQty Required</span>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="amount" class="qty form-control" autocomplete="off" style="text-align:right" readonly />
+                                        </td>
+                                        <td>
+                                            <button type="button" id="add" class="btn btn-primary pull-right"><i class="fa fa-plus-circle"></i>&nbsp; Add</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div id="orderItems">
+                                    <table class="table" id="orderdetailsItems">
+                                        <thead style="background-color:#ddd;">
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>Product</th>
+                                                <th>Qty</th>
+                                                <th>Rate</th>
+                                                <th>Bag Qty</th>
+                                                <th>Amount</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="itemDetails"></tbody>
+                                        @*<tfoot>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td colspan="3" class="pull-right">
+                                                        <input id="submit" type="submit" onclick='return confirm("Are you sure you want to Submit");' value="Submit" class="btn btn-success pull-right" />
+                                                        <a href="~/Store/FeedPurchaseIndex/?companyId=8&productType=F" id="cancel" class="btn btn-danger pull-right">Cancel</a>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>*@
+                                    </table>
+                                    <span id="orderItemError" class="danger"></span>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-8">
+
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <button onclick='return confirm("Are you sure you want to Submit");' type="submit" class="btn btn-success btn-block" style="width:100%" title="Save" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</button>
+                                    </div>
+                                </div>
+
+                            }
+                        }
+                        else
+                        {
+                            @Html.HiddenFor(model => model.CompanyId)
+                            @Html.HiddenFor(model => model.Remarks)
+                            @Html.HiddenFor(model => model.ReceivedCode)
+                            @Html.HiddenFor(model => model.ReceivedDate)
+                            @Html.HiddenFor(model => model.IsSubmited)
+                            @Html.HiddenFor(model => model.StoreId)
+                            @Html.HiddenFor(model => model.Type)
+                            @Html.HiddenFor(model => model.SupplierName)
+                            @Html.HiddenFor(model => model.Name)
+                            @Html.HiddenFor(model => model.Phone)
+                            @Html.HiddenFor(model => model.ReceivedByName)
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <td><b>Receive Code</b></td>
+                                        <td>:</td>
+                                        <td><b>@Model.ReceivedCode</b></td>
+                                        <td width="18%"><b>Receive Date</b></td>
+                                        <td width="5%">:</td>
+                                        <td width="27%">@Model.ReceivedDate.Value.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><b>Received By</b></td>
+                                        <td>:</td>
+                                        <td><b>@Model.ReceiverName</b></td>
+                                        <td><b>Supplier Name</b></td>
+                                        <td>:</td>
+                                        <td>@Model.SupplierName</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Supplier Phone</b></td>
+                                        <td>:</td>
+                                        <td>@Model.Phone</td>
+                                        <td><b>Supplier Address</b></td>
+                                        <td>:</td>
+                                        <td>@Model.Address</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Store Name</b></td>
+                                        <td>:</td>
+                                        <td>@Model.StoreName</td>
+                                        <td><b>Remarks</b></td>
+                                        <td>:</td>
+                                        <td>@Model.Remarks</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                            <div id="orderItems">
+                                <table class="table" id="orderdetailsItems">
+                                    <thead style="background-color:#ddd;">
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Product</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Bag Name</th>
+                                            <th>Bag Qty</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails">
+                                        @foreach (var item in Model.DataList)
+                                        {
+
+                                            totalQty += item.Qty;
+                                            totalBagQty += item.BagQty;
+                                            var Amount = item.Qty * (double)item.UnitPrice;
+                                            totalAmount += item.Qty * (double)item.UnitPrice;
+
+                                            Sl = Sl + 1;
+                                            <tr>
+                                                <td>@(Sl)</td>
+                                                <td>@item.ProductName </td>
+                                                <td>@item.Qty </td>
+                                                <td>@item.UnitPrice </td>
+                                                <td>@item.BagName </td>
+                                                <td>@item.BagQty </td>
+                                                <td>@Amount</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot style="background-color:#ccc;">
+                                        <tr>
+
+                                            <td> Total: </td>
+                                            <td> </td>
+                                            <td>@totalQty</td>
+                                            <td colspan="2"> </td>
+                                            <td> @totalBagQty</td>
+
+                                            <td>@totalAmount</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("GetFeedPurchaseReport","Report", new {storeId=Model.StoreId,companyId=Model.CompanyId,reportName="FeedPurchase"})" target="_blank" class="btn btn-primary btn-block">
+                                        Report
+                                    </a>
+                                </div>
+
+                                <div class="col-md-3">
+                                    @if (!Model.IsSubmited)
+                                    {
+                                        <a onclick="makeFeedPurchaseSubmitable(@Model.StoreId);" class="btn btn-success btn-block" style="width:100%"
+                                           data-toggle="modal" data-target="#submitProdReferenceModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Submitted</button>
+                                    }
+
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("SubmittedFeedPurchase", "Store", FormMethod.Post, new { @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProdReferenceModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Submit</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "submitCompanyFK" })
+                    @Html.HiddenFor(model => model.StoreId, new { id = "submitStoreId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Submit this Sales Return?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/FeedPurchase/FeedPurchase.js"></script>
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+    function makeFeedPurchaseSubmitable(rowId) {
+         $("#submitStoreId").val(rowId)
+         $('#submitCompanyFK').val("@Model.CompanyId");
+         $('#submitActionId').val(10);
+    }
+                    $(function () {
+                        $("#receiverName").autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '/Employee/EmployeeAutoComplete/',
+                                    //data: "{ 'prefix': '" + request.term + "'}",
+                                    data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                                    dataType: "json",
+                                    type: "POST",
+                                    cache: true,
+                                    contentType: "application/json; charset=utf-8",
+                                    success: function (data) {
+                                        response($.map(data, function (item) {
+                                            return item;
+                                        }))
+                                    },
+                                    error: function (response) {
+                                        //alert(response.responseText);
+                                    },
+                                    failure: function (response) {
+                                        //alert(response.responseText);
+                                    }
+                                });
+                            },
+                            select: function (e, i) {
+                                console.log(i.item);
+                                $("#receivedBy").val(i.item.val);
+                                $("#ReceivedByName").val(i.item.label);
+
+                            },
+                            minLength: 1,
+                            cache: true
+
+                        }).focus(function () {
+                            $(this).autocomplete("search");
+                        });
+                    });
+                    $(function () {
+                        $("#txtSupplierName").autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '/Vendor/SupplierAutoComplete/',
+                                    data: "{'prefix': '" + request.term + "', 'companyId' : '" +$('#companyFk').val()+ "' }",
+                                    dataType: "json",
+                                    type: "POST",
+                                    contentType: "application/json; charset=utf-8",
+                                    success: function (data) {
+                                        response($.map(data, function (item) {
+                                            return item;
+                                        }))
+                                    },
+                                    error: function (response) {
+                                        alert(response.responseText);
+                                    },
+                                    failure: function (response) {
+                                        alert(response.responseText);
+                                    }
+                                });
+                            },
+                            select: function (e, i) {
+                                $("#CustomerId").val(i.item.val);
+                            },
+                            minLength: 1,
+                            change: function (event, ui) {
+                                loadCustomerInformation(ui.item.val);
+                            }
+                        }).focus(function () {
+                            $(this).autocomplete("search");
+                        });
+                    });
+
+                    function loadCustomerInformation(customerId) {
+                        $.ajax({
+                            url: '/Vendor/GetCustomerInformation?customerId=' + customerId,
+                            type: "GET",
+                            async: true,
+                            processData: false,
+                            cache: false,
+                            success: function (data) {
+                                var result = JSON.parse(data);
+                                console.log(result);
+                                $('#txtName').val(result.ContactName);
+                                $('#txtAddress').val(result.Address);
+                                $('#txtPhone').val(result.Phone);
+                                $('#SupplierName').val(result.Name);
+                            },
+                            error: function (xhr) {
+                                alert('error');
+                            }
+                        });
+                    }
+
+                    //-------------------------------------------------------------------------------
+                    $(function () {
+                        $("#product").autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '/Products/AutoComplete/',
+                                    data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                                    dataType: "json",
+                                    type: "POST",
+                                    contentType: "application/json; charset=utf-8",
+                                    success: function (data) {
+                                        response($.map(data, function (item) {
+                                            return item;
+                                        }))
+                                    },
+                                    error: function (response) {
+                                        alert(response.responseText);
+                                    },
+                                    failure: function (response) {
+                                        alert(response.responseText);
+                                    }
+                                });
+                            },
+                            select: function (e, i) {
+                                $("#hfProductId").val(i.item.val);
+                                $("#hfTpPrice").val(i.item.TPPrice);
+                                $("#hfBagId").val(i.item.BagId);
+                                $("#hfBagUnitPrice").val(i.item.BagUnitPrice);
+
+                            },
+                        }).focus(function () {
+                            $(this).autocomplete("search");
+                        });
+                    });
+
+    </script>
+}

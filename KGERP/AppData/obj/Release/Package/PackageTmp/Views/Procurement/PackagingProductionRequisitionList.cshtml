@@ -1,0 +1,334 @@
+﻿@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Sales Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Production Order List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Production Requisition List</li>
+    </ol>
+</section>
+@using (Html.BeginForm("PackagingProductionRequisitionList", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>RequisitionNo</th>
+                                        <th>OrderDetailsId</th>
+                                        <th>RequisitionDate</th>
+                                        <th>OrderNo</th>
+                                        <th>ProductId</th>
+                                        <th>ProductName</th>
+                                        <th>OrderMasterId</th>
+                                        <th>Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                       
+                                 
+
+                                    <tr>
+                                        <th>@(++sl)</th>
+                                        @*<td><a target="_blank" href="~/Procurement/PackagingProductionRequisitionList?companyId=@item.CompanyFK&orderMasterId=@item.RequisitionId">@item.RequisitionNo</a></td>*@
+                                        <td><a target="_blank" href="~/Procurement/PackagingIssueProductFromStore?companyId=@item.CompanyFK">@item.RequisitionNo</a></td>
+                                        <td>@item.OrderDetailsId</td>
+                                        <td>
+                                            @if (item.RequisitionDate != null)
+                                            {<span>@item.RequisitionDate.ToString("dd-MM-yyyy")</span>}
+                                        </td>
+                                        <td>@item.OrderNo</td>
+                                        <td>@item.ProductId</td>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.OrderMasterId</td>
+
+
+                                        <td>
+                                            @*<a id="@item.OrderMasterId" onclick=" makeEditble(@item.OrderMasterId);" class="linkPointer" data-toggle="modal" data-target="#editPOModal" title="Edit" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i></a>
+            <a id="@item.OrderMasterId" onclick="makeDeletale(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>*@
+                                            <a href="~/Procurement/PackagingSalesOrderSlave?companyId=@item.CompanyFK&orderMasterId=@item.RequisitionId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                        </td>
+
+
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        @*@if (Model.ID > 0)
+                            {
+                                <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                            }*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   
+}
+@*@using (Html.BeginForm("DeleteOrderMasters", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Sales Order</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.OrderMasterId, new { id = "hidProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POdeleteCompanyFK" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Sales Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginForm("SubmitOrderMasters", "Procurement", FormMethod.Post))
+{
+
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Purchase Order (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.OrderMasterId, new { id = "hidsubmitProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POSubmitCompanyFK" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="submitOrDraftText"></span> this Purchase Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}*@
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            function resetForm() {
+                $('#procurementvmSalesOrderListFormId')[0].reset();
+                $('#SOEditActionId').val(1);
+            }
+            $("#txtCommonCustomerName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCustomerId").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        })
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+            //console.log(actionId);
+            //console.log("@((int)ActionEnum.Approve)");
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+
+
+
+            function makeSubmitble(rowId) {
+                // console.log(rowId);
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglOrderMastersGet", "Procurement")",
+                        datatype: "Json",
+                    data: { orderMasterId: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftPOCIDText').text(data.OrderNo);
+
+                            if (data.Status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+                $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+
+
+
+
+
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+            function makeEditble(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglOrderMastersGet", "Procurement")",
+                        datatype: "Json",
+                     data: { orderMasterId: rowId },
+                        success: function (data) {
+                            console.log(data);
+
+                            $('#pSOCIDText').text(data.OrderNo);
+                            $("#hidOrderMasterId").val(data.OrderMasterId);
+                            $('#SOEditActionId').val(2);
+                            //$("#POEditCompanyFK").val(data.CompanyFK);
+
+                            var orderDate = DateCustom(data.OrderDate);
+
+                            $('#txtOrderDate').val(orderDate);
+                            $('#ddlCustomerPaymentMethodEnumFKK').val(data.CustomerPaymentMethodEnumFK).change();
+                            $('#txtCommonCustomerName').val(data.CommonCustomerName);
+
+                            var deliveryDate = DateCustom(data.ExpectedDeliveryDate);
+                            $('#txtDeliveryDate').val(deliveryDate);
+                            $('#ddlCustomerId').val(data.CustomerId);
+
+
+
+                            //$('#ddlPOTypeEnumFK').val(data.poTypeEnumFK).change();
+                            //$('#ddlProcurementOriginTypeEnumFK').val(data.procurementOriginTypeEnumFK).change();
+                            //$('#ddlCommon_CurrencyFK').val(data.common_CurrencyFK).change();
+
+                        }
+                 });
+            }
+
+
+    </script>
+}
+

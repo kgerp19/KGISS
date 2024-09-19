@@ -1,0 +1,125 @@
+﻿@using PagedList.Mvc;
+@model KGERP.Utility.ReportInfo
+@using PagedList;
+@{
+    ViewBag.Title = "DistrictOrDivisionOrUpzillaWiseReport";
+}
+
+<div style="font-family: Arial">
+    @using (Html.BeginForm("DistrictOrDivisionOrUpzillaWiseReport", "Employee", FormMethod.Get))
+    {
+        <div class="col-md-12">
+            <table>
+                <tr style="background-color: #E9EDBE; vertical-align: middle;">
+                    <td class="tdRightAlign" width="10%" align="right" style="padding:6px">
+                        Division
+                    </td>
+                    <td>
+                        @Html.DropDownList("Division", new SelectList(ViewBag.Divisions, "Text", "Text"), "---Select---", new { @class = "dropdownsize form-control", @style = "width: 250px;", @id = "ddlDivision" })
+                    </td>
+                    <td class="tdRightAlign" width="10%" align="right" style="padding:6px">
+                        District
+                    </td>
+                    <td>
+                        @Html.DropDownList("District", new SelectList(ViewBag.Districts, "Text", "Text"), "---Select---", new { @class = "dropdownsize form-control", @style = "width: 250px;", @id = "ddlDistrict" })
+                    </td>
+                    <td class="tdRightAlign" width="10%" align="right" style="padding:6px">
+                        Upzilla
+                    </td>
+                    <td>
+                        @Html.DropDownList("Upzilla", new SelectList(ViewBag.Upzillas, "Text", "Text"), "---Select---", new { @class = "dropdownsize form-control", @style = "width: 250px;", @id = "ddlThanaUpazila" })
+                    </td>
+                    <td>
+                        @*<input name="active" type="hidden" value="false" />*@
+                        @Html.CheckBox("active", true)
+                    </td>
+                    <td style="padding:10px">
+                        <button type="submit" class="btn btn-success">
+                            <span style="padding:10px"><b>Search</b></span> &nbsp;<i class="fa fa-search"></i>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-md-11">
+                <h4><b>Employee List</b></h4>
+                <hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+            </div>
+        </div>
+
+        if (ViewBag.NoSelect != null)
+        {
+            <script type="text/javascript">
+            window.onload = function () {
+                alert("@ViewBag.NoSelect");
+            };
+            </script>
+        }
+
+    }
+
+    <div class="row">
+        <iframe id="frmReport" src="@Model.ReportURL" width="900" height="900" frameborder="0" scrolling="yes">
+        </iframe>
+    </div>
+</div>
+
+ 
+<span class="checkbox">
+    <a href="@Url.Action("ExportKGCaseToExcel", new {
+                    Division = Request.QueryString["Division"],
+                    District = Request.QueryString["District"],
+                    Upzilla = Request.QueryString["Upzilla"] 
+        })" title=""> 
+    </a>
+</span>
+ 
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('#ddlDivision').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Employee/GetDistrictByDivisionName",
+                data: { name: $('#ddlDivision').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var district = "<select>";
+                    district = district + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        district = district + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    district = district + '</select>';
+                    $('#ddlDistrict').html(district);
+                }
+            });
+        });
+
+        //Bind Upzila base on District Selection
+        $('#ddlDistrict').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Employee/GetUpzilaByDistrictName",
+                data: { name: $('#ddlDistrict').val() },
+
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var upazila = "<select>";
+                    upazila = upazila + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        upazila = upazila + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    upazila = upazila + '</select>';
+                    $('#ddlThanaUpazila').html(upazila);
+                }
+            });
+        });
+    </script>
+
+}

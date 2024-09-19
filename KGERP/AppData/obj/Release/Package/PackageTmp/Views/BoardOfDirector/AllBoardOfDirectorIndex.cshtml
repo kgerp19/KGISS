@@ -1,0 +1,103 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.BoardOfDirectorModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+
+<div class="row">
+    <div class="col-md-8">
+        <h4><b>Board Of Directors</b></h4>
+    </div>
+    <div class="col-md-4">
+        @using (Html.BeginForm("AllBoardOfDirectorIndex", "BoardOfDirector", FormMethod.Get, new { @class = "example" }))
+        {
+            @Html.Hidden("companyId")
+            @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..", @style = "width:100%" } })
+            <button type="submit"><i class="fa fa-search"></i></button>
+
+        }
+    </div>
+
+
+</div>
+
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th class="text-center">
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().CompanyId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().MemberImage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().MemberName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Email)
+            </th>
+
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td style="text-align:center">
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.CompanyName)
+                </td>
+                <td>
+                    <img src="@Url.Content(item.Data.MemberImage)" height="40" width="40" alt="BoardDirector">
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.MemberName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.EndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Email)
+                </td>
+            </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("AllBoardOfDirectorIndex", "BoardOfDirector",
+                                         new { Page_No, Sorting_Order = Request.QueryString["Search"], companyId = Request.QueryString["companyId"], SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>

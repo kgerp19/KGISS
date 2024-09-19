@@ -1,0 +1,215 @@
+﻿@model KGERP.Services.Procurement.VmDemandItemService
+@using KGERP.Data.Models
+
+<div class="row">
+    <div class="col-lg-12">
+        @{
+            
+            if (Model.DemandItemList.Count() > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered text-nowrap">
+                        <thead>
+                                    <tr class="bg-success">
+                                        <th>SL</th>
+
+                                        <th>Finish Item</th>
+
+                                        <th class="center">Quantity</th>
+
+                                        <th class="center">
+                                            Unit Price
+                                        </th>
+                                        <th>
+                                            Unit Discount
+                                        </th>
+                                        <th>
+                                            Cash Discount Percent
+                                        </th>
+                                        <th>
+                                            Special Discount
+                                        </th>
+                                        <th>
+                                            Total Amount
+                                        </th>
+
+                                    </tr>
+                        </thead>
+                        <tbody id="demandTbody">
+                            @for (int i = 0; i < Model.DemandItemList.Count(); i++)
+                            {
+                            <tr>
+                                <th>
+                                    <input hidden="hidden" id="ProductId" name="ProductId" value="@Model.DemandItemList[i].ProductId" />
+                                    <input hidden="hidden" id="DemandItemId" name="DemandItemId" value="@Model.DemandItemList[i].DemandItemId" />
+                                    @(i + 1)
+                                </th>
+
+
+                                <td>
+                                    @Html.DisplayFor(model => model.DemandItemList[i].ProductName)
+                                </td>
+
+                                <td>
+                                    <input class="form-control text-right changeNotifier" name="ItemQuantity" value="@Model.DemandItemList[i].ItemQuantity" />
+                                </td>
+                                <td>
+                                    <input class="form-control text-right changeNotifier" name="UnitPrice" value="@Model.DemandItemList[i].UnitPrice" />
+
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control text-right changeNotifier" name="ProductDiscountUnit" value="@Model.DemandItemList[i].ProductDiscountUnit" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control text-right changeNotifier" name="CashDiscountPercent" value="@Model.DemandItemList[i].CashDiscountPercent" />
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control text-right changeNotifier" name="SpecialDiscount" value="@Model.DemandItemList[i].SpecialDiscount" />
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control text-right changeNotifier"  value="@(Model.DemandItemList[i].ItemQuantity * Model.DemandItemList[i].UnitPrice)" />
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <button type="button" id="poCreateBtn" onclick="PRFAddtoMaster()" class="btn btn-primary btn-block">
+                            <i class='fa fa-plus'></i>
+                            <span>Create New Invoice</span>
+                        </button>
+
+                    </div>
+                </div>
+
+            }
+            else
+            {
+                <div class="col-md-12">
+                    <div class="box box-success box-solid">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            <div class="form-group" style="text-align:center;">
+                                <h3>
+                                    There are no Item yet.
+                                </h3>
+                            </div>
+
+
+
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+
+<script>
+    var demandItems = [];
+    var grandTotal = 0;
+    $(document).ready(function () {
+       
+        //Array.prototype.sum = function (prop) {
+        //    var total = 0
+        //    for (var i = 0, _len = this.length; i < _len; i++) {
+        //        total += this[i][prop]
+        //    }
+        //    return total
+        //}
+
+        function myfunc() {
+            demandItems = [];
+            $('#demandTbody tr').each(function () {
+
+               
+                $(this).each(function () {
+                   
+                    var ProductId, DemandItemId, ItemQuantity, UnitPrice, ProductDiscountUnit, CashDiscountPercent, SpecialDiscount;
+                    
+                    $(this).find("input[name='ProductId']").each(function () {
+                        ProductId = parseInt($(this).val());
+                    });
+                    $(this).find("input[name='DemandItemId']").each(function () {
+                        DemandItemId = parseInt($(this).val());
+                    });
+                    $(this).find("input[name='ItemQuantity']").each(function () {
+                        ItemQuantity = $(this).val();
+                        ItemQuantity = ItemQuantity == '' ? 0 : parseFloat(ItemQuantity);
+                    });
+                    $(this).find("input[name='UnitPrice']").each(function () {
+                        UnitPrice = $(this).val();
+                        UnitPrice = UnitPrice == '' ? 0 : parseFloat(UnitPrice);
+                    });
+                    $(this).find("input[name='ProductDiscountUnit']").each(function () {
+                        ProductDiscountUnit = $(this).val();
+                        console.log('before', ProductDiscountUnit);
+                        ProductDiscountUnit = ProductDiscountUnit == '' ? 0 : parseFloat(ProductDiscountUnit);
+                        console.log('after', ProductDiscountUnit);
+                    });
+                    $(this).find("input[name='CashDiscountPercent']").each(function () {
+                        CashDiscountPercent = $(this).val();
+                        
+                    });
+                    $(this).find("input[name='SpecialDiscount']").each(function () {
+                        
+                        SpecialDiscount = $(this).val();
+                       
+                    });
+                    grandTotal = 0;
+                   // qty, UnitPrice, UnitDiscount, TotalDiscount, TotalAmmount
+                    var ProductId, DemandItemId, ItemQuantity, UnitPrice, ProductDiscountUnit, CashDiscountPercent, SpecialDiscount;
+
+                    let demandItem = {
+                        "ProductId": ProductId,
+                        "DemandItemId": DemandItemId,
+                        "ItemQuantity": ItemQuantity,
+                        "UnitPrice": UnitPrice,
+                        "ProductDiscountUnit": ProductDiscountUnit,
+                        "CashDiscountPercent": CashDiscountPercent,
+                        "SpecialDiscount": SpecialDiscount
+                    };
+                    demandItems.push(demandItem);
+                    //$(this).find('').closest("td").siblings("td").each(function () {
+                    //    values.push($(this).text());
+                    //});
+                    ////console.log(values[0]);
+                    //valueList.push(values[0]);
+                });
+            });
+            //$('#sumQty').val('');
+            //$('#sumUnitPrice').val('');
+            //$('#sumUnitDis').val('');
+            //$('#sumTTLDis').val(demandItems.sum("TotalDiscount"));
+            //$('#sumTTLAmt').val(demandItems.sum("TotalAmmount"));
+            
+            //return valueList;
+            //console.log("(" + valueList.join("),(") + ")");
+        }
+        myfunc();
+        $(".changeNotifier").keyup(function () {
+            myfunc();
+            console.log(demandItems);
+        });
+
+        
+        
+
+    });
+
+
+</script>

@@ -1,0 +1,145 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.MemberBasePFSummaryModel>
+@using PagedList;
+@{
+    ViewBag.Title = "GetPFDetialsByEmployeeId";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-9" hidden>
+        <p>
+            <span style="font-size:25px">PF Details Status</span> <span style="font-size:20px;color:green">
+                @if (ViewBag.Employees != null)
+                {@ViewBag.Employees}
+            </span>
+        </p>
+    </div>
+
+    <div class="col-md-3">
+        <a href="@Url.Action("GetPFDataByEmployeeId",new { employeeId=Request.QueryString["employeeId"]})" title="PF Summary" class="btn btn-primary pull-right">
+            <span class="glyphicon glyphicon-eye-close"></span> Go to PF Summary
+        </a>
+        <input type="submit" value="Print " onclick="PrintElem('#divprint')"
+               class="btn btn-danger" />
+    </div>
+
+</div>
+
+
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+
+@if (Model.Count() == 0)
+{
+    <div><h2>No Data found today!</h2></div>
+}
+else
+{ 
+<div class="row" id="divprint">
+
+
+    <span style="font-size:25px">PF Details Status</span> <span style="font-size:20px;color:green">
+        @if (ViewBag.Employees != null)
+        {@ViewBag.Employees}
+    </span>
+    <hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <th class="text-center">
+                    @Html.DisplayNameFor(model => model.First().PFDate)
+                </th>
+                <th class="text-center">
+                    @Html.DisplayNameFor(model => model.First().SelfContribution)
+                </th>
+                <th class="text-center">
+                    @Html.DisplayNameFor(model => model.First().CompanyContribution)
+                </th>
+                <th class="text-center">
+                    @Html.DisplayNameFor(model => model.First().SelfProfit)
+                </th>
+                <th class="text-center">
+                    @Html.DisplayNameFor(model => model.First().OfficeProfit)
+                </th>
+                <th class="text-center">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.PFDate)
+
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.SelfContribution)
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.CompanyContribution)
+                    </td>
+                    <td align="center">
+
+                        @Html.DisplayFor(modelItem => item.SelfProfit)
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.OfficeProfit)
+                    </td>
+
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.Total)
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5" align="right"><b> Grand Total</b></td>
+                <td align="center">
+                    <b>
+                        @Model.Sum(i => i.Total)
+                    </b>
+                </td>
+            </tr>
+
+        </tfoot>
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("GetDetialsPFDataByEmployeeId", "MemberBasePFSummary",
+                          new { Page_No, Sorting_Order = Request.QueryString["employeeId"], employeeId = @ViewBag.EmployeeId }))
+        </span>
+    }
+</div>
+}
+
+<script type="text/javascript">
+
+    function PrintElem(elem)
+    {
+        Popup($(elem).html());
+    }
+
+    function Popup(data)
+    {
+        var mywindow = window.open('', 'divprint', 'height=400,width=600');
+        mywindow.document.write('<html><head><title></title>');
+        /*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
+        mywindow.document.write('</head><body >');
+        mywindow.document.write(data);
+        mywindow.document.write('</body></html>');
+
+        mywindow.document.close(); // necessary for IE >= 10
+        mywindow.focus(); // necessary for IE >= 10
+
+        mywindow.print();
+        mywindow.close();
+
+        return true;
+    }
+
+</script>

@@ -1,0 +1,1548 @@
+﻿@model KGERP.Service.Implementation.EmployeeResults.EmployeeResultsVM
+
+@{
+    ViewBag.Title = "AnnualPerformanceCheckingList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var TotalScore = 0;
+    var RecValue = 1;
+    int currentYear = DateTime.Now.Year;
+    var startDate = new DateTime(currentYear - 1, 7, 1);
+    var endDate = new DateTime(currentYear, 6, DateTime.DaysInMonth(currentYear, 6));
+    var TotalCount = 0;
+
+}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    input, select {
+        max-width: 100% !important;
+    }
+    #workWithReportingOfficer {
+        width: 10%;
+        background-color: darkblue;
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        border-radius: 7%;
+    }
+    .badge {
+        display: inline-block;
+        padding: 1em 0.7em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        width: 80px;
+    }
+
+    .marks-section {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 1.25rem;
+        padding: 20px;
+        margin-bottom: 4%;
+    }
+
+    .marks-header {
+        font-size: 2.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .marks-item {
+        font-size: 1.7rem;
+        margin-bottom: 5px;
+    }
+
+    .marks-total {
+        font-size: 1.7rem;
+        font-weight: 700;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .badge-warning {
+        color: #212529;
+        background-color: #ffc107;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        background-color: #d9534f;
+        color: #ffffff;
+    }
+
+    #tblFooter tr {
+        cursor: move;
+    }
+
+    .ui-state-highlight {
+        height: 2em;
+        line-height: 1.2em;
+        background-color: #f2f2f2;
+        border: 1px dashed #aaa;
+    }
+
+    .forCustomHeading {
+        margin-top: 1%;
+        margin-bottom: 1%;
+        background: whitesmoke;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
+        padding: 10px 20px;
+        font-size: 19px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .empFormGroup {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+        .empFormGroup label {
+            margin-right: 10px;
+        }
+
+        .empFormGroup span {
+            flex-grow: 1;
+        }
+
+    .container {
+        font-family: 'Roboto', sans-serif;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100% !important;
+        padding-bottom: 1%;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 10px;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    h3 {
+        font-size: 2em;
+        margin-bottom: 10px;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    th {
+        /*background-color: #343a40;
+        color: #fff;*/
+        text-align: center;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    .score {
+        margin: 0;
+    }
+
+    p {
+        font-size: 1.2em;
+    }
+
+    #IncreaseProMonth {
+        width: 10%;
+        background-color: darkblue;
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        border-radius: 7%;
+    }
+
+    #totalScore, #averageScore {
+        font-weight: bold;
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: end;
+        margin-top: 20px;
+    }
+
+    .card-containers {
+        display: flex;
+        justify-content: space-evenly;
+        margin-top: 20px;
+    }
+
+    .card {
+        width: 45%;
+        text-align: center;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .card p {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+    .demonstrated-traits-row {
+        font-weight: bold;
+        text-align: center;
+        background-color: #e9ecef;
+    }
+
+        .demonstrated-traits-row > td {
+            text-align: left;
+        }
+
+    .traitRowTd {
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .thead-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+        .thead-fixed th {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+    .radio-group {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+    }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+</style>
+
+<div class="container">
+    <!-- The Modal For -->
+    <div class="modal fade" id="divSignatoryApprovalListModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body" style="padding:0%">
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-fixed">
+                            <tr>
+                                <th>Sl</th>
+                                <th>Authorized By</th>
+                                <th>ID</th>
+                                <th>Approved date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="signatoryApprovalListTbody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @using (Html.BeginForm("SignatoryApprovalSubmition", "EmployeeResult", FormMethod.Post))
+    {
+        <!-- The Modal For -->
+        <div id="divSectionModal">
+            <div class="modal fade" id="modalForAPrGeneralized" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                @Html.HiddenFor(model => model.SigAppMapID)
+                @Html.HiddenFor(model => model.AnnualPerformanceDetailId, new { @id = "modalAnnualPerformanceDetailId" })
+                @Html.HiddenFor(model => model.OrderBy, new { @id = "modalHdnStatus" })
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header" style="padding-bottom:0%">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h2 class="modal-title" id="myModalLabel" style="text-align:center">Annual Performance Result Review</h2>
+                            <div class="col-md-12" style="margin-top:1%">
+                                <table class="table table-responsive table-bordered ">
+                                    <tr>
+                                        <th>
+                                            Employee Name
+                                        </th>
+                                        <th>
+                                            :
+                                        </th>
+                                        <th style="text-align:left">
+                                           <span id="spanEmployeeName"></span>
+                                        </th>
+
+
+                                        <th>
+                                            Employee Code
+                                        </th>
+                                        <th>
+                                            :
+                                        </th>
+                                        <th style="text-align:left">
+                                            <span id="spanEmployeeCode"></span>
+                                        </th>
+                                    </tr>
+                                   
+                                </table>
+
+
+
+                            </div>
+                        </div>
+                        <div class="modal-body" style="padding:5px">
+
+                            <div id="divProfileQualities" style="overflow: scroll;">
+                                <h3>Profile Qualities</h3>
+                                <table id="traitsTable" class="table table-bordered table-striped">
+                                    <thead class="thead-fixed">
+                                        <tr>
+                                            <th>Sl</th>
+                                            <th style="text-align:left;width:30%;">Qualities Name</th>
+                                            <th>5</th>
+                                            <th>4</th>
+                                            <th>3</th>
+                                            <th>2</th>
+                                            <th>1</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            if (Model.ProfileQualitiesList != null && Model.ProfileQualitiesList.Count > 0)
+                                            {
+                                                int DropDownTypeId = 0;
+                                                TotalCount = Model.ProfileQualitiesList.Count;
+                                                for (int i = 0; i < Model.ProfileQualitiesList.Count; i++)
+                                                {
+
+                                                    if (Model.ProfileQualitiesList[i].DropDownTypeId != DropDownTypeId)
+                                                    {
+                                                        <tr class="demonstrated-traits-row">
+                                                            <td colspan="11">@Model.ProfileQualitiesList[i].ProfileQualitiesGroupName</td>
+                                                        </tr>
+                                                    }
+                                                    <tr>
+                                                        <td>@(i + 1)</td>
+                                                        <td hidden>@Model.ProfileQualitiesList[i].DropDownItemId</td>
+                                                        <td class="traitRowTd">@Model.ProfileQualitiesList[i].ProfileQualitiesName</td>
+                                                        @for (int j = 5; j >= 1; j--)
+                                                        {
+                                                            var t = j == 5 ? "checked" : "";
+                                                            <td><input type="checkbox" value="@j" class="score"></td>
+                                                            TotalScore += j;
+                                                        }
+                                                    </tr>
+                                                    DropDownTypeId = Model.ProfileQualitiesList[i].DropDownTypeId;
+                                                }
+                                            }
+
+                                        }
+                                    </tbody>
+                                </table>
+                                <div class="card-containers">
+                                    <div class="card">
+                                        <p>Total Score: <span id="totalScore">0</span></p>
+                                    </div>
+                                    <div class="card">
+                                        <p>Average Score: <span id="averageScore">0</span></p>
+                                    </div>
+                                </div>
+
+                                <div id="divOverallEvaluation">
+                                    <h3>Overall Evaluation</h3>
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="thead-fixed">
+                                            <tr>
+                                                <th>
+                                                    Excellent<br />
+                                                    4.5 - above
+                                                </th>
+                                                <th>
+                                                    Very Good <br />
+                                                    4-4.4
+                                                </th>
+                                                <th>
+                                                    Good<br />
+                                                    3.5 - 3.9
+                                                </th>
+                                                <th>
+                                                    Average<br />
+                                                    2.5 - 3.4
+                                                </th>
+                                                <th>
+                                                    Below Average<br />
+                                                    2.4 & below
+                                                </th>
+                                                @*<th>Below Average</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <input type="radio" id="lebOutstanding" name="favEvaluation" />
+                                                    @*<label for="lebOutstanding">4.5.00 & above</label>*@
+                                                </td>
+                                                <td>
+                                                    <input type="radio" id="lebVeryGood" name="favEvaluation" />
+                                                    @*<label for="lebVeryGood">4-4.44</label>*@
+                                                </td>
+                                                <td>
+                                                    <input type="radio" id="lebGood" name="favEvaluation" />
+                                                    @*<label for="lebGood">3.5-3.9</label>*@
+                                                </td>
+                                                <td>
+                                                    <input type="radio" id="lebAboveAverage" name="favEvaluation" />
+                                                    @*<label for="lebAboveAverage">2.5-3.4</label>*@
+                                                </td>
+                                                <td>
+                                                    <input type="radio" id="lebAverage" name="favEvaluation" />
+                                                    @*<label for="lebAverage">2.4 & below</label>*@
+                                                </td>
+                                                @*<td>
+                                                    <input type="radio" id="lebBelowAverage" name="favEvaluation" />
+                                                    <label for="lebBelowAverage">0.00-0.99</label>
+                                                </td>*@
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div id="achivementAsAgainstTarget">
+                                        <h3 style="margin-bottom: 0px !important;">Achievement as against Target(80):</h3>
+                                        <span>(For Business Employee)</span>
+                                        <div>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="thead-fixed">
+                                                    <tr>
+                                                        <th>Target</th>
+                                                        <th>Achievement</th>
+                                                        <th>Marks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="container mt-5">
+                                                    <tr>
+                                                        <td style="text-align:left">
+                                                            <label>Sale target-(ton/no/tk)</label>
+                                                            <input type="number" id="salesTarget" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td style="text-align:left">
+                                                            <label>Achievement-(ton/no/tk)</label>
+                                                            <input type="number" id="salesTargetAchive" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td style="text-align:left">
+                                                            <label>Marks obtained..out of(40)</label>
+                                                            <input type="number" id="salesTargetMakrs" readonly class="form-control form-control-sm" />
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align:left">
+                                                            <label>Recovery target-(ton/no/tk)</label>
+                                                            <input type="number" id="salesRecover" class="form-control form-control-sm" />
+
+                                                        </td>
+                                                        <td style="text-align:left">
+                                                            <label>Achievement-(ton/no/tk)</label>
+                                                            <input type="number" id="saleRecoverAchive" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td style="text-align:left">
+                                                            <label>Marks obtained..out of(40)</label>
+                                                            <input type="number" id="salesTargetMakrsRecover" readonly class="form-control form-control-sm" />
+                                                        </td>
+
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align:right"><b>Total makrs obtained:</b></td>
+                                                        <td style="text-align:left"><label id="totalmarksobtained"></label></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    @*<div id="divForSupportServiceEmployee">
+                                        <h3 style="margin-bottom: 0px !important;">Major works done beyond routine work-20 marks for each work(80):</h3>
+                                        <span>(For Support Service Employee)</span>
+                                        <div>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="thead-fixed">
+                                                    <tr>
+                                                        <th style="width: 3%;">SL</th>
+                                                        <th>Major works</th>
+                                                        <th style="width:10%">Marks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="container mt-5">
+                                                    <tr>
+                                                        <td>
+                                                            <label>1</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" id="majorWorkOne" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td>
+                                                            <input value="0" type="number" readonly id="majorWorkOneMakr" class="form-control form-control-sm" />
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <label>2</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" id="majorWorkTwo" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td>
+                                                            <input value="0" type="number" readonly id="majorWorkTwoMark"  class="form-control form-control-sm" />
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <label>3</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" id="majorWorkThree" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td>
+                                                            <input value="0" type="number" readonly id="majorWorkThreeMark"  class="form-control form-control-sm" />
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <label>4</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" id="majorWorkFour" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td>
+                                                            <input value="0" type="number" readonly id="majorWorkFourMark"  class="form-control form-control-sm" />
+                                                        </td>
+
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align:right"><b>Total makrs obtained:</b></td>
+                                                        <td style="text-align:left"><label id="totalMajorWorkMarks"></label></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+
+                                    </div>*@
+                                    <div class="row">
+                                        <div class="col-md-12" id="remarkOfRes" style="margin-left:1%;">
+                                            <h3>Recommendations</h3>
+                                            <input  hidden id="hdnRecommendation"/>
+                                            <div id="RecommendationsCheckBoxValue">
+                                                @{
+                                                    if (Model.CustomRecommendationList != null && Model.CustomRecommendationList.Count > 0)
+                                                    {
+
+                                                        foreach (var item in Model.CustomRecommendationList)
+                                                        {
+                                                            var RecommendationId = $"Recommendation_{RecValue}";
+                                                            if (item.DropDownTypeId == 73)
+                                                            {
+                                                                <div class="recommendationForPermanentEmployee">
+                                                                    @Html.RadioButtonFor(m => m.Recommendation, item.Value, new { @id = RecommendationId }) @item.Text
+                                                                    @*@if (item.Value == "1644")
+                                                                    {
+                                                                        @Html.EditorFor(m => m.IncreaseProMonth, new { @type = "number", })
+                                                                    }*@
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="recommendationForProbitionPerionEmployee">
+                                                                    @Html.RadioButtonFor(m => m.Recommendation, item.Value, new { @id = RecommendationId }) @item.Text
+                                                                    @if (item.Value == "1644")
+                                                                    {
+                                                                        @Html.EditorFor(m => m.IncreaseProMonth, new { @type = "number", })
+                                                                    }
+                                                                </div>
+                                                            }
+
+
+                                                            RecValue += 1;
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                            
+
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-md-12" style="margin-left:1%;">
+                                            <h3>Cartification</h3>
+                                            <p style="font-size: medium;">I certify that the employee worked under me for <input type="number" id="workWithReportingOfficer" /> year/months. Ihave made my assessment on this employee from personal knowledge and that it is my honest opinion.I have informad him of this failings or weaknesses.</p>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <label class="required">General and Special Remarks by Reporting Officer: </label>
+                                            <div class="form-group">
+                                                @Html.TextAreaFor(model => model.GeneralSpecialRemarks, new { id = "noteGeneralSpecialRemarks", placeholder = "Terms and Condition", @class = "summernote form-control", rows = 1 })
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-center" style="margin-top:2%;margin:3%" id="divBtnQualification">
+                                        <button type="button" id="btnQualification" class="btn btn-warning" style="width:25%;color:black">Submit</button>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+
+                            <div id="empMdOrCeo">
+
+                                <div class="container" style="margin-top:2%">
+                                    <div class="row">
+                                        <div class="text-center">
+                                            <h3 class="btn btn-lg forCustomHeading" id="headRemarksOfRespective">To be initiated By Counter Signatory (Officer)</h3>
+                                        </div>
+                                        @Html.HiddenFor(model=>model.AssessmentOfTheApplicant)
+                                        <div class="row">
+                                            <div id="anushobinEvaluation" class="col-md-12">
+                                                <label>I agree/disagree with the assessment of the applicant</label>
+                                                <ol>
+                                                    <li><input name="Anushobin Evaluation" type="radio"   value="1" /> If agree Comments (if any)</li>
+                                                    <li><input name="Anushobin Evaluation" type="radio"  value="2" /> If disagree Comments (if any)</li>
+                                                    <li><input name="Anushobin Evaluation" type="radio"  value="3" /> Adverse Comments (if any)</li>
+                                                </ol>
+                                            </div>
+
+
+                                            <div class="col-md-12">
+                                                <label class="required" id="remarksOfRespective">Remarks of Respective GMD/Director/MD/CEO: </label>
+                                                <div class="form-group">
+                                                    @Html.TextAreaFor(model => model.FinalCommentOfManagement, new { id = "noteFinalCommentOfManagements", placeholder = "Terms and Condition", @class = "summernote form-control", rows = 1 })
+                                                    @Html.ValidationMessageFor(model => model.Department, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div id="numberProvidedGMD">
+                                                <div class="col-md-12">
+                                                    <div class="col-md-2" style=" padding: 0px; width: 13%;">
+                                                        <label>Number provided:</label>
+                                                    </div>
+                                                    <div class="col-md-10">
+                                                        <table id="traitsTable" class="table table-bordered table-striped">
+                                                            <thead class="thead-fixed">
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th style="width: 20%;">Number provided</th>
+                                                                    <td>
+                                                                        @Html.HiddenFor(model=>model.FinalMarkings)
+                                                                        <input type="number" id="numberProvide" style="width:100%" class="form-control-lg" />
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Text</th>
+                                                                    <td style="text-align: left;"><label id="provideNumberMakeText"></label></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-md-12" id="remarkOfRes" style="margin-left:2%;">
+                                                <h4>Recommendations</h4>
+                                                @{
+                                                    if (Model.CustomRecommendationList != null && Model.CustomRecommendationList.Count > 0)
+                                                    {
+
+                                                        foreach (var item in Model.CustomRecommendationList)
+                                                        {
+                                                            var RecommendationId = $"Recommendation_{RecValue}";
+                                                            if (item.DropDownTypeId == 73)
+                                                            {
+                                                                <div class="recommendationForPermanentEmployee">
+                                                                    @Html.RadioButtonFor(m => m.Recommendation, item.Value, new { @id = RecommendationId }) @item.Text
+                                                                    @if (item.Value == "1644")
+                                                                    {
+                                                                        @Html.EditorFor(m => m.IncreaseProMonth, new { @type = "number", })
+                                                                    }
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="recommendationForProbitionPerionEmployee">
+                                                                    @Html.RadioButtonFor(m => m.Recommendation, item.Value, new { @id = RecommendationId }) @item.Text
+                                                                    @if (item.Value == "1644")
+                                                                    {
+                                                                        @Html.EditorFor(m => m.IncreaseProMonth, new { @type = "number", })
+                                                                    }
+                                                                </div>
+                                                            }
+
+
+                                                            RecValue += 1;
+                                                        }
+                                                    }
+                                                }
+
+                                            </div>*@
+                                        </div>
+                                    </div>
+
+                                    <br />
+
+                                    <div class="row text-center" style="margin-top:2%">
+                                        <button type="submit" class="btn btn-warning" style="width:25%;color:black">Submit</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                            <div id="MdOrCeo">
+                                <div class="container" style="margin-top:2%">
+                                    <div class="text-center">
+                                        <h3 class="btn btn-lg forCustomHeading" id="hedTagGm">To be initiated By Group MD</h3>
+                                    </div>
+                                    <div class="row">
+                                        <div id="QuantitativePerformance" style="font-size: medium;">
+                                            <div class="col-md-12">
+                                                <label>a.Attendance Summanry (To be field up by Admin)(10): </label>
+                                                <ol id="attendanceSummanryMark">
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label>b.Discipline Status (To be field up by Admin)(10): </label>
+                                                <ol id="disciplineStateMarks">
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-6">
+                                                        <div class="marks-section">
+                                                            <div class="marks-header">Marks Obtained</div>
+                                                            <div class="marks-item">Attendance Mark: <b id="attendanceMark"></b></div>
+                                                            <div class="marks-item">Discipline Marks: <b id="disciplineMarks"></b></div>
+                                                            <div class="marks-total">Total: <b id="totalEmployeePerformanceMark"></b></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12" id="divGmd">
+                                            <label class="required" id="lblgmd">Remarks of Group Managing Director: </label>
+                                            <div class="form-group">
+                                                @Html.TextAreaFor(model => model.FinalCommentOfManagement, new { id = "noteFinalCommentOfManagement", placeholder = "Terms and Condition", @class = "summernote form-control", rows = 1 })
+                                                @Html.ValidationMessageFor(model => model.FinalCommentOfManagement, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center" style="margin-top:2%">
+                                        <button type="submit" class="btn btn-warning" style="width:25%;color:black">Submit</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    @using (Html.BeginForm("AnnualPerformanceCheckingListFilter", "EmployeeResult", FormMethod.Post))
+                    {
+                        <div class="container" style="padding:1%">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="from" class="form-label">From Date</label>
+                                    <div class="form-group" style="display:flex">
+
+                                        @Html.Editor("fromDate", new { htmlAttributes = new { @id = "fromDate", @class = "form-control text-box single-line datepicker", @autocomplete = "off" } })
+
+                                        @Html.ValidationMessageFor(model => model.AsseFromDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="from" class="form-label">To Date</label>
+                                    <div class="form-group" style="display:flex">
+
+                                        @Html.Editor("toDate", new { htmlAttributes = new { @id = "toDate", @class = "form-control text-box single-line datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.AsseToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <hr />
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <table id="KgErpDataTable" class="table table-striped" width="100%">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width:1%">Action</th>
+                                    <th style="width:1%">Status</th>
+                                    <th>Sl</th>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>Application Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{int sl = 0;}
+                                @foreach (var item in Model.employeeResultsList)
+                                {
+                                    <tr>
+                                        <td style="display: flex; flex-wrap: nowrap; align-items: center;">
+                                            @if (item.Status == 0)
+                                            {
+                                                <a class="btn btn-primary btn-sm" onclick="modalShow('@item.SigAppMapID','@item.AnnualPerformanceDetailId','@item.OrderBy','@item.EmployeeId','@item.EmployeeCode','@item.AssessmentFrom.ToString("yyyy-MM-dd")','@item.AssessmentTo.ToString("yyyy-MM-dd")','@item.EmployeeServiceType')" data-toggle="modal" data-target="#modalForAPrGeneralized" style="width: 147px; margin-right: 5px;">
+                                                    Submit
+                                                </a>
+                                            }
+                                            else if (item.Status == 1)
+                                            {
+                                                <span class="badge badge-success" style="width: 147px; margin-right: 5px;">Submited</span>
+                                            }
+                                            else if (item.Status == -1)
+                                            {
+                                                <span class="badge badge-warning" style="margin-right: 5px; width: 147px;">-</span>
+                                            }
+
+                                            <a href="/Report/AprAndAcrReport?AnnualPerformanceId=@item.AnnualPerformanceId&EmployeeId=@item.EmployeeId&AnnualPerformanceDetailId=@item.AnnualPerformanceDetailId&EmployeeCode=@item.EmployeeCode" target="_blank" class="btn btn-sm btn-primary" title="Report" style="margin-right: 5px;">
+                                                    <i class="glyphicon glyphicon-envelope" style="font-size: 12px;"></i>
+                                                </a>
+
+                                            <a title="Details Information" href="/EmployeeResult/EmployeeResultDetail?annualPerformanceId=@item.AnnualPerformanceId&empId=@item.EmployeeId&annualPerformanceDetailId=@item.AnnualPerformanceDetailId" target="_blank" class="btn btn-info btn-sm">
+
+                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                            </a>
+                                            &nbsp;
+                                            <a title="Approval Signatory" role="button" class="btn btn-sm" onclick="ShowApprovalList('@item.AnnualPerformanceDetailId')" style="color: black; background: hotpink;">
+                                                <i class="fa fa-eye" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+
+                                            @if (item.EmpRsultStatus == 0)
+                                            {
+                                                <span class="badge badge-warning" style="color:black">Pending</span>
+                                            }
+                                            else if (item.EmpRsultStatus == 1)
+                                            {
+                                                <span class="badge badge-success">Approved</span>
+                                            }
+                                        </td>
+                                        <td>@(++sl) </td>
+                                        <td>@item.EmployeeCode</td>
+                                        <td>@item.FullName</td>
+                                        <td>@item.APREmpCreateDate.ToString("dd-MMM-yyyy")</td>
+
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        if (data.longId == 1) {
+                            location.reload(true);
+                        } else {
+                            window.location.href = data.returnURL;
+                        }
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        let ViewReport = () => {
+            $("#divProfileQualities").show();
+            $("#divBtnQualification").html('');
+        }
+
+        let ShowApprovalList = (id) => {
+            if (id > 0) {
+                $("#divSignatoryApprovalListModal").modal('toggle');
+                var datas = HttpRequest.AjaxData("GET", "/EmployeeResult/GetSignatoryApprovalList", { aprDetailsId: id })
+                if (datas != null) {
+                    var tbody = $('#signatoryApprovalListTbody');
+                    var rows = datas.map(function (item, i) {
+                        let StatusResult = ``;
+                        let StatusColor = ``;
+                        if (item.Status == 0) {
+                            StatusResult = `<span class="badge badge-warning"> Pending</span>`
+                            StatusColor = `background-color: yellow;`;
+                        } else if (item.Status == 1) {
+                            StatusResult = `<span class="badge badge-success"> Approved</span>`
+                            StatusColor = '';
+                        } else if (item.Status == -1) {
+                            StatusResult = `<span class="badge badge-info"> Holding</span>`
+                            StatusColor = '';
+                        }
+                        var row = `<tr>
+                                        <td>${++i}</td>
+                                        <td style="text-align: left; ${StatusColor}"> ${item.SignatoryApprovalName} <span style="font-size: smaller;">[${item.EmpDigName}]</span></td>
+                                        <td>${item.EmployeeCode}</td>
+                                        <td>${item.CreatedDateFormatted}</td>
+                                        <td>${StatusResult}</td>
+                                  </tr>`
+                        return row;
+                    });
+                    tbody.html(rows);
+                } else {
+                    $.alert.open("warning", "Data can't found!")
+                }
+
+
+            } else {
+                $.alert.open("warning", "Signatory Approval List Can't found!");
+            }
+        }
+
+        let modalShow = (signatoryApprovalMapId, annualPerformanceDetailId, orderBy, annualPerDetailEmpId, annualPerDetailEmpIdCode, assessmentFrom, assessmentTo, empServiceType) => {
+
+            $("#SigAppMapID").val(signatoryApprovalMapId);
+            $("#modalAnnualPerformanceDetailId").val(annualPerformanceDetailId);
+
+            $("#modalHdnStatus").val(orderBy);
+            if (annualPerDetailEmpId>0) {
+                var data = HttpRequest.AjaxData("GET", "/EmployeeResult/GetEmployeeInfo", { EmployeeId: annualPerDetailEmpId })
+                if (data != null) {
+                    $("#spanEmployeeName").text(data.EmployeeNameSrt);
+                    $("#spanEmployeeCode").text(data.EmployeeCodeSrt);
+                }
+            }
+
+            if (empServiceType === "27") {
+                $('.recommendationForPermanentEmployee').html('');
+            } else {
+                $('.recommendationForProbitionPerionEmployee').html('');
+            }
+            if (orderBy == 1) {
+                $("#empMdOrCeo").html('');
+                $("#MdOrCeo").html('');
+                $("#numberProvidedGMD").hide();
+                $("#anushobinEvaluation").hide();
+            } else if (orderBy == 2) {
+                $("#divProfileQualities").html('');
+                $("#divBtnQualification").html('');
+                $("#MdOrCeo").hide();
+                $("#numberProvidedGMD").show();
+                $("#anushobinEvaluation").show();
+                //if (annualPerDetailEmpId > 0 && annualPerDetailEmpIdCode != null && assessmentFrom != null && assessmentTo != null) {
+
+                //    var data = HttpRequest.AjaxData("GET", "/EmployeeResult/GetEmployeeMarks", { employeeId: annualPerDetailEmpId, employeeCode: annualPerDetailEmpIdCode, startDate: assessmentFrom, endDate: assessmentTo })
+                //    if (data != null) {
+
+                //        let attendanceHtml = '';
+                //        $.each(data["EmpAttendanceStatus"], function (index, item) {
+                //            attendanceHtml += '<li>Total ' + item["EmpStatus"] + ' - (<b>' + item["MarkingEmpAttendance"] + '</b>) mark deducted for <b>' + item["StatusCount"] + '</b> days ' + item["EmpStatus"] + '.</li>';
+                //        });
+                //        $.each(data["EmpLeaveCategory"], function (index, item) {
+                //            attendanceHtml += '<li>Total ' + item["LeaveCategory"].slice(0, 12) + ' - (<b>' + item["Marking"] + '</b>) mark deducted for <b>' + item["TotalLeaveDays"] + '</b> ' + item["LeaveCategory"].slice(0, 12) + ' days</li>';
+                //        });
+
+                //        // Generate HTML for EmpDisciplineStatus
+                //        let disciplineHtml = '';
+                //        $.each(data["EmpDisciplineStatus"], function (index, item) {
+                //            disciplineHtml += '<li>Total no of ' + item["EmployeeDisciplineStatus"] + ' - (<b>' + item["Marking"] + '</b>) mark deducted for <b>' + item["LogCount"] + '</b> ' + item["EmployeeDisciplineStatus"] + '</li>';
+                //        });
+
+                //        $('#attendanceMark').text(data.AttendanceMark);
+                //        $('#disciplineMarks').text(data.DisciplineMarks);
+                //        $('#totalEmployeePerformanceMark').text(data.TotalEmployeePerformanceMark);
+                //        // Append generated HTML to the document
+                //        $('#attendanceSummanryMark').html(attendanceHtml);
+                //        $('#disciplineStateMarks').html(disciplineHtml);
+                //    }
+
+                //}
+            } else if (orderBy == 3) {
+                $("#numberProvidedGMD").hide();
+                $("#divGmd").hide();
+                $("#anushobinEvaluation").hide();
+                $("#hedTagGm").text("To be initiated By Director Of Admin & HR");
+                $("#lblgmd").text("Director Admin & HR (For necessary action):");
+                $("#divProfileQualities").html('');
+                $("#divBtnQualification").html('');
+                $("#empMdOrCeo").html('');
+
+                if (annualPerDetailEmpId > 0 && annualPerDetailEmpIdCode != null && assessmentFrom != null && assessmentTo != null) {
+
+                    var data = HttpRequest.AjaxData("GET", "/EmployeeResult/GetEmployeeMarks", { employeeId: annualPerDetailEmpId, employeeCode: annualPerDetailEmpIdCode, startDate: assessmentFrom, endDate: assessmentTo })
+                    if (data != null) {
+
+                        let attendanceHtml = '';
+                        $.each(data["EmpAttendanceStatus"], function (index, item) {
+                            attendanceHtml += '<li>Total ' + item["EmpStatus"] + ' - (<b>' + item["MarkingEmpAttendance"] + '</b>) mark deducted for <b>' + item["StatusCount"] + '</b> days ' + item["EmpStatus"] + '.</li>';
+                        });
+                        $.each(data["EmpLeaveCategory"], function (index, item) {
+                            attendanceHtml += '<li>Total ' + item["LeaveCategory"].slice(0, 12) + ' - (<b>' + item["Marking"] + '</b>) mark deducted for <b>' + item["TotalLeaveDays"] + '</b> ' + item["LeaveCategory"].slice(0, 12) + ' days</li>';
+                        });
+
+                        // Generate HTML for EmpDisciplineStatus
+                        let disciplineHtml = '';
+                        $.each(data["EmpDisciplineStatus"], function (index, item) {
+                            disciplineHtml += '<li>Total no of ' + item["EmployeeDisciplineStatus"] + ' - (<b>' + item["Marking"] + '</b>) mark deducted for <b>' + item["LogCount"] + '</b> ' + item["EmployeeDisciplineStatus"] + '</li>';
+                        });
+
+                        $('#attendanceMark').text(data.AttendanceMark);
+                        $('#disciplineMarks').text(data.DisciplineMarks);
+                        $('#totalEmployeePerformanceMark').text(data.TotalEmployeePerformanceMark);
+                        // Append generated HTML to the document
+                        $('#attendanceSummanryMark').html(attendanceHtml);
+                        $('#disciplineStateMarks').html(disciplineHtml);
+                    }
+
+                }
+                
+            } else if (orderBy == 4) {
+                $("#numberProvidedGMD").hide()
+                $("#anushobinEvaluation").hide()
+                $("#divProfileQualities").html('');
+                $("#divBtnQualification").html('');
+                $("#QuantitativePerformance").html('');
+                $("#MdOrCeo").hide();
+                $("#remarksOfRespective").text('Remarks of Respective GMD');
+                $("#headRemarksOfRespective").text('To be initiated By GMD');
+                $("#remarkOfRes").html('');
+            }
+        }
+
+
+        let makeSubmitAPR = (aprid, empid) => {
+            $("#modalAnnualPerformanceId").val(aprid);
+            $("#modalEmployeeId").val(empid);
+        }
+
+        let addEductionQua = (id) => {
+            if (id > 0) {
+                $('#EducationDropDownTypeId').val(id);
+                $("#divQualityModal").modal('toggle');
+            } else {
+                alert("DropDownType Can't found!");
+            }
+
+        }
+
+
+
+        $('#radioButtonApp input[type=radio][name=Rentity]').change(function () {
+            var selectedValue = $("input[name='Rentity']:checked").val();
+            if (selectedValue === "company") {
+                $("#divHdnDepartment").hide();
+                $("#divHdnCompany").show();
+                $("#DepartmentId").val('');
+            } else if (selectedValue === "division") {
+                $("#divHdnDepartment").show();
+                $("#divHdnCompany").hide();
+                $("#CompanyId").val('');
+            }
+        });
+
+        const makeDeletale = (eduId) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/EmployeeResult/DeleteEducationById', { "EduId": eduId }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+        let salesAchiveCal = (t,a) => {
+            if (isNaN(t)) {
+                return;
+            }
+
+            var achievementPercent = (40 / t) * a;
+            return achievementPercent;
+
+        }
+
+
+
+        $(document).ready(function () {
+            $('#RecommendationsCheckBoxValue input[type="radio"]').change(function () {
+                var selectedValue = $('input[name="Recommendation"]:checked').val();
+                $('#hdnRecommendation').val(selectedValue);
+            });
+            $('input[name="Anushobin Evaluation"]').change(function () {
+                if ($(this).is(':checked')) {
+                    var value = $(this).val()
+                    $('#AssessmentOfTheApplicant').val(value);
+                }
+            });
+            $('#numberProvide').keyup(() => {
+                let numbers = $('#numberProvide').val();
+                $("#FinalMarkings").val(numbers);
+                $('#provideNumberMakeText').text(numberToWords(numbers));
+            })
+            $("#salesTarget,#salesTargetAchive").keyup(() => {
+
+                var saleTarget = parseFloat($('#salesTarget').val());
+                var achievement = parseFloat($('#salesTargetAchive').val());
+                let achievementPercentR= salesAchiveCal(saleTarget, achievement);
+
+                $("#salesTargetMakrs").val(achievementPercentR.toFixed(2));
+            })
+
+            $("#salesRecover,#saleRecoverAchive").keyup(() => {
+
+                var salerRecover = parseFloat($('#salesRecover').val());
+                var salerecoverachive = parseFloat($('#saleRecoverAchive').val());
+                let result = salesAchiveCal(salerRecover, salerecoverachive);
+                $("#salesTargetMakrsRecover").val(result.toFixed(2));
+            })
+            $("#salesTarget,#salesTargetAchive,#salesRecover,#saleRecoverAchive").keyup(() => {
+                let recoverResult =parseFloat($("#salesTargetMakrsRecover").val());
+                let salesResult = parseFloat($("#salesTargetMakrs").val());
+                let finalResult = 0;
+                if (recoverResult > 0 && salesResult > 0) {
+                    finalResult = (recoverResult + salesResult).toFixed(2)
+                } else if (recoverResult > 0) {
+                    finalResult = recoverResult.toFixed(2)
+                } else if (salesResult > 0) {
+                    finalResult = salesResult.toFixed(2)
+                }
+                $("#totalmarksobtained").text(finalResult);
+            })
+
+            //$("#majorWorkOne, #majorWorkTwo, #majorWorkThree, #majorWorkFour").keyup(() => {
+            //    let majorWorks = ["#majorWorkOne", "#majorWorkTwo", "#majorWorkThree", "#majorWorkFour"];
+            //    let finalResult = 0;
+
+            //    majorWorks.forEach((selector, index) => {
+            //        let value = $(selector).val();
+            //        if (value.length) {
+            //            switch (index) {
+            //                case 0:
+            //                    $("#majorWorkOneMakr").val(20);
+            //                    finalResult += 20;
+            //                    break;
+            //                case 1:
+            //                    $("#majorWorkTwoMark").val(20);
+            //                    finalResult += 20;
+            //                    break;
+            //                case 2:
+            //                    $("#majorWorkThreeMark").val(20);
+            //                    finalResult += 20;
+            //                    break;
+            //                case 3:
+            //                    $("#majorWorkFourMark").val(20);
+            //                    finalResult += 20;
+            //                    break;
+            //                default:
+            //                    break;
+            //            }
+            //        }
+            //    });
+
+            //    $("#totalMajorWorkMarks").text(finalResult);
+            //});
+
+
+            $("#fromDate").val('@startDate.ToShortDateString()')
+            $("#toDate").val('@endDate.ToShortDateString()')
+
+            $('#modalForAPrGeneralized').on('hidden.bs.modal', function () {
+                $('#noteFinalCommentOfManagements').summernote('reset');
+                $("#FinalMarkings").val(0);
+                $("#numberProvide").val(0);
+                $('input[name="Anushobin Evaluation"]').prop('checked', false);
+                $('#AssessmentOfTheApplicant').val(null);
+                location.reload();
+            })
+
+            $('#btnModalSaveData').click(() => {
+                let dropDownTypeId = $('#EducationDropDownTypeId').val();
+                let eduQualityTxt = $('#eduQualityTxt').val();
+                if (dropDownTypeId > 0) {
+                    HttpRequest.Ajax("POST", '/EmployeeResult/EducationContentsSave', { "dropDownTypeId": dropDownTypeId, "Name": eduQualityTxt }, saveSuccess, true);
+                }
+            })
+
+            $('#divQualityModal').on('hidden.bs.modal', function () {
+                $("#eduQualityTxt").val('');
+                $('#EducationDropDownTypeId').val(0)
+                location.reload();
+            });
+
+            $("#tblFooter").sortable({
+                items: "> tr",
+                appendTo: "parent",
+                helper: "clone",
+                cursor: "move",
+                opacity: 0.6,
+                placeholder: "ui-state-highlight",
+                stop: function (event, ui) {
+                    updateRowIndices();
+                }
+            }).disableSelection();
+
+            $("#btnDevQualifications").click(() => {
+                let annualPerformanceDetailId = $("#AnnualPerformanceDetailId").val();
+                let performanceInReportingYear = $("#notePlanforNextYear").val();
+                let additionalPerformance = $("#noteAdditionalPerformance").val();
+                let planforNextYear = $("#notePerformanceNextYear").val();
+                let annualPerformanceId = $("#AnnualPerformanceId").val();
+                let employeeId = $("#EmployeeId").val();
+                let companyId = $("#CompanyId").val();
+                let departmentId = $("#DepartmentId").val();
+                var educationListData = [];
+                $('#tblFooter tr').each(function () {
+                    var row = {};
+                    row.ExaminationDropDownTypeId = $(this).find('td').eq(1).find('select').val();
+                    row.SubjectDropDownTypeId = $(this).find('td').eq(2).find('select').val();
+                    row.Result = $(this).find('td').eq(3).find('input').val();
+                    row.PassedYear = $(this).find('td').eq(4).find('select').val();
+                    row.InstituteDropDownTypeId = $(this).find('td').eq(5).find('select').val();
+                    educationListData.push(row);
+                });
+
+                let EmpPersonalInformation = {
+                    AnnualPerformanceDetailId: annualPerformanceDetailId,
+                    EmployeeId: employeeId,
+                    PerformanceInReportingYear: performanceInReportingYear,
+                    PlanforNextYear: planforNextYear,
+                    AdditionalPerformance: additionalPerformance,
+                    AnnualPerformanceId: annualPerformanceId,
+                    CompanyId: companyId,
+                    DepartmentId: departmentId,
+                    EmployeeEqucationList: educationListData
+                }
+                if (EmpPersonalInformation != null && EmpPersonalInformation.AnnualPerformanceId) {
+                    HttpRequest.Ajax("POST", '/EmployeeResult/AnnualPerformanceDetailSaveUpdate', { "model": EmpPersonalInformation }, saveSuccess, true);
+                } else {
+                    $.alert.open("Error", "Data Can't Valid!")
+                }
+
+            });
+
+            $("#btnQualification").click(() => {
+                debugger
+                let generalSpecialRemarks = $("#noteGeneralSpecialRemarks").val();
+                let annualPerformanceDetailId = $("#modalAnnualPerformanceDetailId").val();
+                let sigAppMapID = $("#SigAppMapID").val();
+                let salesTarget = $("#salesTarget").val();
+                let salesTargetAchive = $("#salesTargetAchive").val();
+                let salesRecover = $("#salesRecover").val();
+                let saleRecoverAchive = $("#saleRecoverAchive").val();
+                let hdnRecommendation = $("#hdnRecommendation").val();
+                let increaseProMonth = $("#IncreaseProMonth").val();
+                let workWithReportingOfficer = $("#workWithReportingOfficer").val();
+                //let majorWorkOne = $("#majorWorkOne").val();
+                //let majorWorkTwo = $("#majorWorkTwo").val();
+                //let majorWorkThree = $("#majorWorkThree").val();
+                //let majorWorkFour = $("#majorWorkFour").val();
+                var profileQualitiesLists = [];
+
+                $('#traitsTable').find('input[type="checkbox"]').each(function () {
+                    if ($(this).is(':checked')) {
+                        var $checkbox = $(this);
+                        var $row = $checkbox.closest('tr');
+                        var itemValue = $checkbox.val();
+                        var itemId = $row.find('td[hidden]').text();
+
+                        profileQualitiesLists.push({
+                            DropDownItemId: itemId,
+                            ItemValue: itemValue
+                        });
+                    }
+                });
+
+
+
+                let finalDataForPost = {
+                    SigAppMapID: sigAppMapID,
+                    AnnualPerformanceDetailId: annualPerformanceDetailId,
+                    Recommendation: hdnRecommendation,
+                    IncreaseProMonth: increaseProMonth,
+                    WorkWithReportingOfficer: workWithReportingOfficer,
+                    //MajorWorkOne: majorWorkOne,
+                    //MajorWorkTwo: majorWorkTwo,
+                    //MajorWorkThree: majorWorkThree,
+                    //MajorWorkFour: majorWorkFour,
+                    GeneralSpecialRemarks: generalSpecialRemarks,
+                    SalesTarget: salesTarget,
+                    SalesAchievement: salesTargetAchive,
+                    RecoveryTarget: salesRecover,
+                    RecoveryAchievement: saleRecoverAchive,
+                    ProfileQualitiesList: profileQualitiesLists
+                }
+                if (profileQualitiesLists.length == @TotalCount && sigAppMapID > 0 && hdnRecommendation > 0) {
+                    HttpRequest.Ajax("POST", '/EmployeeResult/ProfileQualitiesSubmit', { "dataModel": finalDataForPost }, saveSuccess, true);
+                } else {
+                    $.alert.open("warning","Check Item Missing Or Recommendation can't check Or ")
+                }
+            })
+
+
+            $('#addRowBtn').click(() => {
+
+                let qualification = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLExaminations", { "DropDownItemTypeId": 7 });
+                let subjects = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLSubjects", { "DropDownItemTypeId": 42 });
+                let institutions = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLInstitutions", { "DropDownItemTypeId": 40 });
+                let years = HttpRequest.DropDownOptions("GET", "/EmployeeResult/GetDDLYears");
+
+                let rowCount = $('#tblFooter tr').length;
+                var newRow = `<tr>
+                                                                        <td>${rowCount == 0 ? rowCount + 1 : ++rowCount}</td>
+                                                                        <td class="col-sm-2">
+                                                                              <select class="form-control form-control-sm qualificationList">${qualification}</select>
+                                                                         </td>
+                                                                        <td class="col-sm-2">
+                                                                            <select class="form-control form-control-sm subjectsList">${subjects}</select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input placeholder="GPA 4.5 OurOf 5.00" class="text-center form-control from-control-sm"/>
+                                                                        </td>
+                                                                        <td class="col-sm-2">
+                                                                            <select class="form-control form-control-sm yearsList">${years}</select>
+                                                                        </td>
+                                                                        <td class="col-sm-2">
+                                                                            <select class="form-control form-control-sm institutionsList">${institutions}</select>
+                                                                        </td>
+                                                                        <td><button class="deleteRowBtn  btn btn-danger btn-sm"><i class=" fa fa-trash fa-lg" aria-hidden="true"></i></button></td>
+                                                                    </tr>`;
+                $('#tblFooter').append(newRow);
+
+                $(".qualificationList").select2();
+                $(".subjectsList").select2();
+                $(".institutionsList").select2();
+                $(".yearsList").select2();
+            });
+
+            //$('#tblFooter').on('change', '.qualificationList', function () {
+            //    let selectedValue = $(this).val();
+            //    console.log('Selected value:', selectedValue);
+            //    // Perform any action you need with the selected value
+            //});
+
+
+            $('#tblFooter').on('click', '.deleteRowBtn', function () {
+                $(this).closest('tr').remove();
+                updateRowIndices();
+            });
+
+            function updateRowIndices() {
+
+                $('#tblFooter tr').each(function (index) {
+                    $(this).find('td').eq(0).text(index + 1);
+                });
+            }
+
+            $('input[type="checkbox"]').on('change', function () {
+
+                let row = $(this).closest('tr');
+                row.find('input[type="checkbox"]').not(this).prop('checked', false);
+                calculateScores();
+            });
+
+            function calculateScores() {
+                let totalScore = 0;
+                let count = 0;
+
+                $('input[type="checkbox"]:checked').each(function () {
+                    let checkboxValue = parseInt($(this).val());
+                    if (isNaN(checkboxValue)) {
+                        console.log("Invalid value: " + $(this).val());
+                    } else {
+                        totalScore += checkboxValue;
+                        count++;
+                    }
+                });
+
+                let averageScore = count > 0 ? (totalScore / count).toFixed(2) : 0;
+
+                $('#totalScore').text(totalScore);
+                $('#averageScore').text(averageScore);
+                calToChkOverallEvaluation(averageScore);
+            }
+            calculateScores();
+            updateRowIndices();
+            $('#notePlanforNextYear').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+
+            $('#noteAdditionalPerformance').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+
+            $('#notePerformanceNextYear').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 200
+            });
+            $('#noteFinalCommentOfManagement').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteFinalCommentOfManagements').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteGeneralSpecialRemarks').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 100
+            });
+            $('#noteHOdAdminHr').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ["view", ["fullscreen", "codeview", "help"]]
+                ],
+                tabsize: 2,
+                height: 100
+            });
+        });
+
+        let calToChkOverallEvaluation = (calValue) => {
+            if (calValue >= 4.5) {
+                $("#lebOutstanding").prop("checked", true)
+            } else if (calValue >= 4 && calValue <= 4.4) {
+                $("#lebVeryGood").prop("checked", true)
+            } else if (calValue >= 3.5 && calValue <= 3.9) {
+                $("#lebGood").prop("checked", true)
+            } else if (calValue >= 2.5 && calValue <= 3.4) {
+                $("#lebAboveAverage").prop("checked", true)
+            } else if (calValue >= 1 && calValue < 2.4) {
+                $("#lebAverage").prop("checked", true)
+            } else if (calValue >= 0 && calValue < 1) {
+                $("#lebBelowAverage").prop("checked", true)
+            }
+        }
+
+
+    </script>
+}

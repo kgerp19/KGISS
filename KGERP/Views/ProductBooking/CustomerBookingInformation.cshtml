@@ -1,0 +1,2150 @@
+﻿@model KGERP.Service.ServiceModel.GLDLBookingViewModel
+@using KGERP.Utility
+
+@{
+    ViewBag.Title = "Customer Booking Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    decimal i = Convert.ToDecimal(Model.PlotSize) / 100m;
+}
+
+<style>
+    /*Attachment table Css*/
+    .alert-warning, .label-warning, .modal-warning .modal-body {
+        background-color: #f5c5a926 !important;
+        color: #000 !important;
+    }
+
+    .alert .close {
+        color: #fff;
+        opacity: 2.2;
+    }
+
+    .approval {
+        padding: 10px 10px;
+        background: #87bf87;
+        border: 1px solid #87bf87;
+        /* border-radius: 30px;*/
+    }
+
+    .approval-no {
+        padding: 10px 10px;
+        background: #a8b1a833;
+        border: 1px solid #a8b1a833;
+        border-radius: 30px;
+    }
+
+    .approval-no-re {
+        padding: 10px 10px;
+        background: #891919;
+        border: 1px solid red;
+        border-radius: 30px;
+        color: #fff;
+    }
+
+    button.close {
+        -webkit-appearance: none;
+        padding: 0;
+        cursor: pointer;
+        background: #f10f0f8f;
+        border: 0;
+    }
+
+    .table-wrapper {
+        max-width: 100%;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+
+    .table-title {
+        padding-bottom: 10px;
+        margin: 0 0 10px;
+    }
+
+        .table-title h2 {
+            margin: 6px 0 0;
+            font-size: 22px;
+        }
+
+        .table-title .add-new {
+            float: right;
+            height: 30px;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: none;
+            min-width: 100px;
+            border-radius: 50px;
+            line-height: 13px;
+        }
+
+            .table-title .add-new i {
+                margin-right: 4px;
+            }
+
+    /*   table.table {
+        table-layout: fixed;
+    }*/
+
+    .attachment table.table tr th, table.table tr td {
+        border-color: #e9e9e9;
+    }
+
+    .attachment table.table th i {
+        font-size: 13px;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+
+    .attachment table.table th:last-child {
+        width: 100px;
+    }
+
+    .attachment table.table td a {
+        cursor: pointer;
+        display: inline-block;
+        margin: 0 5px;
+        min-width: 24px;
+    }
+
+        .attachment table.table td a.add {
+            color: #27C46B;
+        }
+
+        .attachment table.table td a.edit {
+            color: #FFC107;
+        }
+
+        .attachment table.table td a.delete {
+            color: #E34724;
+        }
+
+    .attachment table.table td i {
+        font-size: 19px;
+    }
+
+    .attachment table.table td a.add i {
+        font-size: 24px;
+        margin-right: -1px;
+        position: relative;
+        top: 3px;
+    }
+
+    .attachment table.table .form-control {
+        height: 32px;
+        line-height: 32px;
+        box-shadow: none;
+        border-radius: 2px;
+    }
+
+        .attachment table.table .form-control.error {
+            border-color: #f50000;
+        }
+
+    .attachment table.table td .add {
+        display: none;
+    }
+
+    /*Attachment table Css*/
+
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .modal-header .close {
+        margin-top: -18px;
+    }
+
+    .hiddenRow {
+        padding: 0 !important;
+    }
+
+    .table > thead > tr > th,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        /* border-top: 1px solid #f4f4f4; */
+        border-top: 1px solid #dbdbdb !important;
+    }
+
+    .accordion .hj:after {
+        content: "+";
+        float: right;
+    }
+
+    .accordion .card-header.collapsed:after {
+        /* symbol for "collapsed" panels */
+        content: "-";
+    }
+
+    .preview {
+        height: 100px;
+    }
+
+    .cloud-uplode-btn {
+        background: #009688;
+        padding: 16px 22px;
+        font-size: 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.3s ease-in-out;
+        color: #fff;
+        border: 1px solid #009688;
+    }
+
+        .cloud-uplode-btn:hover {
+            background: #fff;
+            color: #009688;
+        }
+
+    .shadow {
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important
+    }
+
+    hr {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border: 0;
+        border-top: 8px solid #fff !important;
+    }
+
+    .alert {
+        padding: 10px !important;
+    }
+
+    .alert-dismissable .close, .alert-dismissible .close {
+        position: relative;
+        top: -8px;
+        right: -7px;
+    }
+
+    .badge-primary {
+        color: #fff;
+        background-color: #007bff;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+
+    .badge-dark {
+        color: #fff;
+        background-color: #343a40;
+    }
+
+
+    .badge-info {
+        color: #fff;
+        background-color: #17a2b8;
+    }
+
+    .alert-danger1 {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+
+    .alert1 {
+        position: relative;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+    }
+</style>
+
+<div class="bg-w">
+    <b>General Information </b>
+</div>
+<a href="~/ProductBooking/UpdateBookingInformation?companyId=@Model.CompanyId&CGId=@Model.CGId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+<div class="row">
+    <table class="table">
+        <tr>
+            <th style="width:18%">
+                Name of Applicant
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">[@Model.AccCode]-@Model.CustomerGroupName</label>
+            </td>
+            <th style="width:18%"> Application Date</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @if (Model.ApplicationDate == null)
+                { }
+                else
+                {@Model.ApplicationDate.Value.ToLongDateString();
+            }
+            </td>
+        </tr>
+
+        <tr>
+            <th style="width:18%">
+                Contact No
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">@Model.PrimaryContactNo</label>
+            </td>
+            <th style="width:18%"> Contact Address</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.PrimaryContactAddr</td>
+        </tr>
+        <tr>
+            <th style="width:18%">
+                Email
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">@Model.PrimaryEmail</label>
+            </td>
+            <th style="width:18%"> Booking Date</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @if (Model.BookingDate == null)
+                { }
+                else
+                {@Model.BookingDate.Value.ToLongDateString();
+            }
+            </td>
+        </tr>
+        <tr>
+            <th style="width:18%">
+                Project Name
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label class="col-form-label">@Model.ProjectName</label>
+            </td>
+            <th style="width:18%">
+                @if (Model.CompanyId == 7 && Model.isSeaPalace == 0)
+                {
+                    <Span> Plot No </Span>
+                }
+                else if(Model.CompanyId != 7 && Model.isSeaPalace == 0)
+                {
+                    <Span>  Flat No </Span>
+                }else if(Model.isSeaPalace == 1)
+            {
+                <span>Product</span>
+            }
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.PlotName</td>
+        </tr>
+
+        <tr>
+            <th style="width:18%">
+                @if (Model.CompanyId == 7 && Model.isSeaPalace == 0)
+                {
+                    <Span> Plot Size </Span>
+                }
+                else if(Model.CompanyId != 7 && Model.isSeaPalace == 0)
+                {
+                    <Span>  Flat Size</Span>
+                }
+                else if(Model.isSeaPalace == 1)
+            {
+                <span>Product Size</span>
+            }
+
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+
+                <label class="col-form-label"><span> @Model.PlotSize (@Model.UnitName)</span> </label>
+            </td>
+            <th style="width:18%"> Rate Per @Model.UnitName</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.RatePerKatha</td>
+        </tr>
+
+        <tr>
+
+            @*<th style="width:18%"> Booking No</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.BookingNo</td>*@
+            <th style="width:18%"> Facing-Info</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.FacingName</td>
+
+            <th style="width:18%"> File No</th>
+            <th style="width:2%"> :</th>
+            <td style="width:30%;text-align:left">
+                <a href="/Report/ProductBookingInformation?companyId=@Model.CompanyId&&CGId=@Model.CGId">@Model.FileNo</a>
+            </td>
+        </tr>
+
+        <tr>
+            <th style="width:18%"> Purchase Amount</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.PurchaseAmount</td>
+
+            <th style="width:18%"> Remark</th>
+            <th style="width:2%"> :</th>
+            <td style="width:30%;text-align:left">
+                @Model.Remarks
+            </td>
+        </tr>
+
+        <tr>
+            <th style="width:18%"> BookingMoney Payment Date</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%"> @(Model.BookingMoneyPaymentDate.HasValue ? Model.BookingMoneyPaymentDate.Value.ToLongDateString() : "no date")</td>
+
+            <th style="width:18%"> Down Payment Date</th>
+            <th style="width:2%"> :</th>
+            <td style="width:30%;text-align:left">
+                @(Model.DownPaymentDate.HasValue ? Model.DownPaymentDate.Value.ToLongDateString() : "no date")
+            </td>
+        </tr>
+
+
+        <tr>
+            <th style="width:18%"> Down Payment</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.DownPayment</td>
+            <th style="width:18%"> Create By</th>
+            <th style="width:2%"> :</th>
+            <td style="width:30%;text-align:left">
+                @Model.CreateBy
+            </td>
+
+        </tr>
+        <tr>
+            <th style="width:18%"> Create Date</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">@Model.CreatedDate.Value.ToLongDateString()</td>
+
+
+        </tr>
+    </table>
+</div>
+@if (Model.FileStatus == 2)
+{
+    <div class="alert1 alert-danger1" role="alert">
+        <b> This File is Cancel</b>
+    </div>
+}
+@if (Model.FileStatus == 3)
+{
+    <div class="alert1 alert-danger1" role="alert">
+        <b> This File is Transfer</b>
+    </div>
+}
+
+
+<div class="bg-w" style="margin-top:10px;">
+    <b> Mode of Payment </b>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        @{int sl = 1;
+
+
+        }
+        <thead>
+            <tr>
+                <th>
+                    SL
+                </th>
+                <th>
+                    Cost Head
+                </th>
+
+                <th style="text-align:right;">
+                    Amount
+                </th>
+                <th style="text-align:center;">
+                    Is Installment Include
+                </th>
+                <th style="text-align:right;">
+                    Paid Amount
+                </th>
+
+        </thead>
+        <tbody>
+            <tr>
+                <td> 1</td>
+                <td>
+                    @if (Model.CompanyId == 7)
+                    {
+                        <b> Land Value </b>
+                    }
+                    else
+                    {
+                        <b> Flat Value </b>
+                    }
+
+                </td>
+                <td style="text-align:right;">
+                    <b>@Model.LandValue</b>
+                    @*<b>  @(Convert.ToDecimal(Model.PlotSize)* Convert.ToDecimal(Model.RatePerKatha)) </b>*@
+                </td>
+            </tr>
+            @foreach (var item in Model.LstPurchaseCostHeads)
+            {
+                if (item.Amount > 0)
+                {
+                    <tr>
+                        <td>
+                            @(++sl)
+                        </td>
+                        <td>
+                            @item.CostName
+                        </td>
+                        <td style="text-align:right;">
+                            @item.Amount
+                        </td>
+                        <td style="text-align:center;">
+                            @if (item.IsSnstallmentInclude)
+                            {
+                                <span class="text-success">
+                                    Amount Added in Installment
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">
+                                    Individual Collection
+                                </span>
+                            }
+                        </td>
+                        <td style="text-align:right;">
+                            @if (!item.IsSnstallmentInclude)
+                            {
+                                <span class="text-success">
+                                    @item.PaidAmount
+                                </span>
+                            }
+
+
+                        </td>
+                    </tr>
+                }
+            }
+
+            <tr style="border-top:2px solid black">
+                <td colspan="3" class="text-right">
+                    <b> Total Amount : </b>
+                </td>
+                <td colspan="2" style="text-align:right;">
+                    @Model.TotalAmount
+                </td>
+
+            </tr>
+
+
+            <tr>
+                <td colspan="3" class="text-right">Discount (@Model.Discount%) on Land Value </td>
+                 
+                <td colspan="2" style="text-align:right;">
+                    @((Model.LandValue/100m) * Convert.ToDecimal(Model.Discount))
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" class="text-right">  <b> Special Discount :</b> </td>
+
+                <td colspan="2" style="text-align:right;">
+                    @Model.SpecialDiscountAmt
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" class="text-right">  <b> Total Discount :</b> </td>
+
+                <td colspan="2" style="text-align:right;">
+                    @Model.TotalDiscount
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Grand Total :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.GrandTotalAmount  </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Booking Money :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.BookingMoney  </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Down Payment :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.DownPayment  </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Total Down Payment :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.TotalBookingMoney  </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Total Down Payment Paid :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.TotalBookingMoneyPaid  </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Rest of Amount :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.RestofAmount  </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">
+                    <b>Installment Amount :</b>
+                </td>
+                <td colspan="2" style="text-align:right;"> @Model.InstallmentAmount  </td>
+            </tr>
+            @if (@Model.PurchaseAmount > 0)
+            {
+                <tr>
+                    <td colspan="3" class="text-right">
+                        <b>Purchase  Amount :</b>
+                    </td>
+                    <td colspan="2" style="text-align:right;"> @Model.PurchaseAmount  </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+@if (Model.InstallmentAmount != Model.InstallmentSumOfAmount)
+{
+    <div class="" style="position: relative; padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem; color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; display: block !important ">
+        <b> Installment Amount = @(Model.InstallmentAmount) </b>  <br />
+        <b> Installment Sum Of Amount =  @(Model.InstallmentSumOfAmount)</b> <br />
+        <b> Total fraction = @(Model.InstallmentAmount- Model.InstallmentSumOfAmount)</b>
+
+    </div>
+}
+
+<div class="bg-w">
+    <b>Installment Schedule</b>
+    <button class="btn btn-primary" id="openModal">Add New</button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Add New Item</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Your form goes here -->
+
+                @using (Html.BeginForm("AddnewInstallMent", "ProductBooking", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.CGId, new { @id = "SCGId" })
+                    @Html.HiddenFor(m => m.CompanyId, new { @id = "CompanyId" })
+                    @Html.HiddenFor(m => m.BookingId, new { @id = "SBookingId" })
+
+
+                    <input hidden name="PercentageId" id="PercentageId" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("BookingInstallmentTitle", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.BookingInstallmentTitle, new { htmlAttributes = new { @class = "form-control customStyle", @id = "BookingInstallmentTitleId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.BookingInstallmentTitle, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("BookingInstallmen Date", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.BookingInstallmentDate, new
+                                {
+        htmlAttributes = new
+                                    {
+            @class = "form-control customStyle datepicker",
+            @id = "BookingInstallmentDateId",
+            @autocomplete = "off",
+            @style = "max-width: 100%;",
+            @Value = Model.BookingInstallmentDate.ToString("dd/MM/yyyy")
+        }
+    })
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("BookingInstallmenAmmount", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.BookingInstallmenAmmount, new { htmlAttributes = new { @class = "form-control customStyle", @id = "BookingInstallmenAmmountId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.BookingInstallmenAmmount, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Remarks", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.InstalmentRemarks, new { htmlAttributes = new { @class = "form-control customStyle", @id = "NomineeSharePercentageId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.InstalmentRemarks, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Installment Type ", htmlAttributes: new { @class = "control-label" })
+                                @Html.DropDownListFor(model => model.BookingInstallmentTypeId, new SelectList(Model.BookingInstallmentType, "Value", "Text"), "---Select Installment Type---", new { id = "BookingInstallmentTypeId", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                @Html.ValidationMessageFor(model => model.nominee.RelationId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-danger" role="alert">
+                        <span id="ErrorSharePercentageId"> </span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <input id="submit" type="submit" data-confirm="Are you sure to submit?" value="Submit" class="btn btn-success pull-right" />
+                    </div>
+                }
+
+            </div>
+
+            <!-- Modal Footer -->
+
+
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    SL
+                </th>
+                <th>
+                    Installment Title
+                </th>
+
+                <th>
+                    Installment Date
+                </th>
+                <th style="text-align:right;">
+                    Amount
+                </th>
+                <th style="text-align:right;">
+                    PaidAmount
+                </th>
+                <th style="text-align:right;">
+                    Action
+                </th>
+        </thead>
+
+        @{int sl1 = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.Schedule)
+            {
+
+                <tr>
+                    <td>
+                        @(++sl1)
+                    </td>
+                    <td>
+                        @item.Title
+                    </td>
+                    <td>
+                        @item.InstallmentDate.ToString("dd-MM-yyyy")
+                    </td>
+                    <td style="text-align:right;">
+                        @item.PayableAmount
+                    </td>
+                    <td style="text-align:right;">
+                        @item.PaidAmount
+                    </td>
+                    <td style="text-align:right;">
+                        @{ if (item.IsPaid)
+                            {
+                                <button type="button" class="btn btn-dark" disabled> Paid</button>
+                            }
+                            else
+                            {
+                                if (Model.IsSubmited == true)
+                                {
+                                    @*<a data-toggle="modal" data-target="#exampleModalScrollable" onclick="collaction(@item.InstallmentId)" class="btn btn-success"> Collect Now</a>*@
+                                    <a href="/ProductBooking/MultiCollaction?companyId=@Model.CompanyId&CGId=@Model.CGId&collactionType=1" class="btn btn-success"> Collect Now</a>
+                                }
+                                else
+                                {
+                                    <a disabled class="btn btn-success"> Collect Now</a>
+                                }
+
+                            }
+                            if (item.PaidAmount == 0)
+                            {
+                                <a class="btn btn-primary" id="EditSchedule" onclick="editinstall(@item.InstallmentId)" data-toggle="modal" data-target="#Editmodal2">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+
+                                <a class="btn btn-danger" id="EditSchedule" onclick="confirmDelete(@item.InstallmentId)" data-toggle="modal" data-target="#deleteConfirmationModal">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            }
+
+                        }
+                    </td>
+
+                </tr>
+
+            }
+
+            <tr>
+                <td colspan="3" class="text-right"> <b> Total Installment Amount :</b>  </td>
+                <td colspan="3"> <b> @Model.InstallmentSumOfAmount </b></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this item?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bg-w">
+    <b> Group Membership</b>
+</div>
+
+<div class="row">
+    <table class="table table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    SL
+                </th>
+                <th>
+                    Name
+                </th>
+
+                <th>
+                    Mobile
+                </th>
+                <th>
+                    Share Percentage
+                </th>
+                <th>
+                    @if (Model.CompanyId == 7)
+                    {
+                        <b> Plot Size </b>
+                    }
+                    else
+                    {
+                        <b> Flat Size </b>
+                    }
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+        </thead>
+        @{int srial = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.Cutomers)
+            {
+
+                <tr>
+                    <td>
+                        <span data-toggle="collapse" data-target="#demo_@item.VendorId" class="accordion-toggle btn btn-warning  btn-xs glyphicon glyphicon-plus-sign"></span>
+                    </td>
+                    <td>
+                        @(++srial)
+                    </td>
+                    <td>
+                        @item.VendorName
+                    </td>
+                    <td>
+                        @item.VendorMobile
+                    </td>
+                    <td>
+                        @item.SharePercentage %
+                    </td>
+                    <td>
+                        @((i) * Convert.ToDecimal(item.SharePercentage))
+                    </td>
+                    <td>
+                        @if (item.TotalPercentage != 100)
+                        {
+                            <a onclick="addNominee(@item.VendorId,@item.TotalPercentage,'@item.VendorName')" data-toggle="modal" data-target="#addmodel" class="btn btn-info"> Add Nominee</a>
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="12" class="hiddenRow">
+                        <div class="accordian-body collapse" id="demo_@item.VendorId">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="info">
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>Customer Name</th>
+                                        <th>Relation</th>
+                                        <th>Percentage</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var list in item.CustomerNominee)
+                                    {
+                                        <tr>
+                                            <td>@list.NomineeName</td>
+                                            <td>@list.NomineeMobile</td>
+                                            <td>@list.CustomerName</td>
+                                            <td>@list.RelationName</td>
+                                            <td>@list.NomineeSharePercentage %</td>
+                                            <td>
+                                                <a onclick="deleteNominee(@list.NomineeId,@item.VendorId,'@item.VendorName')" href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#DeleteModal">
+                                                    <i class="glyphicon glyphicon-trash"></i>
+                                                </a>
+                                                <a onclick="editNominee(@list.NomineeId,@item.VendorId,@item.TotalPercentage,'@item.VendorName')" href="#" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editmodel">
+                                                    <i class="glyphicon glyphicon-pencil"></i>
+                                                </a>
+                                                <a onclick="fileNominee(@list.NomineeId)" href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#updatefilemodel">
+                                                    <i class="glyphicon glyphicon-file"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                    <tr style="background:#fffbd3">
+                                        <td colspan="4" class="text-right">
+                                            <b>Total Percentage</b>
+                                        </td>
+                                        <td colspan="2">  <b>@item.TotalPercentage %</b>  </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="bg-w">
+    <b> Booking Document Upload </b>
+</div>
+<div class="accordion" id="accordionExample">
+    <div class="card">
+        <div class="card-header" id="headingTwo" style="margin-top:30px;margin-bottom:30px">
+            <div style="text-align:center">
+                <a class="collapsed cloud-uplode-btn" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">  <i class="glyphicon glyphicon-cloud-upload"></i> File Upload Add List of Files  </a>
+            </div>
+
+        </div>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+            <div class="card-body">
+                <fieldset class="border shadow  p-2" style="background-color:#efefef;padding:10px">
+
+                    @using (Html.BeginForm("CGUloadFile", "ProductBooking", FormMethod.Post, new { enctype = "multipart/form-data", @class = "formReset" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.CGId)
+                        @Html.HiddenFor(m => m.CompanyId)
+
+                        <div class="table-wrapper attachment">
+                            <div class="table-title">
+                                <div class="row">
+                                    <div class="col-sm-8"><h2>Add New File</h2></div>
+                                    <div class="col-sm-4">
+                                        <button type="button" class="btn btn-info add-new"><i class="fa fa-plus"></i> Add New</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <table class="table table-bordered table-sm" id="attachmentTable">
+                                <thead>
+                                    <tr>
+
+                                        <th style="width:30px">SL#</th>
+                                        <th style="width:200px">Attachment Title</th>
+                                        <th style="width:200px;text-align:center">Select or Download File</th>
+                                        <th style="width:30px;text-align:center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int o = 0; o < Model.Attachments.Count(); o++)
+                                    {
+                                        <tr>
+                                            <td class="sl"> @(o+1)</td>
+                                            <td hidden="hidden"> <input value="@Model.Attachments[@o].DocId" name="Attachments[@o].DocId" /> </td>
+                                            <td><input class="form-control" readonly name="Attachments[@o].Title" value="@Model.Attachments[@o].Title" /></td>
+                                            <td style="text-align:center">
+                                                <input class="form-control-file hidden" type="file" name="Attachments[@o].File" />
+                                                <a target="_blank" class="btn btn-primary btn-sm" title="Download File" href="/Upload/DownloadFTP?docid=@Model.Attachments[o].DocId"> <i class="glyphicon glyphicon-download"> </i> </a>
+                                            </td>
+                                            <td style="text-align:center">
+                                                <a class="delete glyphicon glyphicon-trash" onclick="DeleteAttachment(@Model.Attachments[@o].DocId,@Model.CGId,event)" title="Delete" data-toggle="tooltip">
+
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+
+                            <div class="form-group row">
+                                <div class="col-sm-2"></div>
+                                <div class="col-sm-8">
+                                    <button type="submit" class="btn btn-primary" onsubmit="return submit2()" id="btnFArchive1">Upload</button>
+                                    <button type="reset" class="btn btn-danger d-none" id="btnCancel1">Cancel </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    }
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="bg-w">
+    <b>Team Leader Information </b>
+</div>
+
+<div class="alert alert-warning alert-dismissible  show" role="alert">
+    <div class="row" style="display:flex !important;width:100%">
+        <div class="col-md-6" style="width:50%;display:flex">
+            <b> Name : @Model.TeamLeadName</b>
+        </div>
+        <div class="col-md-6" style="width:50%;display:flex">
+            <b>  Phone: @Model.TeamLeadPhone</b>
+        </div>
+    </div>
+    @*<div class="row" style="display:flex !important;width:100%">
+            <div class="col-md-5" style="width:50%;display:flex;margin-top:10px">
+                <b> Email : @Model.TeamLeadEmail</b>
+            </div>
+            <div class="col-md-7" style="width:50%;display:flex;margin-top:10px">
+                <b>  Address: @Model.TeamLeadAddress</b>
+            </div>
+        </div>*@
+</div>
+
+<div class="bg-w">
+    <b>Sales Person Information </b>
+</div>
+
+<div class="alert alert-warning alert-dismissible  show" role="alert">
+    <div class="row" style="display:flex !important;width:100%">
+        <div class="col-md-6" style="width:50%;display:flex">
+            <b> Name : @Model.SalesPerson</b>
+        </div>
+        <div class="col-md-6" style="width:50%;display:flex">
+            <b>  Phone: @Model.SalesPersonPhone</b>
+        </div>
+    </div>
+    @*<div class="row" style="display:flex !important;width:100%">
+            <div class="col-md-5" style="width:50%;display:flex;margin-top:10px">
+                <b> Email : @Model.SalesPersonEmail</b>
+            </div>
+            <div class="col-md-7" style="width:50%;display:flex;margin-top:10px">
+                <b>  Address: @Model.SalesPersonAddress</b>
+            </div>
+        </div>*@
+</div>
+
+
+<div class="bg-w" style="margin-bottom:20px">
+    <b> Approval </b>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-3">
+        <b style="border-bottom:1px dotted #000;width:100%;margin-bottom:3px">Entry By </b> <br />
+        @if (Model.approval.EntryBy != null)
+        {
+            <b style="text-align:left;">
+                @if (!string.IsNullOrEmpty(Model.approval.EntryBySignatureFileName))
+                {
+                    <img src="@Url.Content("~/Images/Picture/" + Model.approval.EntryBySignatureFileName)" alt="Signature" style="max-width: 150px; max-height: 150px;" />
+                }
+                else
+                {
+                    <span>No signature</span>
+                }
+            </b>
+            <br />
+            <b> @Model.approval.EntryName </b><br />
+            <b> @Model.approval.EntryDesignation </b> <br />
+            <b> @(Model.approval.EntryDate.HasValue?@Model.CreatedDate.Value.ToString("dd-MMM-yyyy"):"") </b>
+        }
+    </div>
+    <div class="col-sm-3">
+        <b style="border-bottom:1px dotted #000;width:100%;margin-bottom:3px">Checked By </b> <br />
+        @if (Model.approval.CheckedBy != null)
+        {
+            <b> @Model.approval.CheckeName </b><br />
+            <b> @Model.approval.CheckedDesignation </b><br />
+            <b> @(Model.approval.CheckDate.HasValue?@Model.approval.CheckDate.Value.ToString("dd-MMM-yyyy"):"") </b>
+        }
+    </div>
+    <div class="col-sm-3">
+        <b style="border-bottom:1px dotted #000;width:100%;margin-bottom:3px">Approved By </b><br />
+        @if (Model.approval.ApprovedBy != null)
+        {
+            <b>@Model.approval.ApproveName  </b><br />
+            <b> @Model.approval.ApprovedDesignation </b> <br />
+            <b> @(Model.approval.ApproveDate.HasValue?@Model.approval.ApproveDate.Value.ToString("dd-MMM-yyyy"):"") </b>
+        }
+    </div>
+    <div class="col-sm-3">
+        <b style="border-bottom:1px dotted #000;width:100%;margin-bottom:3px">Final Approver By </b><br />
+        @if (Model.approval.FinalApproverBy != null)
+        {
+            <b>@Model.approval.FinalApproveName</b> <br />
+            <b> @Model.approval.FinalApproverDesignation </b> <br />
+            <b> @(Model.approval.FinalApvDate.HasValue?@Model.approval.FinalApvDate.Value.ToString("dd-MMM-yyyy"):"") </b>
+        }
+    </div>
+</div>
+<div class="bg-w" style="margin-top:20px">
+    <b> Submission Area </b>
+</div>
+
+@if (Model.IsSubmited == false)
+{
+    <div class="row" style="margin-top:40px">
+
+        <div class="col-sm-3" style="text-align:center">
+            <button value="Submit" style="width:100%" id="btnsave1" class="btn btn-md btn-success" type="submit" data-toggle="modal" data-target="#BookingSubmitModal"> Submit </button>
+        </div>
+
+    </div>
+
+}
+else
+{
+    if (Model.IsSubmited == true)
+    {
+        <div class="row" style="margin-top:40px">
+
+            <div class="col-sm-4" style="text-align:center">
+                <input value="Submited" disabled class="btn btn-sm btn-success d-block" type="button" style="width:200px" />
+            </div>
+            <div class="col-sm-4"></div>
+        </div> }
+    else
+    {
+        <div class="row" style="margin-top:40px">
+
+            <div class="col-sm-4" style="text-align:center">
+                <input value="Waiting for Aproval" disabled class="btn btn-sm btn-primary d-block" type="submit" style="width:200px" />
+            </div>
+            <div class="col-sm-4"></div>
+        </div>
+    }
+
+}
+
+
+<!--Booking Submit Modal -->
+<div class="modal fade" id="BookingSubmitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel"><span id="dvname"> Booking FileNo : @Model.FileNo </span></h4>
+                <button type="button" class="close bg-danger" style="opacity:1;" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("finalsubmit", "ProductBooking", FormMethod.Post))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.CompanyId, new { @id = "SCompanyId" })
+                    @Html.HiddenFor(m => m.CGId, new { @id = "SCGId" })
+                    @Html.HiddenFor(m => m.BookingNo, new { @id = "BookingNo" })
+                    @Html.HiddenFor(m => m.BookingId, new { @id = "SBookingId" })
+                    @Html.HiddenFor(m => m.ProductStatus, new { @id = "ProductStatus" })
+                    @Html.HiddenFor(m => m.ProductId, new { @id = "subProductProductId" })
+                    @Html.HiddenFor(m => m.BookingDate, new { @id = "BookingDate" })
+
+                    @if (Model.ProductStatus == (int)ProductStatusEnumGLDL.UnSold || Model.ProductStatus == (int)ProductStatusEnumKPL.VacantFlat)
+                    {
+                        <div class="card">
+                            <div class="card-body" style="background: #4caf505c; padding: 4px">
+                                <h4 class="text-danger" style="font-size:30px"> Notify <i class="fa fa-bell"></i> :</h4>
+                                @if (Model.CompanyId == 7)
+                                {
+                                    <h4 style="color: #ff5722"> <b> Plot Status Is : UnSold  </b> </h4>
+
+                                    <p style="font-size: 17px">
+                                        <span style="color:black"> This File(@Model.FileNo) generate a receivable voucher automatically and should be Accounts Integrated.</span>
+                                    </p>
+                                }
+                                else
+                                {
+                                    <h4 style="color: #ff5722">
+                                        <b> Flat Status Is : Vacant Flat</b>
+                                    </h4>
+
+                                    <p style="font-size: 17px">
+                                        <span style="color: black"> This File(@Model.FileNo) generate a receivable voucher automatically and should be Accounts Integrated.</span>
+                                    </p>
+                                }
+
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card">
+                            <div class="card-body" style="background: #f39c124d;padding:4px">
+                                <h4 class="text-danger" style="font-size:30px"> Notify <i class="fa fa-bell"></i> :</h4>
+                                @if (Model.CompanyId == 7)
+                                {
+                                    <h4> <b> Plot Status Is : @((ProductStatusEnumGLDL)Model.ProductStatus);  </b> </h4>
+                                }
+                                else
+                                {
+                                    <h4> <b> Flat Status Is : @((ProductStatusEnumKPL)Model.ProductStatus);  </b> </h4>
+                                }
+                                <p style="font-size: 17px">
+                                    <b style="color:red"> This Existing File , Not Available Accounts Integrated.</b>
+                                </p>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <input value=" Confirm Submit" class="btn btn-md btn-success" type="submit" style="width:100%" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+<!--Delete Modal -->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"><span id="dvname"> </span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("DeleteNominee", "ProductBooking", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.nominee.CustomerId, new { @id = "dCustomerId" })
+                    @Html.HiddenFor(m => m.nominee.CGId, new { @id = "dCGId" })
+                    @Html.HiddenFor(m => m.nominee.ProductId, new { @id = "dProductId" })
+                    @Html.HiddenFor(m => m.nominee.CompanyId, new { @id = "dcompanyId" })
+                    @Html.HiddenFor(m => m.nominee.NomineeId, new { @id = "dNomineeId" })
+
+                    <div class="modal-footer">
+                        <input id="submit" type="submit" value="Delete Nominee" class="btn btn-danger pull-right" />
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--Add Large modal -->
+<div class="modal fade bd-example-modal-lg" id="addmodel" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add New Nominee for <span id="vname"> </span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("CustomerNominee", "ProductBooking", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.nominee.CustomerId, new { @id = "nCustomerId" })
+                    @Html.HiddenFor(m => m.nominee.CGId, new { @id = "nCGId" })
+                    @Html.HiddenFor(m => m.nominee.ProductId, new { @id = "nProductId" })
+                    @Html.HiddenFor(m => m.nominee.CompanyId, new { @id = "companyId" })
+                    <input hidden name="PercentageId" id="PercentageId" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Name", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeName, new { htmlAttributes = new { @class = "form-control customStyle", @id = "NomineeNameId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Phone Number", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeMobile, new { htmlAttributes = new { @class = "form-control customStyle", @id = "NomineeMobileId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeMobile, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Email", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeEmail, new { htmlAttributes = new { @class = "form-control customStyle", @id = "NomineeEmailId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeEmail, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Nominee Percentage", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeSharePercentage, new { htmlAttributes = new { @class = "form-control customStyle", @id = "NomineeSharePercentageId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeSharePercentage, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Relations", htmlAttributes: new { @class = "control-label" })
+                                @Html.DropDownListFor(model => model.nominee.RelationId, new SelectList(Model.pRM_Relations, "Value", "Text"), "---Select Relations---", new { id = "ddlRelationId", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                @Html.ValidationMessageFor(model => model.nominee.RelationId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-danger" role="alert">
+                        <span id="ErrorSharePercentageId"> </span>
+                    </div>
+
+                    <div class="row">
+                        <div class="text-center" style="padding-left:20px;padding-right:20px">
+                            <input id="submit" type="submit" data-confirm="Are you sure to submit?" value="Submit" class="btn btn-success pull-right" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Large modal -->
+<div class="modal fade bd-example-modal-lg" id="editmodel" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add New Nominee for <span id="vname"> </span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("UpdateNominee", "ProductBooking", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.nominee.CustomerId, new { @id = "ECustomerId" })
+                    @Html.HiddenFor(m => m.nominee.CGId, new { @id = "ECGId" })
+                    @Html.HiddenFor(m => m.nominee.ProductId, new { @id = "EProductId" })
+                    @Html.HiddenFor(m => m.nominee.CompanyId, new { @id = "EcompanyId" })
+                    @Html.HiddenFor(m => m.nominee.NomineeId, new { @id = "ENomineeId" })
+                    <input hidden name="EPercentageId" id="EPercentageId" />
+                    <input hidden name="demoPercentageId" id="demoPercentageId" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Name", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeName, new { htmlAttributes = new { @class = "form-control customStyle", @id = "ENomineeNameId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Phone Number", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeMobile, new { htmlAttributes = new { @class = "form-control customStyle", @id = "ENomineeMobileId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeMobile, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Email", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeEmail, new { htmlAttributes = new { @class = "form-control customStyle", @id = "ENomineeEmailId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeEmail, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Nominee Percentage", htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nominee.NomineeSharePercentage, new { htmlAttributes = new { @class = "form-control customStyle", @id = "ENomineeSharePercentageId", @autocomplete = "off", @style = "max-width: 100%;" } })
+                                @Html.ValidationMessageFor(model => model.nominee.NomineeSharePercentage, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Relations", htmlAttributes: new { @class = "control-label" })
+                                @Html.DropDownListFor(model => model.nominee.RelationId, new SelectList(Model.pRM_Relations, "Value", "Text"), "---Select Relations---", new { id = "EddlRelationId", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                                @Html.ValidationMessageFor(model => model.nominee.RelationId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="alert alert-danger alert-danger2" role="alert">
+                        <span id="ErrorSharePercentageId2"> </span>
+                    </div>
+
+                    <div class="row">
+                        <div class="text-center" style="padding-left:20px;padding-right:20px">
+                            <input id="update" type="submit" data-confirm="Are you sure to uptade?" value="Update" class="btn btn-warning pull-right" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Large modal -->
+<div class="modal fade bd-example-modal-lg" id="updatemodel" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add New Nominee for <span id="vname"> </span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("UpdateNominee", "ProductBooking", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.nominee.CustomerId, new { @id = "ECustomerId" })
+                    @Html.HiddenFor(m => m.nominee.CGId, new { @id = "ECGId" })
+                    @Html.HiddenFor(m => m.nominee.ProductId, new { @id = "EProductId" })
+                    @Html.HiddenFor(m => m.nominee.CompanyId, new { @id = "EcompanyId" })
+                    @Html.HiddenFor(m => m.nominee.NomineeId, new { @id = "ENomineeId" })
+
+                    <div class="row">
+
+                    </div>
+
+                    <div class="alert alert-danger alert-danger2" role="alert">
+                        <span id="ErrorSharePercentageId2"> </span>
+                    </div>
+
+                    <div class="row">
+                        <div class="text-center" style="padding-left:20px;padding-right:20px">
+                            <input id="update" type="submit" data-confirm="Are you sure to uptade?" value="Update" class="btn btn-warning pull-right" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--file Large modal -->
+<div class="modal fade bd-example-modal-lg" id="updatefilemodel" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add New Nominee for <span id="vname"> </span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("UpdateNomineefile", "ProductBooking", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("CGId", new { @id = "fCGId" })
+                    @Html.Hidden("CompanyId", new { @id = "fcompanyId" })
+                    <input hidden name="CNomineeId" id="fNomineeId" />
+                    @*@Html.Hidden("CNomineeId", new { @id = "fNomineeId" })*@
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div class="form-group row imgeuplode">
+                                <label for="" class="col-form-label col-sm-4 mt-1"> Nominee Image Upload</label>
+                                <div class="col-sm-4">
+                                    <input name="ImageFile" type="file" id="ImageFile" accept="image/*" />
+                                </div>
+                                <div class="col-sm-4">
+                                    <img id="ImageFileview" src="#" alt="your image" class="preview" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="col-sm-4">
+                                    <div id="ImageFileShow"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group row niduplode">
+                                <label for="" class="col-form-label col-sm-4 mt-1"> Nominee NID Upload</label>
+                                <div class="col-sm-4">
+                                    <input name="NIDFile" type="file" id="NIDFile" accept="image/*" />
+                                </div>
+                                <div class="col-sm-4">
+                                    <img id="NIDFileview" src="#" alt="your image" class="preview" />
+                                </div>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <div id="NidFileShow">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="text-center" style="padding-left:20px;padding-right:20px">
+                            <input id="update" type="submit" data-confirm="Are you sure to Uplode?" value="Upload" class="btn btn-warning pull-right" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- collaction bill Model-->
+<div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
+        @using (Html.BeginForm("SignalCollaction", "ProductBooking", FormMethod.Post))
+        {
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalScrollableTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body">
+
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.CGId, new { @id = "CCGId" })
+                        @Html.HiddenFor(m => m.CompanyId, new { @id = "CcompanyId" })
+                        @Html.HiddenFor(m => m.BookingId, new { @id = "CBookingId" })
+                        @Html.HiddenFor(m => m.BookingNo, new { @id = "CBookingNo" })
+                        <input hidden name="InstallmentId" id="InstallmentId" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <input type="submit" value="Confirm" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="Editmodal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <div class="row" style="margin-bottom:10px">
+                        <div class="col-md-6">
+                            <label class="form-label">Installment Title</label>
+                            <input type="text" class="form-control" id="Installmenttitle">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Installment Date</label>
+                            <div style="display:flex">
+                                <input type="text" class="form-control datepicker" id="installmentdate">
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="row" style="margin-bottom:10px">
+                        <div class="col-md-6">
+                            <label class="form-label">Actual Amount</label>
+                            <input type="number" readonly class="form-control" id="amnt">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Change  Amount</label>
+                            <input type="number" class="form-control" id="paidamont">
+                        </div>
+                        <input hidden id="instalId" />
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer mt-3" style="margin-top:15px">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="editModalChange">Confirm changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+
+        function myfunc() {
+
+            $('#attachmentTable > tbody  > tr').each(function (index, tr) {
+                $(tr).find(".sl").html(index + 1);
+                $(tr).find(".docid").attr("name", "Attachments[" + index + "].DocId")
+                $(tr).find(".title").attr("name", "Attachments[" + index + "].Title")
+                $(tr).find(".file").attr("name", "Attachments[" + index + "].File")
+
+                console.log(tr);
+            });
+            //console.log(valueList);
+
+            //console.log("(" + valueList.join("),(") + ")");
+        }
+
+
+    function collaction(InstallmentId) {
+
+        $("#InstallmentId").val(InstallmentId);
+    }
+
+
+
+        $(document).ready(function () {
+            $(".alert-danger").hide();
+            $('[data-toggle="tooltip"]').tooltip();
+            var actions = '<a class="delete glyphicon glyphicon-trash" onclick="DeleteAttachment(0,0,event)" title="Delete" data-toggle="tooltip"></a>';
+            // Append table with add row form on add new button click
+            $(".add-new").click(function () {
+                /*$(this).attr("disabled", "disabled");*/
+                var index = $("#attachmentTable tbody tr:last-child").index();
+                var row = '<tr>' +
+                    '<td class="sl"></td> <td hidden="hidden"> <input class="docid" value="0" name="Attachments[0].DocId" /> </td>' +
+                    '<td><input class="form-control title" required  name="Attachments[0].Title"/></td>' +
+                    '<td><input class="form-control-file file" required type="file" name="Attachments[0].File"/></td>' +
+                    '<td style="text-align:center">' + actions + '</td>' +
+                    '</tr>';
+                $("#attachmentTable").append(row);
+                myfunc();
+                /*$("#attachmentTable tbody tr").eq(index + 1).find(".add, .edit").toggle();*/
+                /*$('[data-toggle="tooltip"]').tooltip();*/
+            });
+            //#attachmentTable
+
+            // Add row on add button click
+            $(document).on("click", ".add", function () {
+                var empty = false;
+                var input = $(this).parents("tr").find('input[type="text"]');
+                input.each(function () {
+                    if (!$(this).val()) {
+                        $(this).addClass("error");
+                        empty = true;
+                    } else {
+                        $(this).removeClass("error");
+                    }
+                });
+                $(this).parents("tr").find(".error").first().focus();
+                if (!empty) {
+                    input.each(function () {
+                        $(this).parent("td").html($(this).val());
+                    });
+                    $(this).parents("tr").find(".add, .edit").toggle();
+                    $(".add-new").removeAttr("disabled");
+                }
+            });
+            // Edit row on edit button click
+            $(document).on("click", ".edit", function () {
+                $(this).parents("tr").find("td:not(:last-child)").each(function () {
+                    $(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
+                });
+                $(this).parents("tr").find(".add, .edit").toggle();
+                $(".add-new").attr("disabled", "disabled");
+            });
+
+
+            // Delete row on delete button click
+            //$(document).on("click", ".delete", function () {
+
+            //    var x = this;
+            //    $.confirm({
+            //        title: "",
+            //        content: "<span class='alert_content'> Do you want to delete this file? </span>",
+            //        columnClass: 'small',
+            //        buttons: {
+            //            confirm: {
+            //                text: "<span class='alert_text'>Yes</span>",
+            //                btnClass: 'btn-warning',
+            //                keys: ['enter'],
+            //                action: function () {
+            //                    $(x).parents("tr").remove();
+            //                    myfunc();
+            //                }
+            //            },
+            //            cancel: {
+            //                text: "No",
+            //                btnClass: 'btn-blue',
+            //                keys: ['esc'],
+            //                //action: function () {
+            //                //    $.alert("<h5 class='bg-default text-dark'>Your file was not deleted!!</h3>");
+            //                //    // return "cancelled"
+            //                //}
+            //            }
+            //        }
+            //    });
+
+            //});
+        });
+
+
+    $("#ddlAccounting_BankOrCashParantId").change(function () {
+        var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("HeadGLByHead5ParentIdGet", "Vouchers")",
+            datatype: "Json",
+            data: { companyId: "@Model.CompanyId", parentId: bankOrCashParantId },
+            success: function (data) {
+                var items = "";
+                if (data) {
+                    $("#ddlAccounting_BankOrCashId").empty();
+                    $(data).each(function (index, item) {
+                        $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                    });
+
+                }
+            }
+        });
+    })
+
+        function DeleteAttachment(docid, cgid, event) {
+            var x = event;
+            console.log(event);
+            $.confirm({
+                title: "",
+                content: "<span class='alert_content'> Do you want to delete this file? </span>",
+                columnClass: 'small',
+                buttons: {
+                    confirm: {
+                        text: "<span class='alert_text'>Yes</span>",
+                        btnClass: 'btn-warning',
+                        keys: ['enter'],
+                        action: function () {
+                            if (docid > 0 && cgid > 0) {
+                                $.ajax({
+                                    type: "post",
+                                    url: "/ProductBooking/CGFileDelete",
+                                    data: { docId: docid, CGId: cgid },
+                                    datatype: "json",
+                                    traditional: true,
+                                    success: function (data) {
+                                        console.log(data);
+                                        if (data) {
+                                            $(x.path[2]).remove();
+                                            myfunc();
+                                        } else {
+
+                                        }
+                                    }
+                                });
+
+                            } else {
+                                $(x.path[2]).remove();
+                                //$(".add-new").removeAttr("disabled");
+                            }
+
+                            myfunc();
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-blue',
+                        keys: ['esc'],
+                        //action: function () {
+                        //    $(x.path[3]).remove();
+                        //    //$(".add-new").removeAttr("disabled");
+                        //    myfunc();
+                        //}
+                    }
+                }
+            });
+
+        }
+    </script>
+    <script type="text/javascript">
+
+
+
+        ImageFile.onchange = evt => {
+            const [file] = ImageFile.files
+            if (file) {
+                ImageFileview.src = URL.createObjectURL(file)
+                console.log(dd);
+            }
+        }
+        NIDFile.onchange = evt => {
+            const [file] = NIDFile.files
+            if (file) {
+                NIDFileview.src = URL.createObjectURL(file)
+                console.log(dd);
+            }
+        }
+        function addNominee(a, c, b) {
+                $("#vname").html(b)
+                $("#nCustomerId").val(a)
+                $("#nCGId").val(@Model.CGId)
+                $("#nProductId").val(@Model.ProductId)
+                $("#companyId").val(@Model.CompanyId)
+                $("#PercentageId").val(c)
+        }
+        function fileNominee(a) {
+                $("#fNomineeId").val(parseFloat(a))
+                $("#fCGId").val(@Model.CGId)
+                $("#fcompanyId").val(@Model.CompanyId)
+                $.ajax({
+                type: "post",
+                url: "/ProductBooking/GetNominee",
+                data: { id: a },
+                datatype: "json",
+                traditional: true,
+                    success: function (data) {
+                        $("#ImageFileShow").empty();
+                        $("#NidFileShow").empty();
+
+                        if (data.ImageDocId !== 0) {
+                            $(".imgeuplode").hide();
+
+                            var html = '';
+                            html += '<h5> Nominee Image</h5>';
+                            html += ' <img src="/Upload/DownloadFTP?docid=' + data.ImageDocId + '" alt="your image" class="preview" />';
+                            html += ' <a class="btn btn-danger btn-sm" onclick="imgdelete(' + data.ImageDocId + ',' + data.NomineeId + ')"> Delete</a>';
+                            $('#ImageFileShow').html(html);
+                        } else {
+                            $("#ImageFileShow").empty();
+                            $(".imgeuplode").show();
+                        }
+                        if (data.NIDDocId !== 0) {
+                            $(".niduplode").hide();
+                            var html2 = '';
+                            html2 += '<h5> Nominee NID</h5>';
+                            html2 += ' <img src="/Upload/DownloadFTP?docid=' + data.NIDDocId + '" alt="your image" class="preview" />';
+                            html2 += ' <a class="btn btn-danger btn-sm" onclick="niddelete(' + data.NIDDocId + ',' + data.NomineeId + ')"> Delete</a>';
+                            $('#NidFileShow').html(html2);
+                        } else {
+                            $("#NidFileShow").empty();
+                            $(".niduplode").show();
+                        }
+                      console.log(data);
+                }
+            });
+    }
+
+
+    function imgdelete(did, nid) {
+        if (confirm("Are you sure to remove this ?")) {
+            $.ajax({
+                type: "post",
+                url: "/ProductBooking/DeleteNomineeImageFile",
+                data: { docId: did, nomineeId: nid, CGId:@Model.CGId,companyId:@Model.CompanyId},
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    if (data == 0) {
+                        alert("Problem ");
+                    } else {
+                        $("#ImageFileShow").empty();
+                        $(".imgeuplode").show();
+                    }
+
+                }
+            });
+        }
+    }
+    function niddelete(did, nid) {
+         if (confirm("Are you sure to remove this ?")) {
+            $.ajax({
+                type: "post",
+                url: "/ProductBooking/DeleteNomineeNidFile",
+                data: { docId: did, nomineeId: nid, CGId:@Model.CGId,companyId:@Model.CompanyId},
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    if (data == 0) {
+                        alert("Problem ");
+                    } else {
+                        $("#NidFileShow").empty();
+                        $(".niduplode").show();
+                    }
+                }
+            });
+        }
+    }
+
+        function rebuildDatePicker() {
+            $('.js-date').datepicker({
+                dateFormat: 'dd-M-yy',
+
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "1950:+150"
+            });
+        }
+
+
+        $('.datepickeronPage').datepicker({
+            dateFormat: 'dd-M-yy',
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "1950:+150"
+        });
+
+    $("#NomineeSharePercentageId").keyup(function () {
+        var value = $("#NomineeSharePercentageId").val();
+        var Extvalue = $("#PercentageId").val();
+        var res = parseFloat(Extvalue) + parseFloat(value);
+        var available = 100 - parseFloat(Extvalue);
+        if (100 < res) {
+            $("#submit").attr("disabled", true);
+            $("#ErrorSharePercentageId").text("Available SharePercentage is " + available + "%");
+            $(".alert-danger").show();
+        } else {
+            $("#submit").attr("disabled", false);
+            $("#ErrorSharePercentageId").text("");
+            $(".alert-danger").hide();
+        }
+    });
+          function deleteNominee(n,a,b) {
+            console.log(n,a,b);
+                $("#dvname").html(b)
+                $("#dCustomerId").val(a)
+                $("#dNomineeId").val(n)
+                $("#dCGId").val(@Model.CGId)
+                $("#dProductId").val(@Model.ProductId)
+                $("#dcompanyId").val(@Model.CompanyId)
+        }
+        function editNominee(n, a,p, b) {
+
+            $.ajax({
+                type: "post",
+                url: "/ProductBooking/GetNominee",
+                data: { id: n },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    console.log(data);
+                $("#Edvname").html(b)
+                $("#ECustomerId").val(a)
+                $("#ENomineeId").val(n)
+                $("#EPercentageId").val(p)
+                $("#ECGId").val(@Model.CGId)
+                $("#EProductId").val(@Model.ProductId)
+                    $("#EcompanyId").val(@Model.CompanyId)
+                    $("#ENomineeNameId").val(data.NomineeName)
+                    $("#ENomineeId").val(data.NomineeId)
+                    $("#ENomineeMobileId").val(data.NomineeMobile)
+                    $("#ENomineeEmailId").val(data.NomineeEmail)
+                    $("#ENomineeSharePercentageId").val(data.NomineeSharePercentage)
+                    $("#demoPercentageId").val(data.NomineeSharePercentage)
+                    $("#EddlRelationId").val(data.RelationId).change()
+
+                }
+            });
+
+        }
+
+        $("#ENomineeSharePercentageId").keyup(function () {
+            var value = $("#ENomineeSharePercentageId").val();
+            var current = $("#EPercentageId").val();
+            var demovalue = $("#demoPercentageId").val();
+            var Extvalue = parseFloat(current) - parseFloat(demovalue);
+            var res = parseFloat(Extvalue) + parseFloat(value);
+            var available = 100 - parseFloat(Extvalue);
+            if (100 < res) {
+                $("#update").attr("disabled", true);
+                $("#ErrorSharePercentageId2").text("Available SharePercentage is " + available + "%");
+                $(".alert-danger2").show();
+            } else {
+                $("#update").attr("disabled", false);
+                $("#ErrorSharePercentageId2").text("");
+                $(".alert-danger2").hide();
+            }
+        });
+
+        function editinstall(id) {
+                $.ajax({
+                type: "Post",
+                    url: "@Url.Action("Getinstallmentclient", "ProductBooking")",
+                    datatype: "json",
+                    data: { id: id },
+                success: function (data) {
+                    console.log(data);
+                    var installmentDate = DateCustom(data.InstallmentDate)
+                    $("#Installmenttitle").val(data.InstallmentName);
+                    $("#installmentdate").val(installmentDate);
+                    $("#amnt").val(data.PayableAmount);
+                    $("#paidamont").val(data.PaidAmount);
+                    $("#instalId").val(data.InstallmentId);
+                }
+                });
+
+
+        }
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+        }
+        $("#editModalChange").click(function () {
+            var v = {
+                'InstallmentId':$("#instalId").val(),
+                'InstallmentName': $("#Installmenttitle").val(),
+                'InstallmentDate': $("#installmentdate").val(),
+                'PayableAmount': $("#amnt").val(),
+                'PaidAmount': $("#paidamont").val(),
+
+            }
+            console.log(v);
+
+
+            $.ajax({
+                type: "Post",
+                    url: "@Url.Action("UpdateInstallMent", "ProductBooking")",
+                    datatype: "json",
+                    data: { model: v },
+                success: function (data) {
+                    if (data == 1) {
+                        location.reload();
+                    } else {
+                        alert("Something Wrong");
+                    }
+                }
+                });
+        });
+
+        $("#openModal").click(function () {
+            $("#myModal").modal();
+        });
+        function confirmDelete(installmentId) {
+
+            $('#deleteConfirmationModal').data('installmentId', installmentId);
+
+           // $('#deleteConfirmationModal').modal('show');
+        }
+
+
+
+        $('#confirmDeleteBtn').on('click', function () {
+
+            var installmentId = $('#deleteConfirmationModal').data('installmentId');
+            alert(installmentId);
+
+            $.ajax({
+                url: '/ProductBooking/DeleteAction',
+                type: 'POST',
+                data: { installmentId: installmentId },
+                success: function (response) {
+
+                    $('#deleteConfirmationModal').modal('hide');
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+
+                    console.error(error);
+
+                }
+            });
+
+
+
+
+
+
+
+
+
+        });
+
+    </script>
+}

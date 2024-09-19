@@ -1,0 +1,156 @@
+﻿@model KGERP.Service.ServiceModel.CollactionBillViewModel
+@{
+    ViewBag.Title = "SignalCollaction";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+</style>
+<section style="margin-bottom:20px;font-size:25px">
+    <h3 class="bg-w" style="padding-left:5px"><b> @Model.CompanyName Bill Collaction  </b> </h3>
+</section>
+
+@using (Html.BeginForm("SignalConfirmCollaction", "ProductBooking", FormMethod.Post))
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.CGId, new { @id = "CCGId" })
+                @Html.HiddenFor(m => m.CompanyId, new { @id = "CcompanyId" })
+                @Html.HiddenFor(m => m.BookingId, new { @id = "CBookingId" })
+                @Html.HiddenFor(m => m.BookingNo, new { @id = "CBookingNo" })
+                @Html.HiddenFor(m => m.InstallmentId, new { @id = "CBookingNo" })
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Collection Date</label>
+                        <div style="display:flex">
+                            <input name="TransactionDateString" value="@Model.TransactionDateString" required class="form-control datepickeronPage" id="TransactionDateString" placeholder="--- Select Date ---" autocomplete="off">
+                            @Html.ValidationMessageFor(model => model.TransactionDateString, "", new { @class = "text-danger" })
+                        </div>
+                   </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtBankCharge" class="col-form-label">Bank Charge:</label>
+                        @Html.TextBoxFor(model => model.BankCharge, new { id = "txtBankCharge", @class = "form-control", placeholder = "Bank Charge" })
+                        @Html.ValidationMessageFor(model => model.BankCharge, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Type</label>
+                        @Html.DropDownListFor(model => model.Accounting_BankOrCashParantId, Model.BankOrCashParantList as SelectList, "==Select Type==", new { id = "ddlAccounting_BankOrCashParantId", @class = "form-control ddlReset", @required ="required", @style = "width:100%" })
+                        @Html.ValidationMessageFor(model => model.Accounting_BankOrCashParantId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Bank/Cash</label>
+                        @Html.DropDownListFor(model => model.Accounting_BankOrCashId, Model.BankOrCashGLList as SelectList, "== Select Bank/Cash==", new { id = "ddlAccounting_BankOrCashId", @class = "form-control searchingDropdown", @required = "required", style = "width:100%" })
+                        @Html.ValidationMessageFor(model => model.Accounting_BankOrCashId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtBankCharge" class="col-form-label">Booking No:</label>
+                        @Html.TextBoxFor(model => model.BookingNo, new { id = "txtBookingNo", @class = "form-control", @readonly = "readonly", placeholder = "Booking No" })
+                        @Html.ValidationMessageFor(model => model.BookingNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtBankCharge" class="col-form-label">Receivable Amount:</label>
+                        @Html.TextBoxFor(model => model.ReceivableAmount, new { id = "txtReceivableAmount", @class = "form-control", @readonly = "readonly", placeholder = "Receivable Amount:" })
+                        @Html.ValidationMessageFor(model => model.ReceivableAmount, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtPaidAmount" class="col-form-label">Collected Amount:</label>
+                        @Html.TextBoxFor(model => model.InAmount, new { id = "txtInAmount", @class = "form-control", placeholder = "Paid", @required = "required"})
+                        @Html.ValidationMessageFor(model => model.InAmount, "", new { @class = "text-danger", @required = "required" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtDescription" class="col-form-label">Reference No:</label>
+                        @Html.TextAreaFor(model => model.ReferenceNo, new { id = "txtReferenceNo", placeholder = "Reference No", @class = "form-control", Rows = 1 })
+                        @Html.ValidationMessageFor(model => model.ReferenceNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-4">
+                    </div>
+                    <div class="col-lg-8 col-md-8">
+                        <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                            <i class='fa fa-plus'></i>
+                            <span>Payment Received</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryui")
+        @Styles.Render("~/Content/cssjqryUi")
+
+        <script>
+
+            $(document).ready(function () {
+                $('.datepickeronPage').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    showOn: 'both',
+                    buttonText: "<i class='fa fa-calendar'></i>",
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "1950:+150"
+                });
+                
+            });
+
+
+    $("#ddlAccounting_BankOrCashParantId").change(function () {
+        var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("HeadGLByHead5ParentIdGet", "Vouchers")",
+            datatype: "Json",
+            data: { companyId: "@Model.CompanyId", parentId: bankOrCashParantId },
+            success: function (data) {
+            var items = "";
+            if (data) {
+            $("#ddlAccounting_BankOrCashId").empty();
+            $(data).each(function (index, item) {
+            $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+            });
+
+            }
+            }
+            });
+    })
+        </script>
+    }

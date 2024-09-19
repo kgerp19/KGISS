@@ -1,0 +1,186 @@
+﻿
+@model KGERP.Service.HR_Pay_Roll_Service.PRoll_AttendanceLog_Service.PRoll_AttendanceLogViewModel
+@using KGERP.Utility
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    h3 {
+        margin-top: 11px !important;
+        margin-bottom: -5px !important;
+    }
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .ui-front {
+        z-index: 2100 !important;
+    }
+
+    .ui-datepicker {
+        z-index: 2100 !important;
+    }
+
+    @@media (min-width: 768px) {
+        .modal-content {
+            width: 750px;
+        }
+    }
+
+    .input-group {
+        width: 100% !important;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 0px 15px 20px 5px;
+        background-color: #4caf5029 !important;
+    }
+
+    .list-group-horizontal {
+        -ms-flex-direction: !important;
+        flex-direction: row !important;
+    }
+</style>
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-sm-4">
+            <h3>
+                Attendance Log Details
+            </h3>
+        </div>
+    </div>
+</section>
+
+<div class="content-header mt-3">
+    <div class="">
+        <div class="card">
+            <div class="card-body">
+                <table background-color:#ddd;" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th colspan="10">@Model.CompanyName</th>
+
+                        </tr>
+                        <tr>
+                            <th>Month</th>
+                            <th>:</th>
+                            <th>@Model.MonthName</th>
+                            <th>Year</th>
+                            <th>:</th>
+                            <th>@Model.Year</th>
+                            <th>From Date</th>
+                            <th>:</th>
+                            <th>@Model.FromDate.ToShortDateString()</th>
+                            <th>To Date</th>
+                            <th>:</th>
+                            <th>@Model.ToDate.ToShortDateString()</th>
+                        </tr>
+                    </thead>
+
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+
+                <th>Employee Name</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Grade</th>
+                <th>Deducted Day</th>
+                <th>Payable Day</th>
+                <th>Action</th>
+
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.detailViewModels)
+            {
+            <tr>
+                <td>@(++sl)</td>
+
+                <td>@item.EmployeeName</td>
+                <td>@item.DepartmentName</td>
+                <td>@item.DesignationName</td>
+                <td>@item.GradeName</td>
+                <td>@item.DeductedDay</td>
+                <td>@item.PayableDay</td>
+                <td class="text-center">
+                    <a data-toggle="modal" data-target="#exampleModal" onclick="edit(@item.AttendanceLogDetail,@item.PayableDay)" class="btn btn-warning btn-xs">
+                        <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                    </a>
+                </td>
+
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@using (Html.BeginForm("EditDetails", "PRoll_AttendanceLogs", FormMethod.Post))
+{
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(m => m.AttendanceLogId)
+                    @Html.HiddenFor(m => m.CompanyId)
+                    @Html.HiddenFor(m => m.Month)
+                    @Html.HiddenFor(m => m.Year)
+                    @Html.HiddenFor(m => m.detailViewModel.AttendanceLogDetail, new { id = "AttendanceLogDetail" })
+
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Payable Day:</label>
+                        @Html.EditorFor(model => model.detailViewModel.PayableDay, new { htmlAttributes = new { @class = "form-control", @id = "PayableDay", @autocomplete = "off", @style = "max-width: 100%;", required = "required" } })
+                        @Html.ValidationMessageFor(model => model.detailViewModel.PayableDay, "", new { @class = "text-danger" })
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        function edit(id, payday) {
+            $("#PayableDay").val(payday);
+
+            $("#AttendanceLogDetail").val(id);
+        }
+    </script>
+}

@@ -1,0 +1,269 @@
+﻿
+@model List<KGERP.Data.CustomModel.DeliverItemCustomModel>
+
+
+<table class="table">
+    <tr style="background-color:#4CAF50;color:#FFFFFF">
+        <th>
+            Product Name
+        </th>
+        <th>
+            Order Qty
+        </th>
+        <th>
+            Unit Price
+        </th>
+        <th>
+            Store Available Qty
+        </th>
+        <th>
+            Deliver Qty
+        </th>
+        <th>
+            Engine No
+        </th>
+
+        <th>
+            Chassis No
+        </th>
+        <th>
+            Bettery No
+        </th>
+        <th>
+            Rear Tyre LH
+        </th>
+        <th>
+            Rear Tyre RH
+        </th>
+    </tr>
+    @for (int i = 0; i < Model.Count(); i++)
+    {
+        <tr id="itemDetails">
+
+            <td>
+                @Html.Hidden("deliverItems.Index", (@i))
+                @Html.Hidden("deliverItems[" + i + "].ProductId", Model[i].ProductId)
+                @Html.Hidden("deliverItems[" + i + "].UnitPrice", Model[i].UnitPrice)
+                @Html.DisplayFor(model => model[i].ProductName)
+            </td>
+
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].OrderQty", Model[i].OrderQty, new { @readonly = "readonly", @class = "", @style = "width:70px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].DisplayUnitPrice", Model[i].UnitPrice, new { @readonly = "readonly", @class = "", @style = "width:70px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+            </td>
+
+
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].StoreAvailableQty", Model[i].StoreAvailableQty, new { @id = "availableQty_" + i + "", @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;text-align:right;width:120px;font-weight:bold;color:" + (Model[i].StoreAvailableQty <= 0 ? "red" : "green") })
+            </td>
+
+
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].ReadyToDeliver", Model[i].OrderQty, new { @id = "deleverQty_" + i + "", @onkeyup = "changeRemainingQty(" + i + ")", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver", @style = "width:110px;font-weight:bold;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+
+            <td>
+                @Html.DropDownList("deliverItems[" + i + "].EngineNo", new SelectList(Model[i].Engine, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @onchange = "getProductDetails(" + i + ")", @id = "ddlEngine_" + i + "", @style = "width:125px;height:26px;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].ChassisNo", Model[i].ChassisNo, new { @id = "chassisNo_" + i + "", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver", @style = "width:110px;font-weight:bold;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].BatteryNo", Model[i].BatteryNo, new { @id = "betteryNo_" + i + "", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver", @style = "width:110px;font-weight:bold;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].RearTyreLH", Model[i].RearTyreLH, new { @id = "tyreLh_" + i + "", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver", @style = "width:110px;font-weight:bold;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].RearTyreRH", Model[i].RearTyreRH, new { @id = "tyreRh_" + i + "", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver", @style = "width:110px;font-weight:bold;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+
+        </tr>
+
+    }
+
+    <tr>
+        <td colspan="13">
+            <a id="btnSubmit" class="btn btn-success" data-toggle="modal" style="float:right; margin-left:2px">
+                Submit
+            </a>
+
+            <a href="@Url.Action("Index","OrderDeliver",new {companyId= Request.QueryString["companyId"]})" class="btn btn-danger" style="float:right">
+                Close <i class="fa fa-close" aria-hidden="true"></i>
+            </a>
+            &nbsp;
+        </td>
+    </tr>
+
+</table>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <b class="modal-title" id="exampleModalLongTitle" style="color:blue">INVOICE/ BILL</b>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <input type="submit" formnovalidate="formnovalidate" id="btnFormSubmit" class="btn btn-success" value="Confirm" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $('#btnSubmit').click(function () {
+        var i;
+
+        for (i = 0; i <= $('#itemDetails').length; i++) {
+            var deleverQty = $('#deleverQty_' + i).val();
+            var availableQty = $('#availableQty_' + i).val();
+            if (deleverQty > availableQty) {
+                alert("Unsufficiant Stock");
+                return false;
+            }
+        }
+
+
+
+
+
+        var form = $('#idForm');
+        // var url = form.attr('action');
+        var url = "/OrderDeliver/CreateOrderDeliverPreview";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: form.serialize(),
+            success: function (resp) {
+                console.log(resp);
+                $(".modal-body").html(resp);
+                $("#exampleModalLong").modal({
+                    show: true,
+                    backdrop: 'static',
+                    keyboard: false
+
+                });
+            }
+        });
+
+    });
+
+
+    $(function () {
+        $('.readyToDeliver').map(function (i, el) {
+            var storeAvailableQty = $('#deliverItems_' + i + '__StoreAvailableQty').val();
+            var remainingQty = $('#deliverItems_' + i + '__OrderRemainingQty').val();
+            var readyToDeliver = $('#deliverItems_' + i + '__ReadyToDeliver').val();
+
+            // console.log("storeAvailableQty=" + storeAvailableQty + ", RemainingQty=" + remainingQty + ", ReadyToDeliver=" + readyToDeliver);
+            if (parseInt(storeAvailableQty) > parseInt(remainingQty) && parseInt(readyToDeliver) == 0) {
+                $('#deliverItems_' + i + '__ReadyToDeliver').attr("required", "true");
+                $('#deliverItems_' + i + '__ReadyToDeliver').attr("min", 1);
+            }
+
+
+        })
+    })
+
+
+    function getProductDetails(id) {
+        var ddlId = 'ddlEngine_' + id;
+        var chassisId = 'chassisNo_' + id;
+        var engineNo = $('#' + ddlId + ' :selected').text();
+        $.ajax({
+            url: '/OrderDeliver/GetProductDetails?engineNo=' + engineNo + '',
+            type: "GET",
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (data) {
+                console.log(data);
+
+                $('#' + chassisId).val(data.ChassissNO);
+                $('#betteryNo_' + id).val(data.BetteryNo);
+                $('#tyreLh_' + id).val(data.RearTyreLH);
+                $('#tyreRh_' + id).val(data.RearTyreRH);
+            },
+            error: function (xhr) {
+                alert('error');
+            }
+        });
+
+    }
+
+    function changeRemainingQty(id) {
+        var idReadytoDeliver = 'deliverItems_' + id + '__ReadyToDeliver';
+        var idStoreAvailableQty = 'deliverItems_' + id + '__StoreAvailableQty';
+        var idQty = 'deliverItems_' + id + '__OrderQty';
+        var idOrderRemainingQty = 'deliverItems_' + id + '__OrderRemainingQty';
+        var idDeliveredQty = 'deliverItems_' + id + '__DeliveredQty';
+        var idDueQty = 'deliverItems_' + id + '__DueQty';
+
+        var readyToDeliver = $('#' + idReadytoDeliver).val();
+
+
+        var storeAvailableQty = $('#' + idStoreAvailableQty).val();
+
+        var initialStoreAvailableQty = storeAvailableQty;
+        var orderQty = $('#' + idQty).val();
+        var deliveredQty = $('#' + idDeliveredQty).val();
+        var dueQty = $('#' + idDueQty).val();
+
+
+        $('#' + idOrderRemainingQty).val(parseFloat(dueQty) - parseFloat(readyToDeliver));
+        //Checking Ready to deliver is NaN
+        if (isNaN(readyToDeliver)) {
+            var remainingQty = parseFloat(parseFloat(orderQty) - parseFloat(deliveredQty));
+            $('#' + idReadytoDeliver).val(0);
+            $('#' + idOrderRemainingQty).val(remainingQty);
+        }
+        //Ready to deliver is grater than Due
+        if (parseFloat(readyToDeliver) > parseFloat(dueQty)) {
+            alert("Order Limit Exceeded !");
+            $('#' + idReadytoDeliver).val(0);
+            readyToDeliver = $('#' + idReadytoDeliver).val();
+            $('#' + idOrderRemainingQty).val(parseFloat(dueQty));
+        }
+
+        if (parseFloat(readyToDeliver) > parseFloat(orderQty)) {
+            alert("Order Limit Exceeded !");
+            $('#' + idReadytoDeliver).val(0);
+            readyToDeliver = $('#' + idReadytoDeliver).val();
+            $('#' + idOrderRemainingQty).val(parseFloat(orderQty) - parseFloat(readyToDeliver));
+
+        }
+
+        if (parseFloat(orderQty) - parseFloat(deliveredQty) == 0) {
+            alert("Already Delivered !");
+            $('#' + idOrderRemainingQty).val(0);
+            $('#' + idReadytoDeliver).val(0);
+        }
+
+        //If Stock quantity is not available
+        if (parseFloat(readyToDeliver) > parseFloat(storeAvailableQty)) {
+            alert("Stock not Available !");
+            $('#' + idReadytoDeliver).val(0);
+            readyToDeliver = $('#' + idReadytoDeliver).val();
+            $('#' + idOrderRemainingQty).val(parseFloat(dueQty));
+        }
+
+        //If Stock quantity is not available
+        if (parseFloat(readyToDeliver) > parseFloat(storeAvailableQty)) {
+            alert("Stock not Available !");
+            $('#' + idReadytoDeliver).val(0);
+            readyToDeliver = $('#' + idReadytoDeliver).val();
+        }
+    }
+</script>

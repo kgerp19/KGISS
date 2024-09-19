@@ -1,0 +1,311 @@
+﻿@model KGERP.ViewModel.StockTransferViewModel
+
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+
+@using (Html.BeginForm("Create", "StockTransfer", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.StockTransfer.CompanyId)
+    <div class="row">
+        <table class="table table-responsive">
+            <tr style="background-color:#4CAF50;color:#FFFFFF">
+                <td colspan="10"><b>Stock Transfer Entry</b></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Transfer Date
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.TransferDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.StockTransfer.TransferDate, "", new { @class = "text-danger" })
+                </td>
+                <td>
+                    Transfer From
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.StockTransfer.StockIdFrom, new SelectList(Model.StockFrom, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" ,@id="stockFrom"})
+                    @Html.ValidationMessageFor(model => model.StockTransfer.StockIdFrom, "", new { @class = "text-danger" })
+                </td>
+                <td>
+                    Transfer To
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.StockTransfer.StockIdTo, new SelectList(Model.StockTo, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control" })
+                    @Html.ValidationMessageFor(model => model.StockTransfer.StockIdTo, "", new { @class = "text-danger" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Challan No
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.ChallanNo, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off", @readonly = "readonly" } })
+                </td>
+                <td>
+                    Vehicle No
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.VehicleNo, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                </td>
+
+                <td>
+                    Truck Fare
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.TruckFare, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StockTransfer.TruckFare, "", new { @class = "text-danger" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Labour bill
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.LabourBill, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StockTransfer.LabourBill, "", new { @class = "text-danger" })
+                </td>
+                <td>Receive Person</td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.ReceivePerson, new { htmlAttributes = new { @class = "form-control", @name = "receiverName", @id = "receiverName" } })
+                    @Html.HiddenFor(x => x.StockTransfer.ReceivedBy, new { @id = "receivedBy", @name = "receivedBy" })
+                </td>
+                <td>Phone No</td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.ReceiverPhone, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly",@id = "receiverPhone" } })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Reference No
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.StockTransfer.ReferenceNo, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StockTransfer.ReferenceNo, "", new { @class = "text-danger" })
+                </td>
+            </tr>
+
+        </table>
+
+
+
+
+
+        <div class="details">
+            <table class="table table-responsive">
+                <tr style="background-color:#4CAF50;color:#ffffff">
+                    <th>Product</th>
+                    <th>Stock Available Quantity</th>
+                    <th>Transfer Quantity</th>
+                    <th>&nbsp;</th>
+                </tr>
+                <tr class="mycontainer" id="mainrow">
+
+                    <td>
+                        <input type="text" id="product" name="product" class="form-control" />
+                        <input type="hidden" id="hfProductId" name="productId" />
+                    </td>
+                    <td>
+                        <input type="text" id="stockAvailableQty" class="form-control" autocomplete="off" style="text-align:right" readonly />
+                        <span class="error">Valid quantity required</span>
+                    </td>
+                    <td>
+                        <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" onkeyup="checkTransferQty()" />
+                        <span class="error">Valid quantity required</span>
+                    </td>
+
+                    <td>
+                        <button type="button" id="add" onclick="addItemToGrid()" class="btn btn-success pull-right"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp; Add</button>
+
+                    </td>
+                </tr>
+            </table>
+            <div id="orderItems">
+                <table class="table" id="orderdetailsItems">
+                    <thead>
+                        <tr style="background-color:#4CAF50;color:#ffffff;font-weight:bold">
+                            <th>Sl</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemDetails"></tbody>
+                </table>
+                <span id="orderItemError" style="color:red"></span>
+            </div>
+
+            <div class="col-md-offset-6">
+                <div style="padding:10px 0; text-align:right">
+
+                    <input id="submit" type="submit" onclick='return confirm("Are you sure you want to submit?");' value="Submit" class="btn btn-success pull-right" style="padding:5px 10px;margin-top:5px" />
+                    <a href="@Url.Action("Index",new { companyId=Model.StockTransfer.CompanyId})" id="cancel" class="btn btn-danger pull-right" style="padding:5px 10px;margin-right:10px;margin-top:5px">Cancel</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+}
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/StockTransfer.js"></script>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+
+    <script type="text/javascript">
+        //function checkTransferQty() {
+        //    var stockAvailQty = $("#stockAvailableQty").val();
+        //    var transferQty = $("#qty").val();
+        //    if (parseFloat(transferQty) > parseFloat(stockAvailQty)) {
+        //        alert("Stock not available !");
+        //        var transferQty = $("#qty").val("");
+        //    }
+        //}
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadStockAvailableQuantity(ui.item.val);
+                }
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function loadStockAvailableQuantity(productId) {
+            var stockFrom = $("#stockFrom").val();
+
+            $.ajax({
+                url: '/Products/GetStockAvailableQuantity?productId=' + productId + '&stockFrom=' + stockFrom,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#stockAvailableQty').val(result);
+                    if (result < 0) {
+                        $("#stockAvailableQty").css('color', 'red');
+                        $("#stockAvailableQty").css('font-weight', 'bold');
+                    }
+                    else {
+                        $("#stockAvailableQty").css('color', 'green');
+                        $("#stockAvailableQty").css('font-weight', 'bold');
+                    }
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+        }
+
+        $(function () {
+            $("#receiverName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#receivedBy").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadEmployeeInformation(ui.item.val);
+                }
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+        function loadEmployeeInformation(id) {
+            $.ajax({
+                url: '/Employee/GetEmployeeInformation?id=' + id,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    console.log(result);
+                    $('#receiverPhone').val(result.MobileNo);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+        }
+    </script>
+}

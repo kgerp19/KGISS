@@ -1,0 +1,314 @@
+﻿@model KGERP.Service.ServiceModel.GLDLBookingViewModel
+@{
+    ViewBag.Title = "RealEstateCustomerCostHead";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12" style="background-color:lightblue">
+        @Html.Label("Real Estate Customer Cost Head", new { @style = "font-size:20px" })
+    </div>
+</div>
+<br />
+
+@using (Html.BeginForm("RealEstateCustomerCostHead", "RealStateCostHead", FormMethod.Post, new { @id = "idForm" }))
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CompanyId, new { @id = "hfCompanyId" })
+    <input id="ActionId" type="hidden" name="ActionId" value="1" />
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Project</label>
+                @Html.DropDownListFor(model => model.ProjectId, new SelectList(Model.ProjectList, "Value", "Text"), "==Select Project==", new { id = "ddlProjectId", @class = "form-control", required = "required", style = "max-width:100%" })
+                @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>File Info</label>
+                @Html.DropDownListFor(model => model.CGId, Model.GroupList as SelectList, "==Select File No==", new { id = "ddlCGId", @class = "form-control searchingDropdown", required = "required", style = "max-width:100%" })
+                @Html.ValidationMessageFor(model => model.CGId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="col-md-3" style="margin-top:20PX">
+            <input type="submit" class="btn btn-primary btn-sm" value="Show Information" />
+        </div>
+    </div>
+}
+
+
+@if (Model.LstPurchaseCostHeads != null)
+{
+    <div class="row" style="margin-top:20px">
+        <table class="table table-bordered">
+            <tr>
+                <th style="width:18%">
+                    Name of Applicant
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label class="col-form-label">@Model.CustomerGroupName</label>
+                </td>
+                <th style="width:18%"> Application Date</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @if (Model.ApplicationDate == null)
+                    { }
+                    else
+                    {@Model.ApplicationDate.Value.ToLongDateString();
+                }
+                </td>
+            </tr>
+
+            <tr>
+                <th style="width:18%"> Booking Date</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    @if (Model.BookingDate == null)
+                    { }
+                    else
+                    {@Model.BookingDate.Value.ToLongDateString();
+                }
+                <th style="width:18%"> File No</th>
+                <th style="width:2%"> :</th>
+                <td style="width:30%;text-align:left">
+                    <a href="/Report/ProductBookingInformation?companyId=@Model.CompanyId&&CGId=@Model.CGId">@Model.FileNo</a>
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Project Name
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label class="col-form-label">@Model.ProjectName</label>
+                </td>
+                <th style="width:18%">
+                    @if (Model.CompanyId == 7)
+                    {
+                        <Span> Plot No </Span>
+                    }
+                    else
+                    {
+                        <Span>  Flat No </Span>
+                    }
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.PlotName</td>
+            </tr>
+
+            <tr>
+                <th style="width:18%">
+                    @if (Model.CompanyId == 7)
+                    {
+                        <Span> Plot Size </Span>
+                    }
+                    else
+                    {
+                        <Span>  Flat Size</Span>
+                    }
+
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+
+                    <label class="col-form-label"><span> @Model.PlotSize (@Model.UnitName)</span> </label>
+                </td>
+                <th style="width:18%"> Rate Per @Model.UnitName</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.RatePerKatha</td>
+            </tr>
+        </table>
+    </div>
+
+
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+        Add new Cost head
+    </button>
+    <!-- Modal -->
+
+    using (Html.BeginForm("RealEstateCustomerCostHead", "RealStateCostHead", FormMethod.Post, new { @id = "idForm" }))
+    {
+
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CompanyId, new { @id = "hfCompanyId" })
+        @Html.HiddenFor(model => model.CGId, new { @id = "CGId" })
+        @Html.HiddenFor(model => model.BookingId, new { @id = "BookingId" })
+
+        <input id="ActionId" type="hidden" name="ActionId" value="2" />
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Cost Heads</label>
+                                    @Html.DropDownListFor(model => model.CostId, new SelectList(Model.CostHeads, "Value", "Text"), "==Select Cost Heads==", new { id = "CostId", @class = "form-control", required = "required", style = "max-width:100%" })
+                                    @Html.ValidationMessageFor(model => model.CostId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary" value="Save changes">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+
+
+    <div class="row" style="margin-top:20px">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th> Receive Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            @{int sl = 0;
+            }
+            <tbody>
+                @foreach (var item in Model.LstPurchaseCostHeads)
+                {
+                    <tr>
+                        <td>@(++sl)</td>
+                        <td> @item.CostName</td>
+                        <td> @item.Amount</td>
+                        <td> @item.ReceiveAmount</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal2" onclick="AddAmount(@item.CostsMappingId)">
+                                Add new Amount
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+
+    using (Html.BeginForm("RealEstateCustomerCostHead", "RealStateCostHead", FormMethod.Post, new { @id = "idForm" }))
+    {
+
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CompanyId, new { @id = "hfCompanyId" })
+        @Html.HiddenFor(model => model.CGId, new { @id = "CGId" })
+        @Html.HiddenFor(model => model.BookingId, new { @id = "BookingId" })
+        @Html.HiddenFor(model => model.CostId, new { @id = "MappingId" })
+
+        <input id="ActionId" type="hidden" name="ActionId" value="3" />
+        <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <div class="col-md-4">
+                                    @Html.LabelFor(model => model.CostAmount, htmlAttributes: new { @class = "control-label" })
+                                    @Html.EditorFor(model => model.CostAmount, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" , required = "required" } })
+
+                                </div>
+                                <div class="col-md-4">
+                                    @Html.LabelFor(model => model.AmandmentDate, htmlAttributes: new { @class = "control-label" })
+                                    @Html.EditorFor(model => model.AmandmentDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" , required = "required" } })
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary" value="Save changes">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+
+
+}
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+            var projectId = $("#ddlProjectId").val();
+            if (projectId > 0) {
+                $("#ddlProjectId").change();
+            }
+
+        });
+
+
+    $("#ddlProjectId").change(function () {
+        var projectId = $("#ddlProjectId").val();
+        console.log(projectId);
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "RealStateMoneyReceipt")",
+                  datatype: "Json",
+                    data: { companyId: "@Model.CompanyId", projectId: projectId },
+                success: function (data) {
+                    console.log("ok done",data);
+                      if (data) {
+                          $("#ddlCGId").empty();
+                          $("#ddlCGId").append("<option value=''>==Select File No==</option>");
+                          $(data).each(function (index, item) {
+                              $("#ddlCGId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                      }
+                  }
+            });
+    });
+
+        function AddAmount(id) {
+            $("#MappingId").val(id);
+        };
+    </script>
+}
+
+
+
+
+

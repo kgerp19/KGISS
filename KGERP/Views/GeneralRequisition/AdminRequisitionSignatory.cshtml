@@ -1,0 +1,355 @@
+﻿@model KGERP.Service.Implementation.General_Requisition.ViewModels.RequisitionSignatoryVM
+@{
+    ViewData["Title"] = "Requisition Signatory";
+    int i = 1;
+    int companyId = ViewBag.CompanyId ?? 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>Admin Requisition Signatory</h1>
+</section>
+@using (Html.BeginForm("AdminRequisitionSignatory", "GeneralRequisition", FormMethod.Post, new { id = "procurementSalesOrderSlaveFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(x => x.UserCompanyId)
+            @Html.HiddenFor(model => model.ActionId)
+            @Html.HiddenFor(model => model.RequisitionSignatoryId)
+            <div class="box-danger">
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                         </div>
+                        <div class="col-md-4" style="margin-left:40%">
+                            <div style="display:flex;">
+                                <div class="form-check-inline" style="margin-right:10px;">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked="checked" onclick="activeToggle(1)">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Company
+                                    </label>
+                                </div>
+                                <div class="form-check-inline">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" onclick="activeToggle(2)">
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Category
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Company Name:</label>
+                                @Html.EditorFor(model => model.CompanyName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", required = "required", @onchange = "LoaderFunction()" } })
+                                @Html.HiddenFor(model => model.CompanyId)
+                                @Html.ValidationMessageFor(model => model.CompanyName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CategoryName, htmlAttributes: new { @class = "control-label" })
+                                @Html.DropDownListFor(x => x.CategoryId, new SelectList(String.Empty, "value", "text"), new { @class = "form-control", required="false" })                            
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Signatory:</label>
+                                @Html.EditorFor(model => model.EmployeeName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", required = "required" } })
+                                @Html.HiddenFor(model => model.EmployeeId)
+                                @Html.ValidationMessageFor(model => model.EmployeeName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Designation Name:</label>
+                                @Html.EditorFor(model => model.DesignationName, new { htmlAttributes = new { @class = "form-control", required = "required", @placeholder = "Designation name" } })
+                                @Html.ValidationMessageFor(model => model.DesignationName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Up To Amount</label>
+                                <div class="input-group">
+                                    @Html.TextBoxFor(model => model.Limitation, new { @class = "form-control", required = "required", @type="number" })
+                                    @Html.ValidationMessageFor(model => model.Limitation, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Order By</label>
+                                <div class="input-group">
+                                    @Html.TextBoxFor(model => model.OrderBy, new { @class = "form-control", required = "required", @maxlength = "10", @type = "number" })
+                                    @Html.ValidationMessageFor(model => model.OrderBy, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="pull-right">
+                                <button onclick="resetForm()" class="btn btn-primary mr-1"><i class="fa fa-refresh"></i>&nbsp;Reset</button>
+                                <button type="submit" id="btnSave" class="btn btn-primary">
+                                    <i class='fa fa-plus'></i>
+                                    <span>Add Requisition Signatory</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+
+                </div>
+                <div class="box-body">
+                    <div id="signatoryList">
+                        @if (Model.DataList != null && Model.DataList.Count() > 0)
+                        {
+                            @Html.Partial("_LoadRequisitionSignatoryList", Model.DataList)
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+
+@using (Html.BeginForm("AdminRequisitionSignatory", "GeneralRequisition", FormMethod.Post, new { id = "deleteForm", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Requisition Signatory</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.ActionId, new { @id = "actionId" })
+                    @Html.HiddenFor(x => x.RequisitionSignatoryId, new { @id = "requisitionSignatoryId" })
+                    @Html.HiddenFor(x => x.UserCompanyId, new { @id = "userCompanyId" })
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this  Product Requisition  Item?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnDelete" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            activeToggle(1);
+            //LoadCategory();          
+            //$("#CategoryId").on("select change", function () {
+            //    var selectedCategory = $(this).val();
+            //    if (selectedCategory > 0) {                  
+            //        $("#CompanyName").prop("required", false);
+            //        loadCategorizedSignatory(selectedCategory);
+            //    } else {
+            //        $("#CompanyName").prop("required", true);
+            //    }
+            //});
+
+
+            $(function () {
+                $("#EmployeeName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#EmployeeId").val(ui.item.id);
+                        LoadDesignation(ui.item.id);
+                    }
+                });
+                $("#CompanyName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllCompanyAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#CompanyId").val(ui.item.id);
+                        loadSignatory(ui.item.id);
+                        $("#CategoryId").prop("required", false);
+                    }
+                });
+            });
+        });
+        function LoadCategory() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllGRQSProductCategoryAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CategoryId").html("");
+                    var content = '<option value="0">Select Category</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'                           
+                        })
+
+                    $("#CategoryId").append(content)
+                    //LoadEmployee();
+                }
+            })
+        }
+
+        function LoaderFunction() {
+           // LoadCategory();
+        }
+        function LoadDesignation(employeeId) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetEmployee",
+                data: { employeeId: employeeId },
+                success: function (res) {
+                    $("#DesignationName").val(res.DesignationName);
+                    //alert(res.DesignationName);
+                }
+            })
+        }
+       
+        function makeEditble(id,companyId,companyName,categoryId,categoryName, empId, empName, designationName, limitation,orderBy) {
+            $('#ActionId').val(@((int)KGERP.Utility.ActionEnum.Edit));
+            $("#CompanyId").val(companyId);
+            $("#CompanyName").val(companyName);
+            $("#CategoryId").val(categoryId);
+            if (categoryId > 0) {
+                $("#CompanyName").prop("required", false);
+            }
+            $("#RequisitionSignatoryId").val(id);
+            $("#DesignationName").val(designationName);
+            $("#CategoryName").val(categoryName);
+           // $("#CompanyName").val(companyName);
+            $("#EmployeeId").val(empId);
+            $("#EmployeeName").val(empName);
+            $("#Limitation").val(limitation);
+            $("#OrderBy").val(orderBy);
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update Requisition Signatory");
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $("#requisitionSignatoryId").val(id);
+                $('#actionId').val(@((int)KGERP.Utility.ActionEnum.Delete));
+                var userCompanyId = $("#UserCompanyId").val();
+                $('#userCompanyId').val(userCompanyId);
+            }
+        }
+        function resetForm() {
+           $('#ActionId').val(@((int)KGERP.Utility.ActionEnum.Add));
+           $("#CompanyId").val(null);
+           $("#CompanyName").val('');
+            $("#RequisitionSignatoryId").val(null);
+            $("#DesignationName").val('');
+            $("#CategoryName").val('');
+            $("#EmployeeId").val(null);
+            $("#EmployeeName").val('');
+            $("#Limitation").val(null);
+            $("#OrderBy").val(null);
+            $('#btnSave').html("<i class='fa fa-plus'></i>&nbsp;Update Requisition Signatory");
+        }
+
+
+        function loadSignatory(companyId) {
+            $("#signatoryList").empty();
+            $.ajax({
+                type: "GET",
+                url: "/GeneralRequisition/LoadRequisitionSignatoryList",
+                data: { companyId: companyId },
+                success: function (data) {
+                    $("#signatoryList").append(data);
+                }
+            })
+        }
+        function loadCategorizedSignatory(categoryId) {
+            $("#signatoryList").empty();
+            $.ajax({
+                type: "GET",
+                url: "/GeneralRequisition/LoadCategorizedRequisitionSignatoryList",
+                data: { categoryId: categoryId },
+                success: function (data) {
+                    $("#signatoryList").append(data);
+                }
+            })
+        }
+
+        function activeToggle(type) {
+
+            if (type == 1) {
+                $("#CompanyName").prop('disabled', false);
+                $("#CategoryId").prop('disabled', true);
+            } else {
+                LoadCategory();
+                //$("#CategoryId").on("select change", function () {
+                //    var selectedCategory = $(this).val();
+                //    if (selectedCategory > 0) {
+                //        $("#CompanyName").prop("required", false);
+                //        loadCategorizedSignatory(selectedCategory);
+                //    } else {
+                //        $("#CompanyName").prop("required", true);
+                //    }
+                //});
+                $("#CategoryId").prop('disabled', false);
+                $("#CompanyName").prop('disabled', true);
+            }          
+        }
+    </script>
+}
+

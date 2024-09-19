@@ -1,0 +1,104 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+    @{
+    ViewBag.Title = "Work Report";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("GetWorkingReport", "Report", FormMethod.Post, new { id = "marketingSalesListView", @enctype = "multipart/form-data" }))
+{
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="message-text" class="col-form-label">Reporting Manager:</label>
+                @Html.EditorFor(model => model.Manager, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control" } })
+                @Html.HiddenFor(model => model.ManagerId)
+
+            </div>
+
+        </div>
+        <div class="col-md-4">
+            <div>
+                @Html.Label("Work State", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownListFor(model => model.WorkStatusId, new SelectList(Model.SelectWorkState, "Value", "Text"), "Select Work State", new { @class = "form-control" })
+
+            </div>
+
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.Label("Work Label", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownListFor(model => model.WorkLebelId, new SelectList(Model.selectWorkLebel, "Value", "Text"), "Select Work Label", new { @class = "form-control" })
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-12 text-center">
+            <button type="submit" id="btnSave" class="btn btn-primary">Show</button>
+        </div>
+    </div>
+}
+
+
+
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        $(document).ready(function () {
+
+            $(function () {
+                $("#Manager").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#ManagerIdr").val(ui.item.id);
+                    }
+                });
+            });
+        });
+    </script>
+}

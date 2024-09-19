@@ -1,0 +1,151 @@
+﻿@model KGERP.ViewModel.UpazilaViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Upazila.UpazilaId)
+
+<div class="form-horizontal">
+    <h4>Upazila @Model.Upazila.ButtonName</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.DistrictId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.Upazila.DistrictId, new SelectList(Model.Districts, "Value", "Text"), "--Select--", htmlAttributes: new { @class = "dropdownsize form-control", @id = "ddlDistrict", @onchange = "getUpazilaCode()" })
+            @Html.ValidationMessageFor(model => model.Upazila.DistrictId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Upazila.Name, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Upazila.Name, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.Code, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Upazila.Code, new { htmlAttributes = new { @class = "form-control", @id = "txtCode", @readonly = "readonly" } })
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.FacCarryingCommission, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Upazila.FacCarryingCommission, new { htmlAttributes = new { @type = "number", @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.DepoCarryingCommission, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Upazila.DepoCarryingCommission, new { htmlAttributes = new { @type = "number", @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.MarketingOfficerId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Upazila.Employee.Name, new { htmlAttributes = new { @class = "form-control", @name = "marketingOfficer", @id = "marketingOfficer" } })
+            @Html.HiddenFor(x => x.Upazila.MarketingOfficerId, new { @id = "marketingOfficerId", @name = "MarketingOfficerId" })
+        </div>
+    </div>
+
+
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Upazila.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <div class="checkbox">
+                @Html.EditorFor(model => model.Upazila.IsActive)
+                @Html.ValidationMessageFor(model => model.Upazila.IsActive, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="@Model.Upazila.ButtonName" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        function getUpazilaCode() {
+            var districtId = $('#ddlDistrict').val();
+            $.ajax({
+                url: '/Upazila/GetNewUpazilaCode?districtId=' + districtId,
+                type: "Post",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#txtCode').val(result);
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+
+        }
+
+
+        $(function () {
+            $("#marketingOfficer").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#marketingOfficerId").val(i.item.val);
+                },
+                minLength: 1,
+                cache:true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+    </script>
+}

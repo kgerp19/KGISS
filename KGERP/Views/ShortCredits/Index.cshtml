@@ -1,0 +1,296 @@
+﻿@model KGERP.Service.Implementation.Short__CreditService.ShortCreditViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-sm-4">
+            <h3> Short Credit </h3>
+        </div>
+    </div>
+</section>
+
+<div class="text-center">
+    @{ if (TempData["message"] != null)
+        {
+            <div class="row">
+                <strong>@TempData["message"]</strong>
+            </div>
+
+        }
+
+    }
+</div>
+@if (Model.ShortCreditCollectionId > 0)
+{
+    <div class="col-md-1"> </div>
+    <div class="col-md-10">
+        <table class="table">
+            <tr>
+                <th style="width:18%">Collection Date</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.CollectionDate.ToString("dd-MM-yyyy")</td>
+
+                <th style="width:18%">
+                    Collected Amount
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label class="col-form-label">@Model.CollectedAmount</label>
+                </td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Collection From
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.VendorName</td>
+                <th style="width:18%">
+                    Collection To
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.BankName</td>
+            </tr>
+           
+        </table>
+    </div>
+    <div class="col-md-1"> </div>
+
+
+    <div class="box-footer">
+        <div class="row">
+            <div class="col-md-2">
+
+            </div>
+            <div class="col-md-5">
+
+            </div>
+            <div class="col-md-5">
+                @if (!Model.IsSubmitted)
+                {
+                    <a onclick="makeSubmitable(@Model.ShortCreditCollectionId);" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+
+                }
+                else
+                {
+                    <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Submitted</button>
+
+                }
+
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    using (Html.BeginForm("Index", "ShortCredits", FormMethod.Post))
+    {
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Collection Date</label>
+                   
+                    <input name="CollectionDate" asp-for="CollectionDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtCollectionDate" placeholder="Collection Date" autocomplete="off">
+                    @Html.ValidationMessageFor(model => model.CollectionDate, "", new { @class = "text-danger" })
+                </div>
+            </div>           
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Type</label>
+                    @Html.DropDownListFor(model => model.BankOrCashParantId, Model.BankOrCashParantList as SelectList, "==Select Type==", new { id = "ddlAccounting_BankOrCashParantId", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                    @Html.ValidationMessageFor(model => model.BankOrCashParantId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Bank/Cash</label>
+                    @Html.DropDownListFor(model => model.BankHeadId, Model.BankOrCashGLList as SelectList, new { id = "ddlAccounting_BankOrCashId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                    @Html.ValidationMessageFor(model => model.BankHeadId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @Html.HiddenFor(m => m.CompanyId)
+            <div class="col-md-4">
+                <label for="VendorId" class="col-form-label"> Customer </label>
+                <input type="hidden" id="hfVendor" name="VendorId" />
+                @Html.EditorFor(model => model.VendorName, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtVendor" } })
+                @Html.ValidationMessageFor(model => model.VendorName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                <level class="col-form-label">Current Credit Amount</level>
+                <input type="text" id="Totalamn" class="form-control" name="Totalamn" readonly>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="PlotName" class="col-form-label"> Amount </label>
+                    @Html.TextBoxFor(model => model.Amount, new { id = "Amount", @class = "form-control", style = "max-width:100%" })
+                    @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+
+            <div class="col-md-2" style="margin-top:24px;float:left">
+                <button type="submit" class="btn btn-primary"> Save</button>
+            </div>
+        </div>
+    }
+
+}
+
+@using (Html.BeginForm("SCreditSubmit", "ShortCredits", FormMethod.Post, new { id = "orderMasterByIDFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Submit</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "submitCompanyFK" })
+                    @Html.HiddenFor(model => model.ShortCreditCollectionId, new { id = "submitShortCreditCollectionId" })
+                    @Html.HiddenFor(model => model.ActionId, new { id = "submitActionId" })
+                    @Html.HiddenFor(model => model.VendorId, new { id = "submitCustomerId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to submit this?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@section Scripts {
+
+    @*@Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")*@
+
+    <script type="text/javascript">
+         function makeSubmitable(rowId) {
+             $("#submitShortCreditCollectionId").val(rowId)
+            $('#submitCompanyFK').val("@Model.CompanyId");
+            $('#submitCustomerId').val("@Model.VendorId");
+            $('#submitActionId').val(10);
+        }
+
+        $(function () {
+            $("#txtVendor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/ShortCredits/AutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                         
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+            
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+
+
+             $("#ddlAccounting_BankOrCashParantId").change(function () {
+                var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+
+
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("FeedHeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                         data: { companyId: "@Model.CompanyId", parentId: bankOrCashParantId},
+                    success: function (data) {
+                        console.log(data);
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                                $(data).each(function (index, item) {
+
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+
+                            });
+
+
+                        }
+                    }
+                });
+
+
+        })
+        });
+        $("#txtVendor").on("change", function () {
+            var vendorId = $("#hfVendor").val();
+
+            $.ajax({
+                url: '/ShortCredits/ShortCreditList',
+                type: "GET",
+                data: { VendorId: vendorId },
+                async: true,
+                processData: true,
+                cache: false,
+                success: function (response) {
+                    console.log(response);
+                    $("#Totalamn").val(response.minustotal);
+                    
+                },
+                error: function (xhr, status, error) {
+
+                }
+            });
+        });
+
+
+
+    </script>
+}

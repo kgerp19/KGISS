@@ -1,0 +1,256 @@
+﻿@model KGERP.Service.ServiceModel.GLDLBookingViewModel
+@{
+    ViewBag.Title = "Booking_for_TeamLead";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .ui-front {
+        z-index: 2100 !important;
+    }
+
+    .ui-datepicker {
+        z-index: 2100 !important;
+    }
+
+    @@media (min-width: 768px) {
+        .modal-content {
+            width: 750px;
+        }
+    }
+
+    .input-group {
+        width: 100% !important;
+    }
+
+    .mb-2 {
+        margin-bottom: 15px !important;
+    }
+
+    .input-group .form-control {
+        max-width: 100%;
+    }
+
+    .badge-primary {
+        color: #fff;
+        background-color: #007bff;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+
+    .badge-dark {
+        color: #fff;
+        background-color: #343a40;
+    }
+
+    .badge-info {
+        color: #fff;
+        background-color: #17a2b8;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 0px 15px 20px 5px;
+        background-color: #4caf5029 !important;
+    }
+</style>
+
+
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+    <div class="col-sm-4">
+        <h3> Customer Booking List </h3>
+    </div> 
+    </div>
+</section>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Customer Group Name</th>
+                <th>Project Name</th>
+                <th>Block Name</th>
+                <th>Plot Name</th>
+                <th>Plot Size</th>
+                <th>Booking Money</th>
+                <th>Land Value</th>
+                <th>Rest of Amount</th>
+                <th>Steps</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @{int sl = 0;}
+        <tbody>
+            @foreach (var item in Model.datalist)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td>@item.CustomerGroupName</td>
+                    <td>@item.ProjectName</td>
+                    <td>@item.BlockName</td>
+                    <td>@item.PlotName</td>
+                    <td>@item.PlotSize</td>
+                    <td>@item.BookingMoney</td>
+                    <td>@item.LandValue</td>
+                    <td>@item.RestofAmount</td>
+                    <td>
+
+                        @if (item.Step == 2)
+                        {
+                            <span class="badge badge-dark" data-toggle="modal" data-target="#exampleModal" onclick="statusevent(@item.BookingId, '@item.CGId')">Head of sales</span>
+                        }
+
+                        @if (item.Step == 3)
+                        {
+                            <span class="badge badge-success"> DMD approval</span>
+                        }
+
+
+                        @if (item.Step == 4)
+                        {
+                            <span class="badge badge-success"> MD approval</span>
+                        }
+
+
+                    </td>
+                    <td>
+                        @if (item.Status == 1)
+                        {
+                            <span class="badge badge-primary">Draft</span>
+                        }
+                        @if (item.Status == 2)
+                        {
+                            <span class="badge badge-dark">Recheck</span>
+                        }
+                        @if (item.Status == 3)
+                        {
+                    <span class="badge badge-success">Approve</span>
+                        } 
+                        @if (item.Status == 4)
+                        {
+                            <span class="badge badge-success">Approve</span>
+                        }
+                        @if (item.Status == 5)
+                        {
+                            <span class="badge badge-danger">Reject</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="/ProductBooking/CustomerBookingInformation?companyId=@item.CompanyId&CGId=@item.CGId" target="_blank" class="btn btn-warning btn-xs">
+                            Details
+                        </a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"> Change Booking Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("RechecekBookingStatus", "ProductBooking", FormMethod.Post))
+            {
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.CompanyId, new { @id = "CompanyId" })
+                    @Html.HiddenFor(x => x.CGId, new { @id = "CGId" })
+                    @Html.HiddenFor(x => x.BookingId, new { @id = "BookingId" })
+
+                    <div class="form-group">
+                        <label for="exampleFormControlSelect1">Select Status</label>
+                        <select class="form-control" name="Status" id="Status">
+                            <option value="3">Approve</option>
+                            <option value="5">Reject</option>
+                        </select>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <input id="submit" type="submit" data-confirm="Are you sure to submit?" value="Submit" class="btn btn-success pull-right" />
+                        <a @*href="@Url.Action("Index","Demand",new { companyId=Model.CompanyId})"*@ data-dismiss="modal" class="btn btn-danger pull-right" style="margin-right:15px">
+                            Close <i class="fa fa-close" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(function () {
+            $("#ClientNameId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/ProductBooking/CustomerAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "companyId":"' +@Model.CompanyId+'"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#BookingBy").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function statusevent(bookinid, cgid) {
+            $("#CGId").val(cgid);
+            $("#BookingId").val(bookinid);
+        }
+
+    </script>
+}

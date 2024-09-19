@@ -1,0 +1,237 @@
+﻿@model KGERP.Service.HR_Pay_Roll_Service.Mobile_Bill_Service.MoobileBillViewModel
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Detalis";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .bg-div {
+        padding: 1.15rem 1.25rem;
+        margin-bottom: 0;
+        background-color: #3f51b51f;
+        border-bottom: 0 solid rgba(0,0,0,.125);
+    }
+
+    .select2-container .select2-selection--single {
+        width: 567px !important;
+    }
+</style>
+<div class="bg-div ">
+    <h4> <b> @Model.CompanyName Mobile Bill Detalis </b> </h4>
+</div>
+
+
+<section class="content-header mt-3">
+    <div class="">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row">
+                    <table class="table">
+                        <tr>
+                            <th style="width:18%">
+                                Company Name
+                            </th>
+                            <th style="width:2%">:</th>
+                            <td style="width:30%">
+                                @Model.CompanyName
+                            </td>
+                            <th style="width:18%"> Created Date</th>
+                            <th style="width:2%">:</th>
+                            <td style="width:30%">
+                                @Model.StrCreatedDate
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="width:18%">
+                                Month
+                            </th>
+                            <th style="width:2%">:</th>
+                            <td style="width:30%">
+                                @((MonthList)Model.Month)
+                            </td>
+                            <th style="width:18%"> Year</th>
+                            <th style="width:2%">:</th>
+                            <td style="width:30%">
+                                @Model.Year
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="justify-content: space-between !important; display: flex;">
+                    <h3 class="mt-2"> Employee List</h3>
+                    <div>
+                        <button type="button" onclick="getEmployee()" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
+                            Add Mobile Bill
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="progress" style="height: 3px;">
+                    <div class="progress-bar" role="progressbar" style="width: 13%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <table class="table table-bordered table-sm mt-4">
+                    <thead>
+                        <tr style=" background-color: #fff2e0;">
+                            <th>SL</th>
+                            <th>Employee Id</th>
+                            <th>Name</th>
+                            <th> Amount </th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int sl = 0;
+                            decimal total = 0;
+                            }
+                        @foreach (var item in Model.MobileBillDetaliesList)
+                        {
+                            total += item.Amount??0;
+                            <tr>
+                                <th>@(++sl) </th>
+                                <th> @item.EmployeeKgId </th>
+                                <th> @item.EmployeeName </th>
+                                <th> @item.Amount </th>
+                                <th class="text-center">
+                                    <a onclick="getEmployeeEdit(@item.MobileBillDetailId,@item.EmployeeId,@item.Amount)" title="Update Employee" class="btn btn-info btn-xs" data-toggle="modal" data-target="#exampleModalLong2">
+                                        <i class="fa fa-pencil" style="font-size:15px;" aria-hidden="true"></i>
+                                    </a>
+                                    <a href="/PRoll_MobileBill/Delete?id=@item.MobileBillDetailId" onclick="return confirm('Are you sure you want to delete?');" title="Delete Employee" class="btn btn-danger btn-xs">
+                                        <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+                                    </a>
+                                </th>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr style=" background-color: #fff2e0;">
+                            <th></th>
+                            <th colspan="2">Total</th>
+                          
+                            <th> @total </th>
+                            <th class="text-center"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle"> Add New Mobile Bill </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("AddBillDetalis", "PRoll_MobileBill", FormMethod.Post))
+            {
+
+                <div class="modal-body">
+                    @Html.HiddenFor(m => m.MobileBillId)
+                    @Html.HiddenFor(m => m.Month)
+                    @Html.HiddenFor(m => m.Year)
+                    
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Employee:</label><br />
+                        @Html.DropDownListFor(model => model.DetaliesObject.EmployeeId, new SelectList(string.Empty), "==Select Employee==", new { id = "EmployeeId", @class = "form-control searchingDropdown", required = "required", @style = "max-width: 100%;" })
+                        @Html.ValidationMessageFor(model => model.DetaliesObject.EmployeeId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Amount:</label>
+                        @Html.EditorFor(model => model.DetaliesObject.Amount, new { htmlAttributes = new { @class = "form-control customStyle", @id = "Amount", @autocomplete = "off", @style = "max-width: 100%;", required = "required" } })
+                        @Html.ValidationMessageFor(model => model.DetaliesObject.Amount, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle2" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle2">Update Mobile Bill </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("UpdateBillDetalis", "PRoll_MobileBill", FormMethod.Post))
+            {
+
+                <div class="modal-body">
+                    @Html.HiddenFor(m => m.MobileBillId)
+                    @Html.HiddenFor(m => m.DetaliesObject.MobileBillDetailId, new { id = "MobileBillDetailId" })
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Amount:</label>
+                        @Html.EditorFor(model => model.DetaliesObject.Amount, new { htmlAttributes = new { @class = "form-control customStyle", @id = "Amount", @autocomplete = "off", @style = "max-width: 100%;", required = "required" } })
+                        @Html.ValidationMessageFor(model => model.DetaliesObject.Amount, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning"> Update </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+
+        });
+        function getEmployee() {
+        var companyId = $("#CompanyId option:selected").val();
+        $("#sowData").empty();
+        console.log(companyId);
+        $.ajax({
+            type: "GET",
+            url: "/FoodBill/GetAllEmployeeinfo",
+            datatype: "Json",
+            data: {companyId:@Model.CompanyId},
+            success: function (data) {
+                $("#EmployeeId").empty();
+                $("#EmployeeId").append("<option value=''>==Select Employee==</option>");
+                $(data).each(function (index, item) {
+                    $("#EmployeeId").append("<option value='" + item.Id + "'>" + item.Name + "(" + item.EmployeeId + ")</option>");
+                });
+            }
+        });
+        };
+
+    function getEmployeeEdit(id,brak) {
+            $("#Amount").val(brak);
+        $("#MobileBillDetailId").val(id);
+        };
+
+
+    </script>
+
+    }

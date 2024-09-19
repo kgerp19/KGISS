@@ -1,0 +1,433 @@
+﻿@model KGERP.Service.SalesManagementVM
+
+@{
+    var message = TempData["message"];
+    double? totalAmount = 0;
+}
+
+@{
+    string[] months = { "July", "August", "September", "October", "November", "December", "January", "February", "March", "April", "May", "June" };
+}
+<style>
+    .premium-card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+        .premium-card .card-header {
+            background-color: #007bff;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .premium-card .card-body {
+            padding: 20px;
+        }
+
+        .premium-card .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .premium-card .list-group-item {
+            border-color: rgba(0, 0, 0, 0.125);
+        }
+
+            .premium-card .list-group-item:last-of-type {
+                border-bottom-left-radius: 10px;
+                border-bottom-right-radius: 10px;
+            }
+
+            .premium-card .list-group-item strong {
+                color: #007bff;
+            }
+
+        .premium-card .float-end {
+            font-weight: bold;
+        }
+</style>
+<div class="box">
+
+    <div class="container mt-4 d-flex justify-content-center">
+        <div class="card premium-card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title text-center mb-0">Achievement Details</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Achievement Title:</strong> <span class="float-end">@Model.AchievementTitle</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Target Amount:</strong> <span class="float-end">@Model.TargetAmount BDT</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Session:</strong> <span class="float-end">@Model.StartDate.ToString("dd/MMM/yy") - @Model.EndDate.ToString("dd/MMM/yy")</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="table-responsive" style="margin-top:25px;">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align:center;" colspan="3">Sales</th>
+
+                    <th style="text-align:center;" colspan="3">Sales Qty</th>
+
+                    <th style="text-align:center;" colspan="3">Collection</th>
+
+
+                </tr>
+
+                <tr>
+                    <th>SL</th>
+                    <th>Month</th>
+
+
+                    @if (Model.DataCmpanyWise.Count() == 0)
+                    {
+                        <th colspan="3" style="text-align:center;">Target</th>
+                       
+                        <th colspan="3" style="text-align:center;">Target</th>
+                       
+                        <th colspan="3" style="text-align:center;">Target</th>
+                       
+                    }
+                    else
+                    {
+                        <th style="text-align:center;">Target</th>
+                        <th style="text-align:center;">Achivement</th>
+                        <th style="text-align:center;">Percentage</th>
+                        <th style="text-align:center;">Target</th>
+                        <th style="text-align:center;">Achivement</th>
+                        <th style="text-align:center;">Percentage</th>
+                        <th style="text-align:center;">Target</th>
+                        <th style="text-align:center;">Achivement</th>
+                        <th style="text-align:center;">Percentage</th>
+                    }
+
+                    <th>Unit</th>
+
+
+                    @if (Model.DataCmpanyWise != null && Model.DataCmpanyWise.Any())
+                    {
+                        <th>Action</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DataCmpanyWise != null && Model.DataCmpanyWise.Any())
+                {
+                    int sl = 0;
+                    decimal totalSaleTargetAmount = 0;
+                    decimal totalCollectionTargetAmount = 0;
+                    decimal totalachivementamount = 0;
+                    decimal? totalTargetQty = 0;
+                    decimal? totalachiveQty = 0;
+                    decimal? totalachivementcollection = 0;
+
+                    foreach (var item in Model.DataCmpanyWise)
+                    {
+                        totalSaleTargetAmount += item.MonthlySalesTergetedAmount;
+                        totalachivementamount += item.SalesAchievementAmount;
+                        totalCollectionTargetAmount += item.MonthlyCpllectionTergetedAmount;
+                        totalTargetQty += item.MonthlyTergetedQuantity;
+                        totalachiveQty += item.SalesAchievementQty;
+                        totalachivementcollection += item.recovery;
+
+                        <tr data-id="@item.KGCompanyMonthlySaleTergetId">
+                            <td>@(++sl)</td>
+                            <td>@GetMonthName(item.Month)</td>
+                            <td>
+                                <span class="displayMode">@item.MonthlySalesTergetedAmount</span>
+                                <input type="number" class="editMode" value="@item.MonthlySalesTergetedAmount" style="display:none;" />
+                            </td>
+                            <td>
+                                <span class="displayMode">@item.SalesAchievementAmount</span>
+
+                            </td>
+
+                            <td>
+                                @{
+                                    var f = item.SalesAchievementAmount;
+                                    var g = item.MonthlySalesTergetedAmount; // Correcting the typo to SalesTargetAmount
+                                    var h = (f / g) * 100;
+                                    var formattere = h.ToString("F2");
+                                }
+                                <span class="displayMode">@formattere%</span> <!-- Display the calculated percentage -->
+                            </td>
+                            <td>
+                                <span class="displayMode">@item.MonthlyTergetedQuantity  @item.Unitname</span>
+                                <input type="number" class="editMode" value="@item.MonthlyTergetedQuantity" style="display:none;" />
+                            </td>
+                            <td>
+                                <span class="displayMode">@item.SalesAchievementQty  @item.Unitname</span>
+                                <input type="number" class="editMode" value="@item.SalesAchievementQty" style="display:none;" />
+                            </td>
+                            <td>
+                                @{
+                                    var w = item.SalesAchievementQty;
+                                    var e = item.MonthlyTergetedQuantity ?? 0; // Correcting the typo to SalesTargetAmount
+                                    var r = e > 0 ? (w / e) * 100 : 0;
+                                    var t = r.ToString("F2");
+                                }
+                                <span class="displayMode">@t%</span> <!-- Display the calculated percentage -->
+                            </td>
+                            <td>
+                                <span class="displayMode">@item.MonthlyCpllectionTergetedAmount</span>
+                                <input type="number" class="editMode" value="@item.MonthlyCpllectionTergetedAmount" style="display:none;" />
+                            </td>
+                            <td>
+                                <span class="displayMode">@item.recovery</span>
+                                <input type="number" class="editMode" value="@item.recovery" style="display:none;" />
+                            </td>
+                            <td>
+                                @{
+                                    var a = item.recovery;
+                                    var b = item.MonthlyCpllectionTergetedAmount; // Correcting the typo to SalesTargetAmount
+                                    var c = (a / b) * 100;
+                                    var formattede = h.ToString("F2");
+                                }
+                                <span class="displayMode">@formattede%</span> <!-- Display the calculated percentage -->
+                            </td>
+                            <td>
+                                <span class="displayMode">@item.Unitname</span>
+                                <input type="number" class="editMode" value="@item.Unitname" style="display:none;" />
+                            </td>
+
+
+                            <td>
+                                @*<button class="editBtn btn btn-warning"><i class="fa fa-pencil"></i> </button>*@
+                                <button class="saveBtn btn btn-warning" style="display:none;"><i class="fa fa-save"></i></button>
+                                <a href="@Url.Action("SalesPeronAssign", "SalesManagement", new { KGCompanyMonthlySaleTergetId = item.KGCompanyMonthlySaleTergetId,CompanyId=Model.CompanyId })" class="btn btn-warning"><i class="fa fa-arrow-circle-o-right"></i></a>
+                                <a href="@Url.Action("SaleTagetFix", "SalesManagement", new { KGCompanyMonthlySaleTergetId = item.KGCompanyMonthlySaleTergetId,CompanyId=Model.CompanyId })" class="btn btn-primary">Assign Target</a>
+                            </td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td colspan="2">Total:</td>
+                        <td width="5%"><strong>@totalSaleTargetAmount</strong></td>
+                        <td width="5%"><strong>@totalachivementamount</strong></td>
+                        <td></td>
+                        <td width="5%"><strong>@totalTargetQty</strong></td>
+                        <td width="5%"><strong>@totalachiveQty</strong></td>
+                        <td></td>
+                        <td width="5%"><strong>@totalCollectionTargetAmount</strong></td>
+                        <td width="5%"><strong>@totalachivementcollection</strong></td>
+
+                        <td></td>
+                    </tr>
+                }
+                else
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        int sl = i + 1;
+
+                        <tr>
+                            <td>@sl</td>
+                            <td>@months[i]</td>
+                            <td colspan="3"><input type="text" name="MonthlySalesTergetedAmount[@i]" class="form-control MonthlySalesTergetedAmount" /></td>
+                            <td colspan="3"><input type="text" name="MonthlyTergetedQuantity[@i]" class="form-control MonthlyTergetedQuantity" /></td> <!-- New input field -->
+                            <td colspan="3"><input type="text" name="MonthlyCpllectionTergetedAmount[@i]" class="form-control MonthlyCpllectionTergetedAmount" /></td> <!-- New input field -->
+
+                            <td>
+                                <select name="Unit[@i]" class="form-control UnitDropdown">
+                                    @foreach (var unit in Model.Unit)
+                                    {
+                                        <option value="@unit.Value">@unit.Text</option>
+                                    }
+                                </select>
+                            </td><!-- New input field -->
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="box-footer">
+
+        @if (!(Model.DataCmpanyWise != null && Model.DataCmpanyWise.Any()))
+        {
+            <button id="btnSave" class="btn btn-primary " style="float:right;">Save</button>
+        }
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(function() {
+            $('#btnSave').click(function() {
+                var dataToSave = [];
+
+                $('.MonthlySalesTergetedAmount').each(function(index, element) {
+                    var month = $(this).closest('tr').find('td:nth-child(2)').text().trim(); // Month value
+                    var amount = $(this).val(); // Targeted Amount value
+                    var qty = $(this).closest('tr').find('.MonthlyTergetedQuantity').val();
+                    var collection = $(this).closest('tr').find('.MonthlyCpllectionTergetedAmount').val();
+                    var unitId = $(this).closest('tr').find('.UnitDropdown').val();
+                    var monthNumber = getMonthNumber(month);
+
+                    dataToSave.push({
+                        Month: monthNumber,
+                        MonthlySalesTergetedAmount: amount,
+                        TergetedQty: qty,
+                        MonthlyCollectionTergetedAmount:collection,
+                        KGCompanySaleTergetId:@Model.KGCompanySaleTergetId,
+                        UnitId: unitId
+                    });
+                });
+
+
+                $.ajax({
+                    url: '@Url.Action("SaveTargetAmounts", "SalesManagement")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ targetAmounts: dataToSave }),
+                    success: function(response) {
+
+                        location.reload();
+
+                    },
+                    error: function(xhr, status, error) {
+
+                        console.error('Error saving data:', error);
+
+                    }
+                });
+            });
+        });
+
+        function getMonthNumber(monthName) {
+            switch (monthName) {
+                case 'January':
+                    return 1;
+                case 'February':
+                    return 2;
+                case 'March':
+                    return 3;
+                case 'April':
+                    return 4;
+                case 'May':
+                    return 5;
+                case 'June':
+                    return 6;
+                case 'July':
+                    return 7;
+                case 'August':
+                    return 8;
+                case 'September':
+                    return 9;
+                case 'October':
+                    return 10;
+                case 'November':
+                    return 11;
+                case 'December':
+                    return 12;
+                default:
+                    return 0; // Handle invalid month names
+            }
+        }
+        @functions {
+            public string GetMonthName(int monthNumber)
+            {
+                switch (monthNumber)
+                {
+                    case 1:
+                        return "January";
+                    case 2:
+                        return "February";
+                    case 3:
+                        return "March";
+                    case 4:
+                        return "April";
+                    case 5:
+                        return "May";
+                    case 6:
+                        return "June";
+                    case 7:
+                        return "July";
+                    case 8:
+                        return "August";
+                    case 9:
+                        return "September";
+                    case 10:
+                        return "October";
+                    case 11:
+                        return "November";
+                    case 12:
+                        return "December";
+
+                    default:
+                        return ""; // Handle any unexpected cases
+                }
+            }
+}
+
+    $('.editBtn').on('click', function () {
+        var row = $(this).closest('tr');
+
+        // Toggle between display and edit mode
+        row.find('.displayMode').hide();
+        row.find('.editMode').show();
+
+        // Toggle buttons
+        row.find('.editBtn').hide();
+        row.find('.saveBtn').show();
+    });
+    $('.saveBtn').on('click', function () {
+        var row = $(this).closest('tr');
+
+        // Update displayed values with edited values
+        var amountInput = row.find('.editMode:eq(0)');
+        var quantityInput = row.find('.editMode:eq(1)');
+        var collectionInput = row.find('.editMode:eq(2)');
+
+        row.find('.displayMode:eq(0)').text(amountInput.val());
+        row.find('.displayMode:eq(1)').text(quantityInput.val());
+        row.find('.displayMode:eq(2)').text(collectionInput.val());
+
+        // Toggle between display and edit mode
+        row.find('.editMode').hide();
+        row.find('.displayMode').show();
+
+        // Toggle buttons
+        row.find('.saveBtn').hide();
+        row.find('.editBtn').show();
+
+
+         $.ajax({
+            url: '@Url.Action("UpdateTarget", "SalesManagement")',
+            method: 'POST',
+             data: {
+                id: row.data('id'),
+                 saleAmount: amountInput.val(),
+                 saleQuantity: quantityInput.val(),
+                 collectionAmount : collectionInput.val()
+            },
+             success: function (response) {
+                 location.reload();
+             },
+            error: function(err) {
+                // Handle error
+            }
+         });
+    });
+    </script>
+}

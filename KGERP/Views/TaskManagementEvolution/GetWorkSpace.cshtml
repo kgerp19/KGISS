@@ -1,0 +1,248 @@
+﻿@model KGERP.Service.Implementation.TaskManagment.WorkSpaceVm
+
+@{
+    ViewBag.Title = "GetWorkSpace";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Global styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5; /* Background color */
+        margin: 0;
+        padding: 20px;
+    }
+
+    /* Card styles */
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Card shadow */
+        color: #333; /* Text color */
+        margin: 10px;
+        padding: 20px;
+        width: 200px; /* Card width */
+        display: inline-block;
+        vertical-align: top;
+        transition: transform 0.3s ease;
+        background-color: #f8f9fa; /* Light background */
+        background-image: linear-gradient(to bottom, #f8f9fa, #e2e6ea); /* Gradient effect */
+        position: relative; /* Make the card container relative */
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 10px;
+            position: relative;
+            color: #333; /* Text color */
+        }
+
+            .card h3:after {
+                content: "";
+                display: block;
+                width: 50px;
+                height: 2px;
+                background-color: #6A5ACD;
+                position: absolute;
+                bottom: -8px;
+                left: 0;
+            }
+
+        .card p {
+            margin: 5px 0;
+            color: #555; /* Text color */
+        }
+
+    .card-footer {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+        .card-footer a {
+            background-color: #6A5ACD;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+    /* Premium Icon Styles */
+    .premium-icon {
+        font-size: 24px;
+        margin-right: 5px;
+    }
+
+        .premium-icon:hover {
+            opacity: 0.8;
+        }
+
+    .btn-delete {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1; /* Ensure it's above other elements */
+    }
+</style>
+<h1 style="text-align: center;  color: #333; margin-bottom: 20px; font-size: 48px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #6A5ACD; padding-bottom: 10px;">Workspaces</h1>
+
+<div style="text-align: right;">
+    <a href="#" class="btn btn-primary" style="background-image: linear-gradient(to right, #40AEC2, #B66DE5, #1CA0B5); color: white; text-decoration: none; font-size: 18px; padding: 10px 20px; border-radius: 5px;" data-toggle="modal" data-target="#myModal">Add New Workspaces</a>
+</div>
+
+@using (Html.BeginForm("CreateWorkspace", "TaskManagementEvolution", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header" style="background-color: #40AEC2; color: white; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <h5 class="modal-title" id="myModalLabel">Add New Workspace</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="workspaceTitle">Workspace Title</label>
+                            <input type="text" class="form-control" name="Title" id="workspaceTitle" placeholder="Enter workspace title">
+                        </div>
+                        <div class="form-group">
+                            <label for="workspaceDescription">Workspace Description</label>
+                            <input class="form-control" name="WorkNo" id="WorkNo" rows="3" placeholder="Enter workspace Description">
+                        </div>
+                        <div class="form-group">
+                            <label for="workspaceDate">Date</label>
+                            <input type="text" name="Date" class="form-control datepicker" id="workspaceDate" placeholder="Select date">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<!-- Modal -->
+<!-- Modal HTML -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Are you sure you want to delete the workspace "<span id="workspaceTitleee"></span>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="alertMessage" class="alert alert-success" style="display: none;"></div>
+@if (Model.DataList != null && Model.DataList.Any())
+{
+    <div class="row">
+        @foreach (var workspace in Model.DataList)
+        {
+            var hue = (workspace.GetHashCode() * 40) % 360; /* Adjust hue for different colors */
+            var color = "hsl(" + hue + ", 70%, 50%)";
+
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+                <div class="card" id="workspace-@workspace.WorkSpacesId" style="background-color: @color;">
+                    <div class="card-header">
+                        <a href="#" class="btn-delete" data-workspace-id="@workspace.WorkSpacesId" data-workspace-title="@workspace.Title"><i class="fa fa-times premium-icon" style="color: red;"></i></a>
+                    </div>
+                    <h3>@workspace.Title</h3>
+                    <p><strong>Work Description:</strong> @workspace.WorkNo</p>
+                    <p><strong>Date:</strong> @workspace.Date.Value.ToString("dd/MM/yyyy")</p>
+                    <p><strong>Created By:</strong> @workspace.CreatedBy</p>
+                    <div class="card-footer">
+                        <a href="#" class="btn-go">Go</a>
+                        <a href="~/TaskManagementEvolution/WorkBoard?WorkSpaceID=@workspace.WorkSpacesId" class="btn-arrow">&#8594;</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No workspaces found.</p>
+}
+
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
+            }).datepicker('setDate', new Date());
+        });
+
+
+        function openDeleteModal(workspaceId, workspaceTitle) {
+            // Set the workspace ID and title in the modal
+            console.log(workspaceTitle);
+            $('#deleteModal').data('workspace-id', workspaceId);
+            $('#workspaceTitleee').text(workspaceTitle);
+
+            // Show the delete modal
+            $('#deleteModal').modal('show');
+        }
+
+        $('.btn-delete').click(function (e) {
+            e.preventDefault();
+            var workspaceId = $(this).data('workspace-id');
+            var workspaceTitle = $(this).data('workspace-title');
+            $('#workspaceTitleee').text(workspaceTitle);
+            $('#deleteModal').data('workspace-id', workspaceId);
+            $('#deleteModal').modal('show');
+        });
+
+        $('#confirmDelete').click(function () {
+            var workspaceId = $('#deleteModal').data('workspace-id');
+            $('#deleteModal').modal('hide');
+            // Send an AJAX request to the DeleteConfirmed action
+            $.ajax({
+                url: '/TaskManagementEvolution/DeleteConfirmed/' + workspaceId,
+                type: 'POST',
+                success: function (response) {
+                    $('#workspace-' + workspaceId).remove();
+                    // Show success message
+                    $('#alertMessage').text('Workspace deleted successfully!').fadeIn('fast');
+                    // Fade out the message after 3 seconds
+                    setTimeout(function () {
+                        $('#alertMessage').fadeOut('slow');
+                    }, 3000);
+
+
+                }
+            });
+        });
+
+    </script>
+
+
+}

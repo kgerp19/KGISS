@@ -1,0 +1,306 @@
+﻿@model KGERP.Service.Implementation.Production.VMProdReferenceSlave
+
+@{
+    ViewData["Title"] = "Store In";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.ProdReferenceId > 0)
+        {
+            <span>
+                Production Process By Challan No <a target="_blank" href="~/WareHouse/WareHousePOReceivingSlaveReport?companyId=@Model.CompanyFK&materialReceiveId=@Model.ProdReferenceId">@Model.ReferenceNo</a>
+            </span>
+        }
+        else
+        {
+            <span>
+                Production Process By Challan
+            </span>
+        }
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li><a href="~/WareHouse/WareHousePOReceivingSlave">Store In</a></li>
+        <li class="active">Production By Challan</li>
+    </ol>
+</section>
+@using (Html.BeginForm("ProdReferenceSlaveByChallan", "Production", FormMethod.Post, new { id = "prodReferenceSlaveByChallanFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(x => x.CompanyFK, new { id = "CompanyFK" })
+
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.ProdReferenceId > 0)
+                        {
+                            @Html.HiddenFor(x => x.CompanyFK, new { id = "CompanyFK" })
+
+
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <td><b>Purchase Order</b></td>
+                                        <td>:</td>
+                                        <td><a href="~/WareHouse/WareHousePOSlaveReceivingDetailsByPO/@Model.ProdReferenceId" target="_blank" title="See All Receiving History of This PO">@Model.ReferenceNo</a> </td>
+
+                                        <td><b>Reference Date</b></td>
+                                        <td>:</td>
+                                        <td>@Model.ReferenceDate.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+
+                        }
+                        else
+                        {
+
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Production Date</label>
+                                            <input name="ReferenceDate" asp-for="ReferenceDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" style="width:100%;border:1px black solid" required="required" class="datePicker form-control" id="txtReferenceDate" placeholder="Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.ReferenceDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="form-group" style="padding:0px">
+                                            <label>Challan Number</label>
+                                            @Html.EditorFor(model => model.ChallanNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "ChallanNo", @id = "txtChallanNo" } })
+
+                                            @Html.HiddenFor(model => model.MaterialReceiveFk, new { id = "ddlMaterialReceiveFk" })
+                                            @Html.ValidationMessageFor(model => model.MaterialReceiveFk, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <br />
+                            <div class="col-md-12">
+                                <div class="box">
+                                    <div class="box-footer">
+                                        <div id="materialReceiveData"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+                        <!--Body Will by Start Here-->
+
+
+
+                        @{
+                            if (Model.ProdReferenceId > 0)
+                            {
+                                <div class="box-header" style="clear:both">
+                                    <h4><b>Received Item:</b> </h4>
+                                </div>
+                                <div class="table-responsive col-md-12 text-nowrap">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+
+                                                <th class="center">Product Name </th>
+                                                <th class="center">Process Quantity</th>
+                                                <th class="center">Unit</th>
+                                               
+                                                <th>RM Comsume</th>
+                                              
+                                            </tr>
+                                        </thead>
+                                        @{
+                                            int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataListSlave)
+                                            {
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>@item.ProductName</td>
+                                                    <td>@item.Quantity</td>
+                                                    <th>@item.UnitName</th>
+                                                    <td>
+                                                        <table class="table">
+                                                            @foreach (var itemSub in item.RowProductConsumeList)
+                                                            {
+                                                            <tr>
+                                                                <td>@itemSub.RProductName</td>
+                                                                <td>@itemSub.TotalConsumeQuantity</td>
+                                                                <td>@itemSub.UnitName</td>
+
+                                                            </tr>
+                                                            }
+
+                                                        </table>
+                                                    </td>
+                                                   
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="box-footer">
+                        @*@if (Model.ID > 0)
+                            {
+                                <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                            }*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Challan Item</b></h5>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        @Html.HiddenFor(model => model.ID, new { Value = "", id = "challanSlaveId" })
+
+                        <h3>Are you sure to delete?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btncloseandreset" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" id="btnsave" class="btn btn-primary">&nbsp;Delete</button>&nbsp;
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+            //$("#poDetailsTable").hide();
+            $("#chkIsDefineBin input:checkbox").change(function () {
+                var ischecked = $(this).is(':checked');
+                if (ischecked) {
+                    alert('uncheckd ' + $(this).val());
+                }
+                else {
+                    alert('uncheckd ' + $(this).val());
+
+                }
+
+
+            });
+
+            $("#txtChallanNo").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("AutoCompleteMaterialReceivesGet", "Production")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.CompanyFK", prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlMaterialReceiveFk").val(i.item.val);
+
+                 $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetMaterialReceiveDetails", "Production")",
+                    datatype: "Json",
+                     data: { materialReceiveId : i.item.val },
+                     success: function (data) {
+                         console.log(data);
+                         $("#materialReceiveData").html(data);
+                    }
+                });
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        });
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#challanSlaveId').val(id);
+                $('#ActionId').val(3);
+
+            }
+        }
+        function resetForm() {
+            $('#prodReferenceSlaveByChallanFormId')[0].reset();
+            $('#ActionId').val(1);
+        }
+
+    </script>
+}

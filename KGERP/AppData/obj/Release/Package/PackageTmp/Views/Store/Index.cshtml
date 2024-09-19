@@ -1,0 +1,143 @@
+﻿@model KGERP.Service.ServiceModel.StoreModel
+
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Receive List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>Receive List</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("CreateOrEdit",new {id=0,type=Request.QueryString["type"] })" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New Receive
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "Store", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+
+
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%;">SL</th>
+                                        <th style="width:10%;">Received Date</th>
+                                        <th style="width:10%;">Received Code</th>
+                                        <th style="width:10%;">Supplier Name</th>
+                                        <th style="width:10%;">LC No</th>
+                                        <th style="width:10%;">Store Name</th>
+                                        <th style="width:10%;">Export</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">
+                                                @(++sl)
+                                            </td>
+                                            <td>
+                                                @item.ReceivedDate.Value.ToString("dd/MMM/yyyy")
+                                            </td>
+                                            <td>@item.ReceivedCode</td>
+                                            <td>
+                                                @item.SupplierName
+                                            <td>
+                                                @item.LcNo
+                                            </td>
+                                            <td>
+                                                @item.StoreName
+                                            </td>
+                                            <td>
+                                                @if (Request.QueryString["companyId"].Equals("10"))
+                                                {
+                                                    <a href="@Url.Action("GetKFMALCOstingReport","Report", new {storeId=item.StoreId})" title="Report" target="_blank" class="btn btn-info btn-xs">
+                                                        <i class="fa fa-download" style="font-size:15px;" aria-hidden="true"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a href="@Url.Action("GetFinishProductStoreReport","Report", new {storeId=item.StoreId,reportName="FinishProductStockIn"})" target="_blank" class="btn btn-primary btn-xs">
+                                                        Report
+                                                    </a>
+                                                }
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}

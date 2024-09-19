@@ -1,0 +1,159 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.EmployeeModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Previous Employees";
+}
+
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+<div class="row">
+    @using (Html.BeginForm("PreviousEmployees", "Employee", FormMethod.Get, new { @class = "example" }))
+    {
+        <div class="col-md-8">
+            @Html.Hidden("employeeType", new { employeeType = Request.QueryString["employeeType"] })
+            @if (Request.QueryString["employeeType"].Equals("true"))
+            {<span style="font-size:20px;font:bold">
+                    Current Employees
+                </span>
+            }
+            else
+            {
+                <span style="font-size:20px;font:bold">
+                    Former Employees
+                </span>
+            }
+        </div>
+        <div class="col-md-4">
+            @*@Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..." } })
+            <button type="submit"><i class="fa fa-search "></i></button>*@
+        </div>
+    }
+</div>
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped" id="employeeList">
+        <thead>
+            <tr style="background-color:#4CAF50;color:#FFFFFF">
+                <th>SL</th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().EmployeeId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Name)
+                </th>
+                <th nowrap>
+                    @Html.DisplayNameFor(model => model.First().JoiningDate)
+                </th>
+
+                <th>
+                    @Html.DisplayNameFor(model => model.First().DepartmentId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().DesignationId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().OfficeEmail)
+                </th>
+                <th nowrap>
+                    @Html.DisplayNameFor(model => model.First().MobileNo)
+                </th>
+                <th>
+                    Status
+                </th>
+                @if (System.Web.HttpContext.Current.User.Identity.Name == "KG3070"
+                      || System.Web.HttpContext.Current.User.Identity.Name == "KG3068")
+                {
+                    <th class="text-center">
+                        Download
+                    </th>
+                    }
+                </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+            {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.EmployeeId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Name)
+                </td>
+                <td nowrap>
+
+                    @if (item.Data.JoiningDate.HasValue)
+                    {
+                        @item.Data.JoiningDate.Value.ToString("dd-MMM-yyyy")
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Department.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Designation.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.OfficeEmail)
+                </td>
+                <td nowrap>
+                    @Html.DisplayFor(modelItem => item.Data.MobileNo)
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-xs">Inactive</button>
+                </td>
+                @if (System.Web.HttpContext.Current.User.Identity.Name == "KG3070"
+                  || System.Web.HttpContext.Current.User.Identity.Name == "KG3068")
+                {
+                    <td class="text-center" nowrap>
+
+                        <a href="@Url.Action("GetPreviousEmployeeReport", "Report", new { id = item.Data.Id, reportName = "PreviousEmployee" })" title="Export Bio-Data" target="_blank" class="btn btn-primary btn-xs">
+                            Export
+                        </a>
+                        <a href="@Url.Action("CreateOrEdit", new { id = item.Data.Id })" title="Update Employee" class="btn btn-info btn-xs">
+                            <i class="fa fa-pencil" style="font-size:15px;" aria-hidden="true"></i>
+                        </a>
+                    </td>
+}
+
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    @*@if (Model.PageCount > 1)
+        {
+            <span class="btn btn-success">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+            </span>
+            <span class="checkbox">
+                @Html.PagedListPager(Model, Page_No => Url.Action("PreviousEmployees", "Employee",
+                                                                                    new { Page_No, Sorting_Order = Request.QueryString["Search"], employeeType = Request.QueryString["employeeType"], SearchText = Request.QueryString["searchText"] }))
+            </span>
+        }*@
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#employeeList').DataTable({
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            "paging": true,
+            "bInfo": false
+            });
+  
+        });
+    </script>
+}
+
+

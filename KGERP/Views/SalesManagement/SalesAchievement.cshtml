@@ -1,0 +1,212 @@
+﻿@model KGERP.Service.SalesManagementVM
+
+@{
+    ViewBag.Title = "KG Sales Planning";
+}
+<style>
+    button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 5px;
+        border: none;
+        border-radius: 12px;
+        background-color: #ffffff;
+        color: #444444;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        cursor: pointer;
+    }
+        button i {
+            margin-right: 6px;
+        }
+        button:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+    .editAchievement {
+        background-color: #00bcd4;
+        color: white;
+    }
+
+        .editAchievement:hover {
+            background-color: #0097a7;
+        }
+
+    
+    .deleteAchievement {
+        background-color: #f44336; 
+        color: white;
+    }
+
+        .deleteAchievement:hover {
+            background-color: #d32f2f;
+        }
+
+    
+    .goToSalesTarget {
+        background-color: #4caf50;
+        color: white;
+    }
+
+        .goToSalesTarget:hover {
+            background-color: #388e3c;
+        }
+
+
+    #saveBtn {
+        margin-top: 25px;
+    }
+
+    .achievement-list {
+        margin-top: 150px;
+    }
+</style>
+<h2>KG Sales Planning</h2>
+
+<div class="myCard">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.AchievementId, new { @id = "AchievementId", @value = 0 })
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.LabelFor(m => m.AchievementTitle)
+                @Html.TextBoxFor(m => m.AchievementTitle, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.AchievementTitle, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+        </div>
+    }
+</div>
+<div class="achievement-list myCard">
+    <table id="KgErpDataTable" class="table table-striped" width="100%">
+        <thead>
+            <tr>
+                <th style="width:20%">Title</th>
+                <th style="width:15%">From Date</th>
+                <th style="width:15%">To Date</th>
+                <th style="width:20%">Total Targeted Amount</th>
+                <th style="width:30%">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+@section scripts {
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+    $('.datepicker').datepicker({
+        dateFormat: "dd/mm/yy",
+        showOn: 'both',
+        buttonText: "<i class='fa fa-calendar'></i>",
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "2001:+50"
+    });
+
+    function fetchAndDisplayAchievements() {
+        $.ajax({
+            url: '@Url.Action("GetAllAchievements", "SalesManagement")',
+            type: 'GET',
+            success: function (data) {
+                $('#KgErpDataTable tbody').empty();
+                $.each(data, function (index, achievement) {
+                    var fromDateFormatted = moment(achievement.FromDate).format('DD/MM/YYYY');
+                    var toDateFormatted = moment(achievement.ToDate).format('DD/MM/YYYY');
+                    var row = $('<tr>').append(
+                        $('<td width = "40%">').text(achievement.AchievementTitle),
+                        $('<td>').text(fromDateFormatted),
+                        $('<td>').text(toDateFormatted),
+                        $('<td>').text(achievement.TotalTergetedAmountStr),
+                    );
+                    row.append($('<td>').append($('<button>').addClass('btn editAchievement').html('<i class="fa fa-edit"></i>').data('achievementId', achievement.AchievementId)).append($('<button>').addClass('btn deleteAchievement').html('<i class="fa fa-trash"></i>').data('achievementId', achievement.AchievementId)).append($('<button>').addClass('btn goToSalesTarget').html('<i class="fa fa-arrow-circle-o-right"></i>').data('achievementId', achievement.AchievementId)));
+                    $('#KgErpDataTable tbody').append(row);
+                });
+            },
+            error: function () {
+                alert('Error fetching data.');
+            }
+        });
+    }
+
+    $('#KgErpDataTable').on('click', '.deleteAchievement', function (e) {
+        var achievementId = $(this).data('achievementId');
+        console.log("Achievement Id : " + achievementId);
+        if (confirm('Are you sure you want to delete this achievement?')) {
+            $.ajax({
+                url: '/SalesManagement/DeleteAchievement',
+                type: 'POST',
+                data: { achievementId: achievementId },
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        toastr.success(response.message);
+                        fetchAndDisplayAchievements();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+    });
+
+    $('#KgErpDataTable').on('click', '.editAchievement', function (e) {
+        var achievementId = $(this).data('achievementId');
+        $.ajax({
+            url: '@Url.Action("GetAchievement", "SalesManagement")',
+            type: 'GET',
+            data: { achievementId: achievementId },
+            success: function (response) {
+                var achievement = response.achievement;
+                $('#AchievementTitle').val(achievement.AchievementTitle);
+                $('#StrFromDate').val(achievement.StrFromDate);
+                $('#StrToDate').val(achievement.StrToDate);
+                $('#AchievementId').val(achievement.AchievementId);
+            },
+            error: function () {
+                alert('Error fetching data for edit.');
+            }
+        });
+    });
+    $('#KgErpDataTable').on('click', '.goToSalesTarget', function (e) {
+        var achievementId = $(this).data('achievementId');
+        var url = '@Url.Action("KGCompanySalesTarget", "SalesManagement")' + '?salesId=' + achievementId;
+        window.location.href = url;
+    });
+    $(document).ready(function () {
+        fetchAndDisplayAchievements();
+    });
+    </script>
+
+}

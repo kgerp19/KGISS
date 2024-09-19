@@ -1,0 +1,158 @@
+﻿@model KGERP.Service.ServiceModel.OfficerAssignModel
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<form method="Post">
+    <div class="col-md-12 " style="margin-top:30px;">
+        <div class="row">
+            <div class="col-md-6">
+                <input name="OfficerAssignId" value="@Model.officervm.OfficerAssignId" hidden />
+                <div class="form-group row" style="margin-left:8px;">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Zone</label>
+                    <select id="zonevalue"  class="form-control" name="ZoneId">
+                        <option value="0">---Select Zone  --- </option>
+                        @{
+                            foreach (var item in Model.ZoneList2)
+                            {
+                                if (item.Value == Model.ZoneId)
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-6">
+                    <div class="form-group row" style="margin-left:8px;">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label">SubZone</label>
+                        <select id="Subzonevalue" class="form-control" name="subZoneId">
+                            <option value="0">---Select SubZone  --- </option>
+                            @{
+                                foreach (var item in Model.SubZoneList2)
+                                {
+                                    if (item.Value == Model.officervm.SubZoneId)
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-12 ">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Marketing Person</label>
+                    <div class="col-sm-10">
+                        <input type="text" value="@Model.officervm.EmployeeName"readonly class="form-control" id="employee" placeholder="Marketing Person">
+                        <input hidden value="@Model.officervm.EmpId" name="EmpId" id="EmpId" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label">Remarks</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" value="@Model.officervm.Remarks" name="Remarks" asp-for="Remarks" id="rmks" placeholder="Remarks">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-12 ">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Start Date</label>
+                    <div class="col-sm-10">
+                        <input type="date" class="form-control" value="@Model.officervm.StartDate" name="StartDate" id="StartDate">*
+                        @*@Html.EditorFor(model => model.StartDate, new { htmlAttributes = new { @class = "datepickeronPage" } })
+                        @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })*@
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label">End Date</label>
+                        <div class="col-sm-10">
+                            <input type="datetime-local" class="form-control" value="@Model.officervm.EndDate" name="EndDate" asp-for="EndDate" id="inputEmail3" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="text-center ">
+        <input style="margin-top:40px;" type="submit" class="btn btn-primary" value="save" />
+    </div>
+
+
+
+</form>
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+    //$(document).ready(function () {
+    //    $('.datepickeronPage').datepicker({
+    //        dateFormat: 'dd-M-yy',
+    //        showOn: 'both',
+    //        buttonText: "<i class='fa fa-calendar'></i>",
+    //        changeMonth: true,
+    //        changeYear: true,
+    //        yearRange: "1950:+150"
+    //    });
+    //    });
+    $("#zonevalue").change(function () {
+            var ZoneinfoId = $('#zonevalue').find(":selected").val();
+            $.ajax({
+                type: "Get",
+                url: "@Url.Action("GetSubZone", "OfficerAssign")",
+                datatype: "Json",
+                data: { Id: ZoneinfoId },
+                success: function (data) {
+                    console.log(data);
+                    var select = $("#Subzonevalue");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('Select SubZone'));
+                    $(data.SubZoneList).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.Value + "'>").val(item.Value).text(item.Text));
+                    });
+                    return false;
+                    }
+                });
+
+
+        });
+
+
+</script>
+}

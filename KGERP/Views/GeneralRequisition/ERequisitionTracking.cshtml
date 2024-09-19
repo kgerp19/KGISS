@@ -1,0 +1,485 @@
+﻿@using KGERP.Utility
+@*@model IEnumerable<KGERP.Service.Implementation.General_Requisition.ViewModels.ERequisitionVM>*@
+@model IEnumerable<KGERP.Service.Implementation.General_Requisition.ViewModels.ERequisitionVM>
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "ই নথি";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 1;
+    int companyId = ViewBag.CompanyId ?? 0;
+}
+<style>
+    .overdate {
+        z-index: 1400;
+        position: absolute;
+    }
+</style>
+<section class="content-header">
+    <h1>E-File List</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("ERequisitionAdd", new { CompanyId = companyId })" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New Document
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("ERequisitionTracking", "GeneralRequisition", FormMethod.Get, new { @class = "formValidator" }))
+                        {
+                            @Html.Hidden("companyId",companyId)
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="GeneralRequisitionType" class="control-label">Requisition Status</label>
+                                        @*@Html.EnumDropDownListFor(model => model.FirstOrDefault().ERequisitionStatus, "--Select--", htmlAttributes: new { @class = "form-control", @data_val = "false" })*@
+                                        @Html.DropDownListFor(model => model.FirstOrDefault().ERequisitionStatus, new SelectList(Enum.GetValues(typeof(GeneralRequisitionStatusEnum))), "--Select--", new { @class = "form-control", @data_val = "false" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.Editor("fromDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessage("fromDate", "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.Editor("toDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessage("toDate", "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <hr />
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-responsive table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Document No</th>
+                                            <th>Date</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                            <th>Attachment</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            string color =
+                                    item.ERequisitionStatus == GeneralRequisitionStatusEnum.Approved ? "text-primary" : item.ERequisitionStatus == GeneralRequisitionStatusEnum.Rejected ? "text-danger" : "";
+
+                                            <tr>
+                                                <td>
+                                                    @(sl++)
+                                                </td>
+                                                <td>
+                                                    <a href="~/Report/EDocumentReport?companyId=@item.UserCompanyId&&masterId=@item.Id" target="_blank">  @item.RequisitionNumber </a>
+                                                </td>
+                                                <td>@item.RequisitionDate.ToString("yyyy-MM-dd")</td>
+                                                <td>@item.Remarks</td>
+                                                <td class="@color">@item.ERequisitionStatus</td>
+                                                <td>
+                                                    @if (item.Attachments != null && item.Attachments.Count() > 0)
+                                                    {
+                                                        foreach (var file in item.Attachments)
+                                                        {
+                                                            <a target="_blank" class="btn btn-primary btn-sm" title="@file.Title" href="/Upload/DownloadFTP?docid=@file.DocId"> <i class="glyphicon glyphicon-download"> </i> </a>
+                                                        }
+                                                    }
+
+                                                </td>
+                                                <td>
+                                                    @*@if (item.AttachmentId > 0)
+                                                    {
+                                                        <a target="_blank" class="btn btn-primary btn-sm" title="Download File" href="/Upload/DownloadFTP?docid=@item.AttachmentId"> <i class="glyphicon glyphicon-download"> </i> </a>
+                                                    }*@
+                                                     @if (item.ERequisitionStatus <= KGERP.Utility.GeneralRequisitionStatusEnum.Submitted || item.LastSignatoryStatus == EFileSignatoryStatusEnum.Return)
+                                                    {
+                                                        <a id="@item.Id" onclick="makeDeletable(@item.Id,@companyId,'@item.RequisitionNumber')" class="linkPointer text-danger" data-toggle="modal" data-target="#deleteModal" title="Delete" data-placement="top"> <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> </a>
+
+                                                        @*<a id="@item.Id" onclick="makeEditable(@item.Id,@item.CompanyId,'@item.RequisitionNumber','@item.RequisitionDate.ToString("yyyy-MM-dd")','@item.Remarks','@item.RequestForPersonId','@item.RequestForPersonName');" class="linkPointer" data-toggle="modal" data-target="#updateModal" title="Edit" data-placement="top"> <i class="fa fa-edit" aria-hidden="true"></i> </a>*@
+                                                        <a id="@item.Id" onclick="makeEditable(@item.Id,@companyId,'@item.RequisitionNumber','@item.Remarks');" class="linkPointer" data-toggle="modal" data-target="#updateModal" title="Edit" data-placement="top"> <i class="fa fa-edit" aria-hidden="true"></i> </a>
+                                                        <a target="_blank" href="~/GeneralRequisition/ERequisitionAdd?companyId=@companyId&requisitionId=@item.Id" title="Details"> <i class="glyphicon glyphicon-new-window text-info text-right"></i></a>
+                                                        if (item.LastSignatoryStatus == EFileSignatoryStatusEnum.Return)
+                                                        {
+                                                            <a id="@item.Id" onclick="loadSignatory(@item.Id);" class="linkPointer" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top"> <i class="fa fa-eye" aria-hidden="true"></i> </a>
+
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <a target="_blank" href="~/GeneralRequisition/ERequisitionAdd?companyId=@companyId&requisitionId=@item.Id" title="Details"> <i class="glyphicon glyphicon-new-window text-info text-right"></i></a>
+                                                        <a id="@item.Id" onclick="loadSignatory(@item.Id);" class="linkPointer" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top"> <i class="fa fa-eye" aria-hidden="true"></i> </a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @using (Html.BeginForm("ERequisitionUpdate", "GeneralRequisition", FormMethod.Post, new { id = "updateFormModal", @class = "formValidator", @enctype = "multipart/form-data" }))
+                {
+
+                    <div class="modal fade" id="updateModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                        <div class="modal-dialog modal-lg ui-front" role="document">
+                            <div class="modal-content">
+                                <div class="box">
+                                    <div class="box-body">
+                                        <div class="modal-header">
+                                            <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                                &times;
+                                            </button>
+                                            <h4 class="modal-title"><b>E File Update</b><span id="rqNumber"></span></h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            @Html.AntiForgeryToken()
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            @Html.HiddenFor(x => x.FirstOrDefault().UserCompanyId,companyId)
+                                            @Html.Hidden("Id")
+                                            @Html.HiddenFor(x => x.FirstOrDefault().EmployeeId)
+                                            <div>                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.FirstOrDefault().Remarks, htmlAttributes: new { @class = "control-label" })
+                                                            @Html.TextAreaFor(model => model.FirstOrDefault().Remarks, new { @class = "form-control", style = "max-width:100% !important" })
+                                                            @Html.ValidationMessageFor(model => model.FirstOrDefault().Remarks, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    @*<div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Attachment </label>
+                                                            @Html.TextBoxFor(model => model.FirstOrDefault().Attachment, new { @type = "file", @class = "form-control"})
+                                                        </div>
+                                                    </div>*@
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="col-md-8">
+                                                    <button type="button" onclick="resetUpdateModal()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @using (Html.BeginForm("DeleteEDocument", "GeneralRequisition", FormMethod.Post))
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                        &times;
+                                    </button>
+                                    <h5 class="modal-title"><b>Delete E-File Requisition</b><span id="rqNumber"></span></h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Hidden("id")
+                                    @Html.Hidden("companyId",companyId)
+
+                                    @Html.AntiForgeryToken()
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    <div style="text-align:center">
+                                        <h3>Are you sure to Delete this E-File requisition?</h3>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="col-md-3">
+                                        <button type="button" onclick="resetDeleteModal()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-danger fa fa-remove">&nbsp; Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+                <div class="modal fade" id="signatoryModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                    &times;
+                                </button>
+                                <h5 class="modal-title"><b>E-File Signatory</b></h5>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-responsive-md table-striped table-hover" id="signatoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Signatory Id</th>
+                                            <th scope="col">Signatory</th>
+                                            <th scope="col">Designation</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Comment</th>
+                                            <th scope="col">Approved Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sigantoryTableBody">
+                                        @*@if (Model.RequisitionApprovalLIst != null)
+                                            {
+                                                int ii = 1;
+                                                foreach (var item in Model.RequisitionApprovalLIst)
+                                                {
+                                                    <tr>
+                                                        <td>@(ii++)</td>
+                                                        <td>@item.EmployeeName</td>
+                                                        <td>@item.DesignationName</td>
+                                                        <td>@item.Status</td>
+                                                    </tr>
+                                                }
+                                            }*@
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+         $("#toDate").val("@(DateTime.Today.ToString("yyyy/MM/dd"))");
+        $("#fromDate").val("@(DateTime.Today.AddMonths(-2).ToString("yyyy/MM/dd"))");
+            $(function () {
+                $("#RequestForPersonName").autocomplete({
+                source: function (request, response) {
+                    $.ajax
+                        ({
+                            url: "/Configuration/EmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data,
+                                    function (item) {
+                                        return { label: item.label, value: item.label, id: item.val }
+                                    }));
+                            },
+                            error: function (e) { }
+                        });
+                },
+                minLength: 1,
+                delay: 500,
+                autoFocus: true,
+                select: function (event, ui) {
+                    console.log(ui);
+                    $("#RequestForPersonId").val(ui.item.id);
+                }
+            });
+        });
+     });
+
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+        function makeDeletable(id, companyId, rqNumber) {
+            var queryString = window.location.search;
+            // Parse the query string into an object
+            var params = new URLSearchParams(queryString);
+            // Access specific parameters by name
+             companyId = params.get("companyId");
+            $("#id").val(id);
+            $("#companyId").val(companyId);
+            $("#rqNumber").text(" #" + rqNumber);
+
+        }
+
+        function makeEditable(id, userCompanyId, rqNumber, remarks) {
+            var queryString = window.location.search;
+            // Parse the query string into an object
+            var params = new URLSearchParams(queryString);
+            // Access specific parameters by name
+            var companyId = params.get("companyId");
+            $("#rqNumber").text(" #" + rqNumber);
+            $("#Remarks").val(remarks);
+             $("#UserCompanyId").val(companyId);
+            $("#Id").val(id);           
+        }
+        function resetUpdateModal() {
+            $("#CommonId").html("");
+            $("#Remarks").val("");
+            $("#UserCompanyId").val(null);
+          //  $("#GeneralRequisitionType").val(0);
+            $("#CategoryId").html("");
+            $("#Id").val(null);
+            $("#rqNumber").text("");
+        }
+        function reseteDeleteModal() {
+            $("#id").val(null);
+            $("#companyId").val(null);
+            $("#rqNumber").text("");
+
+        }
+
+        function LoaderFunction(id) {
+            LoadCompany(id);
+        }
+        function LoadCompany(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#RequisitionToCompanyId").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+                    $("#RequisitionToCompanyId").append(content)
+                    if (id != null && id > 0) {
+                        $("#RequisitionToCompanyId").val(id);
+                    }
+                }
+            })
+        }
+        function LoadDepartment(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                    if (id != null && id > 0) {
+                        $("#CommonId").val(id);
+                    }
+                }
+            })
+        }
+        function LoadCategory(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllGRQSProductCategoryAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CategoryId").html("");
+                    var content = '<option>Select Category</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CategoryId").append(content)
+
+                    if (id != null && id > 0) {
+                        $("#CategoryId").val(id);
+                    }
+                }
+            })
+        }
+    function loadSignatory(id) {
+        $.ajax({
+            type: "GET",
+            url: "/GeneralRequisition/GetEDocumentApprovalList",
+             data: { requisitionId: id },
+            success: function (data) {
+                // Get the table element from the HTML
+                const table = document.getElementById('sigantoryTableBody');
+                while (table.rows.length > 0) {
+                    table.deleteRow(0);
+                }
+                data.forEach((item, index) => {
+                    const row = table.insertRow(index);
+                    // Display specific fields in the table
+                    const fieldsToDisplay = ['OrderBy', 'EmployeeIdString', 'EmployeeName', 'DesignationName', 'StatusString','Comment','ApprovedTime'];
+                    fieldsToDisplay.forEach((field) => {
+                        const cell = row.insertCell();
+                        cell.innerHTML = item[field];
+                    });
+                });
+            }
+        })
+    }
+    function LoadProject(companyId, projectId) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllProjectList",
+                data: { companyId: companyId },
+                success: function (res) {
+                    var content = '<option value="0">Select Project</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#ProjectId").append(content)
+                    if (projectId != null && projectId > 0) {
+                        $("#ProjectId").val(projectId);
+                    }
+                }
+            })
+        }
+    function loadProject() {
+        $("#ProjectId").html("");
+        var companyId = $("#RequisitionToCompanyId").val();
+        LoadProject(companyId);
+    }
+    </script>
+}

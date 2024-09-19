@@ -1,0 +1,241 @@
+﻿
+@using PagedList.Mvc;
+@model KGERP.Service.ServiceModel.VoucherModel
+@using PagedList;
+@{
+    ViewBag.Title = "Voucher List";
+    var message = TempData["message"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Voucher List
+    </h1>
+ 
+   
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+      
+        <li>
+            <a href="~/Vouchers/ManageBankOrCash?companyId=@Request.QueryString["companyId"]" class="btn btn-primary">New Voucher</a>
+        </li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="box-danger">
+
+                    <div class="box">
+                        <div class="box-danger">
+                           
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="radio" name="IsCompleteInvoice" asp-for="IsCompleteInvoice" id="txtIsCompleteInvoice" checked="checked" class="flat-red" value="1"> Completed Voucher
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="IsCompleteInvoice" asp-for="IsCompleteInvoice" id="txtIsInCompleteInvoice" class="flat-red" value="0"> Incompleted Voucher
+                                            </label>
+
+                                        </div>
+                                        
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="message-text" class="col-form-label">From Date:</label>
+                                            <input name="FromDate" asp-for="FromDate" type="text" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="datePicker form-control" id="txtFromDate" placeholder="From Date" autocomplete="off">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="message-text" class="col-form-label">ToDate:</label>
+                                            <input name="ToDate" asp-for="ToDate" type="text" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="datePicker form-control" id="txtToDate" placeholder="To Date" autocomplete="off">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div class="table-responsive">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr style="background-color:#32527B;color:#FFFFFF">
+                                                <th>
+                                                    SL
+                                                </th>
+                                                <th>
+                                                    Voucher No
+                                                </th>
+                                                <th>
+                                                    Voucher Date
+                                                </th>
+                                                <th>
+                                                    Posting Date
+                                                </th>
+                                                <th>
+                                                    Narration
+                                                </th>
+                                                <th style="width:70px;">Report</th>
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @(++sl)
+                                                    </td>
+                                                    <td>
+
+                                                        @item.VoucherNo
+                                                    </td>
+                                                    <td>
+
+                                                        @if (item.VoucherDate.HasValue)
+                                                        {
+                                                            @item.VoucherDate.Value.ToString("dd/MMM/yyyy")
+                                                        }
+
+                                                    </td>
+                                                    <td>
+                                                        @if (item.CreateDate.HasValue)
+                                                        {
+                                                            @item.CreateDate.Value.ToString("dd/MMM/yyyy")
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Narration)
+                                                    </td>
+                                                    <td>
+                                                        <a href="~/Vouchers/ManageBankOrCash?companyId=@item.CompanyId&voucherId=@item.VoucherId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                                        <a href="@Url.Action("GetVoucherReport","Report", new {companyId=item.CompanyId,voucherId=item.VoucherId,reportName="VoucherReport"})" target="_blank" class="btn btn-primary btn-xs">
+                                                            Print
+                                                        </a>
+
+                                                    </td>
+                                                </tr>
+
+                                            }
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+
+
+
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+
+@section scripts {
+
+<script type="text/javascript">
+
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+        });
+
+        var message = '@message';
+        if(message){
+            alert(message);
+        }
+
+        function makeEditble(id) {
+            if (id !== null) {
+                $.ajax({
+                type: "get",
+                url: "@Url.Action("CommonCustomerByIDGet", "Configuration")",
+                    data: { id: id },
+                    datatype: "json",
+                    traditional: true,
+                    success: function (data) {
+                        //console.log(data);
+
+                        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                        $('#customerId').val(data.ID);
+                        $('#ActionId').val(2);
+                        $('#CompanyFK').val(data.CompanyFK);
+                        $('#txtCustomerName').val(data.Name);
+                        $('#txtContactPerson').val(data.ContactPerson);
+                        $('#txtPhone').val(data.Phone);
+
+
+                        $('#txtEmail').val(data.Email);
+                        $('#ddlCommon_DivisionFk').val(data.Common_DivisionFk);
+
+                        $('#ddlCommon_DistrictsFk').val(data.Common_DistrictsFk);
+                        $('#ddlCommon_UpazilasFk').val(data.Common_UpazilasFk);
+                        $('#ddlZoneId').val(data.ZoneId);
+                        $('#ddlSubZoneId').val(data.SubZoneId);
+                        $('#txtAddress').val(data.Address);
+                        $('#txtNID').val(data.NID);
+                        $('#txtCreditLimit').val(data.CreditLimit);
+                        $('#ddCustomerTypeFk').val(data.CustomerTypeFk);
+
+
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+            }
+        }
+        function resetForm() {
+            $('#commonCustomerformId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#customerIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+
+            }
+                    }
+
+</script>
+    }
+
+
+

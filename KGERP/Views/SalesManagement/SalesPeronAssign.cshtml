@@ -1,0 +1,522 @@
+﻿@model KGERP.Service.KGSalesAchivementDetailVm
+
+
+<style>
+    .custom-card {
+        background: linear-gradient(145deg, #f3f3f3, #e7e7e7);
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s;
+    }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .card-body {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .card-title {
+        color: #007bff;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+
+    .card-text span {
+        font-size: 1.5rem;
+        color: #555;
+    }
+
+    <style >
+    .modal-header {
+        background-color: #5A9;
+        color: #fff;
+        border-bottom: 2px solid #4A8;
+    }
+
+    .modal-header h4 {
+        font-weight: bold;
+    }
+
+    .modal-header .close {
+        color: #fff;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #5A9;
+        border-color: #4A8;
+    }
+
+        .btn-primary:hover {
+            background-color: #4A8;
+            border-color: #397;
+        }
+
+    .modal-footer {
+        border-top: 2px solid #4A8;
+        padding-top: 15px;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f9f9f9;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #e9e9e9;
+    }
+</style>
+</style>
+@{
+    string[] monthNames = new string[] {
+        "Invalid month",
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+}
+<div class="card custom-card shadow mb-4 border-0 rounded-lg">
+    <div class="card-body p-4">
+ 
+        <span class="d-block"><strong>Sale Person History</strong></span>
+        <h5 class="card-title text-primary font-weight-bold">@Model.Title</h5>
+        <p class="card-text">
+            <span class="d-block mb-2"><strong>Month:</strong> @(Model.Month >= 1 && Model.Month <= 12 ? monthNames[Model.Month] : "Invalid month")</span><br />
+            <span class="d-block"><strong>Targeted Amount:</strong> @Model.MonthlySalesTergetedAmount</span>
+        </p>
+    </div>
+</div>
+
+
+
+
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" class="table table-striped table-bordered" width="100%">
+        <thead class="thead-light">
+            <tr style="background-color:#44AA88">
+                <th colspan="2" style="border-right: 2px solid gray;"></th>
+                <th colspan="3" style="text-align: center; font-size: 15px; border-right:2px solid gray; ">Sales</th>
+                <th colspan="3" style="text-align: center; font-size: 15px; border-right:2px solid gray; ">Qty</th>
+                <th colspan="3" style="text-align: center; font-size: 15px; border-right: 2px solid gray;">Collection</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>Employee Name</th>
+                <th>Salary</th>
+                <th>Target </th>
+                <th>Achievement </th>
+                <th>Percentage%</th>
+                <th>Qty</th>
+                <th>Achievement</th>
+                <th>Percentage%</th>
+                <th> Target </th>
+                <th> Achievement </th>
+                <th>  Percentage%</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                decimal totalSalary = 0;
+                decimal totalSalesTargetAmount = 0;
+                decimal totalMonthlyCollectionTargetedAmount = 0;
+                decimal totalMonthlyQty = 0;
+                decimal totalSalesAchievementAmount = 0;
+                decimal totalSalesAchievementQuantity = 0;
+                decimal totalRecoveryAchievementAmount = 0;
+                decimal totalPercentageAchieved = 0;
+                decimal totalPercentageAchievedTarget = 0;
+                int itemCount = 0;
+
+                foreach (var item in Model.DataList)
+                {
+                    totalSalary += item.Salary;
+                    totalSalesTargetAmount += item.SalesTargetAount; // Correcting the typo to SalesTargetAmount
+                    totalMonthlyCollectionTargetedAmount += item.MonthlyCollectionTergetedAmount;
+                    totalMonthlyQty += item.SalesTargetQuantity;
+                    totalSalesAchievementAmount += item.SalesAchievementAmount;
+                    totalSalesAchievementQuantity += item.SalesAchievementQuantity;
+                    totalRecoveryAchievementAmount += item.RecoveryAchievementAmount;
+                        <tr data-id="@item.KGSalesAchievementDetailsId">
+                            <td class="em-name">@item.EmName - @item.KgId</td>
+                            <td>@item.Salary</td>
+                            <td class="sales-target-amount">@item.SalesTargetAount</td>
+                            <td>
+                                <span class="displayMode">@item.SalesAchievementAmount</span>
+                                <input type="text" class="form-control editMode" value="@item.SalesAchievementAmount" style="display:none;">
+                            </td>
+                            <td>
+                                @{
+                                    var a = item.SalesAchievementAmount;
+                                    var b = item.SalesTargetAount; // Correcting the typo to SalesTargetAmount
+                                    var d = (a / b) * 100;
+                                    var formattedD = d.ToString("F2");
+                                }
+                                <span class="displayMode">@formattedD%</span> <!-- Display the calculated percentage -->
+                            </td>
+                            <td class="sales-target-quantity">@item.SalesTargetQuantity @item.UnitName</td>
+                            <td>
+                                <span class="displayMode">@item.SalesAchievementQuantity @item.UnitName</span>
+                                <input type="text" class="form-control editMode" value="@item.SalesAchievementQuantity" style="display:none;">
+                            </td>
+                            <td>
+                                @{
+                                    var w = item.SalesAchievementQuantity;
+                                    var e = item.SalesTargetQuantity; // Correcting the typo to SalesTargetAmount
+                                    var r = e > 0 ? (w / e) * 100 : 0;
+                                    var t = r.ToString("F2");
+                                }
+                                <span class="displayMode">@t%</span> <!-- Display the calculated percentage -->
+                            </td>
+                            <td class="sales-target-amountt">@item.MonthlyCollectionTergetedAmount</td>
+                            <td>
+                                <span class="displayMode">@item.RecoveryAchievementAmount</span>
+                                <input type="text" class="form-control editMode" value="@item.RecoveryAchievementAmount" style="display:none;">
+                            </td>
+                            <td>
+                                @{
+                                    var f = item.RecoveryAchievementAmount;
+                                    var g = item.MonthlyCollectionTergetedAmount; // Correcting the typo to SalesTargetAmount
+                                    var h = (f / g) * 100;
+                                    var formattere = h.ToString("F2");
+                                }
+                                <span class="displayMode">@formattere%</span> <!-- Display the calculated percentage -->
+                            </td>
+                            <td>
+                                @*<button type="button" class="btn btn-sm btn-primary editBtn">Edit</button>*@
+                                <button type="button" class="btn btn-sm btn-success saveBtn" style="display:none;">Save</button>
+                                <button type="button" class="btn btn-primary open-modal" data-toggle="modal" data-target="#achievementModal">
+                                    Add Achievement
+                                </button>
+                            </td>
+                        </tr>
+                }
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="1">Total</td>
+                <td><strong>@totalSalary</strong></td>
+                <td><strong>@totalSalesTargetAmount</strong></td>
+                <td><strong>@totalSalesAchievementAmount</strong></td>
+                <td></td>
+                <td><strong>@totalMonthlyQty</strong></td>
+                <td><strong>@totalSalesAchievementQuantity</strong></td>
+                <td></td>
+                <td><strong>@totalMonthlyCollectionTargetedAmount</strong></td>
+                <td><strong>@totalRecoveryAchievementAmount</strong></td>
+                <td colspan="6"></td>
+            </tr>
+        </tfoot>
+    </table>
+    <div class="modal fade" id="achievementModal">
+        <div class="modal-dialog modal-lg">
+            <!-- Use modal-lg class for a larger modal -->
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalTitle"></h4>
+                    <p id="salesTarget"></p>
+                    <p id="salesQty"></p>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Achievement Form -->
+                    <form id="achievementForm">
+                        <div class="form-group col-md-6">
+                            <label for="achievementAmount">Sales Achievement Amount:</label>
+                            <input type="text" class="form-control " id="achievementAmount" name="achievementAmount">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="achievementQuantity">Sales Achievement Quantity:</label>
+                            <input type="text" class="form-control" id="achievementQuantity" name="achievementQuantity">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="recoveryAmount">Recovery Achievement Amount:</label>
+                            <input type="text" class="form-control" id="recoveryAmount" name="recoveryAmount">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="achievementDate">Achievement Date:</label>
+                            <input type="date" class="form-control" id="achievementDate" name="achievementDate">
+                        </div>
+                        <button type="button" class="btn btn-primary " style="float:right;" id="submitAchievement">Submit</button>
+                    </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <table id="achievementTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sl</th>
+                                <th>Achievement Date</th>
+                                <th>Sale Achievement Amount</th>
+                                <th>Sale Achievement Qty</th>
+                                <th>Recovery Amount</th>
+
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="achievementTableBody">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script>
+    $(document).ready(function () {
+        // Edit button click handler
+        $('.editBtn').on('click', function () {
+            var row = $(this).closest('tr');
+
+            // Toggle between display and edit mode
+            row.find('.displayMode').hide();
+            row.find('.editMode').show();
+
+            // Toggle buttons
+            row.find('.editBtn').hide();
+            row.find('.saveBtn').show();
+        });
+
+
+        // Save button click handler
+        $('.saveBtn').on('click', function () {
+            var row = $(this).closest('tr');
+
+            // Update displayed values with edited values
+            var amountInput = row.find('.editMode:eq(0)').val();
+            var quantityInput = row.find('.editMode:eq(1)').val();
+            var recoveryInput = row.find('.editMode:eq(2)').val();
+
+            row.find('.displayMode:eq(0)').text(amountInput);
+            row.find('.displayMode:eq(1)').text(quantityInput);
+            row.find('.displayMode:eq(2)').text(recoveryInput);
+
+            // Toggle between display and edit mode
+            row.find('.editMode').hide();
+            row.find('.displayMode').show();
+
+            // Toggle buttons
+            row.find('.saveBtn').hide();
+            row.find('.editBtn').show();
+            console.log(quantityInput);
+
+            $.ajax({
+                url: '@Url.Action("SaveAchievementDetails", "SalesManagement")',
+                method: 'POST',
+                data: {
+                    KGSalesAchievementDetailsId: row.data('id'),
+                    SalesAchievementAmount: amountInput,
+                    SalesAchievementQuantity: quantityInput,
+                    RecoveryAchievementAmount: recoveryInput
+                },
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (err) {
+                    // Handle error
+                }
+            });
+        });
+    });
+
+        var currentKgId;
+
+var currentKgId;
+
+$('.open-modal').on('click', function () {
+    var row = $(this).closest('tr');
+    var emName = row.find('.em-name').text();
+    var salesTargetAmount = row.find('.sales-target-amount').text();
+    var salesTargetQuantity = row.find('.sales-target-quantity').text();
+    currentKgId = row.data('id');
+
+    $.ajax({
+        url: '@Url.Action("GetPersonAchivmentPersonWise", "SalesManagement")',
+        method: 'GET',
+        data: { currentKgId: currentKgId },
+        success: function (response) {
+            $('#achievementTableBody').empty();
+
+            // Iterate through vm.Details and append rows to the table
+            $.each(response.Details, function (index, item) {
+                var achivedate = DateCustom(item.AchivementDate);
+                var row = '<tr data-id="' + item.KGSalesCollectedAchivementId + '">' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
+                    '<td class="text-center">' +
+                    '<span class="achivement-date">' + achivedate + '</span>' +
+                    '</td>' +
+                    '<td class="text-center">' +
+                    '<span class="sales-amount">' + item.SalesAchievementAmount + '</span>' +
+                    '<input type="text" class="form-control edit-sales-amount" value="' + item.SalesAchievementAmount + '" style="display:none;">' +
+                    '</td>' +
+                    '<td class="text-center">' +
+                    '<span class="sales-quantity">' + item.SalesAchievementQuantity + '</span>' +
+                    '<input type="text" class="form-control edit-sales-quantity" value="' + item.SalesAchievementQuantity + '" style="display:none;">' +
+                    '</td>' +
+                    '<td class="text-center">' +
+                    '<span class="recovery-amount">' + item.RecoveryAchievementAmount + '</span>' +
+                    '<input type="text" class="form-control edit-recovery-amount" value="' + item.RecoveryAchievementAmount + '" style="display:none;">' +
+                    '</td>' +
+                    '<td class="text-center">' +
+                    //'<button class="btn btn-warning edit-achievement" data-id="' + item.KGSalesCollectedAchivementId + '">Edit</button>' +
+                    //'<button class="btn btn-success save-achievement" style="display:none;" data-kgid="' + currentKgId + '" data-achievementid="' + item.KGSalesCollectedAchivementId + '">Save</button>' +
+                    '<button class="btn btn-danger delete-achievement" data-kgid="' + currentKgId + '" data-achievementid="' + item.KGSalesCollectedAchivementId + '">Delete</button></td>' +
+                    '</td>' +
+                    '</tr>';
+                $('#achievementTableBody').append(row);
+            });
+
+            $('#achievementTableBody').on('click', '.edit-achievement', function () {
+                var row = $(this).closest('tr');
+             
+                row.find('.sales-amount').hide();
+                row.find('.sales-quantity').hide();
+                row.find('.recovery-amount').hide();
+
+                row.find('.edit-achivement-date').show();
+                row.find('.edit-sales-amount').show();
+                row.find('.edit-sales-quantity').show();
+                row.find('.edit-recovery-amount').show();
+
+                row.find('.edit-achievement').hide();
+                row.find('.save-achievement').show();
+            });
+            // Set modal title and sales target
+            $('#modalTitle').text(emName);
+            $('#salesTarget').html('Sales Target Amount: ' + salesTargetAmount + '<br>Sales Target Quantity: ' + salesTargetQuantity);
+        },
+        error: function (err) {
+            console.error('Error fetching achievements:', err);
+        }
+    });
+});
+
+
+
+  $('#achievementTableBody').on('click', '.delete-achievement', function () {
+    var currentKgId = $(this).data('kgid');
+      var achievementId = $(this).data('achievementid');
+      console.log(currentKgId, achievementId)
+    // Confirm deletion (optional)
+    if (confirm('Are you sure you want to delete this achievement?')) {
+        $.ajax({
+            url: '@Url.Action("DeletePersonAchivmentPersonWise", "SalesManagement")',
+            method: 'POST',
+            data: { currentKgId: currentKgId, achievementId: achievementId },
+            success: function(response) {
+                // Handle success
+                alert('Achievement deleted successfully.');
+                location.reload();
+            },
+            error: function(err) {
+                // Handle error
+                console.error('Error deleting achievement:', err);
+                alert('Error deleting achievement. Please try again.');
+            }
+        });
+    }
+});
+
+
+
+
+        $('#submitAchievement').on('click', function () {
+            var achievementAmount = $('#achievementAmount').val();
+            var achievementQuantity = $('#achievementQuantity').val();
+            var recoveryAmount = $('#recoveryAmount').val();
+            var achievementDate = $('#achievementDate').val();
+
+            var v = {
+                KGSalesAchievementDetailsId: currentKgId,
+                SalesAchievementAmount: achievementAmount,
+                SalesAchievementQuantity: achievementQuantity,
+                RecoveryAchievementAmount: recoveryAmount,
+                AchivementDate: achievementDate
+            }
+$.ajax({
+    url: '@Url.Action("SavePersonAchivmentPersonWise", "SalesManagement")',
+    method: 'POST',
+    data: v,
+    success: function (response) {
+        alert('Achievement saved successfully.');
+        location.reload();
+    },
+    error: function (err) {
+        // Handle error
+    }
+});
+
+        });
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "/" + month + "/" + year;
+        return date;
+    }
+
+
+
+    $('#achievementTableBody').on('click', '.save-achievement', function () {
+        var row = $(this).closest('tr');
+        var id = $(this).data('achievementid'); // Use data attribute 'achievementid'
+        var salesAmount = row.find('.edit-sales-amount').val();
+        var salesQuantity = row.find('.edit-sales-quantity').val();
+        var recoveryAmount = row.find('.edit-recovery-amount').val();
+        var currentKgId = $(this).data('kgid'); // Ensure currentKgId is set correctly
+
+        var v = {
+            KGSalesCollectedAchivementId: id,
+            KGSalesAchievementDetailsId: currentKgId,
+            SalesAchievementAmount: salesAmount, // Fixed variable name
+            SalesAchievementQuantity: salesQuantity, // Fixed variable name
+            RecoveryAchievementAmount: recoveryAmount
+        };
+
+   $.ajax({
+    url: '@Url.Action("UpdateAchievement", "SalesManagement")',
+    method: 'POST',
+    data: v,
+    success: function (response) {
+        alert('Achievement saved successfully.');
+        location.reload();
+    },
+    error: function (err) {
+        // Handle error
+    }
+});
+    });
+
+
+</script>
+
+}

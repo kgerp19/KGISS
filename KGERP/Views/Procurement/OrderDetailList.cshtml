@@ -1,0 +1,160 @@
+﻿@model KGERP.Services.Procurement.OrderDetailVM
+@using KGERP.Utility;
+
+
+@{
+
+    ViewBag.Title = "Job List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+
+<section class="content-header">
+    <h3>
+        Job List
+    </h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+       
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+
+                        @using (Html.BeginForm("OrderDetailList", "Procurement", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.companyId)
+                            <div class="row">
+                                <div class="col-md-3">
+
+
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Job Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Job Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                         
+                        <div class="table-responsive text-nowrap">
+                            <table id="KgErpDataTable2" style="width:100%;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Job No</th>
+                                        <th>Status</th>
+                                        <th>Job Date</th>
+                                        <th>Exp. Delivery Date</th>
+                                        <th>Item Name</th>
+                                        <th>Qty</th>
+                                        <th>Company Name</th>
+                                        <th>Structure</th>
+                                        <th> Reel Direction</th>
+                                        <th> Pouch Derection</th>
+                                        <th style="width:5%;">Remarks</th>
+
+
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+
+                                <tbody>
+                                    @foreach (var item in Model.OrderDetailList)
+                                    {
+                                    <tr>
+                                        <td style="width:10px;">
+                                            @(++sl)
+                                        </td>
+                                        <td>
+                                            <a target="_blank" title="Consumption Calculation" href="~/Procurement/PackagingSalesOrderBOM?companyId=@Model.companyId&orderDetailId=@item.OrderDetailID">@item.JobOrderNo</a>
+
+
+                                        </td>
+                                        <td>
+                                            @if (item.StatusId == (int)EnumPOStatus.Submitted)
+                                            {
+                                                <span class="btn btn-success btn-xs">
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else if (item.StatusId == (int)EnumPOStatus.Draft)
+                                            {
+                                                <span class="btn btn-warning btn-xs">
+                                                    Pending
+                                                </span>
+                                            }
+
+                                        </td>
+                                        <td>@(item.JobOrderDate.HasValue ? item.JobOrderDate.Value.ToString("dd/MM/yyyy") : string.Empty)</td>
+                                        <td>@(item.DeliveryDate.HasValue ? item.DeliveryDate.Value.ToString("dd/MM/yyyy") : string.Empty)</td>
+                                        <td>@item.ItemName</td>
+                                        <td>@item.Qty @item.Unit</td>
+                                        <td>@item.CompanyName</td>
+                                        <td>@item.Structure</td>
+                                        <td>@item.ReelDirection</td>
+                                        <td>@item.PouchDerection</td>
+                                        <td>@item.Remarks</td>
+
+
+
+                                    </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        if (message) {
+            alert(message);
+        }
+    </script>
+}
+

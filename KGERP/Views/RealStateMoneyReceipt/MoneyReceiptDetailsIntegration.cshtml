@@ -1,0 +1,530 @@
+﻿@model KGERP.Service.ServiceModel.RealState.MoneyReceiptViewModel
+@{
+    ViewBag.Title = "MoneyReceiptDetailsIntegration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+    .datepickeronPage{
+        z-index:1400;
+        position:absolute;
+    }
+</style>
+<section style="margin-bottom:20px;font-size:25px">
+    <h3 class="bg-w" style="padding-left:5px"><b> @Model.CompanyName - Money Receipt Details Integration </b> </h3>
+    @*<a href="/RealStateMoneyReceipt/Create?companyId=@Model.CompanyId" > Add New Money Receipts </a>*@
+</section>
+
+<div class="row">
+    <table class="table">
+
+        <tr>
+            <th style="width:18%">
+                Money Receipt No
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label>@Model.MoneyReceiptNo</label>
+            </td>
+            <th style="width:18%"> Money Receipt Date</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @if (Model.MoneyReceiptDate == null)
+                { }
+                else
+                {@Model.MoneyReceiptDate.Value.ToLongDateString()
+            }
+            </td>
+        </tr>
+
+
+        <tr>
+            <th style="width:18%">
+                Client Name
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label>@Model.ClientName</label>
+            </td>
+            <th style="width:18%"> Purpose</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @Model.AgainstString
+            </td>
+        </tr>
+
+        <tr>
+            <th style="width:18%">
+                File No
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label>@Model.FileNo</label>
+            </td>
+            <th style="width:18%"> Project Name </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @Model.ProjectName
+            </td>
+        </tr>
+
+        <tr>
+            <th style="width:18%">
+                Pay Type
+            </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @if (Model.PayTypeId == 1)
+                {
+                    <span> Cash</span>
+                }
+                else if (Model.PayTypeId == 2)
+                {
+                    <span> Bank</span>
+                }
+                else if (Model.PayTypeId == 3)
+                {
+                    <span> Remote Diposit</span>
+                }
+                else
+                {
+                    <span> Internal Transfer </span>
+                }
+            </td>
+            <th style="width:18%"> Amount</th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                @Model.Amount Tk
+            </td>
+        </tr>
+
+        <tr>
+            @if (Model.PayTypeId == 1)
+            {
+                <th style="width:18%">
+                    Particular
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.Particular</label>
+                </td>
+            }
+
+            else if (Model.PayTypeId == 2)
+            {
+
+                <th style="width:8%">
+                    Bank Name
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:40%">
+                    <label>@Model.BankName  Cheque No: @Model.ChequeNo , Cheque Date :  @Model.ChequeDate.Value.ToLongDateString()</label>
+                </td>
+            }
+
+            else if (Model.PayTypeId == 3)
+            {
+                <th style="width:18%">
+                    Particular
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.Particular</label>
+                </td>
+            }
+            else
+            {
+                <th style="width:18%">
+                    Particular
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label>@Model.Particular</label>
+                </td>
+            }
+        <th style="width:18%">
+            BookingNo
+        </th>
+            <th style="width:2%">:</th>
+            <td style="width:30%">
+                <label>@Model.BookingNo</label>
+            </td>
+        </tr>
+
+    </table>
+
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <section style="margin-bottom:20px;font-size:25px">
+                <h3 class="bg-w" style="padding-left:15px"><b>  Money Receipt Details</b> </h3>
+            </section>
+        </div>
+    </div>
+
+
+    <div class="table-responsive" style="margin-bottom:30px">
+        <table id="KgErpDataTable" class="table table-striped table-hover" style="margin-top:20px">
+            <thead>
+                <tr>
+                    <th style="padding:5px;text-align:center;">SL</th>
+                    <th style="padding:5px;text-align:left;">Collection From</th>
+
+                    <th style="padding:5px;text-align:center;">Amount</th>
+                    <th style="padding:5px;text-align:center;">Colledcted Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.MoneyReceiptList)
+                {
+
+                    <tr>
+                        <td style="padding:5px">@(++sl)</td>
+                        <td>@item.CollectionFrom</td>
+                        <td style="text-align: center">@item.Amount</td>
+                        <td style="text-align: center">@item.PaidAmount</td>
+                    </tr>
+
+                }
+                <tr>
+                    <td colspan="3" class="text-right"> Total Pay</td>
+                    <td colspan="2" class="text-center"> <b id="paytext"> @Model.TotalAmount </b> </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            @*<a class="btn btn-info" target="_blank" style="width:100%" href="/Report/MoneyReceipts?companyId=@Model.CompanyId&&moneyReceiptId=@Model.MoneyReceiptId">Print Money Receipt</a>*@
+        </div>
+        <div class="col-md-4">
+            @if (Model.MoneyReceiptId > 0)
+            {
+                if (Model.TotalAmount == Model.Amount)
+                {
+                    if (Model.IsSubmitted == true)
+                    {
+                        <input type="button" value="Submitted Successfully" disabled style="width:100%" class="btn btn-info" />
+                    }
+                    else
+                    {
+                        <input type="button" id="btnSubmitId" data-toggle="modal" value="Submit" data-target="#exampleModal2" style="width:100%" class="btn btn-success" />
+
+                    }
+                }
+                else
+                {
+                    <input type="button" value="Submit" disabled style="width:100%" class="btn btn-success" />
+
+                }
+
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+@using (Html.BeginForm("MoneyReceiptSubmit", "RealStateMoneyReceipt", FormMethod.Post, new { @class = "from2" }))
+{
+    @Html.HiddenFor(m => m.CompanyId, new { @id = "companyIdfi" })
+    @Html.HiddenFor(m => m.MoneyReceiptId, new { @id = "MoneyReceiptIdfi" })
+    @Html.HiddenFor(m => m.MoneyReceiptId, new { @id = "MoneyReceiptIdfi" })
+    @Html.HiddenFor(m => m.CGId, new { @id = "CGIdfi" })
+    @Html.HiddenFor(m => m.BookingId, new { @id = "BookingIdfi" })
+    <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog ui-front" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">@(Model.ClientName+" - "+Model.MoneyReceiptNo)</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    @*<div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.IsExisting, htmlAttributes: new { @class = "control-label", @style = "margin-left:0px" })
+                                    @Html.CheckBoxFor(model => Model.IsExisting, new { @onclick = "GetValue()", @id = "IsExisting" })
+                                </div>
+                            </div>
+                        </div>*@
+
+                    <div class="row" id="hideshwodive">
+
+                        <div class="col-md-12">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Accounting Head:</label>
+
+                                @Html.EditorFor(model => model.AccountingHeadName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtAccountingHeadName", required = "required", style = "max-width:100%" } })
+
+                                @Html.HiddenFor(model => model.Accounting_BankOrCashId, new { id = "ddlAccounting_HeadFK" })
+                                @Html.ValidationMessageFor(model => model.Accounting_BankOrCashId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="BankCharge" class="col-form-label"> Bank charge  </label>
+                                @Html.TextBoxFor(model => model.BankCharge, new { id = "txtBankCharge", @class = "form-control", placeholder = "Bank Charge", required = "required", style = "max-width:100%" })
+                                @Html.ValidationMessageFor(model => model.BankCharge, "", new { @class = "text-danger" })
+                            </div>
+                        </div>   
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="StringSubmidtate" class="col-form-label"> Submited Date </label>
+                                <div style="display:flex">
+                                    <input name="StringSubmidtate" required value="@Model.StringSubmidtate" required class="form-control datepickeronPage" id="TransactionDateString" placeholder="--- Select Date ---" autocomplete="off">
+                                </div>
+                                  @Html.ValidationMessageFor(model => model.StringSubmidtate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class=" rrr btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+    var datalist = @Html.Raw(Json.Encode(Model.MoneyReceiptList));
+    console.log(datalist);
+        $(document).ready(function () {
+
+                $('.datepickeronPage').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    showOn: 'both',
+                    buttonText: "<i class='fa fa-calendar'></i>",
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "1950:+150"
+                });
+            $('.select2').select2()
+        });
+        $("#txtAccountingHeadName").autocomplete({
+                                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteHeadGLGet", "Vouchers")",
+                        data: { prefix: request.term, companyId: "@Model.CompanyId" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                                            response($.map(data, function (item) {
+                                                return item;
+                                            }))
+                        },
+                        error: function (response) {
+                                            //alert(response.responseText);
+                                        },
+                        failure: function (response) {
+                                            //alert(response.responseText);
+                                        }
+                                    });
+                                },
+             select: function (e, i) {
+
+
+
+                 $("#ddlAccounting_HeadFK").val(i.item.val);
+
+
+                                },
+             minLength: 1,
+             cache: true
+         }).focus(function () {
+             $(this).autocomplete("search");
+                            });
+
+
+
+        $('#AgainstId').chosen({
+            allow_single_deselect: true
+            //, width: "95%"
+        });
+        $('#ddlInstallmentId').chosen({
+            allow_single_deselect: true
+            //, width: "95%"
+        });
+
+
+        $("#ddlPayTypeId").change(function () {
+            var id = $("#ddlPayTypeId").val();
+            if (id == 1) {
+                $("#hideIdbank").hide();
+                $("#hideIdchequeNo").hide();
+                $("#hideIdChequeDateString").hide();
+                $("#hideIdparticular").show();
+            } if (id == 2) {
+                $("#hideIdbank").show();
+                $("#hideIdchequeNo").show();
+                $("#hideIdChequeDateString").show();
+                $("#hideIdparticular").hide();
+            }
+            if (id == 3) {
+                $("#hideIdbank").show();
+                $("#hideIdchequeNo").hide();
+                $("#hideIdChequeDateString").show();
+                $("#hideIdparticular").hide();
+            }
+            if (id==4) {
+                $("#hideIdbank").hide();
+                $("#hideIdchequeNo").hide();
+                $("#hideIdChequeDateString").hide();
+                $("#hideIdparticular").show();
+            }
+            if (id == 0 || id == "") {
+                $("#hideIdbank").show();
+                $("#hideIdchequeNo").show();
+                $("#hideIdChequeDateString").show();
+                $("#hideIdparticular").show();
+            }
+        });
+
+
+
+
+    $("#ddlProjectId").change(function () {
+        var projectId = $("#ddlProjectId").val();
+        console.log(projectId);
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "RealStateMoneyReceipt")",
+                  datatype: "Json",
+                    data: { companyId: "@Model.CompanyId", projectId: projectId },
+                success: function (data) {
+                    console.log(data);
+                      if (data) {
+                          $("#ddlCGId").empty();
+                          $("#ddlCGId").append("<option value=''>==Select File No==</option>");
+                          $(data).each(function (index, item) {
+                              $("#ddlCGId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                      }
+                  }
+            });
+        });
+
+    $("#ddlCGId").change(function () {
+        var cgId = $("#ddlCGId").val();
+        $.ajax({
+            type: "GET",
+              url: "@Url.Action("GetClient", "RealStateMoneyReceipt")",
+              datatype: "Json",
+            data: { companyId: "@Model.CompanyId", CGId: cgId },
+              success: function (data) {
+                  if (data) {
+                      console.log("hhhh", data);
+                      $("#txtReceivedBy").val(data.ClientName);
+                      $("#txtProjectName").val(data.ProjectName);
+                      $("#txtPlotName").val(data.PlotName);
+                      $("#txtBookingNo").val(data.BookingNo);
+                      $("#ClientId").val(data.ClientId);
+                      $("#bookingMonyId").text(data.BookingMoney + "TK");
+                      $("#BookingId").val(data.BookingId);
+                      $("#ddlInstallmentId").empty();
+                      if (data.BookingMoney == 0) {
+                          $('#chkIsBookingAmount').attr("disabled", true);
+                      }
+                      else {
+                          $('#chkIsBookingAmount').attr("disabled", false);
+                      }
+
+                      $(data.Schedule).each(function (index, item) {
+                          $("#ddlInstallmentId").append("<option value='" + item.InstallmentId + "'>" + item.Title + "</option>");
+                      });
+                      $('#ddlInstallmentId').trigger("chosen:updated");
+                      $("#AgainstId").empty();
+                      $(data.costHead).each(function (index, item) {
+                          $("#AgainstId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                      });
+                      $('#AgainstId').trigger("chosen:updated");
+                  }
+              }
+          });
+    });
+
+    function makeEditble(id) {
+        var list = datalist.find(f => f.MoneyReceiptDetailId === id);
+        $('#Amount').val(list.Amount);
+        $('#PaidAmount').val(list.PaidAmount);
+        $('#MoneyReceiptDetailIdup').val(list.MoneyReceiptDetailId);
+        $('#MoneyReceiptIdup').val(list.MoneyReceiptId);
+        $('#CompanyIdup').val(@Model.CompanyId);
+    }
+        $('.from').submit(function (event) {
+
+           var requrdAmo= $('#Amount').val();
+            var PaidAmo=  $('#PaidAmount').val();
+            if (parseFloat(PaidAmo) <= parseFloat(requrdAmo)) {
+                return true;
+            } else {
+                alert("check your collection amount!");
+                return false;
+            }
+        });
+
+
+    $("#ddlAccounting_BankOrCashParantId").change(function () {
+        var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("HeadGLByHead5ParentIdGet", "Vouchers")",
+            datatype: "Json",
+            data: { companyId: "@Model.CompanyId", parentId: bankOrCashParantId },
+            success: function (data) {
+                var items = "";
+                if (data) {
+                    $("#ddlAccounting_BankOrCashId").empty();
+                    $(data).each(function (index, item) {
+                        $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                    });
+
+                }
+            }
+        });
+    })
+
+
+        function GetValue() {
+            var res = $("#IsExisting").prop('checked');
+            if (res == true) {
+                $("#hideshwodive").hide();
+            } else {
+                $("#hideshwodive").show();
+            }
+        }
+    </script>
+}

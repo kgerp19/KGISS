@@ -1,0 +1,124 @@
+﻿@model KGERP.Service.ServiceModel.VendorModel
+@using KGERP.Utility;
+@{
+    ViewBag.Title = "ShortCreditFeed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .bold-row {
+        font-weight: bold;
+    }
+</style>
+
+
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="font-weight-bold text-primary" style="border: 1px solid #ccc; padding: 10px; border-radius: 8px;">Short Credit Feed</h2>
+
+    </div>
+
+    <div class="text-center">
+        <form action="/YourController/YourAction" method="get" class="mb-4">
+            <div class="form-group">
+                <label for="district" class="font-weight-bold">Vendor:</label>
+                <select id="district" name="SelectedDistrictId" class="form-control">
+                    <option value="" disabled selected>Select Vendor</option>
+                    @foreach (var vendor in Model.List)
+                    {
+                        <option value="@vendor.VendorId" @(vendor.VendorId == Model.VendorId ? "selected" : "")>
+                            @vendor.Name
+                        </option>
+                    }
+                </select>
+            </div>
+
+        </form>
+    </div>
+</div>
+<table id="paymentTable" class="table">
+    <thead>
+        <tr>
+            <th>Vendor Name</th>
+            @*<th>Vendor ID</th>*@
+            <th>Description</th>
+            <th>Transaction Date</th>
+            <th>Reference No</th>
+            <th>Credit Amount</th>
+            <th>Collection Amount</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+       
+    </tbody>
+</table>
+
+
+
+
+<script>
+    $(document).ready(function () {
+    // Initialize Select2
+    $('#district').select2();
+
+    // Initialize DataTable
+    var dataTable = $('#paymentTable').DataTable();
+
+    $("#district").change(function () {
+        var CustoId = $('#district').val();
+
+        $.ajax({
+            url: '@Url.Action("ShortCreditFeedPayment", "OrderMaster")',
+            type: 'GET',
+            data: { CustomerId: CustoId },
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+
+                dataTable.clear().draw();
+
+                var totalFinalAmount = 0; // Variable to store the sum
+
+                $.each(data.DataListPayment, function (index, item) {
+                    var trrransactiondate = DateCustom(item.TransactionDate);
+                    var finalAmount = item.InAmount - item.OutAmount;
+                    totalFinalAmount += finalAmount; // Add to the sum
+                    dataTable.row.add([
+                        item.Vendorname,
+                        item.BranchName,
+                        trrransactiondate,
+                        item.ReferenceNo,
+                        item.InAmount,
+                        item.OutAmount,
+                        finalAmount
+                    ]).draw(false);
+                });
+
+                // Add a row for the total sum
+                dataTable.row.add([
+                    "<strong>Total</strong>", "", "", "", "", "", "<strong>" + totalFinalAmount + "</strong>"
+                ]).draw(false);
+
+            }
+        });
+    });
+});
+
+
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "/" + month + "/" + year;
+        return date;
+    }
+
+</script>
+
+

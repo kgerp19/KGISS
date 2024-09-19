@@ -1,0 +1,226 @@
+﻿@model KGERP.Service.ServiceModel.Vendor.VendorAdjustmentVM
+@{
+    ViewBag.Title = "Customer Adjustment List";
+    int sl = 1;
+}
+<h2>Customer Adjustment List</h2>
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .overdate {
+        z-index: 1400;
+    }
+</style>
+@if (Model != null && Model.VendorAdjustmentList.Any())
+{
+    <div class="table-responsive">
+        <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-responsive table-striped">
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Customer Name</th>
+                    <th>Zone</th>
+                    <th>Territory</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Naration</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.VendorAdjustmentList)
+                {
+                    <tr>
+                        <td>
+                            @(sl++)
+                        </td>
+                        <td>@item.VendorName</td>
+                        <td>@item.ZoneName</td>
+                        <td>@item.SubZoneName</td>
+                        <td>@item.Debit</td>
+                        <td>@item.Credit</td>
+                        <td>@item.Narration</td>
+                        <td>
+                            @if (item.IsSubmit)
+                            {
+                                <span>Submitted</span>
+                            }
+                            else
+                            {
+                                <span>Pending</span>
+
+                            }
+                        </td>
+                    <td>
+                        @if (item.IsSubmit == false)
+                        {
+                            <a onclick="loadActionModal(6,@item.AdjustmentId,@Model.UserCompnayId);" data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
+                            <a onclick="loadActionModal(3,@item.AdjustmentId,@Model.UserCompnayId);" data-toggle="modal" data-target="#actionModal" title="Denied" data-placement="top"> <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
+
+                            <a href="@Url.Action("CustomerAdjustment", "Vendor", new { companyId = Model.UserCompnayId, adjustmentId = item.AdjustmentId })" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm pr-1">"Submitted"</button>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+
+        </table>
+    </div>
+}
+
+
+<!-- Modal -->
+@*<div class="modal" id="managerModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Manager Comments</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="leaveApplicationId" value="@item.Data.LeaveApplicationId" />
+                    <input type="text" name="comments" class="form-control" min="5" required />
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="Denied" value="Denied" class="btn btn-danger btn-xs" />
+                    <button type="button" class="btn btn-warning btn-xs" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+
+@using (Html.BeginForm("UpdateCustomerAdjustmentStatus", "Vendor", FormMethod.Post, new { id = "actionForm", @class = "formValidator" }))
+{
+
+    <div class="modal fade modal-lg" id="actionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-lg ui-front" role="document">
+            <div class="modal-content">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="modal-header">
+                            <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                &times;
+                            </button>
+                            <h4 class="modal-title"><b>Sales Order Edit (<span id="pSOCIDText"></span>)</b></h4>
+                        </div>
+                        <div class="modal-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(model => model.AdjustmentId)
+                            @Html.HiddenFor(model => model.UserCompnayId)
+                            @Html.HiddenFor(model => model.ActionId, new { id = "StatusUpdateActionId" })
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Adjust With Accounts Head:</label>
+
+                                    @Html.EditorFor(model => model.AccountingHeadName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control overdate", @id = "txtAccountingHeadName", required = "required" } })
+
+                                    @Html.HiddenFor(model => model.Accounting_HeadFK, new { id = "ddlAccounting_HeadFK" })
+                                    @Html.ValidationMessageFor(model => model.Accounting_HeadFK, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div style="text-align:center">
+                                <h3 id="modalTitle"></h3>
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <div class="col-md-3">
+                                <button type="button" onclick="resetDeleteForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                            </div>
+                            <div class="col-md-9">
+                                <div id="btnAdd">
+                                    <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#txtAccountingHeadName").autocomplete({
+                                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteHeadGLGet", "Vouchers")",
+                        data: { prefix: request.term, companyId: "@Model.UserCompnayId" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                                            response($.map(data, function (item) {
+                                                return item;
+                                            }))
+                        },
+                        error: function (response) {
+                                            //alert(response.responseText);
+                                        },
+                        failure: function (response) {
+                                            //alert(response.responseText);
+                                        }
+                                    });
+                                },
+             select: function (e, i) {
+
+
+
+                 $("#ddlAccounting_HeadFK").val(i.item.val);
+
+                                },
+             minLength: 1,
+             cache: true
+         }).focus(function () {
+             $(this).autocomplete("search");
+         });
+
+
+
+            $('#actionModal').on('shown.bs.modal', function () {
+                $('#txtAccountingHeadName').focus();
+            });
+        })
+
+        function loadActionModal(actionType, adjustmentId, userCompanyId) {
+            $("#AdjustmentId").val(adjustmentId);
+            $("#UserCompanyId").val(userCompanyId);
+            $("#StatusUpdateActionId").val(actionType);
+
+
+            $("#IsSubmit").val('False');
+            if (actionType == 6)
+            {
+                $("#modalTitle").text("Are you sure to Submit this Customer Adjustment Item?");
+                $("#btnAdd").html('<button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-add">&nbsp; Submit</button>');
+            } else {
+                $("#modalTitle").text("Are you sure to delete this Customer Adjustment Item?");
+                $("#btnAdd").html('<button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>');
+            }
+        }
+    </script>
+}

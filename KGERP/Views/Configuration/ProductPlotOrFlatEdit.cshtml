@@ -1,0 +1,803 @@
+﻿@using KG.Core.Services
+
+@{
+
+    ViewData["Title"] = "Plot's or Flat's";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMRealStateProduct
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .form-control {
+        display: block;
+        width: 100%;
+        height: 40px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 0px;
+        -webkit-box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+        box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 17px;
+        margin-top: 10px;
+    }
+
+
+
+    input[type="radio"], input[type="checkbox"] {
+        margin: 4px 0 0;
+        margin-top: 1px \9;
+        line-height: normal;
+        width: 3.25rem !important;
+        height: 3.25rem !important;
+    }
+
+    .chosen-container-multi .chosen-choices li.search-field input[type=text] {
+        margin: 1px 0;
+        padding: 0;
+        height: 39px;
+        outline: 0;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none;
+        color: #999;
+        font-size: 100%;
+        font-family: sans-serif;
+        line-height: normal;
+        border-radius: 0;
+    }
+
+    .box {
+        position: relative;
+        border-radius: 3px;
+        background: #ffffff;
+        border-top: 3px solid #ffffff;
+        margin-bottom: 20px;
+        width: 100%;
+        box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
+    }
+
+    .skin-blue .content-header {
+        background: #ccffce;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 15px 15px 15px 15px;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        @if (Model.CompanyFK == 7)
+        {<b> @Model.CompanyName (Plot's)  </b> }
+    else
+    { <b> @Model.CompanyName (Flat's)  </b>}
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">
+            @if (Model.CompanyFK == 7)
+            {<b>   Plot's  </b> }
+            else
+            { <b> Flat's  </b>}
+        </li>
+    </ol>
+</section>
+@if (Model.CompanyFK == 9)
+{
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ProductPlotOrFlat", "Configuration", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+                {
+                    <div class="box">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="box-danger">
+
+                            <!-- /.box-header -->
+                            <div class="box-body" style="margin-top:7px">
+                                @Html.HiddenFor(model => model.Image, new { Value = "", id = "txtPhoto" })
+
+                                @Html.HiddenFor(model => model.ID, new { id = "productId" })
+                                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                                @Html.HiddenFor(model => model.ProductType, new { id = "ProductType" })
+
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Project  : <span style="color:red">*</span> </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Common_ProductCategoryFk, Model.ProductCategoryList as SelectList, "---Select Block---", new { id = "ddlCommonProductCategoryFk", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Common_ProductCategoryFk, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Floor : <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Common_ProductSubCategoryFk, Model.ProductSubCategoryList as SelectList, "---Select Block---", new { id = "ddlCommonProductSubCategoryFk", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Common_ProductSubCategoryFk, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label"> Flat  : <span style="color:red">*</span> </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.Name, new { id = "txtProductName", @class = "form-control", @placeholder = "Plot or Flat", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Unit :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Common_UnitFk, Model.UnitList as SelectList, "---Select Unit---", new { id = "ddlCommonUnitFk", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Common_UnitFk, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Size :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.PackSize, new { id = "txtPackSize", @class = "form-control", @placeholder = "Size", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.PackSize, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Unit Price :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.MRPPrice, new { id = "txtUnitPrice", @class = "form-control", @placeholder = "Unit Price ", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.MRPPrice, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Facing :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.FacingId, new SelectList(Model.FacingDropDown, "Value", "Text"), "---Select Facing---", new { id = "ddlFacingId", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FacingId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Lift :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.FlatProp.LiftCount, new { id = "textLiftCount", @class = "form-control", @placeholder = "Lift No", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.LiftCount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Bed Room  :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.FlatProp.BedRoomCount, new { id = "textBedRoomCount", @class = "form-control", @placeholder = " Number of Bed Room", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.BedRoomCount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Washroom Room :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.FlatProp.WashroomRoomCount, new { id = "textWashroomRoomCount", @class = "form-control", @placeholder = "Number of Washroom", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.WashroomRoomCount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Verandah :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.FlatProp.verandahCount, new { id = "textverandahCount", @class = "form-control", @placeholder = "Number of Verandah", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.verandahCount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Code :    </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.ProductCode, new { id = "textverandahCount", @class = "form-control", @placeholder = "Code",})
+                                                @Html.ValidationMessageFor(model => model.ProductCode, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Land Facing :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.FlatProp.LandFacing, new SelectList(Model.FacingDropDown, "Value", "Text"), "---Select Land Facing---", new { id = "ddllandFacingId", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.LandFacing, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div> '
+
+                                    <div class="col-md-3">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label"> Completion Status  </label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control" name="FlatProp.CompletionStatus" id="CompletionStatus">
+                                                    <option value="1">On Going</option>
+                                                    <option value="2">FUll Ready</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Status :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Status, new SelectList(Model.StatusList, "Value", "Text"), "---Select Status---", new { id = "ddlStatus", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Remarks :   </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextAreaFor(model => model.Remarks, new { id = "txtRemarks", @class = "form-control", @placeholder = "Remarks" })
+                                                @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="row" style="margin-top:20px;margin-bottom:20px;padding: 13px 0px 0px 0px;background: #eff0f1;">
+                                    <div class="col-md-6">
+                                        <div class="form-group row">
+                                            @Html.LabelFor(model => model.FlatProp.IsDuplex, htmlAttributes: new { @class = "control-label col-sm-4", @style = "margin-left:0px" })
+                                            <div class="col-sm-8" style="padding-left:15px">
+                                                @Html.CheckBoxFor(model => model.FlatProp.IsDuplex, true)
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6 hidefloors">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Floors</label>
+                                            <div class="select2-purple col-sm-8">
+                                                <select id="ddFloors" name="FlatProp.Floors" value="FlatProp.Floors" class="form-control select-single" multiple="multiple" data-placeholder="Select a Floors" data-dropdown-css-class="select2-purple" required style="width: 100%;">
+                                                    @foreach (var item in Model.ProductSubCategoryList)
+                                                    {
+                                                        if (Model.FlatProp.Floors.Where(e => e == item.Value.ToString()).Count() > 0)
+                                                        {
+                                                            <option value="@item.Value" selected> @item.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.Value"> @item.Text</option>
+                                                        }
+
+                                                    }
+
+                                                </select>
+                                                @Html.ValidationMessageFor(model => model.FlatProp.Floors, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="row" style="margin-top:20px;margin-bottom:20px;padding: 13px 0px 0px 0px;background: #eff0f1;">
+                                    <div class="col-md-4">
+                                        <div class="form-group row">
+                                            @Html.LabelFor(model => model.FlatProp.IsDiningDrawingCombined, htmlAttributes: new { @class = "control-label col-md-6" })
+                                            <div class="col-md-6">
+                                                @Html.CheckBoxFor(model => model.FlatProp.IsDiningDrawingCombined, true)
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-6 col-form-label">Dining Room :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-6">
+                                                @Html.TextBoxFor(model => model.FlatProp.DiningRoomCount, new { id = "textDiningRoomCount", @class = "form-control", @placeholder = "Number of Dining Room", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.DiningRoomCount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-6 col-form-label">Drawing Room :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-6">
+                                                @Html.TextBoxFor(model => model.FlatProp.DrawingRoomCount, new { id = "textDrawingRoomCount", @class = "form-control", @placeholder = "Number of Drawing Room", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FlatProp.DrawingRoomCount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-check form-check-inline">
+                                    <div class="row">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-8">
+                                            <div class="form-group" style="margin-top:25px">
+                                                @Html.LabelFor(model => model.FlatProp.HasParking, htmlAttributes: new { @class = "control-label col-md-3" })
+                                                @Html.CheckBoxFor(model => model.FlatProp.HasParking, true)
+                                            </div>
+                                            <div class="form-group" style="margin-top:25px">
+                                                @Html.LabelFor(model => model.FlatProp.Utilies.HasGas, htmlAttributes: new { @class = "control-label col-md-3" })
+                                                @Html.CheckBoxFor(model => model.FlatProp.Utilies.HasGas, true)
+                                            </div>
+
+                                            <div class="form-group" style="margin-top:25px">
+                                                @Html.LabelFor(model => model.FlatProp.Utilies.HasElectricity, htmlAttributes: new { @class = "control-label col-md-3" })
+                                                @Html.CheckBoxFor(model => model.FlatProp.Utilies.HasElectricity, true)
+                                            </div>
+
+                                            <div class="form-group" style="margin-top:25px">
+                                                @Html.LabelFor(model => model.FlatProp.Utilies.HasWaterSupply, htmlAttributes: new { @class = "control-label col-md-3" })
+                                                @Html.CheckBoxFor(model => model.FlatProp.Utilies.HasWaterSupply, true)
+                                            </div>
+                                            <div class="form-group" style="margin-top:25px">
+                                                @Html.LabelFor(model => model.FlatProp.Utilies.HasSolarPanel, htmlAttributes: new { @class = "control-label col-md-3" })
+                                                @Html.CheckBoxFor(model => model.FlatProp.Utilies.HasSolarPanel, true)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group" style="margin-top:20px;text-align:center">
+                                    <button type="submit" id="btnSave" class="btn btn-warning"><i class='fa fa-edit'></i> Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+
+
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ProductPlotOrFlat", "Configuration", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+                {
+                    <div class="box">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="box-danger">
+
+                            <!-- /.box-header -->
+                            <div class="box-body" style="margin-top:7px">
+                                @Html.HiddenFor(model => model.Image, new { Value = "", id = "txtPhoto" })
+
+                                @Html.HiddenFor(model => model.ID, new { id = "productId" })
+                                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                                @Html.HiddenFor(model => model.ProductType, new { id = "ProductType" })
+
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Project  : <span style="color:red">*</span> </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Common_ProductCategoryFk, Model.ProductCategoryList as SelectList, "---Select Block---", new { id = "ddlCommonProductCategoryFk", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Common_ProductCategoryFk, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Block : <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Common_ProductSubCategoryFk, Model.ProductSubCategoryList as SelectList, "---Select Block---", new { id = "ddlCommonProductSubCategoryFk", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Common_ProductSubCategoryFk, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Plot: <span style="color:red">*</span> </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.Name, new { id = "txtProductName", @class = "form-control", @placeholder = "Number of Plot", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Unit :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Common_UnitFk, Model.UnitList as SelectList, "---Select Unit---", new { id = "ddlCommonUnitFk", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Common_UnitFk, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Size :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.PackSize, new { id = "txtPackSize", @class = "form-control", @placeholder = "Size", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.PackSize, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Unit Price :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.MRPPrice, new { id = "txtUnitPrice", @class = "form-control", @placeholder = "Unit Price ", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.MRPPrice, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Road Size by Feet :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.PlotProp.RoadSizebyFeet, new { id = "RoadSizebyFeet", @class = "form-control", @placeholder = "Size", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.PlotProp.RoadSizebyFeet, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Road No :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.PlotProp.RoadNo, new { id = "RoadNo", @class = "form-control", @placeholder = "Unit Price ", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.PlotProp.RoadNo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Facing :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.FacingId, new SelectList(Model.FacingDropDown, "Value", "Text"), "---Select Facing---", new { id = "ddlFacingId", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FacingId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Code :</label>
+                                            <div class="col-sm-8">
+                                                @Html.TextBoxFor(model => model.ProductCode, new { id = "textverandahCount", @class = "form-control", @placeholder = "Code"})
+                                                @Html.ValidationMessageFor(model => model.ProductCode, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-4 col-form-label">Status :  <span style="color:red">*</span>  </label>
+                                            <div class="col-sm-8">
+                                                @Html.DropDownListFor(model => model.Status, new SelectList(Model.StatusList, "Value", "Text"), "---Select Status---", new { id = "ddlStatus", @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="form-group row" style="padding:0px">
+                                            <label for="message-text" class=" col-sm-2 col-form-label">Remarks :   </label>
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(model => model.Remarks, new { id = "txtRemarks", @class = "form-control", @placeholder = "Remarks" })
+                                                @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-top:20px;text-align:center">
+                                    <button type="submit" id="btnSave" class="btn btn-warning"><i class='fa fa-edit'></i> Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </section>
+}
+
+@using (Html.BeginForm("ProductPlotOrFlat", "Configuration", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.ID, new { Value = "", id = "productIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.CompanyFK, new { Value = "", id = "CompanyFKDelete" })
+    @Html.HiddenFor(model => model.Common_ProductCategoryFk, new { Value = "", id = "common_ProductCategoryFk" })
+    @Html.HiddenFor(model => model.Common_ProductSubCategoryFk, new { Value = "", id = "common_ProductSubCategoryFk" })
+    @Html.HiddenFor(model => model.ProductType, new { Value = "", id = "productType" })
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Plot/Flat Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this Plot/Flat?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i>Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+
+    $(document).ready(function () {
+      //  $('#txtCategoryName').focus();
+        isduplexCheck();
+        $('.formValidator').bootstrapValidator();
+
+
+    });
+        function isduplexCheck() {
+            var status = $(':checkbox#FlatProp_IsDuplex').prop('checked');
+            if (status === true) {
+                $(".hidefloors").show();
+            } else {
+                $(".hidefloors").hide();
+            }
+        }
+
+        $("#FlatProp_IsDuplex").on("click", function (e) {
+            isduplexCheck();
+        })
+
+        $("#FlatProp_IsDiningDrawingCombined").on("click", function (e) {
+            var status = $(':checkbox#FlatProp_IsDiningDrawingCombined').prop('checked');
+            if (status === true) {
+                $("#textDiningRoomCount").prop("readonly", true);
+                $("#textDiningRoomCount").val(1);
+                $("#textDrawingRoomCount").prop("readonly", true);
+                $("#textDrawingRoomCount").val(1);
+            } else {
+                $("#textDiningRoomCount").prop("readonly", false);
+                $("#textDiningRoomCount").val(0);
+                $("#textDrawingRoomCount").prop("readonly", false);
+                $("#textDrawingRoomCount").val(0);
+            }
+        })
+    @*$("#txtCategoryName").autocomplete({
+        source: function (request, response) {
+            //console.log(request);
+            //console.log(response);
+
+            $.ajax({
+                url: "@Url.Action("AutoCompleteProductCategoryGet", "Configuration")",
+                //data: "{ 'prefix': '" + request.term + "'}",
+                data: { companyId: "@Model.CompanyFK", prefix: request.term, productType: "@Model.ProductType" },
+                dataType: "json",
+                type: "get",
+                cache: true,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return item;
+                    }))
+                },
+                error: function (response) {
+                    //alert(response.responseText);
+                },
+                failure: function (response) {
+                    //alert(response.responseText);
+                }
+            });
+        },
+
+        select: function (e, i) {
+            $("#ddlCommonProductCategoryFk").val(i.item.val);
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("CommonProductSubCategoryGet","Configuration")",
+                datatype: "Json",
+                data: { companyId: "@Model.CompanyFK", categoryId: i.item.val },
+                success: function (data) {
+                    var items = "";
+                    if (data) {
+                        $("#ddlCommonProductSubCategoryFk").empty();
+                        $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                        $(data).each(function (index, item) {
+                            $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                        });
+
+                    }
+                }
+            });
+
+        },
+        minLength: 1,
+        cache: true
+
+    }).focus(function () {
+        $(this).autocomplete("search");
+    });*@
+
+        $("#ddlCommonProductCategoryFk").change(function () {
+            var cid = $("#ddlCommonProductCategoryFk").val();
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("CommonProductSubCategoryGet","Configuration")",
+                datatype: "Json",
+                data: { companyId: "@Model.CompanyFK", categoryId: cid},
+                success: function (data) {
+                    var items = "";
+                    if (data) {
+                        $("#ddlCommonProductSubCategoryFk").empty();
+                        $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                        $(data).each(function (index, item) {
+                            $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                        });
+                    }
+                }
+            });
+        })
+
+    function makeEditble(id) {
+        if (id !== null) {
+            $.ajax({
+                type: "get",
+                url: "@Url.Action("CommonProductByIDGet", "Configuration")",
+                data: { id: id },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    console.log(data);
+
+                    $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                    $('#productId').val(data.ID);
+                    $('#txtCategoryName').val(data.CategoryName)
+                    $('#ActionId').val(2);
+                    $('#txtProductName').val(data.Name);
+                    $('#ddlCommonUnitFk').val(data.Common_UnitFk);
+                    $('#txtUnitPrice').val(data.MRPPrice);
+                    $('#txtPackSize').val(data.PackSize);
+
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductSubCategoryGet","Configuration")",
+                        datatype: "Json",
+                        data: { companyId: "@Model.CompanyFK", categoryId: data.Common_ProductCategoryFk },
+                        success: function (data2) {
+                            if (data2) {
+                                $("#ddlCommonProductSubCategoryFk").empty();
+                                $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                                $(data2).each(function (index2, item2) {
+                                    $("#ddlCommonProductSubCategoryFk").append("<option value='" + item2.Value + "'>" + item2.Text + "</option>");
+                                });
+
+                                $('#ddlCommonProductSubCategoryFk').val(data.Common_ProductSubCategoryFk);
+                            }
+                        }
+                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+    }
+    //.load(function () {
+    //                    $('#ddlCommonProductCategoryFk').val(data.common_ProductCategoryFk);
+
+    //});
+
+
+
+
+    function resetForm() {
+        $('#commonProductformId')[0].reset();
+        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+    }
+
+    function makeDeletable(id) {
+        if (id !== null) {
+            $('#productIdDelete').val(id);
+            $('#ActionIdDelete').val(3);
+            $('#CompanyFKDelete').val("@Model.CompanyFK");
+            $('#common_ProductCategoryFk').val("@Model.Common_ProductCategoryFk");
+            $('#common_ProductSubCategoryFk').val("@Model.Common_ProductSubCategoryFk");
+            $('#productType').val("@Model.ProductType");
+
+        }
+    }
+
+
+    </script>
+}
+

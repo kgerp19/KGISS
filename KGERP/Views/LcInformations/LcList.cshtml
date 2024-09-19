@@ -1,0 +1,124 @@
+﻿@model KGERP.Service.Implementation.LcInfoServices.LcInfoViewModel
+@using KGERP.Utility
+@{
+    ViewBag.Title = "LcList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #ffeb3b47;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .form-control {
+        max-width: 100%;
+    }
+</style>
+
+
+<section style="margin-bottom:20px;font-size:25px">
+    <h3 class="bg-w" style="padding-left:5px"><b> @Model.CompanyNmae -LC List </b> </h3>
+</section>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>LC No</th>
+                <th>LC date</th>
+                <th>Supplier Name</th>
+                <th>LC Value</th>
+                <th class="text-center">Action</th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.listdata)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td>@item.LCNo</td>
+                    <td>@item.LCDate.ToString("dd-MM-yyyy")</td>
+                    <td>@item.SupplierName</td>
+                    <td>@item.LCValue</td>
+                    <td class="text-center">
+                        <a href="/LcInformations/LcDetalis?lcid=@item.LCId" target="_blank" class="btn btn-warning btn-xs">
+                            <i class="glyphicon glyphicon-eye-open" aria-hidden="true"></i>
+                        </a>
+                        @if (item.Status == 1)
+                        {
+                            <a id="linkVoucherId_@item.LCId" class="btn btn-danger btn-xs" onclick="makeDeletale(@item.LCId,@item.LCNo,@item.CompanyId)" style="color:white" data-toggle="modal" data-target="#exampleModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                            <a href="/LcInformations/LcEdit?lcid=@item.LCId" target="_blank" class="btn btn-primary btn-xs" onclick="makeDeletale(@item.LCId,@item.LCNo,@item.CompanyId)" style="color:black" title="EDIT" data-placement="top"><i class="glyphicon glyphicon-pencil" aria-hidden="true"></i></a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-danger btn-xs" disabled style="color:white"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                            <a class="btn btn-primary btn-xs disabled" disabled style="color:black"><i class="glyphicon glyphicon-pencil" aria-hidden="true"></i></a>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+
+<!-- Modal -->
+
+@using (Html.BeginForm("Delete", "LcInformations", FormMethod.Post))
+{
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel33"><b>@Model.CompanyNmae </b> <b class="text-danger"> LC NO : <span id="showtext"></span></b> </h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.LCId, new { id = "LCId" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyId" })
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>
+                            Are you sure to Delete this?.                    
+                        </h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    @section scripts {
+
+        <script type="text/javascript">
+
+            function makeDeletale(lc, lcno, CompanyId) {
+                console.log(lc, lcno, CompanyId);
+                $('#showtext').text(lcno);
+                $('#LCId').val(lc);
+                $('#deleteCompanyId').val(CompanyId);
+            }
+
+
+        </script>
+    }

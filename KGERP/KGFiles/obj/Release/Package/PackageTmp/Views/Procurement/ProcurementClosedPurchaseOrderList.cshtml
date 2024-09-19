@@ -1,0 +1,186 @@
+﻿
+@model KGERP.Services.Procurement.VMPurchaseOrder
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "Closed Purchase Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Closed Purchase Order List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Closed Purchase Order</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <table id="KgErpDataTable" class="table table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+                                    <th>PO NO</th>
+                                    <th>Order Date</th>
+                                    <th>Payment Method</th>
+
+
+                                    <th>Supplier</th>
+
+                                    <th>Description</th>
+
+                                    <th>Delivery Date</th>
+                                    <th>Delivery Address</th>
+                                 
+
+                                    <th>Status</th>
+                                    <th>Print</th>
+                                    <th>Reopen</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DataList)
+                                {
+                                    #region Link Title
+                                    string closeStatusTitle = "";
+                                    if (item.Status == (int)EnumPOStatus.Closed)
+                                    {
+                                        closeStatusTitle = "Reopen";
+                                    }
+                                    else
+                                    {
+                                        closeStatusTitle = "Close";
+
+                                    }
+
+                                    #endregion
+
+                                <tr>
+                                    <th>@(++sl)</th>
+                                    <td>@item.CID</td>
+                                    <td>@item.OrderDate.Value.ToString("dd-MM-yyyy")</td>
+
+
+                                    <td>@item.POPaymentMethodName</td>
+
+
+                                    <td>@item.SupplierName</td>
+
+                                    <td>@item.Description</td>
+
+                                    <td>@item.DeliveryDate.Value.ToString("dd-MM-yyyy")</td>
+                                    <td>@item.DeliveryAddress</td>
+
+
+                                    <td>@item.EnumStatusName</td>
+                                    <td><a target="_blank" href="~/Procurement/ProcurementPurchaseOrderReport?companyId=@item.CompanyFK&purchaseOrderId=@item.PurchaseOrderId" title="Details"><i class="glyphicon glyphicon-print"></i></a></td>
+
+                                    <td>
+                                        @if (item.Status == (int)EnumPOStatus.Closed)
+                                        {
+                                            @*<span class="border:1px solid;border-color:#006400;"><i style="color:#006400;">Closed</i></span>*@
+
+                                            <a id="@item.ID" onclick="makeCloseable(@item.PurchaseOrderId,@((int)ActionEnum.ReOpen))" class="linkPointer" data-toggle="modal" data-target="#closedReopenProcurementPurchaseOrderModal" title="@closeStatusTitle" data-placement="top"><i class="fa fa-reply" aria-hidden="true"></i></a>
+
+                                        }
+
+
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @*@if (Model.ID > 0)
+                        {
+                            <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                        }*@
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@using (Html.BeginForm("ClosedReopenProcurementPurchaseOrder", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="closedReopenProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="closeReopenText"></span> Purchase Order</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.PurchaseOrderId, new { id = "hidcloseReopenProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.ActionId, new { id = "hidcloseReopenActionId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "hidCompanyFKd" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="closeReopenText"></span> this Purchase Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnHoldOrUnhold" style="width:100%" class="btn btn-primary">&nbsp;<span class="closeReopenText"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section scripts {
+
+    <script type="text/javascript">
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+            //console.log(actionId);
+            //console.log("@((int)ActionEnum.Approve)");
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+
+
+
+    </script>
+}
+

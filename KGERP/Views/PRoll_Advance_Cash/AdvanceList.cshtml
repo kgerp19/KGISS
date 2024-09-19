@@ -1,0 +1,147 @@
+﻿@model KGERP.Service.HR_Pay_Roll_Service.PRoll_AdvanceCash.PRoll_AdvanceViewModel
+@using System.Globalization
+@{
+    ViewBag.Title = "AdvanceList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+</style>
+<div class="bg-w">
+    <b> Advance list </b>
+    
+</div>
+<a href="~/PRoll_Advance_Cash/AddAdvance?companyId=@Model.CompanyId" class="btn btn-primary pull-right">Add New</a>
+@{
+
+
+    int currentYear = DateTime.Now.Year;
+
+
+}
+
+@using (Html.BeginForm("GetAdvanceDetails", "Report", FormMethod.Post))
+{
+
+    <div class="container-fluid" style="margin-top: 20px; border: 1px solid #f0ffff; padding: 28px 18px 21px 18px; background: #fff ">
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label> Months </label>
+                    <input hidden name="CompanyId" value="@Model.CompanyId" />
+                   <select id="ddlMonth" class="form-control ddlReset" style="width:100%" required="required" name="RMonths">
+                       <option value="">==Select Month ==</option>
+                       @for (int month = 1; month <= 12; month++)
+                       {
+                           <option value="@month" @(month == DateTime.Now.Month - 1 ? "selected" : "")>
+                               @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month)
+                           </option>
+                       }
+                   </select>
+
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="control-label"> Years<b style="color:red"> *</b> </label>
+                    <select id="Year" class="searchingDropdown customStyle" style="width: 100%;" required="required" name="RYears">
+                        <option value="">---Select Year---</option>
+                        @for (int year = 2050; year >= 2010; year--)
+                        {
+                            <option value="@year" @(year == DateTime.Now.Year ? "selected" : "")>@year</option>
+                        }
+                    </select>
+                    <span class="text-danger">@Html.ValidationMessageFor(model => model.Year)</span>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5"></div>
+            <div class="col-md-2 " style="margin-top:20px">
+                <input type="submit" value="Show" style="width:100%;height:45px" class="btn btn-primary" />
+            </div>
+            <div class="col-md-5 "></div>
+        </div>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Employee</th>
+                <th>No Of Installment</th>
+                <th>Installment Start Date</th>
+                <th>Advance Type </th>
+                <th>Advance Date</th>
+                <th>Amount</th>
+                <th>Created By</th>
+                <th>Created Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.viewModels)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td> @item.EmployeeName</td>
+                    <td>
+                        @item.NoOfInstallment
+                    </td>
+                    <td>
+                        @item.InstallmentStartDate.ToShortDateString()
+                    </td>
+                    <td>
+                        @item.AdvanceTypeName
+                    </td>
+                    <td>
+                        @item.AdvanceDate.ToShortDateString()
+                    </td>
+                    <td> @item.TotalAmount</td>
+                    <td> @item.CreatedBy</td>
+                    <td> @item.CreatedDate.ToShortDateString()</td>
+                    <td class="text-center">
+
+                        <a href="/PRoll_Advance_Cash/AdvanceDatlis?id=@item.AdvanceId" target="_blank" class="btn btn-warning btn-xs">
+                            Details
+                        </a>
+
+                        @*<a href="/PRoll_MobileBill/Delete?id=@item.MobileBillId" onclick="return confirm('Are you sure you want to delete?');" title="Delete Employee" class="btn btn-danger btn-xs">
+                <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
+            </a>*@
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+

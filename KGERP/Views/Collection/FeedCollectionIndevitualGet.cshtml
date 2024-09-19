@@ -1,0 +1,257 @@
+﻿
+@{
+    ViewData["Title"] = "Invoice List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@model KGERP.Service.Implementation.VMFeedPayment
+<style>
+    /* Tooltip container */
+
+
+    /* Tooltip text */
+    .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        /* Position the tooltip text - see examples below! */
+        position: absolute;
+        z-index: 1;
+    }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Collection Details
+    </h1>
+    <ol class="breadcrumb">
+        <li>
+            
+        </li>
+    </ol>
+</section>
+
+
+<div class="box">
+    <div class="box-danger">
+        <div class="box-header">
+
+
+
+
+                 <table class="table">
+
+            <tr>
+                <th style="width:18%">
+                    Collection No
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label class="col-form-label">@Model.PaymentNo</label>
+                </td>
+                <th style="width:18%">Collection Date</th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">@Model.TransactionDate.ToString("dd-MM-yyyy")</td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Collection To
+                </th>
+                <th style="width:2%">:</th>
+
+                <td style="width:30%" colspan="4">@Model.PaymentToHeadGLName</td>
+            </tr>
+            <tr>
+                <th style="width:18%">
+                    Referenc
+                </th>
+                <th style="width:2%">:</th>
+                <td style="width:30%">
+                    <label class="col-form-label">@Model.ReferenceNo</label>
+                </td>
+                <th style="width:18%">Bank Charge</th>
+                <th style="width:2%">:</th>
+                <th style="width:30%">@Model.BankCharge</th>
+            </tr>
+
+        </table>
+
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="table-responsive">
+                <table id="KgErpDataTable" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>SL</th>
+                            <th>Vendor Name</th>
+                            <th>
+                                Money Receipt Date
+                            </th>
+                            <th>
+                                Money Receipt
+                            </th>
+                          
+                            <th>
+                                Collected Amount
+                            </th>
+
+
+                        </tr>
+                    </thead>
+                    @{int sl = 0;
+                        decimal totalInAmount = 0;
+                    }
+                    <tbody>
+
+
+                        @foreach (var item in Model.DataList)
+                        {
+                            totalInAmount += item.InAmount;
+                            <tr>
+                                <td>@(++sl)</td>
+                                <td>
+                                    @item.PaymentFromHeadGLName
+                                </td>
+                                <td>
+                                    @item.TransactionDate.ToString("dd-MMM-yyyy")
+                                </td>
+                                <td>
+                                    @item.MoneyReceiptNo
+                                </td>
+                               
+                                <td>
+                                    @item.InAmount
+                                </td>
+
+                            </tr>
+
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">Total InAmount:</td>
+                            <td>@totalInAmount</td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+
+
+
+
+        </div>
+        @if (Model.PaymentMasterId > 0)
+        {
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-2">
+
+                    </div>
+                    <div class="col-md-5">
+                        @*<a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/Report/GCCLProductionReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.PaymentMasterId&reportName=GCCLProductionReports">Collection Voucher of @Model.PaymentNo</a>*@
+
+                    </div>
+                    <div class="col-md-5">
+                        @if (!Model.IsFinalized)
+                        {
+                            <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Not Finalized</button>
+                        }
+                        else if (!Model.IsFeedVoucherCreated)
+                        {
+                    <a onclick="makeSubmitable(@Model.PaymentMasterId);" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitPaymentMasterIdModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Acknowledge</a>
+
+                        }
+                        else
+                        {
+                    <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Acknowledged</button>
+
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@using (Html.BeginForm("SubmitFeedCollection", "Collection", FormMethod.Post, new { id = "orderMasterByIDFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitPaymentMasterIdModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Acknowledgement</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
+                    @Html.HiddenFor(model => model.PaymentMasterId, new { id = "submitPaymentMasterId" })
+                    @Html.HiddenFor(model => model.ActionId, new { id = "submitActionId" })
+                    @Html.HiddenFor(model => model.CustomerId, new { id = "submitCustomerId" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Acknowledge this?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Acknowledge</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+    function makeSubmitable(rowId) {
+            $("#submitPaymentMasterId").val(rowId)
+            $('#submitCompanyFK').val("@Model.CompanyFK");
+            $('#submitCustomerId').val("@Model.CustomerId");
+            $('#submitActionId').val(11);
+
+
+        }
+
+
+        $(document).ready(function () {
+            $(function () {
+                $('.datepicker').datepicker({
+                    dateFormat: "yy/mm/dd",
+                    showOn: 'both',
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "2001:+50"
+                });
+            });
+
+        });
+    </script>
+
+}

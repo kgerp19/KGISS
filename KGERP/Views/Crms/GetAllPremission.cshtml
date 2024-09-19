@@ -1,0 +1,203 @@
+﻿@model KGERP.Data.CustomModel.PermissionModelListVm
+@{
+    ViewBag.Title = "User Permission";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+@using (Html.BeginForm("GetAllPremission", "Crms", FormMethod.Post, new { @class = "formValidator" }))
+{
+    <div class="row container-fluid">
+        <div class="row">
+            <h4>Assign Permission</h4>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-5" style="padding:0px">
+                @Html.EditorFor(model => model.UserName, new
+           {
+               htmlAttributes = new
+               {
+                   @autocomplete = "on",
+                   @class = "form-control",
+                   @name = "Title",
+                   @id = "txtEmployeeKGId",
+                   @style = "max-width: 100%",
+                   @required = "required"
+
+               }
+           })
+                <input type="hidden" asp-for="UserId" name="UserId" id="ddlREmployeeKGId" />
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <select id="ddlCompanyFK" asp-for="CompanyId" name="CompanyId" required class="searchingDropdown form-control">
+                        <option value="">--select company--</option>
+                        @foreach (var c in Model.CompanyList)
+                        {
+                            if (c.Id == Model.CompanyId)
+                            {
+                                <option value="@c.Id" selected>@c.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <button type="submit" id="btnSave" class="btn btn-sm btn-danger btn-block"><i class='fa fa-edit'></i>Show Permission</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<section>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-sm">
+                @foreach (var i in Model.PermissionList)
+                {
+                    <tr>
+                        <td>@i.Name</td>
+                        <td>
+                            <table>
+                                @foreach (var c in i.Childs)
+                                {
+                                    <tr>
+                                        <td>
+                                            @c.Name
+                                        </td>
+                                        <td>
+                                            <table>
+                                                @foreach (var cd in c.Childs)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <div style="display:flex;">
+                                                                @if (cd.IsChecked)
+                                                                {
+                                                                    <a id="unassign_@cd.ID" style="cursor:pointer;" onclick=" menuAssign(@cd.ID, false);" title="Unassign"
+                                                                       data-placement="top">
+                                                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    <a id="assign_@cd.ID" style="display:none;cursor:pointer;" onclick=" menuAssign(@cd.ID,true);" title="Assign"
+                                                                       data-placement="top">
+                                                                        <i class="fa fa-times" aria-hidden="true"></i>
+                                                                    </a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a id="assign_@cd.ID" style="cursor:pointer;" onclick=" menuAssign(@cd.ID,true);" title="Assign"
+                                                                       data-placement="top">
+                                                                        <i class="fa fa-times" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    <a id="unassign_@cd.ID" style="display: none;cursor:pointer;" onclick=" menuAssign(@cd.ID,false);" title="Unassign"
+                                                                       data-placement="top">
+                                                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                                                    </a>
+                                                                }
+                                                                &nbsp;  @cd.Name
+                                                            </div>
+
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </td>
+
+                                    </tr>
+                                }
+                            </table>
+                        </td>
+                    </tr>
+                }
+
+            </table>
+        </div>
+        <div class="col-md-6">
+
+        </div>
+    </div>
+</section>
+
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="~/Scripts/notify.js"></script>
+    <script type="text/javascript">
+
+        function menuAssign(id, status) {
+
+            var permissionNo = id;
+            var isActive = status;
+            var userId = @Model.UserId;
+            var companyId = @Model.CompanyId;
+
+            $.ajax({
+                type: "post",
+                url: "@Url.Action("SavePermission", "Crms")",
+                data: { id: permissionNo, status: isActive, companyId: companyId, userId : userId },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    if (data.ID === 0) {
+                        $.notify(data.Name, "warn");
+                    }
+                    console.log(data);
+                    if (data.IsChecked) {
+                        $('#assign_' + data.ID).hide();
+                        $('#unassign_' + data.ID).show();
+
+                    } else {
+                        $('#assign_' + data.ID).show();
+                        $('#unassign_' + data.ID).hide();
+                    }
+                }
+            });
+        }
+
+
+        $("#txtEmployeeKGId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                       url:"@Url.Action("GetAutoCompleteEmployee", "Crms")",
+                        data: { prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            console.log('data',data)
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                        },
+                        failure: function (response) {
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                $("#ddlREmployeeKGId").val(i.item.val);
+                $('#txtEmployeeKGId').focus();
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+    </script>
+
+}
+
+
+

@@ -1,0 +1,337 @@
+﻿@*@model KGERP.ViewModel.StoreViewModel*@
+@model KGERP.ViewModel.StoreViewModel
+
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.table-bordered {
+        display: none
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("CreateOrEdit", "Store", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Store.Type, new { @Value = "F" })
+    @Html.HiddenFor(model => model.Store.CompanyId, new { @id = "companyId" })
+
+    <div class="row">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <span style="font-size:15px;font-family:Arial;font-weight:bold">Product Receive</span>
+            </div>
+            <div class="panel-body" style="padding-left:0px;padding-right:0px">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.ReceivedCode, new { htmlAttributes = new { @class = "control-label" } })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.VendorId, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.HiddenFor(x => x.Store.VendorId, htmlAttributes: new { @id = "hfVendor" })
+                    @*<input type="hidden" id="hfVendor" name="VendorId" />*@
+                    @Html.EditorFor(model => model.Store.Vendor.Name, new { htmlAttributes = new { @class = "control-label", @name = "VendorName", @id = "txtVendor" } })
+                </div>
+                <div class="col-md-3">
+                    <label for="CompanyName" class="control-label">Company Name</label>
+                    <br />
+                    @Html.EditorFor(model => model.Store.Vendor.Name, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "CompanyName" } })
+
+                </div>
+                <div class="col-md-3">
+                    <label for="Address" class="control-label">Address</label>
+                    <br />
+                    @Html.EditorFor(model => model.Store.Vendor.Address, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "Address" } })
+
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.ReceivedDate, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.ReceivedDate, new { htmlAttributes = new { @class = "datepicker", @id = "receivedDate" } })
+                    @Html.ValidationMessageFor(model => model.Store.ReceivedDate, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.StockInfoId, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.DropDownListFor(model => model.Store.StockInfoId, new SelectList(Model.StockInfos, "Value", "Text"), "------Select------", new { @class = "dropdownsize control-label" })
+                    @Html.ValidationMessageFor(model => model.Store.StockInfoId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.LcNo, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.LcNo, new { htmlAttributes = new { @class = "control-label" } })
+                    @Html.ValidationMessageFor(model => model.Store.LcNo, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.LcDate, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.LcDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.Store.LcDate, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.LcQty, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.TextBoxFor(model => model.Store.LcQty, htmlAttributes: new { @id = "lcQty", @class = "control-label", @autocomplete = "off" })
+                    @Html.ValidationMessageFor(model => model.Store.LcQty, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.LcValue, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.TextBoxFor(model => model.Store.LcValue, htmlAttributes: new { @id = "lcValue", @class = "control-label", @autocomplete = "off" })
+                    @Html.ValidationMessageFor(model => model.Store.LcValue, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.ConvRateBDT, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.ConvRateBDT, new { htmlAttributes = new { @class = "control-label", @id = "convRateBdt", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.Store.ConvRateBDT, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.LcValueBDT, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.LcValueBDT, new { htmlAttributes = new { @class = "control-label", @readonly = "readonly", @id = "lcValueBdt" } })
+                    @Html.ValidationMessageFor(model => model.Store.LcValueBDT, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.InsurencePremiumCharge, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.InsurencePremiumCharge, new { htmlAttributes = new { @class = "control-label", @id = "insurencePremiumCharge" } })
+                    @Html.ValidationMessageFor(model => model.Store.InsurencePremiumCharge, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.BankCharge, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.BankCharge, new { htmlAttributes = new { @class = "control-label", @id = "bankCharge", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.Store.BankCharge, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.CustomDutyCharge, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.CustomDutyCharge, new { htmlAttributes = new { @class = "control-label", @id = "customDutyCharge" } })
+                    @Html.ValidationMessageFor(model => model.Store.CustomDutyCharge, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Store.OtherCharge, htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.Store.OtherCharge, new { htmlAttributes = new { @class = "control-label", @id = "otherCharge", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.Store.OtherCharge, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <table class="table table-bordered">
+            <tr style="background-color:#009270;color:#FFFFFF">
+                <td colspan="6"><b>Product Details</b></td>
+            </tr>
+        </table>
+    </div>
+    <div class="details">
+        <table class="table table-responsive">
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>USD Price </th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+                <td>
+                    <input type="text" id="product" name="product" class="form-control col-md-6" />
+                    <input type="hidden" id="hfProductId" name="productId" />
+                </td>
+                <td>
+                    <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid quantity required</span>
+                </td>
+
+                <td>
+                    <input type="text" id="usdPrice" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid production rate required</span>
+                </td>
+
+                <td>
+                    <button type="button" id="add" onclick="addItemToGrid()" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp; Add</button>
+
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems">
+            <table class="table" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:teal;color:white;font-weight:bold">
+                        <th>Sl</th>
+                        <th>Product</th>
+                        <th>USD Price</th>
+                        <th>BDT Price</th>
+                        <th>Qty</th>
+                        <th>Invoice Value</th>
+                        <th>Landed Cost</th>
+                        <th>Total Cost/COGS</th>
+                        <th>COGS/Unit</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" style="color:red"></span>
+        </div>
+
+
+        <div class="col-md-offset-6">
+            <div style="padding:10px 0; text-align:right">
+                <input id="submit" type="submit" value="Submit" class="btn btn-success" onclick="javascript: return SubmitForm();" style="padding:5px 10px" />
+            </div>
+        </div>
+
+    </div>
+}
+
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/ProductEntryforKFMAL.js"></script>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        function SubmitForm() {
+            var r = confirm("Are you sure you want to submit?");
+            if (r == false) {
+                return false;
+            }
+        }
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+        
+        $(function () {
+            $("#txtVendor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/SupplierAutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function loadCustomerInformation(customerId) {
+           
+            $.ajax({
+                url: '/Vendor/GetCustomerInformation?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#CompanyName').val(result.Name)
+                    $('#Address').val(result.Address)
+                },
+                error: function (xhr) {
+                    //alert('error');
+                }
+            });
+
+        }
+
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1,
+                //change: function (event, ui) {
+                //    loadProductPrice(ui.item.val);
+                //}
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+      
+
+    </script>
+}

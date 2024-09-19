@@ -1,0 +1,258 @@
+﻿@model KGERP.Service.ServiceModel.RealState.MoneyReceiptViewModel
+@{
+    ViewBag.Title = "MoneyReceiptList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .bg-w {
+        margin-right: -15px;
+        margin-left: -15px;
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 14px;
+        font-weight: 900;
+    }
+
+    .form-control.input-validation-error:focus {
+        border-color: red !important;
+    }
+
+    .chosen-container-multi .chosen-choices li.search-field input[type=text] {
+        margin: 1px 0;
+        padding: 0;
+        height: 39px;
+        outline: 0;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none;
+        color: #999;
+        font-size: 100%;
+        font-family: sans-serif;
+        line-height: normal;
+        border-radius: 0;
+    }
+
+    .box {
+        position: relative;
+        border-radius: 3px;
+        background: #ffffff;
+        border-top: 3px solid #ffffff;
+        margin-bottom: 20px;
+        width: 100%;
+        box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
+    }
+
+    .skin-blue .content-header {
+        background: #ccffce;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 15px 15px 15px 15px;
+    }
+</style>
+
+<section style="margin-bottom:20px;font-size:25px;">
+    <div> </div>
+    <h3 class="bg-w" style="padding-left:5px"><b> @Model.CompanyName - Money Receipts List </b> </h3>
+    <a href="/RealStateMoneyReceipt/Create?companyId=@Model.CompanyId" class="btn btn-sm btn-success"> Add New Money Receipts </a>
+</section>
+<section>
+    @using (Html.BeginForm("MoneyReceiptListfilter", "RealStateMoneyReceipt", FormMethod.Post, new { id = "MoneyReceiptListfilterid", @class = "formValidator" }))
+    {
+
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Project</label>
+                                @Html.DropDownListFor(model => model.ProjectId, new SelectList(Model.ProjectList, "Value", "Text"), "==Select Project==", new { id = "ddlProjectId", @class = "form-control", style = "max-width:100%" })
+                                @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>File Info</label>
+                                @Html.DropDownListFor(model => model.CGId, Model.GroupList as SelectList, "==Select File No==", new { id = "ddlCGId", @class = "form-control searchingDropdown", style = "max-width:100%" })
+                                @Html.ValidationMessageFor(model => model.CGId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                            </div>
+
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="padding: 0px 2px 0px 8px;">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</section>
+
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+
+                <th>Money Receipt No</th>
+                <th>Money Receipt Date  </th>
+                <th>Client Name</th>
+                <th>File No</th>
+
+
+                <th>MR No</th>
+                <th>Purpose</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th class="text-center"> Action </th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var item in Model.MoneyReceiptList)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td>
+                        <a target="_blank" style="width:100%" href="/Report/MoneyReceipts?companyId=@Model.CompanyId&&moneyReceiptId=@item.MoneyReceiptId"> @item.MoneyReceiptNo </a>
+                    </td>
+                    <td>@item.MoneyReceiptDate.Value.ToLongDateString()</td>
+                    <td>@item.ClientName</td>
+                    <td>@item.FileNo</td>
+                     
+                    <td>@item.SerialNumber</td>
+                    <td>@item.AgainstString</td>
+                    <td>@item.Amount TK</td>
+                    <td>
+                        @if (item.IsSubmitted == true)
+                        {
+                            <span class="badge badge-success" style="background-color:green">Submitted</span>
+                        }
+                        else
+                        { <span class="badge badge-info" style="background-color:cornflowerblue">On Going</span>}
+
+                    </td>
+
+                    <td class="text-center">
+                        <a href="/RealStateMoneyReceipt/Create?companyId=@item.CompanyId&moneyReceiptId=@item.MoneyReceiptId" target="_blank" class="btn btn-warning btn-xs"> Details </a>
+                        @if (item.IsSubmitted == true && item.IsExisting!=true)
+                        {
+                            <a class="btn btn-danger btn-xs" disabled> Delete </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-danger btn-xs" data-toggle="modal" data-target="#exampleModal" onclick="Delete(@item.MoneyReceiptId)"> Delete </a>
+                        }
+
+
+
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Modal -->
+@using (Html.BeginForm("DeleteMoneyReceipt", "RealStateMoneyReceipt", FormMethod.Post, new { @class = "from" }))
+{
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"> </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input hidden id="MoneyReceiptIdup" name="MoneyReceiptId" />
+                    <input hidden id="CompanyIdup" name="CompanyId" />
+                    <h4 class="text-danger"> Are you sure delete this MoneyReceipt!!!  </h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class=" rrr btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+        function Delete(id) {
+
+            $.ajax({
+                type: "get",
+                url: "/RealStateMoneyReceipt/MoneyReceiptget",
+                data: { moneyReceiptId: id },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    $('#MoneyReceiptDetailIdup').val(data.ClientName);
+                    $('#MoneyReceiptIdup').val(data.MoneyReceiptId);
+                    $('#CompanyIdup').val(data.CompanyId);
+                    $('#exampleModalLabel').text(data.MoneyReceiptNo + " - " + data.ClientName);
+
+                }
+            });
+        }
+
+
+            $("#ddlProjectId").change(function () {
+        var projectId = $("#ddlProjectId").val();
+        console.log(projectId);
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("ResaleGetByProjectId", "RealStateMoneyReceipt")",
+                  datatype: "Json",
+                    data: { companyId: "@Model.CompanyId", projectId: projectId },
+                success: function (data) {
+                      if (data) {
+                          $("#ddlCGId").empty();
+                          $("#ddlCGId").append("<option value=''>==Select File No==</option>");
+                          $(data).each(function (index, item) {
+                              $("#ddlCGId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                      }
+                  }
+            });
+    });
+         
+</script>
+}

@@ -1,0 +1,200 @@
+﻿@model KGERP.Service.ServiceModel.MaterialReceiveModel
+
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Material Received List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Material Received List
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("CreateOrEdit",new {companyId=Model.CompanyId,materialReceiveId = 0 })" class="btn btn-primary pull-right">
+                <span class="fs fs-plus"></span> New Receive
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "MaterialReceive", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+
+
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <hr />
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Received Date</th>
+                                        <th>Receive No</th>
+                                        <th>PO No</th>
+                                        <th>Supplier</th>
+                                        <th>Warehouse</th>
+                                        <th>Stutas</th>
+                                        <th>Submission</th>
+
+                                        <th>Report</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @(++sl)
+                                            </td>
+                                            <td>
+                                                @if (item.ReceivedDate.HasValue)
+                                                {
+                                                    @item.ReceivedDate.Value.ToString("dd/MMM/yyyy")
+                                                }
+                                            </td>
+                                            <td>@item.ReceiveNo</td>
+                                            <td>
+                                                @item.PurchaseOrderNo
+                                            </td>
+                                            <td>
+                                                @item.SupplierName
+                                            </td>
+                                            <td>
+                                                @item.StoreName
+                                            </td>
+                                            <td>
+                                                @if (item.MaterialReceiveStatus.ToLower().Equals("cancel"))
+                                                {
+                                                    <span class="label label-danger" title="@("Reason : "+item.Remarks)">ISSUE</span>
+
+
+                                                }
+                                                else if (item.MaterialReceiveStatus.ToLower().Equals("issue"))
+                                                {
+                                                  
+                                                    <a title="Issue Details" href="@Url.Action("MaterialIssueEdit","MaterialReceive",new { companyId = item.CompanyId,  materialReceiveId = item.MaterialReceiveId})" class="btn btn-success btn-xs">
+                                                       Issued
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="label label-warning">OPEN</span>
+
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.MaterialReceiveStatus.ToLower().Equals("cancel"))
+                                                {
+                                                    <a  href="@Url.Action("MaterialReceiveEdit","MaterialReceive",  new {id=item.MaterialReceiveId})" title="Edit" class="btn btn-success btn-xs">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                }
+
+                                                <a title="MRR Report" href="@Url.Action("GetMRRReport","Report", new {materialReceiveId=item.MaterialReceiveId,reportName="MRRReport"})" target="_blank" class="btn btn-primary btn-xs">
+                                                    Report
+                                                </a>
+
+
+                                            </td>
+                                            <td>
+                                                @if (item.IsSubmitted == true)
+                                                {
+                                                    <span class="label label-success">Submited</span>
+                                                }
+                                                else
+                                                {
+                                            <span class="label label-warning">Submit Pending</span>
+
+                                                }
+                                            </td>
+
+                                            <td>
+                                                <a title="Material Receive Details" href="@Url.Action("CreateOrEdit","MaterialReceive",new { companyId = item.CompanyId,  materialReceiveId = item.MaterialReceiveId})" class="btn btn-info btn-xs">
+                                                    Details
+                                                </a>
+                                               
+                                               
+
+
+                                            </td>
+                                        </tr>
+
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}
+

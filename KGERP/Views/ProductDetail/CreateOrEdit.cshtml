@@ -1,0 +1,303 @@
+﻿@model KGERP.ViewModel.ProductDetailViewModel
+@{
+    /**/
+
+    ViewBag.Title = "Create";
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: #dd4b39;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("CreateOrEdit", "ProductDetail", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <span style="font-size:15px;font-family:Arial;font-weight:bold"> Product Detail Information</span>
+            </div>
+            <div class="panel-body" style="padding-left:0px;padding-right:0px">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.LcNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.LcNo, new { htmlAttributes = new { @class = "form-control", @id = "txtlcNo" } })
+                            <span class="error">Lc No required</span>
+                            @Html.ValidationMessageFor(model => model.ProductDetail.LcNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.ProductId, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.DropDownListFor(model => model.ProductDetail.ProductId, new SelectList(Model.Product, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlProduct" })
+                            <span class="error">Lc No required</span>
+                            @Html.ValidationMessageFor(model => model.ProductDetail.ProductId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row details">
+        <table class="table table-responsive">
+            <tr style="background-color:orange;color:#000000">
+                <th>Engine No</th>
+                <th>Chassis No</th>
+                <th>Bettery No</th>
+                <th>Fuel Pump Sl No</th>
+                <th>Rear Tyre RH</th>
+                <th>Rear Tyre LH</th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+                <td>
+                    <input type="text" id="engineNo" name="EngineNo" class="form-control" autocomplete="off" style="text-align:right" />
+                </td>
+                <td>
+                    <input type="text" id="chassisNo" name="ChassisNo" class="form-control" autocomplete="off" style="text-align:right" />
+                </td>
+
+                <td>
+                    <input type="text" id="betteryNo" name="BetteryNo" class="form-control" autocomplete="off" style="text-align:right" />
+                </td>
+
+                <td>
+                    <input type="text" id="fuelPump" name="FuelPumpSlNo" class="form-control" autocomplete="off" style="text-align:right" />
+                </td>
+
+                <td>
+                    <input type="text" id="rearTyreLh" name="RearTyreLh" class="form-control" autocomplete="off" style="text-align:right" />
+                </td>
+
+                <td>
+                    <input type="text" id="rearTyreRh" name="RearTyreRh" class="form-control" autocomplete="off" style="text-align:right" />
+                </td>
+
+                <td>
+                    <button type="button" id="add" class="btn btn-success pull-right"><i class="fa fa-plus-circle"></i>&nbsp; Add</button>
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems">
+            <table class="table" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:teal;color:white;font-weight:bold">
+                        <th>Sl</th>
+                        <th>Engine No</th>
+                        <th>Chassis No</th>
+                        <th>Bettery No</th>
+                        <th>Fuel Pump Sl No</th>
+                        <th>Rear Tyre RH</th>
+                        <th>Rear Tyre LH</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" class="danger"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-offset-9 pull-right">
+            <table>
+               
+                <tr>
+                  
+                    <td>
+                        <input id="submit" type="submit" value="Submit" class="btn btn-success pull-right" style="padding:5px 10px;margin-top:5px" />
+                        <a href="@Url.Action("Index")" id="cancel" class="btn btn-danger pull-right" style="padding:5px 10px;margin-right:10px;margin-top:5px">Cancel</a>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+
+
+
+
+
+
+
+
+@*@using (Html.BeginForm("CreateOrEdit", "ProductDetail", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <span style="font-size:25px">Product Detail</span>
+            <hr style="border-color:#32527B; padding:0px;margin-top: 10px;margin-bottom: 10px; border-width: 2px;" />
+        </div>
+
+        <div class="form-horizontal">
+            <div class="row">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.ProductDetail.ProductDetailsId)
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.LcNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.LcNo, new { htmlAttributes = new { @class = "form-control", @id = "txtlcNo" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.LcNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.ProductId, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.DropDownListFor(model => model.ProductDetail.ProductId, new SelectList(Model.Product, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlProduct" })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.ProductId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.EngineNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.EngineNo, new { htmlAttributes = new { @class = "form-control" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.EngineNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.ChassissNO, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.ChassissNO, new { htmlAttributes = new { @class = "form-control" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.ChassissNO, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.FuelPumpSlNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.FuelPumpSlNo, new { htmlAttributes = new { @class = "form-control" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.FuelPumpSlNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.BetteryNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.BetteryNo, new { htmlAttributes = new { @class = "form-control" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.BetteryNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.RearTyreLH, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.RearTyreLH, new { htmlAttributes = new { @class = "form-control" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.RearTyreLH, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductDetail.RearTyreRH, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.EditorFor(model => model.ProductDetail.RearTyreRH, new { htmlAttributes = new { @class = "form-control" } })
+
+                            @Html.ValidationMessageFor(model => model.ProductDetail.RearTyreRH, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-offset-5 col-md-5">
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-primary pull-right" />
+                        <a href="@Url.Action("Index")" class="btn btn-danger pull-right" style="margin-right:8px">
+                            Close <i class="fa fa-close" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }*@
+
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="~/Scripts/ApplicationScripts/Inventory_Feed/Stock/ProductDetail.js"></script>
+    <script type="text/javascript">
+        $('#txtlcNo').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/ProductDetail/GetProductByLcNo",
+                data: { lcNo: $('#txtlcNo').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var product = "<select>";
+                    product = product + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        product = product + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    product = product + '</select>';
+                    $('#ddlProduct').html(product);
+                }
+            });
+        });
+        $('#ddlLocation').change(function () {
+            $.ajax({
+                type: "post",
+                url: "/Asset/GetSubLocationByLocationId",
+                data: { locationId: $('#ddlLocation').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var subLocation = "<select>";
+                    subLocation = subLocation + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        subLocation = subLocation + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    subLocation = subLocation + '</select>';
+                    $('#ddlSubLocation').html(subLocation);
+                }
+            });
+        });
+
+    </script>
+}

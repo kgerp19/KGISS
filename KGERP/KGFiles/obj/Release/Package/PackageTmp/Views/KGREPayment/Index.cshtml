@@ -1,0 +1,116 @@
+﻿
+@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.KGREPaymentModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    var message = TempData["message"];
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+
+<div class="row">
+    @using (Html.BeginForm("Index", "KGREPayment", FormMethod.Get, new { @class = "example" }))
+    {
+        <div class="col-md-4">
+            <span style="font-size:25px">Customer Payment List</span>
+        </div>
+        <div class="col-md-6">
+            <div class="col-md-4">
+                @Html.Editor("searchDate", new { htmlAttributes = new { @autocomplete = "off", @class = "datepicker pull-left", @placeholder = "dd/mm/yyyy" } })
+            </div>
+            <div class="col-md-8">
+                @Html.Hidden("companyId")
+                @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..." } })
+                <button type="submit"><i class="fa fa-search "></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <a href="@Url.Action("CreateOrEdit", new { id = 0 })" class="btn btn-primary pull-right">
+                <span class="glyphicon glyphicon-plus-sign"></span> New Payment
+            </a>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FileNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Payment_For)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FullName)
+            </th>
+            <th>
+                Trans. Date
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().InAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().MoneyReceiptNo)
+            </th>
+
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+    <tr>
+        <td>
+            @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Data.FileNo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Data.Payment_For)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Data.FullName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Data.InAmount)
+        </td>
+        <td>
+            @item.Data.TransactionDate
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Data.MoneyReceiptNo)
+        </td>
+    </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("Index", "KGREPayment",
+                                              new { companyId = Request.QueryString["companyId"], Page_No, Sorting_Order = Request.QueryString["Search"], SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+    var message = '@message';
+    if(message){
+        alert(message);
+    }
+    </script>
+
+}

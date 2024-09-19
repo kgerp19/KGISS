@@ -1,0 +1,195 @@
+﻿@{
+    ViewBag.Title = "Farmer List";
+    int companyId = Convert.ToInt32(Session["CompanyId"]);
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Farmer List
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Farmer List</li>
+    </ol>
+</section>
+
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("CommonSupplier", "Configuration", FormMethod.Post, new { id = "commonSupplierformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+
+                     
+                        <div class="box">
+                            <div class="box-danger">
+                                <div class="box-header">
+
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body">
+                                    <div class="table-responsive text-nowrap">
+                                        <table id="farmerSearch" style="background-color:#ddd;" class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Responsible Officer</th>
+                                                    <th>Phone</th>
+                                                    <th>NID</th>
+                                                    <th>Address</th>
+                                                    <th nowrap>Start Date</th>
+                                                    <th nowrap>Action</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <div class="box-footer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+@*<link href="~/Content/themes/base/jquery-ui.min.css" rel="stylesheet" />*@
+@*<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet" />*@
+
+
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    @*<script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>*@
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+
+
+    @*<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>*@
+
+    <script>
+        var Popup, dataTable;
+        $(document).ready(function () {
+            var companyId='@companyId'
+            dataTable = $("#farmerSearch").DataTable({
+                "ajax": {
+                    "url": "/Farmer/Farmers?companyId=" + companyId,
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "Name", "name": "Name"},
+                    { "data": "OfficerName", "name": "OfficerName" },
+                    { 'data': 'Phone', "name": "Phone" },
+                    { "data": "NationalId", "name": "NationalId" },
+                    { 'data': 'Address', "name": "Address" },
+                    { 'data': 'StrStartDate', "name": "StrStartDate" },
+                    {
+
+                        'data': "FarmerId", 'render': function (data) {
+                            return "<a ><i class='fa fa-pencil-square-o'></i></a><a onclick=Delete(" + data + ") style='margin-left:5px'> <i class='glyphicon glyphicon-trash' aria-hidden='true'></i></a>";
+                        },
+                        "orderable": false,
+                        "width": "150px"
+                    }
+                ],
+                "language": {
+
+                    "emptyTable": "No data found, Please click on <b>Add New</b> Button"
+                },
+                "serverSide": "true",
+                "order": [0, "asc"],
+                "processing": "true"
+
+
+            });
+        });
+
+        function PopupForm(url) {
+            var formDiv = $('<div/>');
+            $.get(url)
+                .done(function (response) {
+                    formDiv.html(response);
+                    Popup = formDiv.dialog({
+                        autoOpen: true,
+                        resizable:false,
+                        title: "Fill Farmer's Detail",
+                        height: 500,
+                        width: 700,
+                        close: function () {
+                            Popup.dialog('destroy').remove();
+                        }
+                    })
+                })
+        }
+
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid) {
+                console.log(form.action);
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+
+                        }
+                    }
+                })
+            }
+            return false;
+        }
+
+        function Delete(id) {
+            if (confirm("Are you sure to delete Farmer's Record ?")) {
+                $.ajax({
+                "type": "POST",
+                "url": '@Url.Action("Delete","Farmer")/' + id,
+                success: function (data) {
+                    if (data.success) {
+                        dataTable.ajax.reload();
+
+                        $.notify(data.message, {
+                            globalPosition: "top center",
+                            className: "danger"
+                        })
+
+                    }
+                }
+            });
+            };
+
+        }
+
+    </script>
+}
+

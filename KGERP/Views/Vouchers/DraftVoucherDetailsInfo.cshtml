@@ -1,0 +1,727 @@
+﻿@model KGERP.Service.Implementation.Accounting.VMJournalSlave
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "Draft Voucher Detail Info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    double? totalDebitAmount = 0;
+    double? totalCreditAmount = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.VoucherId > 0)
+        {
+            <span>
+                Voucher History of: @Model.VoucherNo
+            </span>
+        }
+        else
+        {
+            <span>
+                Voucher Entry<span style="color:orangered" id="spnVoucherNo"></span>&nbsp;
+            </span>
+            <b> @Model.CompanyName</b>
+        }
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a href="~/Vouchers/ManageBankOrCash?companyId=@Request.QueryString["companyId"]" class="btn btn-primary"><b>New Voucher</b></a></li>
+    </ol>
+</section>
+@using (Html.BeginForm("ManageBankOrCash", "Vouchers", FormMethod.Post, new { id = "manageBankOrCashFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.VoucherId, new { id = "hidVoucherId" })
+                @Html.HiddenFor(model => model.VoucherDetailId, new { id = "hidVoucherDetailId" })
+
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                @Html.HiddenFor(model => model.VoucherNo, new { @id = "txtVoucherNo" })
+
+
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.VoucherId > 0)
+                        {
+
+
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <th style="width:18%">
+                                            Voucher No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @Model.VoucherNo
+                                        </td>
+                                        <th style="width:18%"> Voucher Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.Date</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Cheque No & Name
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @Model.ChqNo @Model.ChqName
+                                        </td>
+                                        <th style="width:18%"> Cheque Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.ChqDate</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Cost Center
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @Model.Accounting_CostCenterName
+                                        </td>
+                                        <th style="width:18%"> Bank/Cash</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.BankOrCashNane</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Narration
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @Html.Raw(Model.Narration)
+                                        </td>
+                                        <th style="width:18%">Created By</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.CreatedBy</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+                        <div class="box-body">
+
+                            @if (Model.VoucherId == 0)
+                            {
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Date</label>
+                                            <input name="Date" asp-for="Date" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" onchange="generateVoucherNoByDate()" class="datePicker form-control" id="txtDate" placeholder="Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Voucher Type</label>
+                                            @Html.DropDownListFor(model => model.VoucherTypeId, Model.VoucherTypesList as SelectList, "==Voucher Type==", new { id = "ddlVoucherTypeId", @class = "form-control", @onchange = "generateVoucherNo()", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.VoucherTypeId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>CostCenter/Project</label>
+                                            @Html.DropDownListFor(model => model.Accounting_CostCenterFK, Model.CostCenterList as SelectList, new { id = "ddlAccounting_CostCenterFK", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Accounting_CostCenterFK, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row bankHead" style="display:none">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Cheque Date</label>
+                                            <input name="ChqDate" asp-for="ChqDate" type="text" class="datePicker form-control" id="txtChqDate" placeholder="Chq Date" autocomplete="off">
+
+                                            @Html.ValidationMessageFor(model => model.ChqDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Cheque No</label>
+                                            @Html.TextBoxFor(model => model.ChqNo, new { id = "txtChqNo", @class = "form-control", placeholder = "Cheque No" })
+                                            @Html.ValidationMessageFor(model => model.ChqNo, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Cheque Name</label>
+                                            @Html.TextBoxFor(model => model.ChqName, new { id = "txtChqName", @class = "form-control", placeholder = "Cheque Name" })
+                                            @Html.ValidationMessageFor(model => model.ChqName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <!-- /.box-body -->
+                                </div>
+
+                                @*<div class="row">
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label>Type</label>
+                                                @Html.DropDownListFor(model => model.Accounting_BankOrCashParantId, Model.BankOrCashParantList as SelectList, "==Select Type==", new { id = "ddlAccounting_BankOrCashParantId", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Accounting_BankOrCashParantId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label>Bank/Cash</label>
+                                                @Html.DropDownListFor(model => model.Accounting_BankOrCashId, Model.BankOrCashGLList as SelectList, new { id = "ddlAccounting_BankOrCashId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.Accounting_BankOrCashId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+
+                                    </div>*@
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+
+                                            @Html.TextAreaFor(model => model.Narration, new { id = "txtNarration", placeholder = "Narration", @class = "form-control", rows = 2 })
+                                            @Html.ValidationMessageFor(model => model.Narration, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            }
+                            @if (Model.IsSubmit == false)
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group" style="padding:0px">
+                                            <label for="message-text" class="col-form-label">Accounting Head:</label>
+
+                                            @Html.EditorFor(model => model.AccountingHeadName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtAccountingHeadName", required = "required" } })
+
+                                            @Html.HiddenFor(model => model.Accounting_HeadFK, new { id = "ddlAccounting_HeadFK" })
+                                            @Html.ValidationMessageFor(model => model.Accounting_HeadFK, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Debit</label>
+                                            @Html.TextBoxFor(model => model.Debit, new { id = "txtDebit", type = "number", step = "0.01", @class = "form-control", @style = "width:100%;border:1px black solid" })
+                                            @Html.ValidationMessageFor(model => model.Debit, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Credit</label>
+                                            @Html.TextBoxFor(model => model.Credit, new { id = "txtCredit", type = "number", step = "0.01", @class = "form-control", @style = "width:100%;border:1px black solid" })
+                                            @Html.ValidationMessageFor(model => model.Credit, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+
+                                            @Html.TextAreaFor(model => model.Particular, new { id = "txtParticular", placeholder = "Particular", @class = "form-control", rows = 2 })
+                                            @Html.ValidationMessageFor(model => model.Particular, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                        @if (Model.IsSubmit == false)
+                        {
+                            <div class="box-footer">
+                                <div class="row">
+                                    <div class="col-md-8">
+
+                                    </div>
+                                    <div class="col-lg-4 col-md-4">
+                                        <input type="submit" id="voucharCreateBtn" class="btn btn-primary btn-block"
+                                               value="@(Model.VoucherId > 0? "Save" :"Create Voucher")" />
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <!--Body Will by Start Here-->
+                        @{
+                            if (Model.VoucherId > 0)
+                            {
+
+                                <div class="table-responsive col-md-12">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead style="background-color:#ddd;">
+                                            <tr>
+                                                <th style="padding:5px;text-align:center;">SL</th>
+                                                <th style="padding:5px;text-align:left;">Code</th>
+                                                <th style="padding:5px;text-align:left;">Accounting Head</th>
+                                                <th style="padding:5px;text-align:left;">Particular</th>
+                                                <th style="padding:5px;text-align:right;">Debit</th>
+                                                <th style="padding:5px;text-align:right;">Credit</th>
+                                                @if (Model.IsSubmit == false)
+                                                {
+                                                    <th style="padding:5px;text-align:center;">Action</th>
+                                                }
+
+                                            </tr>
+                                        </thead>
+                                        @{ int sl = 0; }
+                                        <tbody>
+                                            @foreach (var item in Model.DataListDetails)
+                                            {
+                                                totalDebitAmount += item.Debit;
+                                                totalCreditAmount += item.Credit;
+
+                                                <tr>
+                                                    <td style="padding:5px">@(++sl)</td>
+                                                    <td style="padding:5px;text-align:left;">@item.Code</td>
+                                                    <td style="padding:5px;text-align:left;">@item.AccountingHeadName</td>
+                                                    <td style="padding:5px;text-align:left;">@item.Particular</td>
+
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Debit)</td>
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Credit)</td>
+                                                    @if (Model.IsSubmit == false)
+                                                    {
+                                                        <td style="padding:5px;text-align:center;">
+                                                            @*<a id="@item.VoucherDetailId-Edit" onclick="makeEditble(@item.VoucherDetailId);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>*@
+                                                            <a id="@item.VoucherDetailId-Delete" onclick="makeDeletable(@item.VoucherDetailId);" class="linkPointer" data-toggle="modal" data-target="#deleteModal" title="Delete"
+                                                               data-placement="top">
+                                                                <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                            </a>
+                                                        </td>
+                                                    }
+
+                                                </tr>
+                                            }
+                                        </tbody>
+
+                                        <tfoot style="background-color:#eee;">
+
+                                            <tr>
+                                                <th style="padding:5px;text-align:center;"></th>
+                                                <th colspan="3" style="padding:5px;text-align:left;">Total</th>
+
+                                                <th style="padding:5px;text-align:right;">@String.Format("{0:0.00}", totalDebitAmount)</th>
+                                                <th style="padding:5px;text-align:right;">@String.Format("{0:0.00}", totalCreditAmount)</th>
+
+                                                <th style="padding:5px;text-align:center;"></th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="box-footer">
+                        @if (Model.VoucherId > 0)
+                        {
+                            string btnProperty = Math.Round(totalDebitAmount ?? 0, 2) == Math.Round(totalCreditAmount ?? 0, 2) ? "disabled" : "";
+                            string btnSubmitProperty = Math.Round(totalDebitAmount ?? 0, 2) == Math.Round(totalCreditAmount ?? 0, 2) ? "" : "disabled";
+                            <div class="row">
+                                <div class="col-md-4">
+                                    @if (Model.IsSubmit == true)
+                                    {
+                                        <a href="@Url.Action("GetVoucherReport","Report", new {companyId=Model.CompanyFK,voucherId=Model.VoucherId,reportName="VoucherReport"})" style="width:100%" target="_blank" class="btn btn-warning btn-block">
+                                            <span class="fa fa-print"></span>
+                                            Print
+                                        </a>
+                                    }
+
+
+                                </div>
+
+                                @if (!Model.IsSubmit)
+                                {
+                                    <div class="col-md-2">
+                                        @if (btnProperty == "")
+                                        {
+                                            <button type="button" onclick="autoInsertVoucherDetails()" @btnProperty id="autoInsertBtn" class="btn btn-info btn-block">
+                                                <i class='fa fa-plus'></i>
+                                                <span>Add</span>
+                                            </button>
+
+                                        }
+                                        else
+                                        {
+                                            <span style="width:100%" class="btn  btn-warning">Ready To Submit <span class="fa fa-angle-right"></span><span class="fa fa-angle-right"></span></span>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <span style="color:#ba0a0a" id="spnAlertinSubmission">
+
+                                        </span>
+
+                                        <button type="button" id="btnVoucherSubmit" data-toggle="modal" style="width:100%;"
+                                                data-target="#submitProcurementPurchaseOrderModal" data-placement="top"
+                                                class="btn btn-primary btn-block" @btnSubmitProperty>
+                                            <i class='fa fa-plus'></i>
+                                            <span>Submit</span>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="col-md-8">
+                                        <span style="width:100%" class="btn btn-default btn-outline-dark">@Model.VoucherNo has been submitted <span class="fa fa-check"></span></span>
+                                    </div>
+
+                                }
+
+
+
+
+
+
+                            </div>
+
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+<!--Modal-->
+<div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Voucher Submission</b></h5>
+            </div>
+            <div class="modal-body">
+                <t3>
+                    <span style="color: #ba0a0a; text-align: center" id="spnAlertinModal">
+
+                    </span>
+                </t3>
+
+                <div id="divAlertModalMessage" style="text-align:center">
+                    <h3>Are you sure to submit this voucher?</h3>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                </div>
+                <div class="col-md-9">
+
+                    <button id="btnModalSubmit" type="button" onclick="updateVoucherStatus()" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("ManageBankOrCash", "Vouchers", FormMethod.Post, new { id = "commonCustomerformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.VoucherDetailId, new { Value = "", id = "voucherDetailIdIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFKDelete" })
+    @Html.HiddenFor(model => model.VoucherId, new { id = "hidDeleteVoucherId" })
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this data?</h3>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="color:red;">
+                    <button type="button" id="btnClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i>Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+        var CompanyId =@Html.Raw(Json.Encode(Model.CompanyFK))
+        var previousBank = '';
+        $(document).ready(function () {
+
+
+            $("#txtCredit").click(function () {
+                $(this).select();
+            });
+            $("#txtDebit").click(function () {
+                $(this).select();
+            });
+
+            $('#voucharCreateBtn').click(function ()
+            {
+                $(this).attr('disabled', 'disabled');
+                $(this).val('Processing...');
+                $('#manageBankOrCashFormId').submit();
+
+
+            });
+        });
+
+
+         $("#txtAccountingHeadName").autocomplete({
+                                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteHeadGLGet", "Vouchers")",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                                            response($.map(data, function (item) {
+                                                return item;
+                                            }))
+                        },
+                        error: function (response) {
+                                            //alert(response.responseText);
+                                        },
+                        failure: function (response) {
+                                            //alert(response.responseText);
+                                        }
+                                    });
+                                },
+             select: function (e, i) {
+
+
+                 if (CompanyId == 8 && i.item.value != undefined) {
+                     if (i.item.value.startsWith("1301001002", 1)) {
+                         var narration = $('#txtNarration').val();
+
+                         if (previousBank != '' && narration.includes(previousBank)) {
+                             narration = narration.replace(previousBank, '');
+                         }
+                         var splitStr = i.item.value.substring(i.item.value.indexOf('k') + 1);
+                         previousBank = splitStr;
+                         $('#txtNarration').val(narration + ' ' + splitStr);
+                     }
+                     else if (i.item.value.startsWith("1301001002", 1)) {
+                         var narration = $('#txtNarration').val();
+
+                         if (previousBank != '' && narration.includes(previousBank)) {
+                             narration = narration.replace(previousBank, '');
+                         }
+                         var splitStr = i.item.value.substring(i.item.value.indexOf('k') + 1);
+                         previousBank = splitStr;
+                         $('#txtNarration').val(narration + ' ' + splitStr);
+                     }
+
+                         else {
+                             var narration = $('#txtNarration').val();
+
+                             if (previousBank != '' && narration.includes(previousBank)) {
+                                 narration = narration.replace(previousBank, '');
+                                 previousBank = '';
+                                 $('#txtNarration').val(narration);
+                             }
+                         }
+                 }
+                 $("#ddlAccounting_HeadFK").val(i.item.val);
+
+                 $("#txtDebit").focus();
+
+                 $("#txtDebit").select();
+                                },
+             minLength: 1,
+             cache: true
+         }).focus(function () {
+             $(this).autocomplete("search");
+                            });
+
+
+        @*$("#ddlAccounting_BankOrCashParantId").change(function () {
+                var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+
+
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("HeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                         data: { companyId: "@Model.CompanyFK", parentId: bankOrCashParantId},
+                         success: function (data) {
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                            $(data).each(function (index, item) {
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+
+
+        })*@
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#voucherDetailIdIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+
+            }
+        }
+
+        function makeEditble(voucherDetailId) {
+
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("GetSingleVoucherDetails", "Vouchers")",
+                  datatype: "Json",
+                data: { voucherDetailId : voucherDetailId },
+                  success: function (data) {
+                      console.log(data);
+                      $('#voucharCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidVoucherId").val(data.VoucherId);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val("@Model.CompanyFK");
+                      $("#txtAccountingHeadName").val(data.AccountingHeadName);
+                      $("#ddlAccounting_HeadFK").val(data.Accounting_HeadFK);
+                      $("#txtDebit").val(data.Debit);
+                      $('#txtCredit').val(data.Credit);
+                      $("#txtParticular").val(data.Particular)
+                      $('#hidVoucherDetailId').val(data.VoucherDetailId);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                 });
+            }
+
+        function updateVoucherStatus() {
+
+                var voucherId = $("#hidVoucherId").val();
+                $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("DraftVoucherStatusSubmit", "Vouchers")",
+                        datatype: "Json",
+                         data: { voucherId: voucherId},
+                    success: function (data) {
+                        if (data > 0) {
+                            document.location.href = "../Vouchers/DraftVoucherDetailsInfo?companyId=@Model.CompanyFK&voucherId=@Model.VoucherId";
+                        }
+                        else {
+                            $("#btnVoucherSubmit").hide()
+                            $("#btnModalSubmit").hide()
+                            $("#spnAlertinModal").text("Submission is not possible because the Financial report for this month has already been approved.")
+                            $("#spnAlertinSubmission").text("Submission is not possible because the Financial report for this month has already been approved.")
+                            $("#divAlertModalMessage").hide()
+
+
+                        }
+                        }
+                    });
+
+        }
+
+        function autoInsertVoucherDetails() {
+
+            var voucherId = $("#hidVoucherId").val();
+            var virtualHeadId = $("#ddlAccounting_HeadFK").val();
+            var virtualHeadParticular = $("#txtParticular").val();
+
+
+            $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("AutoInsertVoucherDetails", "Vouchers")",
+                    datatype: "Json",
+                data: { voucherId: voucherId, virtualHeadId: virtualHeadId, virtualHeadParticular: virtualHeadParticular},
+                success: function (data) {
+                    document.location.href = "../Vouchers/ManageBankOrCash?companyId=@Model.CompanyFK&voucherId=@Model.VoucherId";
+                    }
+                });
+
+        }
+
+
+        function generateVoucherNo() {
+            var voucherTypeId = $("#ddlVoucherTypeId option:selected").val();
+            var voucherDate = $("#txtDate").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetSinglevoucherTypes", "Vouchers")",
+                datatype: "Json",
+                data: { voucherTypesId: voucherTypeId },
+                success: function (data) {
+                      if (data.IsBankOrCash == true) {
+                          $('.bankHead').show();
+                      }
+                      else {
+                          $('.bankHead').hide();
+                      }
+                }
+            });
+            $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("GetVoucherNo", "Vouchers")",
+                datatype: "Json",
+                data: { voucherTypeId: voucherTypeId, companyId: "@Model.CompanyFK", voucherDate : voucherDate },
+                success: function (data) {
+                    $("#txtVoucherNo").val(data);
+                    $("#spnVoucherNo").text("-" + data);
+                }
+            });
+
+
+        }
+
+
+        function generateVoucherNoByDate() {
+            var voucherTypeId = $("#ddlVoucherTypeId option:selected").val();
+            var voucherDate = $("#txtDate").val();
+
+            $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("GetVoucherNo", "Vouchers")",
+                datatype: "Json",
+                data: { voucherTypeId: voucherTypeId, companyId: "@Model.CompanyFK", voucherDate : voucherDate },
+                success: function (data) {
+                    $("#txtVoucherNo").val(data);
+                    $("#spnVoucherNo").text("-" + data);
+                }
+            });
+
+
+        }
+    </script>
+}

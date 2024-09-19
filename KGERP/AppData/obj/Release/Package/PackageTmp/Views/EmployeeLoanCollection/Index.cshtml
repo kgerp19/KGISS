@@ -1,0 +1,114 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.EmployeeLoanCollectionModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    @using (Html.BeginForm("Index", "EmployeeLoanCollection", FormMethod.Get))
+    {
+        <div class="col-md-4">
+            <h4><b>Employee Loan Collection List</b></h4>
+        </div>
+        <div class="col-md-5">
+            <div class="col-md-10">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search..." })</div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("CreateOrEdit", new { id = 0 })" title="New Loan" class="btn btn-primary pull-right">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add New Loan
+            </a>
+        </div>
+    }
+</div>
+
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+
+<div style="width: 100%; height: 100%; overflow-x: visible; overflow-y: scroll;">
+    <style>
+        table td th {
+            border: solid 1px #fab;
+            width: 100px;
+            word-wrap: inherit;
+        }
+    </style>
+
+
+    <table class="table">
+        <tr style="background-color:#009270;color:#FFFFFF">
+            <th>
+                SL.
+            </th>
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().EmployeeId)
+            </th>
+             
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().LoanId)
+            </th>
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().LoanTypeName)
+            </th>
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().ForMonthDate)
+            </th>
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().Amount)
+            </th> 
+            <th nowrap>
+                @Html.DisplayNameFor(model => model.First().Remarks)
+            </th>
+            <th>Action</th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+        <tr>
+            <td>
+                @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.EmployeeId)
+            </td> 
+            <td nowrap>
+                @Html.DisplayFor(modelItem => item.Data.LoanId)
+            </td>
+            <td  nowrap>
+                @Html.DisplayFor(modelItem => item.Data.LoanTypeName)
+            </td>
+            <td  nowrap>
+                @Html.DisplayFor(modelItem => item.Data.ForMonthDate)
+            </td>
+            <td  nowrap>
+                @Html.DisplayFor(modelItem => item.Data.Amount)
+            </td> 
+            <td>
+                @Html.DisplayFor(modelItem => item.Data.Remarks)
+            </td>
+            <td>
+                <a href="@Url.Action("CreateOrEdit", new {employeeId=item.Data.EmployeeId, id = item.Data.LoanCollectionId,SearchText=item.Data.EmployeeId })" title="Edit Action" class="btn btn-success btn-xs">
+                    <i class="fa fa-pencil" style="font-size:15px;" aria-hidden="true"></i> Edit
+                </a> 
+            </td>
+        </tr>
+        }
+
+    </table>
+
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No =>
+                Url.Action("Index", "EmployeeLoanCollection",
+                new { Page_No, Sorting_Order = Request.QueryString["Search"],
+                SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>

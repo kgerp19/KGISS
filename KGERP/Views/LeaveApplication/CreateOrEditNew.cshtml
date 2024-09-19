@@ -1,0 +1,349 @@
+﻿@model KGERP.ViewModel.LeaveApplicationViewModel
+@using KGERP.Utility
+@{ ViewBag.Title = "Create";
+    var data = Model.LeaveBalance; }
+
+
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+</style>
+
+<input type="hidden" id="dataList" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.LeaveBalance))' />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.LeaveApplication.LeaveApplicationId)
+    @Html.HiddenFor(model => model.isSandwichLeave, new { id = "isSandwichLeave" })
+
+    <div class="row" style="font-family:Arial">
+        <table class="table table-striped" style="border:2px solid #009270;border-radius:2px">
+            <thead>
+                <tr style="background-color:#4CAF50;color:#FFFFFF">
+                    <th>Leave Type</th>
+                    <th>Total Leave</th>
+                    <th>Leave Availed</th>
+                    <th>Leave Due</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.LeaveBalance)
+                {
+                    <tr>
+                        <td><span><b>@item.LeaveCategory</b></span></td>
+                        <td><span class="badge" style="background-color:blue">@item.TotalLeave</span></td>
+                        <td><span class="badge" style="background-color:red">@item.LeaveAvailed</span></td>
+                        <td><span class="badge" style="background-color:forestgreen">@item.LeaveBalance</span></td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+    <div class="form-horizontal">
+        <fieldset>
+            <legend>Leave Application New</legend>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.ManagerId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.TextBox("ManagerName", Model.LeaveApplication.ManagerInfo, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.LeaveCategoryId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.LeaveApplication.LeaveCategoryId, new SelectList(Model.LeaveCategories, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "categoryType", @onchange = "checkValidate()" })
+
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.LeaveCategoryId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.StartDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.StartDate, new { htmlAttributes = new { @class = "datepicker readonly", @id = "txtStartDate", @autocomplete = "off", @onchange = "getStartDate()" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.StartDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.EndDate, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.EndDate, new { htmlAttributes = new { @class = "datepicker readonly", @id = "txtEndDate", @autocomplete = "off", @onchange = "getStartDate()" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.EndDate, "", new { @class = "text-danger", @id = "endDate" })
+                    </div>
+                </div>
+            </div>
+            <div id="errorMessageContainer" class="col-md-12" style="display:none;">
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.ErrorMessage, new { @class = "form-control", @id = "errorField", @readonly = "readonly", style = "color: red; font-weight: bold; text-align: center;" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.LeaveDays, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.LeaveDays, new { htmlAttributes = new { @class = "form-control", @id = "txtLeaveDays", @readonly = "readonly" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.LeaveDays, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.Address, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.Address, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.Address, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.Reason, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.TextAreaFor(model => model.LeaveApplication.Reason, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.Reason, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LeaveApplication.Remarks, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.LeaveApplication.Remarks, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.LeaveApplication.Remarks, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index")" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-arrow-left"></span> Back
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    @if (TempData["errorMessage"] != null)
+                    {
+                        <b class="text-danger">@TempData["errorMessage"]</b>}
+                </div>
+                <div class="col-md-3">
+                    @*<input type="submit" data-confirm="Are you sure to submit your leave application?" value="Submit" id="apply" class="btn btn-primary pull-right disabled" />*@
+                    <input type="submit" value="Submit" id="submitBtn" class="btn btn-primary pull-right" disabled="disabled" />
+                </div>
+            </div>
+        </fieldset>
+    </div>}
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h2 class="modal-title" id="exampleModalLabel">Message Modal</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align:center;">
+                    <h4 id="modalMessage"></h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-info" data-dismiss="modal" id="closeModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json2/20160511/json2.min.js"></script>
+    <script type="text/javascript">
+        var isUnapprovedApplication = false;
+        $(document).ready(function () {
+            $.ajax({
+                type: "post",
+                url: "/LeaveApplication/IsUnapprovedApplication",
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    console.log("Is unapprove: ");
+                    console.log(data);
+                    isUnapprovedApplication = data.result;
+                    if (isUnapprovedApplication === true) {
+                        $('#submitBtn').prop('disabled', true);
+                        modalTrigger("Attention!", "You have unapproved application. Please approve them before applying for next application.", "Red");
+                    }
+                }
+            });
+        });
+
+        //    function stopRKey(evt) {
+        //    var evt = (evt) ? evt : ((event) ? event : null);
+        //    var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+        //    if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
+        //}
+        // document.onkeypress = stopRKey;
+        function getStartDate() {
+            debugger
+            var categoryType = $("#categoryType").val();
+            if (categoryType == null || categoryType <= 0) {
+                modalTrigger("Attention!", "Please select leave category first", "Red");
+                //alert("Please select leave category first");
+                $('#txtStartDate').val("");
+                $('#txtEndDate').val("");
+                return;
+            }
+            var startDate = $('#txtStartDate').val();
+            var start_Date = startDate.split("/");
+
+            var d = parseInt(start_Date[0], 10),
+                m = parseInt(start_Date[1], 10),
+                y = parseInt(start_Date[2], 10);
+            var start = new Date(y, m - 1, d);
+
+            //console.log(start);
+
+            var endDate = $('#txtEndDate').val();
+            var end_Date = endDate.split("/");
+            var d = parseInt(end_Date[0], 10),
+                m = parseInt(end_Date[1], 10),
+                y = parseInt(end_Date[2], 10);
+            var end = new Date(y, m - 1, d);
+
+            console.log("End Date:" + end);
+
+            var timeDiff = Math.abs(start.getTime() - end.getTime());
+            var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            diffDays = diffDays++;
+
+            //console.log(diffDays);
+            if (end < start) {
+                $('#submitBtn').prop('disabled', true);
+                $('#txtEndDate').val("");
+                $('#txtLeaveDays').val("");
+                modalTrigger("Attention!", "Please select correct date", "Red");
+                //alert("Please select correct date");
+                return false;
+            }
+            var currentBalance = checkBalance(categoryType);
+            if (currentBalance == null || currentBalance < diffDays + 1) {
+                $('#txtEndDate').val("");
+                $('#txtLeaveDays').val("");
+                $('#submitBtn').prop('disabled', true);
+                modalTrigger("Attention!", "You do not have sufficient balance for this request", "Red");
+                //alert("You do not have sufficient balance for this request");
+                return;
+            }
+            if (diffDays >= 0 && isUnapprovedApplication === false) {
+                $('#txtLeaveDays').val(diffDays + 1);
+                $('#submitBtn').prop('disabled', false);
+                $('#errorMessageContainer').hide();
+            } else {
+                $('#txtLeaveDays').val(diffDays + 1);
+            }
+            $.ajax({
+                type: "post",
+                url: "/LeaveApplication/SuffixPrefixDeterminer",
+                data: { startDate: start.toISOString(), endDate: end.toISOString() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    console.log(data);
+                    console.log(data.Result);
+                    if (data.result && data.result.Result === true) {
+                        var startDate = data.result.StartDate.split(" ")[0];
+                        var endDate = data.result.EndDate.split(" ")[0];
+                        $('#submitBtn').prop('disabled', true);
+                        modalTrigger("Attention!", "Please ensure that your application aligns with company policy. Kindly apply appropriately", "Red");
+                        var errorMessage = "Please ensure that your application aligns with company policy. Kindly apply appropriately";
+                        //var errorMessage = "Leave can not be applied because " + startDate + " and " + endDate + " is holiday, Kindly apply appropriately.";
+                        $('#errorField').val(errorMessage);
+                        $('#errorMessageContainer').show();
+                        $('#isSandwichLeave').val(1);
+                    } else {
+                        $('#isSandwichLeave').val(0);
+                    }
+                }
+            });
+        }
+        $('#closeModalBtn').click(function () {
+            $('#exampleModal').modal('hide');
+        });
+        function modalTrigger(heading, message, color) {
+            $('#exampleModalLabel').text(heading);
+            $('#modalMessage').text(message).css('color', color);
+            $('#exampleModal').modal('show');
+        }
+
+        function checkValidate() {
+            var categoryType = $("#categoryType").val();
+            if (categoryType == null || categoryType <= 0 || categoryType == "") {
+                alert("Please check leave category first.");
+                //$('#txtEndDate').val("");
+                //$('#txtLeaveDays').val("");
+                // $('#txtLeaveDays').val("");
+                $('#submitBtn').prop('disabled', true);
+                return;
+            }
+            if (categoryType > 0) {
+                var balance = checkBalance(categoryType);
+                var requestDays = $('#txtLeaveDays').val();
+                if (requestDays == null || requestDays == "" || requestDays <= 0) {
+                    return;
+                }
+                if (requestDays > balance) {
+                    $('#submitBtn').prop('disabled', true);
+                    $('#txtEndDate').val("");
+                    $('#txtLeaveDays').val("");
+                    alert("You do not have sufficient balance for this request");
+                    return;
+                }
+                $('#submitBtn').prop('disabled', false);
+            }
+
+        }
+        function checkBalance(categoryId) {
+            var dataList = JSON.parse(document.getElementById('dataList').value);
+            var balance = 0;
+            if (categoryId > 0) {
+                var filteredLeaveBalance = dataList.find(function (item) {
+                    return item.LeaveCategoryId == categoryId;
+                });
+                if (filteredLeaveBalance) {
+                    console.log(filteredLeaveBalance);
+                    balance = filteredLeaveBalance.LeaveBalance;
+                }
+            }
+            return balance;
+        }
+    </script>
+
+}

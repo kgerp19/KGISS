@@ -1,0 +1,144 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomerModel
+@{
+
+    ViewData["Title"] = "Customer List Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+<style type="text/css">
+   
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+
+<style type="text/css">
+    .calender-width{
+        width: 80%;
+    }
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Customer List
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Customer List</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("CustomerListReportView", "Report", FormMethod.Get, new { id = "customerReportformId", @class = "formValidator", @target = "_blank", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            @Html.HiddenFor(model => model.ReportName, new { id = "ReportName" })
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Zone:</label>
+                                        @Html.DropDownListFor(model => model.ZoneFk, new SelectList(Model.ZoneList, "Value", "Text"), "---Select Zone---", 
+                                       new { id = "ddlCommon_ZoneFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ZoneFk, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Sub Zone:</label>
+                                        @Html.DropDownListFor(model => model.SubZoneFk, Model.SubZoneList as SelectList, "---Select Sub Zone---", new { id = "ddlCommon_SubZoneFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })
+                                        @*@Html.DropDownListFor(model => model.SubZoneFk, new SelectList(Model.SubZoneList, "Value", "Text"), "---Select Sub Zone---",
+                                       new { id = "ddlCommon_SubZoneFk", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="col-md-7">
+                                        <select asp-for="ReportType" class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px;width:100%" name="ReportType" id="ddlReportType">
+                                            <option value="PDF">PDF</option>
+                                            <option value="EXCEL">EXCEL</option>
+                                            <option value="WORD">WORD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input style="width:100%" type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" formtarget="_blank" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</section>
+<script>
+        $(document).ready(function () {
+
+            $("#ddlCommon_ZoneFk").change(function () {
+                var companyFk = $("#CompanyId").val();
+                var zoneFk = $("#ddlCommon_ZoneFk").val();
+
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetSubZoneList", "Configuration")",
+                    datatype: "Json",
+                    data: {
+                        companyId: companyFk,
+                        zoneId: zoneFk
+                    },
+                    success: function (data) {
+                        var items = "";
+                        if (data) {
+                            $("#ddlCommon_SubZoneFk").empty(); 
+                            $(data).each(function (index, item) {
+                                $("#ddlCommon_SubZoneFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            });
+        });
+
+
+        function resetForm() {
+            $('#customerReportformId')[0].reset();
+        }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

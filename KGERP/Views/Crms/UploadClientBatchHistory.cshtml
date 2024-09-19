@@ -1,0 +1,110 @@
+﻿@model KGERP.Data.CustomModel.ClientBatchUplodListVm
+@{
+    ViewBag.Title = "Filtered Client List ";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+    int sl = 0;
+}
+<div class="container-fluid">
+    @Html.Partial("_ErrorMessage")
+    <section>
+        <table>
+            <tr>
+                <td>
+                    <button class="btn btn-sm btn-secondary hvr-rectangle-out text-dark" onclick="refreshWindow()">
+                        <i class="fa fa-sync"></i> &nbsp; Refresh
+                    </button>
+                </td>
+                <td>
+                    <a class="btn btn-sm hvr-sweep-to-bottom text-dark border " href="@Url.Action("UploadClientBatch","Crms", new {companyId=Model.CompanyId})"><i class="fa fa-plus"></i> &nbsp; New Upload</a>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table id="table_id" class="table table-sm table-striped">
+                <thead style="background-color: #dcefe5;">
+                    <tr>
+                        <th class="p-1">S.L</th>
+                        <th class="p-1">Upload Serial No</th>
+                        <th class="p-1">Upload Date</th>
+                        <th class="p-1">Sucess Count(*)</th>
+                        
+                        <th class="p-1">Error Count(*)</th>
+                        <th class="p-1">Is Sync(*)</th>
+                        <th class="p-1">Upload By</th>
+                        <th class="p-1">File Name</th>
+                        <th class="p-1">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model.DataList)
+                    {
+                        sl = sl + 1;
+                        <tr>
+                            <td class="p-1">@{ @sl}</td>
+                            <td class="p-1">@{ @d.UploadSerialNo}</td>
+                            <td class="p-1">@{ @d.UploadDateTime.ToString("dd-MMM-yyyy")}</td>
+                            <td class="p-1">@{ @d.SuccessCount}</td>
+                            <td class="p-1">@{ @d.ErrorCount}</td>
+                            <td class="p-1">@{ @d.IsSyncCount}</td>
+                            <td class="p-1">@{ @d.UploadName}</td>
+                            <td class="p-1">@{ @d.FileName}</td>
+
+                            <td class="p-1">
+                                <a href="@Url.Action("ExportClientUploadBatchHistoryExcel", "Crms", new
+                                                {
+
+                                                   companyId= Model.CompanyId,
+                                                   uploadSerialNo= d.UploadSerialNo,
+                                                   uploadDateTime= d.UploadDateTime
+                                                })"
+                                   style="color:#fff;" class="btn btn-sm btn-secondary"><i class="fa fa-file-excel"></i> &nbsp; Export</a>
+                                <a style="color:#fff;" onclick="syncUploadClients(@Model.CompanyId, @d.UploadSerialNo, '@d.UploadDateTime')" class="btn btn-sm btn-success">
+                                    <i class="fa fa-sync"></i> Sync
+                                </a>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script>
+        function syncUploadClients(c,us,ut) {
+            var v = {
+                'companyId': c,
+                'LastUploadNo': us,
+                'UploadDateTime': ut
+            }
+            console.log(v);
+
+             $.ajax({
+
+                    type: "POST",
+                    url: "@Url.Action("SyncClientBatch", "Crms")",
+                    datatype: "Json",
+                    data: { model: v },
+                    success: function (data) {
+                        console.log(data);
+                        var mess = [];
+                        if (data.HasMessage == true) {
+                            for (var i = 0; i < data.MessageList.length; i++) {
+                                mess.push(data.MessageList[i]);
+                            }
+                            alert(mess);
+                        }
+                    }
+                });
+     }
+    </script>
+}
+

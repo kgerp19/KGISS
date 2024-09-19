@@ -1,0 +1,128 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.MonthlyTargetModel>
+@using PagedList;
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = TempData["message"];
+    int companyId = Convert.ToInt32(Session["CompanyId"]);
+}
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+
+
+<div class="row">
+    <div class="col-md-6">
+        <span style="font-size:20px;font-weight:bold">Monthly Target List</span>
+    </div>
+    <div class="col-md-4">
+        @using (Html.BeginForm("CompanyIndex", "MonthlyTarget", FormMethod.Get, new { @class = "example" }))
+        {
+            <input type="text" placeholder="Search.." autocomplete="off" name="searchText">
+            <button type="submit"><i class="fa fa-search"></i></button>
+        }
+    </div>
+
+    <div class="col-md-2">
+        <a href="@Url.Action("CompanyCreateOrEdit",new { id=0,companyId=companyId })" class="btn btn-primary pull-right">
+            <span class="glyphicon glyphicon-plus"></span> Add
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().CompanyName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().CustomerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Year)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Month)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Amount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Remarks)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().IsActive)
+            </th>
+            <th class="text-center">Action</th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.CompanyName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.CustomerName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Year)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.MonthName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Remarks)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.IsActive)
+                </td>
+
+                <td class="text-center">
+                    <a href="@Url.Action("CompanyCreateOrEdit", new {id = item.Data.MonthlyTargetId,companyId=companyId})" class="btn btn-info btn-xs">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                    <a href="@Url.Action("DeleteCompanyMonthlyTarget", new { monthlyTargetId = item.Data.MonthlyTargetId,companyId=companyId})" onclick="return confirm('Are you sure to delete this Record?');" class="btn btn-danger btn-xs">
+                        <i class="fa fa-trash"></i> Delete
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </table>
+    @if (Model.PageCount > 1)
+    {
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("CompanyIndex", "MonthlyTarget",
+                          new { Page_No, Sorting_Order = Request.QueryString["Search"], SearchText = Request.QueryString["searchText"] }))
+        </span>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        var message = '@message';
+        if(message){
+            alert(message);
+        }
+    </script>
+
+}

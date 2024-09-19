@@ -1,0 +1,438 @@
+﻿
+@{
+    ViewData["Title"] = "Invoice List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@model KGERP.Service.Implementation.VMPayment
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Payment History of <span style="color:maroon">@Model.CommonCustomerCode-@Model.CommonCustomerName</span>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Dealer / Customer</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("PurchaseOrdersByID", "Collection", FormMethod.Post, new { id = "orderMasterByIDformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+            {
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                @Html.HiddenFor(model => model.CustomerId, new { id = "hidCustomerId" })
+                @Html.HiddenFor(model => model.PaymentMasterId, new { id = "hidPaymentMasterId" })
+
+
+                <div class="box-danger">
+                    <div class="box">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>A/C Name</th>
+                                <th>A/C No</th>
+                                <th>Bank Name</th>
+                                <th>Branch Name</th>
+
+                            </tr>
+                            <tr>
+                                <th>@Model.ACName</th>
+                                <th>@Model.ACNo</th>
+                                <th>@Model.BankName</th>
+                                <th>@Model.BranchName</th>
+
+                            </tr>
+                        </table>
+
+                        <div class="box-body">
+                            @if (Model.PaymentMasterId > 0)
+                            {
+
+
+                                <div class="col-md-1"> </div>
+                                <div class="col-md-10">
+                                    <table class="table">
+
+                                        <tr>
+                                            <th style="width:18%">
+                                                Payment No
+                                            </th>
+                                            <th style="width:2%">:</th>
+                                            <td style="width:30%">
+                                                <label class="col-form-label">@Model.PaymentNo</label>
+                                            </td>
+                                            <th style="width:18%">Collection Date</th>
+                                            <th style="width:2%">:</th>
+                                            <td style="width:30%">@Model.TransactionDate.ToString("dd-MM-yyyy")</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:18%">
+                                                Collection From
+                                            </th>
+                                            <th style="width:2%">:</th>
+                                            <td style="width:30%">
+                                                @Model.PaymentFromHeadGLName
+
+                                            </td>
+                                            <th style="width:18%">Collection To</th>
+                                            <th style="width:2%">:</th>
+                                            <td style="width:30%">@Model.PaymentToHeadGLName</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:18%">
+                                                Referenc
+                                            </th>
+                                            <th style="width:2%">:</th>
+                                            <td style="width:30%">
+                                                <label class="col-form-label">@Model.ReferenceNo</label>
+                                            </td>
+                                            <th style="width:18%">Bank Charge</th>
+                                            <th style="width:2%">:</th>
+                                            <th style="width:30%">@Model.BankCharge</th>
+                                        </tr>
+
+                                    </table>
+                                </div>
+                                <div class="col-md-1"> </div>
+                            }
+
+
+                            @if (Model.PaymentMasterId == 0)
+                            {
+                        <div class="row">
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Payment Date</label>
+                                    <input name="TransactionDate" asp-for="TransactionDate" type="text" required="required" class="datePicker form-control" id="txtPaymentDate" placeholder="Payment Date" autocomplete="off">
+                                    @Html.ValidationMessageFor(model => model.TransactionDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="txtDescription" class="col-form-label">Cheque Name:</label>
+                                    <input name="MoneyReceiptNo" asp-for="MoneyReceiptNo" type="text" class="form-control">
+
+                                    @Html.ValidationMessageFor(model => model.MoneyReceiptName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtDescription" class="col-form-label">Cheque No:</label>
+                                    <input name="MoneyReceiptNo" asp-for="MoneyReceiptNo" type="text" class="form-control">
+
+                                    @Html.ValidationMessageFor(model => model.MoneyReceiptNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Cheque Date</label>
+                                    <input name="MoneyReceiptDate" asp-for="MoneyReceiptDate" type="text" required="required" class="datePicker form-control" id="txtPaymentDate" placeholder="Cheque Date" autocomplete="off">
+                                    @Html.ValidationMessageFor(model => model.MoneyReceiptDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="txtBankCharge" class="col-form-label">Bank Charge:</label>
+
+                                    @Html.TextBoxFor(model => model.BankCharge, new { id = "txtBankCharge", @class = "form-control", placeholder = "Bank Charge" })
+
+                                    @Html.ValidationMessageFor(model => model.BankCharge, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Type</label>
+                                            @Html.DropDownListFor(model => model.Accounting_BankOrCashParantId, Model.BankOrCashParantList as SelectList, "==Select Type==", new { id = "ddlAccounting_BankOrCashParantId", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Accounting_BankOrCashParantId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Bank/Cash</label>
+                                            @Html.DropDownListFor(model => model.Accounting_BankOrCashId, Model.BankOrCashGLList as SelectList, new { id = "ddlAccounting_BankOrCashId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Accounting_BankOrCashId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="txtDescription" class="col-form-label">Reference No:</label>
+                                            @Html.TextAreaFor(model => model.ReferenceNo, new { id = "txtReferenceNo", placeholder = "Reference No", @class = "form-control", Rows = 2, required = "required" })
+                                            @Html.ValidationMessageFor(model => model.ReferenceNo, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+
+                            <div class="row">
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">PO No:</label>
+                                        @Html.DropDownListFor(model => model.PurchaseOrderId, Model.OrderMusterList as SelectList, "--PO No--", new { id = "ddlPurchaseOrderId", @class = "searchingDropdown form-control", required = "true" })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrderId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="txtDescription" class="col-form-label">Payable Amount:</label>
+                                        <input name="PayableAmount" value="@(Convert.ToDecimal(Model.PayableAmountDecimal) - (Model.InAmount + Model.ReturnAmount))" readonly="readonly" asp-for="PayableAmount" type="text" class="form-control">
+
+                                        @Html.ValidationMessageFor(model => model.PayableAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="txtOutAmount" class="col-form-label">Payment Amount:</label>
+                                        <input name="OutAmount" asp-for="OutAmount" type="text" required="required" class="form-control" id="txtOutAmount" placeholder="Paid">
+                                        @Html.ValidationMessageFor(model => model.OutAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <div class="box-footer">
+                            <div class="row">
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-lg-8 col-md-8">
+                                    <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        <span>Payment to @Model.CommonCustomerName</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="box-danger">
+                            <div class="box-header">
+
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <div class="table-responsive">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>
+                                                    PO No
+                                                </th>
+                                                <th>
+                                                    PO Date
+                                                </th>
+
+                                                <th style="text-align:right;">
+                                                    Payment Amount
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                                        @{int sl = 0;
+                                            decimal paidTotal = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataList)
+                                            {
+                                                paidTotal += item.InAmount;
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>
+                                                        @item.OrderNo
+                                                    </td>
+                                                    <td>
+                                                        @item.OrderDate.ToString("dd-MM-yyyy")
+                                                    </td>
+
+                                                    <td style="text-align:right;">
+                                                        @item.OutAmount
+                                                    </td>
+
+
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th></th>
+                                                <th colspan="2">
+                                                    Total Amount
+                                                </th>
+
+                                                <th style="text-align:right;">
+                                                    @paidTotal
+                                                </th>
+
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+
+
+
+                            </div>
+                            <div class="box-footer">
+                                <div class="row">
+                                    <div class="col-md-2">
+
+                                    </div>
+                                    <div class="col-md-5">
+                                        @*<a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/Report/GCCLProductionReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.PaymentMasterId&reportName=GCCLProductionReports">Collection Voucher of @Model.PaymentNo</a>*@
+
+                                    </div>
+                                    <div class="col-md-5">
+                                        @if (!Model.IsFinalized)
+                                        {
+                                            <a onclick="makeProdReferenceSubmitable(@Model.PaymentMasterId);" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitPaymentMasterIdModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Submitted</button>
+
+                                        }
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            }
+
+            @using (Html.BeginForm("PurchaseOrdersByID", "Collection", FormMethod.Post, new { id = "orderMasterByIDFormId", @class = "formValidator" }))
+            {
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="modal fade" id="submitPaymentMasterIdModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                    &times;
+                                </button>
+                                <h5 class="modal-title"><b>Submit</b></h5>
+                            </div>
+                            <div class="modal-body">
+
+                                @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
+                                @Html.HiddenFor(model => model.PaymentMasterId, new { id = "submitPaymentMasterId" })
+                                @Html.HiddenFor(model => model.ActionId, new { id = "submitActionId" })
+                                @Html.HiddenFor(model => model.CustomerId, new { id = "submitCustomerId" })
+
+
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                <div style="text-align:center">
+                                    <h3>Are you sure to submit this?</h3>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                                </div>
+                                <div class="col-md-9">
+                                    <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+@section scripts {
+
+    <script type="text/javascript">
+        function makeProdReferenceSubmitable(rowId) {
+            $("#submitPaymentMasterId").val(rowId)
+            $('#submitCompanyFK').val("@Model.CompanyFK");
+            $('#submitCustomerId').val("@Model.CustomerId");
+            $('#submitActionId').val(10);
+
+
+        }
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+            $("#ddlPurchaseOrderId").change(function () {
+                var purchaseOrderId = $('#ddlPurchaseOrderId').val();
+                $.ajax({
+                       type: "GET",
+                    url: "@Url.Action("GetPurchaseOrderPayableValue", "Procurement")",
+                    datatype: "Json",
+                    data: { companyId: "@Model.CompanyFK", purchaseOrderId: purchaseOrderId },
+                    success: function (data) {
+
+                        $('#txtOutAmount').val(data);
+
+                    }
+                });
+            });
+
+             $("#ddlAccounting_BankOrCashParantId").change(function () {
+                var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+
+
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("HeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                         data: { companyId: "@Model.CompanyFK", parentId: bankOrCashParantId},
+                         success: function (data) {
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                            $(data).each(function (index, item) {
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+
+
+        })
+        });
+
+
+    </script>
+}
+
+

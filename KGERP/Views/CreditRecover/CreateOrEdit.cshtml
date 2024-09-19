@@ -1,0 +1,86 @@
+﻿@model KGERP.ViewModel.CreditRecoverViewModel
+@{
+    Layout = null;
+}
+
+<script>
+    $('#ddlCompany').change(function () {
+        $.ajax({
+            type: "POST",
+            url: "/Vendor/GetCustomerSelectModelsByCompany",
+            data: { companyId: $('#ddlCompany').val() },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                var Customer = "<select>";
+                Customer = Customer + '<option value="">--Select--</option>';
+                for (var i = 0; i < data.length; i++) {
+                    Customer = Customer + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                }
+                Customer = Customer + '</select>';
+                $('#ddlCustomer').html(Customer);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $('.selectpicker').selectpicker({
+            liveSearch: true,
+            width: 270,
+            showSubtext: true
+        });
+    });
+</script>
+
+@using (Html.BeginForm("CreateOrEdit", "CreditRecover", FormMethod.Post, new { onsubmit = "return SubmitForm(this)" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CreditRecover.CreditRecoverId)
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.CreditRecover.CompanyId, htmlAttributes: new { @class = "control-label" })
+        @Html.DropDownListFor(model => model.CreditRecover.CompanyId, new SelectList(Model.Companies, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlCompany" })
+        @Html.ValidationMessageFor(model => model.CreditRecover.CompanyId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.CreditRecover.VendorId, htmlAttributes: new { @class = "control-label" })
+        @Html.DropDownListFor(model => model.CreditRecover.VendorId, new SelectList(Model.Customers, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlCustomer" })
+        @Html.ValidationMessageFor(model => model.CreditRecover.VendorId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.CreditRecover.Amount, htmlAttributes: new { @class = "control-label" })
+        @Html.EditorFor(model => model.CreditRecover.Amount, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.CreditRecover.StartDate, htmlAttributes: new { @class = "control-label" })
+        <br />
+        @Html.EditorFor(model => model.CreditRecover.StartDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:240px", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+        @Html.ValidationMessageFor(model => model.CreditRecover.StartDate, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.CreditRecover.Remarks, htmlAttributes: new { @class = "control-label" })
+        @Html.EditorFor(model => model.CreditRecover.Remarks, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.CreditRecover.IsActive, htmlAttributes: new { @class = "control-label" })
+        @Html.EditorFor(model => model.CreditRecover.IsActive, new { @style = "margin-left:50px" })
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Submit" class="btn btn-primary" />
+        <input type="reset" value="Reset" class="btn btn-danger" />
+    </div>
+}
+
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.date.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+

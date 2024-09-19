@@ -1,0 +1,726 @@
+﻿@model KGERP.Service.Implementation.General_Requisition.ViewModels.ERequisitionVM
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "ই নথি";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 1;
+    decimal grandTotal = 0;
+    int companyId = Model.UserCompanyId;
+    string disableClass = Model.IsApprovedForwardStatus ? "disabled" : "";
+}
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.Id > 0)
+        {
+            <span>
+                E File  History of : @Model.RequisitionNumber
+            </span>
+        }
+        else
+        {
+            <span>
+                E File
+            </span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a href="~/GeneralRequisition/Index?CompanyId=@companyId">ERequisition List</a></li>
+    </ol>
+</section>
+@using (Html.BeginForm("ERequisitionAdd", "GeneralRequisition", FormMethod.Post, new { id = "procurementSalesOrderSlaveFormId", @class = "formValidator", @enctype = "multipart/form-data" }))
+{
+    <section class="content">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.UserCompanyId)
+            @Html.HiddenFor(model => model.AttachmentId)
+            <div class="box-danger">
+                <!-- /.box-header -->
+                <div class="box-body">
+                    @if (Model.Id > 0)
+                    {
+                        @Html.HiddenFor(model => model.Id, new { id = "Id", @name = "requisitionId" })
+                        <div class="col-md-1"> </div>
+                        <div class="col-md-10">
+                            <table class="table">
+                                <tr>
+                                    <th style="width:18%">
+                                        EFile No
+                                    </th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">
+                                        <label class="col-form-label">@Model.RequisitionNumber</label>
+                                    </td>
+                                    <th style="width:18%">Date</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:30%">@Model.RequisitionDate.ToString("dd-MM-yyyy")</td>
+                                </tr>
+                                <tr class="col-order-2">
+
+                                    <th style="width:8%">Status</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:10%" colspan="1">@Model.ERequisitionStatus.ToString()</td>
+
+
+                                    <th style="width:18%">Remarks</th>
+                                    <th style="width:2%">:</th>
+                                    <td style="width:60%">@Model.Remarks</td>
+
+
+                                    @*<th style="width:18%">Attachment</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+
+                                            @if (Model.AttachmentId > 0)
+                                            {
+                                                <a target="_blank" class="btn btn-primary btn-sm" title="Download File" href="/Upload/DownloadFTP?docid=@Model.AttachmentId"> <i class="glyphicon glyphicon-download"> </i> </a>
+                                            }
+
+                                        </td>*@
+
+                                </tr>
+
+                            </table>
+                        </div>
+                        <div class="col-md-1"> </div>
+                    }
+                    <div class="box-body">
+                        @if (Model.Id == 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="CompanyId" class="control-label">Date</label>
+                                        <div style="display:flex;">
+                                            @Html.EditorFor(model => model.RequisitionDate, new { htmlAttributes = new { @autocomplete = "off", @class = "@*datepicker*@ form-control", @data_val = "false", @readonly = "readonly" } })
+
+                                        </div>
+                                        @Html.ValidationMessageFor(x => x.RequisitionDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                @*<div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Attachment </label>
+                                            @Html.TextBoxFor(model => model.Attachment, new { @type = "file", @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Attachment, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-9">
+                                    @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label" })
+                                    @Html.TextAreaFor(model => model.Remarks, new { @class = "form-control", required = "Required", })
+                                    @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                @*<div class="box-footer">
+                        <div class="row">
+                            <div class="col-md-3 pull-right">
+                                @if (Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Draft)
+                                {
+                                    <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        @if (Model.Id > 0)
+                                        {
+                                            <span>Add New Description</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Add Description</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>*@
+                <div class="box-body">
+                    <h3>Attachment</h3>
+                    <div style="border:2px solid #e1dbdb;">
+                        <fieldset class="border shadow  p-2" style="background-color:;padding:10px">
+                            <div class="table-wrapper attachment">
+                                <table class="table table-bordered table-sm" id="attachmentTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:30px">SL#</th>
+                                            <th style="width:200px">Attachment Title</th>
+                                            <th style="width:200px;text-align:center">Select or Download File</th>
+                                            <th style="width:30px;text-align:center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int o = 0; o < Model.Attachments.Count(); o++)
+                                        {
+                                            <tr>
+                                                <td class="sl"> @(o+1)</td>
+                                                <td hidden="hidden"> <input value="@Model.Attachments[@o].DocId" name="Attachments[@o].DocId" /> </td>
+                                                <td><input class="form-control" readonly name="Attachments[@o].Title" value="@Model.Attachments[@o].Title" /></td>
+                                                <td style="text-align:center">
+                                                    <input class="form-control-file hidden" type="file" name="Attachments[@o].File" />
+
+                                                    <a target="_blank" class="btn btn-primary btn-sm" title="Download File" href="/Upload/DownloadFTP?docid=@Model.Attachments[o].DocId"> <i class="glyphicon glyphicon-download"> </i> </a>
+
+
+                                                </td>
+                                                <td style="text-align:center">
+                                                    @*@if (Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Approved && Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Pending && Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Rejected)*@
+                                                    @if (Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Draft)
+                                                    {
+                                                        @*<a class="edit glyphicon glyphicon-edit" onclick="UpdateAttachment(this)" title="Update" data-toggle="tooltip"></a>*@
+                                                        <a class="delete glyphicon glyphicon-trash" onclick="DeleteAttachment(@Model.Attachments[@o].DocId,@Model.Id,this)" title="Delete" data-toggle="tooltip"></a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        @*@if (Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Approved && Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Pending && Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Rejected)*@
+                                        @if (Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Draft)
+                                        {
+
+                                            <tr>
+                                                <td colspan="6">
+                                                    <button type="reset" style="float:right; margin-right:5px; margin-left: 5px;" class="btn btn-danger d-none" id="btnCancel1">Cancel </button>
+                                                    <span>&nbsp;&nbsp;</span>
+                                                    <button style="float:right;" type="button" class="btn btn-info add-new"><i class="fa fa-plus"></i>Add New</button>
+                                                </td>
+                                            </tr>
+                                            @*<tr>
+                                                <td colspan="6">
+                                                    <button style="float:right;" type="submit" class="btn btn-info add-new"><i class="fa fa-plus"></i>Submit</button>
+                                                </td>
+                                            </tr>*@
+                                        }
+
+                                    </tfoot>
+                                </table>
+
+                                @*<div class="table-title">
+                                        <div class="row">
+                                            <div class="col-sm-8"><h2>Attachemnt</h2></div>
+                                            <div class="col-sm-4 text-right">
+                                                <button type="button" class="btn btn-info add-new"><i class="fa fa-plus"></i>Add New</button>
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+                                @*<div class="form-group row">
+                                        <div class="col-sm-2"></div>
+                                        <div class="col-sm-8">
+                                            <button type="submit" class="btn btn-primary" onsubmit="return submit2()" id="btnFArchive1">Upload</button>
+                                            <button type="reset" class="btn btn-danger d-none" id="btnCancel1">Cancel </button>
+                                        </div>
+                                    </div>*@
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <div class="row">
+                        @if (Model.Id <= 0)
+                        {
+                            <div class="col-md-3 pull-right">
+                                <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block" name="ActionButton" value="Create">
+                                    <i class='fa fa-plus'></i>
+                                    Submit
+                                </button>
+                            </div>
+                        }
+                        else if (Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Draft)
+                        {
+                            <div class="col-md-3 pull-right">
+                                <button type="submit" id="poUpdateBtn" class="btn btn-primary btn-block" name="ActionButton" value="Update">
+                                    <i class='fa fa-plus'></i>
+                                    Update
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @if (Model.Id > 0)
+                    {
+                        if (Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Draft || Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Submitted)
+                        {
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="EmployeeName" class="control-label">Forward To</label>
+                                        @Html.EditorFor(model => model.EmployeeName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control"} })
+                                        @Html.HiddenFor(model => model.EmployeeId)
+                                        @Html.HiddenFor(model => model.SignatoryId)
+                                        @Html.ValidationMessageFor(model => model.EmployeeName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                @*<div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="EmployeeName" class="control-label">&nbsp;</label>
+                                        <button type="reset" class="btn btn-info btn-block" onclick="resetSignatory()">
+                                            <i class="fa fa-refresh"></i>&nbsp;Reset
+                                        </button>
+                                    </div>
+                                </div>*@
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">&nbsp;</label>
+                                        <button type="submit" id="forwardBtn" name="ActionButton" value="Forward" class="btn btn-primary btn-block">
+                                            <i class='fa fa-plus'></i>
+                                            <span>Forward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <ul id="forwardList" class="form-control-label"></ul>
+                                    @Html.Hidden("EmployeeIdList")
+                                </div>
+                            </div>
+
+                        }
+                    }
+                </div>
+                @if (Model.ERequisitionStatus != GeneralRequisitionStatusEnum.Draft && Model.SignatoryList != null && Model.SignatoryList.Count() > 0)
+                {
+                    <h3>Forwarding History</h3>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Id</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Designation</th>
+                                <th scope="col">Comment</th>
+                                <th scope="col">Approved Time</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SignatoryList != null)
+                            {
+                                int ii = 1;
+                                foreach (var item in Model.SignatoryList)
+                                {
+                                    string color =
+                                    item.SignatoryStatus == EFileSignatoryStatusEnum.Approved ? "text-primary" : item.SignatoryStatus == EFileSignatoryStatusEnum.Rejected ? "text-danger" : "";
+                                    <tr>
+
+                                        <td>@(ii++)</td>
+                                        <td>@item.EmployeeId</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.DesignationName</td>
+                                        <td>@item.Comment</td>
+                                        <td>
+                                            @if (item.SignatoryStatus != EFileSignatoryStatusEnum.Pending)
+                                            {
+                                                @item.ApprovedTimeString
+                                            }
+                                         </td>
+                                        <td class="@color">@item.SignatoryStatus</td>
+                                        <td>
+                                            @if (Model.ERequisitionStatus == GeneralRequisitionStatusEnum.Submitted)
+                                            {
+                                                <a id="@item.Id" onclick="signatoryEdit(@item.Id,'@item.EmployeeId','@item.EmployeeName')" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                <a id="@item.Id" onclick="signatoryDelete(@item.Id)" class="linkPointer text-danger" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </section>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(function () {
+                $("#EmployeeName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id };
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#EmployeeId").val(ui.item.id);
+                        //description required false
+                        $("#Description").removeAttr("required");
+
+                        if (true) {
+                          //  $("#EmployeeName").val("");
+                            var listContainer = document.getElementById("forwardList");
+                            //listContainer.innerHTML = "";
+                            var listItem = document.createElement("li");
+                            listItem.textContent = ui.item.label + ' '; //+"<span class='glyphicon glyphicon-remove text-danger'></sapn>";
+
+                            // Create a span element for the remove icon
+                            var removeIcon = document.createElement("span");
+                            removeIcon.className = "glyphicon glyphicon-remove text-danger"; // Bootstrap remove icon classes
+
+                            //// Append the remove icon to the listItem
+                            listItem.appendChild(removeIcon);
+
+
+
+                            listItem.style.cursor = "pointer";
+                           // listItem.setAttribute("onclick", "removeEmployee(" + this + ',' + ui.item.id + ")");
+                            listItem.setAttribute("onclick", "removeEmployee(this,"+ui.item.id+")");
+
+                          //  listItem.appendChild(removeIcon);
+                            listContainer.appendChild(listItem);
+                            var signatoryList = $("#EmployeeIdList").val();
+                            if (signatoryList == null || signatoryList == "") {
+                                $("#EmployeeIdList").val(ui.item.id)
+                            } else {
+                                $("#EmployeeIdList").val(signatoryList+ ',' + ui.item.id);
+                            }
+                        }
+                        setTimeout(function () {
+                            $("#EmployeeName").val(""); // Clear the EmployeeName input field after a short delay
+                        }, 100); // Adjust the delay in milliseconds as needed
+
+                    }
+                });
+               
+            });
+        });
+
+
+        function makeEditble(id, descriptionName) {
+
+            $("#Description").val(descriptionName);
+            $("#ERequisitionDetailId").val(id);
+            $("#poCreateBtn").text("Update");
+        };
+        function makeDeletable(id) {
+
+            if (confirm("Are you sure you want to delete this description?")) {
+                // Get the query string from the URL
+                var queryString = window.location.search;
+                // Parse the query string into an object
+                var params = new URLSearchParams(queryString);
+                // Access specific parameters by name
+                var companyId = params.get("companyId");
+                var requisitionId = params.get("requisitionId");
+                queryString = "?companyId=" + companyId + "&requisitionId=" + requisitionId + "&id=" + id;
+
+                // Create a URL for the action method and append the URL parameters
+                var actionUrl = '/GeneralRequisition/DeleteERequisitionItemDetail' + queryString;
+
+                // Redirect to the action method with the URL parameters
+                window.location.href = actionUrl;
+
+            };
+        };
+        function signatoryEdit(id, empId, empName) {
+            $("#SignatoryId").val(id);
+            $("#EmployeeId").val(empId);
+            $("#EmployeeName").val(empName);
+            $("#forwardBtn").prop("disabled", false);
+        }
+        function signatoryDelete(id) {
+            if(confirm("Are you sure you want to delete this signatory?"))
+            {
+                // Get the query string from the URL
+                var queryString = window.location.search;
+                // Parse the query string into an object
+                var params = new URLSearchParams(queryString);
+                // Access specific parameters by name
+                var companyId = params.get("companyId");
+                var requisitionId = params.get("requisitionId");
+                 queryString = "?companyId=" + companyId + "&requisitionId=" + requisitionId+"&signatoryId="+id;
+
+                // Create a URL for the action method and append the URL parameters
+                var actionUrl = '/GeneralRequisition/DeleteERequisitionSignatory' + queryString;
+
+                // Redirect to the action method with the URL parameters
+                window.location.href = actionUrl;
+
+            };
+
+        }
+
+        function resetSignatory() {
+            $("#SignatoryId").val(0);
+            $("#EmployeeId").val('');
+            $("#EmployeeName").val('');
+            //$("#forwardBtn").prop("disabled", true);
+        }
+
+        //function bindProperty() {
+        //    var requisitionTypeId = $("#GeneralRequisitionType").val();
+        //    var company = $("#Company").val();
+        //    if (requisitionTypeId == 1) {
+        //        $("#CompanyId").val(company);
+        //    }
+        //    if (requisitionTypeId == 2) {
+        //        $("#DivisionId").val(company);
+        //    }
+        //}
+
+        function LoadDepartment() {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+               // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    $('#CommonName').text("Division");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                }
+            })
+        }
+
+
+
+ $('.datepicker').datepicker({
+        dateFormat: "yy-mm-dd",
+        showOn: 'both',
+        buttonText: "<i class='fa fa-calendar'></i>",
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "2001:+50"
+    });
+    function resetForm() {
+        $("#FromDate").val("@(DateTime.Today.ToString("yyyy/MM/dd"))");
+        $("#btnSave").text("Add");
+        $("#ActionType").val('@(ActionEnum.Add)');
+        const fieldsToDisplay = ['Id', 'EmployeeId', 'EmployeeName', 'FromDate', 'ToDate', 'BusinessType', 'BusineesId_Fk'];
+        fieldsToDisplay.forEach((item) => {
+            var f = $("#" + item);
+            if (f != null) {
+                if (item == "Id") {
+                    f.val(0);
+                } else {
+
+                    f.val('');
+                }
+            }
+
+        });
+    }
+
+
+    </script>
+
+
+    <script>
+
+        function myfunc() {
+
+            $('#attachmentTable > tbody  > tr').each(function (index, tr) {
+                $(tr).find(".sl").html(index + 1);
+                $(tr).find(".docid").attr("name", "Attachments[" + index + "].DocId")
+                $(tr).find(".title").attr("name", "Attachments[" + index + "].Title")
+                $(tr).find(".file").attr("name", "Attachments[" + index + "].File")
+
+                console.log(tr);
+            });
+            //console.log(valueList);
+
+            //console.log("(" + valueList.join("),(") + ")");
+        }
+
+
+        function collaction(InstallmentId) {
+
+            $("#InstallmentId").val(InstallmentId);
+        }
+
+
+
+        $(document).ready(function () {
+            $(".alert-danger").hide();
+            $('[data-toggle="tooltip"]').tooltip();
+           // var actions = '<a class="delete glyphicon glyphicon-trash" onclick="DeleteAttachment(0,0,event)" title="Delete" data-toggle="tooltip"></a>';
+            var actions = '<a class="delete glyphicon glyphicon-trash" onclick="DeleteRow(this)" title="Delete" data-toggle="tooltip"></a>';
+            // Append table with add row form on add new button click
+            $(".add-new").click(function () {
+                /*$(this).attr("disabled", "disabled");*/
+                var index = $("#attachmentTable tbody tr:last-child").index();
+                var row = '<tr>' +
+                    '<td class="sl"></td> <td hidden="hidden"> <input class="docid" value="0" name="Attachments[0].DocId" /> </td>' +
+                    '<td><input class="form-control title" required  name="Attachments[0].Title"/></td>' +
+                    '<td><input class="form-control-file file" required type="file" name="Attachments[0].File"/></td>' +
+                    '<td style="text-align:center">' + actions + '</td>' +
+                    '</tr>';
+                $("#attachmentTable").append(row);
+                myfunc();
+                /*$("#attachmentTable tbody tr").eq(index + 1).find(".add, .edit").toggle();*/
+                /*$('[data-toggle="tooltip"]').tooltip();*/
+            });
+            //#attachmentTable
+
+            // Add row on add button click
+            $(document).on("click", ".add", function () {
+                var empty = false;
+                var input = $(this).parents("tr").find('input[type="text"]');
+                input.each(function () {
+                    if (!$(this).val()) {
+                        $(this).addClass("error");
+                        empty = true;
+                    } else {
+                        $(this).removeClass("error");
+                    }
+                });
+                $(this).parents("tr").find(".error").first().focus();
+                if (!empty) {
+                    input.each(function () {
+                        $(this).parent("td").html($(this).val());
+                    });
+                    $(this).parents("tr").find(".add, .edit").toggle();
+                    $(".add-new").removeAttr("disabled");
+                }
+            });
+            // Edit row on edit button click
+            $(document).on("click", ".edit", function () {
+                $(this).parents("tr").find("td:not(:last-child)").each(function () {
+                    $(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
+                });
+                $(this).parents("tr").find(".add, .edit").toggle();
+                $(".add-new").attr("disabled", "disabled");
+            });
+
+
+
+        });
+
+
+
+        function DeleteAttachment(docid, cgid, element) {
+            $.confirm({
+                title: "",
+                content: "<span class='alert_content'> Do you want to delete this file? </span>",
+                columnClass: 'small',
+                buttons: {
+                    confirm: {
+                        text: "<span class='alert_text'>Yes</span>",
+                        btnClass: 'btn-warning',
+                        keys: ['enter'],
+                        action: function () {
+                            if (docid > 0 && @Model.Id > 0) {
+
+                                $.ajax({
+                                    type: "post",
+                                    url: "/ProductBooking/CGFileDelete",
+                                    data: { docId: docid, CGId:@Model.Id},
+                                    datatype: "json",
+                                    traditional: true,
+                                    success: function (data) {
+                                       // console.log(data);
+                                       // location.reload();
+                                        alert("Deleted");
+                                        $(element).closest('tr').remove();
+                                        //if (data) {
+                                        //    $(x.path[2]).remove();
+                                        //    myfunc();
+                                        //} else {
+
+                                        //}
+                                    }
+                                });
+
+                            } else {
+                              //  alert("Not Deleted!");
+                               // $(x.path[2]).remove();
+                                //$(".add-new").removeAttr("disabled");
+                            }
+
+                           // myfunc();
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-blue',
+                        keys: ['esc'],
+                        //action: function () {
+                        //    $(x.path[3]).remove();
+                        //    //$(".add-new").removeAttr("disabled");
+                        //    myfunc();
+                        //}
+                    }
+                }
+            });
+
+        }
+
+        function DeleteRow(element) {
+            $(element).closest('tr').remove();
+        }
+
+        //function UpdateAttachment(element) {
+        //    // Get the closest 'tr' ancestor of the clicked edit button
+        //    var closestRow = $(element).closest('tr');
+        //    closestRow.find('td:nth-child(3)').children().text("OK");
+        //    // Find the immediate two 'td' elements and remove the 'readonly' attribute
+        //   // closestRow.find('td:nth-child(1), td:nth-child(2)').removeAttr('readonly');
+        //    console.log(closestRow.find('td:nth-child(3)').children().val());
+        //}
+
+
+        function removeEmployee(element,id) {
+            $(element).remove();
+
+            // Get the current value of the sSignatoryList input field
+            var currentIds = $("#EmployeeIdList").val();
+
+            // Convert the comma-separated string into an array of IDs
+            var idArray = currentIds.split(",");
+
+            // Remove the desired ID from the array
+            var indexToRemove = idArray.indexOf(id.toString());
+            if (indexToRemove !== -1) {
+                idArray.splice(indexToRemove, 1);
+            }
+
+            // Join the updated array back into a string with commas
+            var updatedIds = idArray.join(",");
+
+            // Set the new string as the value of the sSignatoryList input field
+            $("#EmployeeIdList").val(updatedIds);
+
+
+        }
+
+
+        //function RemoveEmp() {
+        //    $("#EmployeeName").text("");
+
+        //}
+   </script>
+}

@@ -1,0 +1,313 @@
+﻿@model KGERP.Service.SalesManagementVM
+@{
+    ViewBag.Title = "KG Companies Sales Planning";
+}
+<style>
+    .container-fluid {
+        padding: 20px;
+    }
+
+    .dropContainer, .comListContainer {
+        margin-bottom: 20px;
+        padding: 20px;
+    }
+
+    .searchingDropdown {
+        width: 100%;
+    }
+
+    .tbl {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+
+    .gradient-background {
+        background: linear-gradient(to left, #ffffff, #f0f0f0);
+        padding: 30px;
+        border-radius: 10px;
+        height: 400px;
+    }
+
+    .editAchievement {
+        margin-right: 15px;
+        color: cornflowerblue;
+    }
+
+    .deleteAchievement {
+        color: red;
+    }
+</style>
+
+ 
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        KG Companies Sales Planning
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">KG Companies Sales Planning</li>
+    </ol>
+</section>
+@using (Html.BeginForm())
+{
+<section class="content">
+
+
+
+    <div class="row">
+
+
+        <div class="col-md-12">
+
+            <div class="row">
+                <table class="table table-bordered">
+                    <tr>
+                        <td><span id="snnTitle"></span></td>
+                        <td><span id="snnFromDate"></span></td>
+                        <td><span id="snnToDate"></span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-3">
+                <div class="box">
+
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.KGcomTargetId, new { @id = "SalesTargetID", @value = 0 })
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>Add</h4>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            <div class="form-group">
+                                <label for="achievementDropdown">Sales Achievement</label>
+                                @Html.DropDownListFor(model => model.AchievementId, Model.SalesAcheivements, "Select a Sales Achievement", new { @class = "form-control searchingDropdown", id = "achievementDropdown", onchange = "fetchAndDisplayCompanyWiseTarget()" })
+
+                            </div>
+
+                            <div class="form-group">
+                                <label for="companyDropdown">Company</label>
+                                @Html.DropDownListFor(model => model.CompanyId, Model.Companies, "Select a Company", new { @class = "form-control searchingDropdown", id = "companyDropdown" })
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.TargetAmount, "Sales Target")
+                                @Html.TextBoxFor(model => model.TargetAmount, new { @class = "form-control", placeholder = "Enter sales target", id = "targetField" })
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-5">
+                                    <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                </div>
+                                <div class="col-md-7">
+                                    <button type="submit" id="btnSave" onclick="saveData()" class="btn btn-primary btn-block">Save</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box">
+
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>KG Companies Sales Planning List</h4>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Company</th>
+                                        <th>Targeted Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                            
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+            function fetchAndDisplayCompanyWiseTarget() {
+                var achievementId = $('#achievementDropdown').val();
+                $.ajax({
+                    url: '@Url.Action("GetSaleswiseTarget", "SalesManagement")',
+                    type: 'GET',
+                    data: { achievementId: achievementId },
+                    success: function (data) {
+                        $('#KgErpDataTable tbody').empty();
+                        var sl = 0;
+                        if (data != null) {
+                            $('#snnTitle').text(data.AchievementTitle)
+                            $('#snnFromDate').text(moment(data.FromDate).format('DD/MM/YYYY'))
+                            $('#snnToDate').text(moment(data.ToDate).format('DD/MM/YYYY'))
+
+                        }
+
+                        if (data.DataList.length > 0) {
+                            $.each(data.DataList, function (index, achievement) {
+                                var targetAmountInWords = convertNumberToWords(achievement.TargetAmount);
+                                sl++;
+                                var row = $('<tr>').append(
+                                    $('<td>').text(sl),
+                                    $('<td width="30%">').text(achievement.CompanyName),
+                                    $('<td>').text(achievement.TargetAmountStr + ' - ' + targetAmountInWords + ' BDT'),
+                                );
+                                row.append(
+                                    $('<td>').append(
+                                        $('<button>')
+                                            .addClass('editAchievement')
+                                            .html('<i class="fa fa-edit"></i>')
+                                            .data('SalesTargetId', achievement.KGcomTargetId)
+                                    ).append(
+                                        $('<button>')
+                                            .addClass('deleteAchievement')
+                                            .html('<i class="fa fa-trash"></i>')
+                                            .data('SalesTargetId', achievement.KGcomTargetId)
+                                    ).append(
+                                        $('<a>')
+                                            .addClass('btn btn-success fa fa-arrow-circle-o-right')
+                                            .attr('href', '/SalesManagement/AssignSalesTarget?KGCompanySaleTergetId=' + achievement.KGcomTargetId)
+                                            
+                                    )
+                                );
+
+                                $('#KgErpDataTable tbody').append(row);
+                            });
+                        }
+
+                    },
+                    error: function () {
+                        alert('Error fetching data GetSaleswiseTarget Action.');
+                    }
+                });
+            }
+        $('#KgErpDataTable').on('click', '.editAchievement', function (e) {
+                e.preventDefault();
+                var salesTargetId = $(this).data('SalesTargetId');
+                console.log("Edit id: "+salesTargetId);
+        $.ajax({
+            url: '@Url.Action("GetSalesTarget", "SalesManagement")',
+            type: 'GET',
+            data: { salesTargetId: salesTargetId },
+            success: function (data) {
+                console.log(data.TargetAmount);
+                $('#SalesTargetID').val(data.KGcomTargetId);
+                $('#achievementDropdown').val(data.AchievementId).change(); // Trigger change event if needed
+                $('#companyDropdown').val(data.CompanyId).change(); // Trigger change event if needed
+                //$('#achievementDropdown').val(data.AchievementId);
+                //$('#companyDropdown').val(data.CompanyId);
+                $('#targetField').val(data.TargetAmount);
+            },
+            error: function () {
+                alert('Error fetching data for edit.');
+            }
+        });
+    });
+            $('#companyDropdown').on('change', function () {
+                var selectedText = $('#companyDropdown option:selected').text();
+                $('#companyDropdown').siblings('.dropdown-toggle').find('.filter-option-inner-inner').text(selectedText);
+            });
+
+        $('#KgErpDataTable').on('click', '.deleteAchievement', function (e) {
+                e.preventDefault();
+                var salesTargetId = $(this).data('SalesTargetId');
+                if (confirm('Are you sure you want to delete this sales target?')) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteSalesTarget", "SalesManagement")',
+                        type: 'POST',
+                        data: { salesTargetId: salesTargetId },
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success(response.message);
+                                fetchAndDisplayCompanyWiseTarget();
+                            } else {
+                                toastr.error(response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                }
+            });
+
+            function saveData() {
+        console.log("I am called");
+        var achievementId = $('#achievementDropdown').val();
+        var companyId = $('#companyDropdown').val();
+        var targetAmount = $('#targetField').val();
+        var salesTargetId = $('#SalesTargetID').val();
+
+        $.ajax({
+            url: '@Url.Action("KGCompanySalesTargetSave", "SalesManagement")',
+            type: 'POST',
+            data: {
+                KGcomTargetId: salesTargetId,
+                AchievementId: achievementId,
+                CompanyId: companyId,
+                TargetAmount: targetAmount,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message);                   
+                    location.reload();
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+            }
+            $(document).ready(function () {
+                $('#achievementDropdown').on('change', function () {
+                    fetchAndDisplayCompanyWiseTarget();
+                });
+                var achievementId = $('#achievementDropdown').val();
+                if (achievementId != 0) {
+                    $('#achievementDropdown').val(achievementId).trigger('change');
+                }
+
+            });
+    </script>
+}

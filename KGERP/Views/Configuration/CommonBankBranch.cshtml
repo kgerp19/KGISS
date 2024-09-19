@@ -1,0 +1,230 @@
+﻿@{
+
+    ViewData["Title"] = "Bank";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMCommonBankBranch
+    @using KGERP.Utility
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Bank Branch
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Bank Branch</li>
+    </ol>
+</section>
+@using (Html.BeginForm("CommonBankBranch", "Configuration", FormMethod.Post, new { id = "commonBankBranchFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.ID, new { id = "bankBranchId" })
+    @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-4">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">Bank</label>
+                        @Html.DropDownListFor(model => model.BankId, Model.BankList as SelectList, "--Bank--", new { @class = "form-control", required = "true" })
+                        @Html.ValidationMessageFor(model => model.BankId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">Bank Branch</label>
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control input-sm", @placeholder = "Branch", required = "true" })
+                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">Account Type</label>
+                        @Html.DropDownListFor(x => x.AccountType, new SelectList(Enum.GetValues(typeof(KGERP.Utility.BankAccountTypeEnum))), "--Select--", new { @class = "form-control", required = "true" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-6">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">Account Number</label>
+                        @Html.TextBoxFor(model => model.AccountNumber, new { @class = "form-control input-sm", @placeholder = "Account Number", required = "true" })
+                        @Html.ValidationMessageFor(model => model.Street, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">Account Name</label>
+                        @Html.TextBoxFor(model => model.AccountName, new {@class = "form-control input-sm", @placeholder = "Account Name", required = "true" })
+                        @Html.ValidationMessageFor(model => model.AccountName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-6">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">Street</label>
+                        @Html.TextBoxFor(model => model.Street, new {@class = "form-control input-sm", @placeholder = "Street", required = "true" })
+                        @Html.ValidationMessageFor(model => model.Street, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">City</label>
+                        @Html.TextBoxFor(model => model.City, new {@class = "form-control input-sm", @placeholder = "City", required = "true" })
+                        @Html.ValidationMessageFor(model => model.City, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group" style="padding:0px">
+                        <label for="message-text" class="col-form-label">ZIP Code</label>
+                        @Html.TextBoxFor(model => model.ZIPCode, new { @class = "form-control input-sm", @placeholder = "ZIP Code", required = "true" })
+                        @Html.ValidationMessageFor(model => model.ZIPCode, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <button type="submit" style="float:right; margin:0px 5px 3px;" id="btnSave" class="btn btn-primary"><i class='fa fa-edit'></i> Add</button>
+                        <button type="button" style="float:right;" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="table table-responsive table-bordered col-md-12">
+            <table id="KgErpDataTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>Bank</th>
+                        <th>Branch</th>
+                        <th>Account Number</th>
+                        <th>Account Name</th>
+                        <th>Type</th>
+                        <th>Street</th>
+                        <th>City</th>
+                        <th>ZIP Code</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                @{int sl = 0;
+                }
+                <tbody>
+                    @foreach (var item in Model.DataList)
+                    {
+
+                        <tr>
+                            <td>@(++sl)</td>
+                            <td>
+                                <input type="hidden" id="commonBankId_@item.ID" value="@item.BankId" />
+                                @item.BankName
+                            </td>
+                            <td id="tdBranchName_@item.ID">@item.Name</td>
+                            <td id="tdAccountNumber_@item.ID">@item.AccountNumber</td>
+                            <td id="tdAccountName_@item.ID">@item.AccountName</td>
+                            <td id="tdAccountType_@item.ID">@item.AccountType</td>
+                            <td id="tdStreet_@item.ID">@item.Street</td>
+                            <td id="tdCity_@item.ID">@item.City</td>
+                            <td id="tdZIPCode_@item.ID">@item.ZIPCode</td>
+                            <td>
+                                <a id="@item.ID" onclick="makeEditble(this);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                <a id="@item.ID" onclick="makeDeletable(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#deleteBankBranchModal" title="Delete"
+                                   data-placement="top">
+                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+@using (Html.BeginForm("CommonBankBranch", "Configuration", FormMethod.Post, new { id = "commonBankBranchDeleteFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.ID, new { id = "bankBranchIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.BankId, new { id = "bankIdDelete" })
+
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFKDelete" })
+
+    <div class="modal fade" id="deleteBankBranchModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Branch  Delete</b></h5>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this branch?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+
+        });
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#bankBranchId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#BankId').val($('#commonBankId_' + rowId).val().trim()).trigger('change');
+                $('#Name').val($('#tdBranchName_' + rowId).text().trim());
+                $('#Street').val($('#tdStreet_' + rowId).text().trim());
+                $('#City').val($('#tdCity_' + rowId).text().trim());
+                $('#ZIPCode').val($('#tdZIPCode_' + rowId).text().trim());
+                $('#AccountNumber').val($('#tdAccountNumber_' + rowId).text().trim());
+                $('#AccountName').val($('#tdAccountName_' + rowId).text().trim());
+                $('#AccountType').val($('#tdAccountType_' + rowId).text().trim().replace(' ','_'));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#bankBranchIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+            }
+        }
+        function resetForm() {
+            $('#commonBankBranchFormId')[0].reset();
+            $('#ActionId').val(1);
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+        }
+    </script>
+}
+

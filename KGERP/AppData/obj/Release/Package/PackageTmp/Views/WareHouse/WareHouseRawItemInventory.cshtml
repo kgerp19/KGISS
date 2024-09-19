@@ -1,0 +1,162 @@
+﻿@using KG.Core.Services
+
+@{
+
+    ViewData["Title"] = "Raw Materials Inventory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMCommonProduct
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Raw Materials Inventory
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Raw Materials Inventory</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("WareHouseRawItemInventoryView", "WareHouse", FormMethod.Post, new { id = "wareHouseRawItemInventoryformId", @class = "formValidator", @target = "_blank", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                            @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+
+                            <div class="row">
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Category:</label>
+                                        @Html.DropDownListFor(model => model.Common_ProductCategoryFk, Model.ProductCategoryList as SelectList, "---Select Category---", new { id = "ddlCommon_ProductCategoryFk", @class = "form-control"})
+                                        @Html.ValidationMessageFor(model => model.Common_ProductCategoryFk, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Subcategory:</label>
+                                        @Html.DropDownListFor(model => model.Common_ProductSubCategoryFk, Model.ProductSubCategoryList as SelectList, "---Select Subcategory---", new { id = "ddlCommonProductSubCategoryFk", @class = "form-control"})
+                                        @Html.ValidationMessageFor(model => model.Common_ProductSubCategoryFk, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Item:</label>
+                                        @Html.DropDownListFor(model => model.Common_ProductFk, Model.ProductList as SelectList, "---Select Item---", new { id = "ddlCommonProductFk", @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Common_ProductFk, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                           
+
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                </div>
+                                <div class="col-md-9">
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-shower'></i> Show Inventory</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                        
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+             $('.formValidator').bootstrapValidator();
+
+
+
+
+
+            $("#ddlCommon_ProductCategoryFk").change(function () {
+
+                var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("CommonProductSubCategoryGet","Configuration")",
+                datatype: "Json",
+                         data: { companyId: "@Model.CompanyFK", categoryId: productCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductSubCategoryFk").empty();
+                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+
+            $("#ddlCommonProductSubCategoryFk").change(function () {
+
+                var productSubCategoryFk = $("#ddlCommonProductSubCategoryFk").val();
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("CommonProductGet", "Configuration")",
+                datatype: "Json",
+                         data: { companyId: "@Model.CompanyFK", productSubCategoryId: productSubCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductFk").empty();
+                            $("#ddlCommonProductFk").append("<option value=''>==Select Item==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+            })
+
+        });
+
+
+        function resetForm() {
+            $('#wareHouseRawItemInventoryformId')[0].reset();
+           
+
+        }
+    </script>
+}
+

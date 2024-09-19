@@ -1,0 +1,295 @@
+﻿@model KGERP.Service.ServiceModel.Vendor.VendorAdjustmentVM
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Customer Adjustment";
+    SelectList selectList = null;
+    if (Model.AdjustmentId > 0)
+    {
+        var items = new List<SelectListItem>
+{
+            new SelectListItem
+            {
+                Value = Model.VendorId.ToString(),
+                Text = Model.VendorName
+            }
+        };
+
+        selectList = new SelectList(items, "Value", "Text");
+    }
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Customer Adjustment
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Customer Adjustment</li>
+    </ol>
+</section>
+
+
+
+<div class="row">
+    <div class="col-md-12" style="background-color:#f1f1f1;padding:5px">
+        <span style="font-size:20px;color:#000000"></span>
+    </div>
+</div>
+<br />
+<div class="container-fluid">
+    @using (Html.BeginForm("CustomerAdjustment", "Vendor", FormMethod.Post, new { @id = "idForm" }))
+    {
+
+        <section class="content">
+            <div class="row">
+                <div class="box">     
+                    <div class="box-danger">
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(model => model.AdjustmentId)
+                            @Html.HiddenFor(model => model.UserCompnayId)
+                            @Html.HiddenFor(model => model.ActionId)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Select Zone</label>
+                                        @Html.DropDownListFor(model => model.ZoneId, new SelectList(Model.ZoneList, "Value", "Text"), "---Select---", new { id = "ddlZoneId", @class = "searchingDropdown form-control" })
+                                        @Html.ValidationMessageFor(model => model.ZoneId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Territory</label>
+                                        @if (Model.SubZoneList != null && Model.SubZoneList.Count() > 0)
+                                        {
+                                            @Html.DropDownListFor(model => model.SubZoneId, new SelectList(Model.SubZoneList, "Value", "Text"), "--Select Territory--", new { id = "ddlSubZoneId", @class = "form-control" })
+
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownListFor(model => model.SubZoneId, new SelectList(string.Empty, "Value", "Text"), "--Select Territory--", new { id = "ddlSubZoneId", @class = "form-control" })
+                                        }
+                                        @Html.ValidationMessageFor(model => model.SubZoneId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Customer</label>
+                                        @if (selectList != null)
+                                        {
+                                            @Html.DropDownListFor(model => model.VendorId, new SelectList(selectList, "Value", "Text"), "--Select Customer--", new { @class = "searchingDropdown form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownListFor(model => model.VendorId, new SelectList(string.Empty, "Value", "Text"), "--Select Customer--", new { @class = "searchingDropdown form-control" })
+                                        }
+
+                                        @Html.ValidationMessageFor(model => model.SubZoneId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Invoice Number</label>
+                                        @Html.DropDownListFor(model => model.OrderMasterId, Model.OrderListList as SelectList, "==Select Invoice No==", new { id = "ddlOrderMasterId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.OrderMasterId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Challan No</label>
+                                        @Html.DropDownListFor(model => model.OrderDeliverId, Model.ExistingChallanList as SelectList, "==Select Existing Challan==", new { id = "ddlChallan", @class = "searchingDropdown form-control ddlReset", required = "required", style = "width:100%" })
+                                        @Html.ValidationMessageFor(model => model.OrderDeliverId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Naration</label>
+                                        @Html.TextAreaFor(model => model.Narration, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Debit Amount</label>
+                                        @Html.TextBoxFor(model => model.Debit, new { @class = "form-control", @type = "number" })
+                                        @Html.ValidationMessageFor(model => model.Debit, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Credit Amount</label>
+                                        @Html.TextBoxFor(model => model.Credit, new { @class = "form-control", @type = "number" })
+                                        @Html.ValidationMessageFor(model => model.Credit, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+
+                            <span title="if you checked, nothing happan or a new voucher generate.">Is Existing? </span> @Html.CheckBoxFor(model => model.IsExisting)
+
+                            @if (Model.AdjustmentId == 0)
+                            {
+                                <input type="submit" name="Save" value="Save" class="btn btn-success pull-right" />
+                            }
+                            else
+                            {
+                                <input type="submit" name="Update" value="Update" class="btn btn-success pull-right" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json2/20160511/json2.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#Debit").on("input", function () {
+                $("#Credit").val(0);
+            });
+
+            $("#Credit").on("input", function () {
+                $("#Debit").val(0);
+            });
+        });
+
+      $("#ddlZoneId").change(function (e) {
+          var zoneId = $("#ddlZoneId :selected").val();
+
+                $.ajax({
+                type: "GET",
+                url: "@Url.Action("CommonSubZonesGet", "Configuration")",
+                datatype: "Json",
+                    data: { id: zoneId },
+                    success: function (data) {
+                        console.log("data list",data);
+                    var items = "";
+                        if (data) {
+                            $("#ddlSubZoneId").empty();
+                            $("#ddlSubZoneId").append("<option value=''>==Select Territory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlSubZoneId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+       });
+        $("#ddlSubZoneId").change(function (e) {
+
+            var subzoneId = $("#ddlSubZoneId :selected").val();
+        $.ajax({
+        type: "GET",
+        url: "@Url.Action("CustomerLisBySubZonetGet", "Procurement")",
+        datatype: "Json",
+            data: { subZoneId: subzoneId },
+            success: function (data) {
+                console.log("data list",data);
+            var items = "";
+                if (data) {
+                    $("#VendorId").empty();
+                    $("#VendorId").append("<option value=''>==Select Customer=</option>");
+                    $(data).each(function (index, item) {
+                        $("#VendorId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                    });
+
+                }
+            }
+        });
+        });
+
+
+
+        $("#VendorId").change(function () {
+
+            var customerId = $("#VendorId").val();
+            $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("SalesOrderLisByCustomerIdGet", "Procurement")",
+                    datatype: "Json",
+                data: { customerId: customerId},
+                    success: function (data) {
+                        //debugger;
+                        //var items = "";
+
+                        if (data) {
+                            $("#ddlOrderMasterId").empty();
+                            $("#ddlOrderMasterId").append("<option value=''>==Select Invoice No==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlOrderMasterId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+                        }
+                    }
+            });
+        })
+
+
+
+
+
+
+        $("#ddlOrderMasterId").change(function () {
+            var orderMasterId = $("#ddlOrderMasterId").val();
+            $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetExistingChallanListByOrderMasters", "WareHouse")",
+                    datatype: "Json",
+                data: { id: orderMasterId},
+                    success: function (data) {
+
+
+                        if (data) {
+                            $("#ddlChallan").empty();
+                            $("#ddlChallan").append("<option value=''>==Select Existing Challan==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlChallan").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+                        }
+                    }
+            });
+
+        })
+    </script>
+
+}

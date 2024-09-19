@@ -1,0 +1,405 @@
+﻿@model KGERP.Service.Implementation.Production.VMProdReference
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Daily Production List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h3><span>Daily Production List</span></h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Purchase Order</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+                    @using (Html.BeginForm("ProdReferenceList", "Production", FormMethod.Post, new { @class = "formValidator" }))
+                    {
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyId" })
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <table id="KgErpDataTable" class="table table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+                                    <th>Reference NO</th>
+                                    <th>Reference Date</th>
+                                    <th>Submission</th>
+                                    <th style="text-align:center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DataList)
+                                {
+                                    <tr>
+                                        <th>@(++sl)</th>
+                                        <td><a target="_blank" href="~/Production/ProdReferenceSlaveReport?companyId=@item.CompanyFK&prodReferenceId=@item.ProdReferenceId">@item.ReferenceNo</a></td>
+                                        <td>@item.ReferenceDate.ToString("dd-MM-yyyy")</td>
+                                        <td>
+                                            @if (item.IsSubmitted)
+                                            {
+                                                <span style="width:60px" class="text-success">
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="width:60px" class="text-danger">
+                                                    Submission Pending
+                                                </span>
+
+                                            }
+                                        </td>
+                                        <td style="text-align:center;">
+                                            @if (item.CompanyFK == 24)
+                                            {
+                                                <a href="~/Production/GCCLProdReferenceSlave?companyId=@item.CompanyFK&prodReferenceId=@item.ProdReferenceId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+                                            }
+                                            else
+                                            {
+                                                <a href="~/Production/ProdReferenceSlave?companyId=@item.CompanyFK&prodReferenceId=@item.ProdReferenceId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @*@if (Model.ID > 0)
+                        {
+                            <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                        }*@
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@using (Html.BeginForm("DeleteProcurementPurchaseOrder", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Purchase Order</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.ProdReferenceId, new { id = "hidProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POdeleteCompanyFK" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Reference?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginForm("SubmitProcurementPurchaseOrder", "Procurement", FormMethod.Post))
+{
+
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Purchase Order (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.ProdReferenceId, new { id = "hidsubmitProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POSubmitCompanyFK" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="submitOrDraftText"></span> this Reference?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+
+        $(document).ready(function () {
+
+             $("#txtSupplierName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSupplierGet", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCommon_SupplierFK").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        })
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+            //console.log(actionId);
+            //console.log("@((int)ActionEnum.Approve)");
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+
+
+
+            function makeSubmitble(rowId) {
+                // console.log(rowId);
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftPOCIDText').text(data.CID);
+
+                            if (data.status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+                $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+
+
+            function makeHoldable(rowId) {
+                console.log(rowId);
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('.POCIDText').text(data.CID);
+
+                            if (data.isHold == true) {
+                                $('.HoldOrUnholdText').text("Unhold");
+                            }
+                            else {
+                                $('.HoldOrUnholdText').text("Hold");
+
+                            }
+                        }
+                 });
+                $('#hidHoldUnHoldProcurementPurchaseOrderId').val(rowId);
+        }
+
+            function makCancelable(rowId) {
+                console.log(rowId);
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#cancelRenewPOCIDText').text(data.CID);
+
+                            if (data.isCancel == true) {
+                                $('.cancelRenewText').text("Renew");
+                            }
+                            else {
+                                $('.cancelRenewText').text("Cancel");
+
+                            }
+                        }
+                 });
+                $('#hidcancelRenewProcurementPurchaseOrderId').val(rowId);
+            }
+
+
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+            function makeEditble(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+
+                            $('#pPOCIDText').text(data.CID);
+                            $("#hidPOID").val(data.PurchaseOrderId);
+                            $('#POEditActionId').val(2);
+                            //$("#POEditCompanyFK").val(data.CompanyFK);
+
+                            var orderDate = DateCustom(data.OrderDate);
+
+                            $('#txtOrderDate').val(orderDate);
+                            $('#txtDescription').val(data.Description);
+                            $('#ddlSupplierPaymentMethodEnumFK').val(data.SupplierPaymentMethodEnumFK).change();
+
+                            $('#txtDeliveryAddress').val(data.DeliveryAddress);
+                            var deliveryDate = DateCustom( data.DeliveryDate);
+                            $('#txtDeliveryDate').val(deliveryDate);
+                            $('#ddlCommon_SupplierFK').val(data.Common_SupplierFK);
+                            $('#txtSupplierName').val(data.SupplierName);
+
+
+
+                            //$('#ddlPOTypeEnumFK').val(data.poTypeEnumFK).change();
+                            //$('#ddlProcurementOriginTypeEnumFK').val(data.procurementOriginTypeEnumFK).change();
+                            //$('#ddlCommon_CurrencyFK').val(data.common_CurrencyFK).change();
+
+                        }
+                 });
+            }
+
+
+    </script>
+}
+

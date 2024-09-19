@@ -1,0 +1,329 @@
+﻿@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "RM Requisition";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string RequisitionId = ViewBag.RequisitionId;
+    string actionUrl = Url.Content($"~/Procurement/PackagingProductionRequisitionDetails?companyId={Model.CompanyFK}&requisitionId={RequisitionId}");
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            RM Requisition
+        </span>
+    </h1>
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">RM Requisition</li>
+        <li class="active">
+            <a class="btn-link btn btn-primary btn-xs"   href="~/Procurement/PackagingProductionRequisition?companyId=@Model.CompanyFK">Add New RM Requisition</a>
+        </li>
+    </ol>
+</section>
+
+<section class="content">
+    
+        @using (Html.BeginForm("PackagingProductionRequisition", "Procurement", FormMethod.Post, new { id = "procurementRequisitionFormId", @class = "formValidator" }))
+        {
+
+            <div class="row">
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="row">
+
+                            <div class="col-md-3">
+                                <label>Requisition Date</label>
+                                <div class="form-group" style="display:flex">
+                                    @Html.EditorFor(model => model.RequisitionDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+
+                                    <label>From Department</label>
+                                    @Html.DropDownListFor(model => model.FromDepartmentReqId, Model.DDLStockDepartmetn, "From Department", new { @class = "form-control form-control-sm" })
+                                    @Html.ValidationMessageFor(model => model.FromDepartmentReqId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>To Department</label>
+                                    @Html.DropDownListFor(model => model.ToDepartmentReqId, Model.DDLStockDepartmetn, "To Department", new { @class = "form-control form-control-sm" })
+                                    @Html.ValidationMessageFor(model => model.ToDepartmentReqId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtCustomerName" } })
+                                    @Html.HiddenFor(model => model.CustomerId, new { id = "hidCustomerId" })
+                                </div>
+                            </div>
+
+ 
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Order No, Date & PO NO</label>
+
+                                    @Html.DropDownListFor(model => model.OrderNo, Model.PoList as SelectList, "== Order No , Date & PO No ==", new { id = "ddlOrderNo", @class = "form-control searchingDropdown" })
+                                    @Html.HiddenFor(model => model.RequisitionId, new { id = "ddlCommon_OrderMasterId" })
+                                    @Html.ValidationMessageFor(model => model.ToDepartmentReqId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label>Product Name & Job No</label>
+                                    @Html.DropDownListFor(model => model.OrderDetailsId, Enumerable.Empty<SelectListItem>(), "== Job & Product ==", new { id = "ddlJobOrderNo", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.OrderDetailsId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="box-footer">
+                        <div id="PackagingPurchaseOrderSlaveData">
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+
+                            </div>
+                            <div class="col-lg-4 col-md-4">
+                                <button type="submit" id="" class="btn btn-primary btn-block">
+                                    <i class='fa fa-plus'></i>
+                                    <span>Create New Requisition</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        }
+
+     
+</section>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+
+
+
+
+        //let dataSaveMasterChild = () => {
+
+        //    let requisitionDate = $('#RequisitionDate').val();
+        //    let fromDepartmentReqId = $('#FromDepartmentReqId').val();
+        //    let toDepartmentReqId = $('#ToDepartmentReqId').val();
+        //    let packagingOrderId = $('#ddlOrderNo').val();
+        //    let ddlOrdStyleNo = $('#ddlOrdStyleNo').val();
+
+        //    var dataArray = [];
+
+        //    let RequisitionMasterDetailsRM = {
+        //        RequisitionDate: requisitionDate,
+        //        FromRequisitionId: fromDepartmentReqId,
+        //        ToRequisitionId: toDepartmentReqId,
+        //        packagingOrderId: packagingOrderId,
+        //        OrderDetailsId: ddlOrdStyleNo,
+        //        RequisitionItemDetail: dataArray
+        //    }
+
+        //    $('table tbody tr').each(function (index) {
+        //        debugger
+        //        let supplierFK = $(this).find('input[name$="Common_SupplierFK"]').val();
+        //        let productFK = $(this).find('input[name$="Common_ProductFK"]').val();
+        //        let finishProductBOMId = $(this).find('input[name$="FinishProductBOMId"]').val();
+        //        let requiredQuantity = $(this).find('input[name$="RequiredQuantity"]').val();
+
+        //        var rowData = {
+        //            FinishProductBOMId: finishProductBOMId,
+        //            RProductId: productFK,
+        //            RQty: requiredQuantity
+        //        };
+
+        //        dataArray.push(rowData);
+        //    });
+
+        //    if (RequisitionMasterDetailsRM != null && RequisitionMasterDetailsRM.RequisitionItemDetail.length>0) {
+        //        HttpRequest.Ajax("POST", '/Procurement/RequisitionMasterDetails', { 'loanMastes': RequisitionMasterDetailsRM }, saveSuccess, null, true);
+        //    } else {
+
+        //    }
+        //}
+
+        //function saveSuccess(data) {
+        //    debugger
+        //    if (data.result>0) {
+        //        $.alert.open({
+        //            type: 'Success',
+        //            content: data.message,
+        //            callback: function () {
+        //                $("#PackagingPurchaseOrderSlaveData").html('');
+        //                window.location.href = data.returnURL;
+
+        //            }
+        //        });
+        //    }
+        //    else {
+        //        $.alert.open("error", data.message);
+        //    }
+        //}
+
+
+        $(document).ready(function () {
+            //$("#poCreateBtn").click(() => {
+            //    dataSaveMasterChild();
+            //})
+
+
+            $('#txtCustomerName').autocomplete({
+                 source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("GetAutoCompleteSCustomer", "Procurement")",
+                        data: { prefix: request.term , companyId: "@Model.CompanyFK"},
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+
+                        },
+                        failure: function (response) {
+
+                        },
+
+                    });
+                },
+                select: function (e, i) {
+                    $('#hidCustomerId').val(i.item.val);
+
+                     $.ajax({
+                        url: "@Url.Action("GetOrderMaster", "WareHouse")",
+                         data: { customerId: i.item.val },
+                            dataType: "json",
+                            Method: "GET",
+                            success: function (data1) {
+                                var select = $("#ddlOrderNo");
+                                select.children().remove();
+                                select.append($("<option>").val('').text('== Order No & Date'));
+                                $(data1).each(function (index, item) {
+                                select.append($("<option data-toggle='tooltip' title='" + item.OrderMasterId + "'>").val(item.OrderMasterId).text(item.OrderNo));
+                                 });
+                                return false;
+                            },
+                            error: function (data1) {
+                            },
+                            failure: function (data1) {
+                            },
+                     });
+
+
+                     $.ajax({
+                   url: "@Url.Action("GetOrderMaster", "WareHouse")",
+                         data: { customerId: i.item.val },
+                            dataType: "json",
+                            Method: "GET",
+                   success: function (data1) {
+
+                       var select = $("#ddlOrderNo");
+                       select.children().remove();
+                       select.append($("<option>").val('').text('Select'));
+                       $(data1).each(function (index, item) {
+                           select.append($("<option data-toggle='tooltip' title='" + item.OrderMasterId + "'>").val(item.OrderMasterId).text(item.OrderNo));
+                       });
+                       return false;
+
+                    },
+                   error: function (data1) {
+
+                    },
+                   failure: function (data1) {
+
+                   },
+
+               });
+                },
+                minLength: 1,
+                cache : true
+            });
+
+
+
+
+
+            $("#ddlJobOrderNo").change(function () {
+                var StyleNo = $("#ddlJobOrderNo").val();
+
+                $.ajax({
+                    type: "GET",
+                    url:"@Url.Action("PackagingPurchaseRawItemDataList", "Procurement")",
+                    data: { StyleNo: StyleNo },
+                    success: function (response) {
+                        $("#PackagingPurchaseOrderSlaveData").html(response);
+                        $("#poCreateBtn").css("display", "");
+                    },
+                });
+
+
+            });
+
+
+
+            $("#ddlOrderNo").change(function () {
+                var OrderMasterId = $("#ddlOrderNo").val();
+
+                $.ajax({
+                    url:"@Url.Action("GetAutoCompleteStyleNo", "Procurement")",
+                    data: { OrderMasterId:OrderMasterId },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        var option = "";
+                        option = "<option value='0'>== Job & Product ==</option>";
+                        $.each(data, function (key, value) {
+                            option += "<option value='" + value.val + "'>" + value.lable + "</option>";
+                        });
+
+                        $("#ddlJobOrderNo").empty();
+                        $("#ddlJobOrderNo").append(option);
+
+                    },
+                });
+            });
+
+        });
+
+
+</script>
+
+}

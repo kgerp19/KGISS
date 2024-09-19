@@ -1,0 +1,875 @@
+﻿@model KGERP.Data.CustomModel.CrmListVm
+@{
+    ViewBag.Title = "My Client List";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+    int sl = Model.FirstSerialNumber;
+    int pageCount = (int)Math.Ceiling(Model.DataList.Count / (double)Model.pageSize);
+    sl = ((Model.CureentPage * Model.pageSize) - Model.pageSize) + 1;
+}
+
+<style>
+    .pagination {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+    }
+
+        .pagination li {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+            .pagination li a {
+                color: #333; /* Set the default color for pagination links */
+                text-decoration: none;
+                padding: 5px 10px;
+            }
+
+            .pagination li.active a {
+                color: #fff; /* Set the color for the active pagination link */
+                background-color: #007bff; /* Set the background color for the active link */
+                border-radius: 5px;
+            }
+
+    .sear {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
+</style>
+
+
+@Html.Partial("_ErrorMessage")
+<section>
+    <table>
+        <tr>
+            <td>
+                <button class="btn btn-sm btn-secondary hvr-rectangle-out text-dark" onclick="refreshWindow()">
+                    <i class="fa fa-sync"></i> &nbsp; Refresh
+                </button>
+            </td>
+            <td>
+                <a class="btn btn-sm hvr-sweep-to-bottom text-dark border " href="@Url.Action("AddNewClient","Crms", new {companyId=Model.CompanyId})"><i class="fa-plus"></i> &nbsp; New Client</a>
+            </td>
+            <td>
+                <button class="btn btn-sm hvr-sweep-to-top text-dark border" data-toggle="modal" data-target="#searchClientModal"><i class="fa fa-search"></i> &nbsp; Client Search </button>
+            </td>
+            <td>
+                <div class="form-group">
+                    <label for="pageSize">Select Page Size</label>
+                    <select class="form-control" name="@Model.pageSize" id="pageSize">
+                        <option value="100">100</option>
+                        <option value="50">150</option>
+                        <option value="100">200</option>
+                    </select>
+                </div>
+            </td>
+        </tr>
+    </table>
+</section>
+
+<div class="input-group sear">
+    <div class="form-outline ">
+        <input type="search" placeholder="search" id="AutSersinput" class="form-control" />
+    </div>
+    <button type="button" id="AutSers" class="btn btn-primary" >
+        <i class="fas fa-search"></i>
+    </button>
+
+</div>
+<div class="text-right p-2">
+    <button type="button" class="btn btn-secondary"  id="refreshButton">Refresh</button>
+</div>
+
+
+
+<table id="@*table_id*@" class="table table-sm table-striped">
+    <thead style="background-color: #dcefe5;">
+        <tr>
+            <th style="width:2%;" class="p-2">S.L</th>
+            <th style="width:20%!important;" class="p-2">Created Date</th>
+            <th style="width:10%;" class="p-2">Name</th>
+            <th style="width:10%;" class="p-2">Mobile</th>
+            <th style="width:8%;" class="p-2">Responsible Officer</th>
+            <th style="width:5%;" class="p-2">Job Title</th>
+            <th style="width:5%;" class="p-2">Organization</th>
+            <th style="width:10%;" class="p-2">Remarks</th>
+
+            <th style="width:8%;" class="p-2">Status</th>
+            <th style="width:10%;" class="p-2">Project</th>
+            <th style="width:10%;" class="p-2">Source Of media</th>
+
+            <th style="width:5%;" class="p-2">Action</th>
+            <th>
+
+            </th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model.DataList)
+        {
+
+            <tr>
+                <td class="p-1">@{ @sl}</td>
+                <td class="p-1">@i.CreatedDate.ToString("dd-MMM-yyyy")</td>
+                <td class="p-1 hvr-underline-from-left">
+
+                    <a href="@Url.Action("GetClientDetailsById", "Crms", new {clientId= i.ClientId, companyId=i.CompanyId})"> @i.Name@*<i class="fa fa-info-circle"></i>*@</a>
+
+                </td>
+                <td class="p-1 text-center">
+                    @i.MobileNo
+                    <br />
+                    <a href="https://wa.me/+88@(i.MobileNo)" target="_blank" rel="noopener noreferrer">
+                        <i style="color: #25D366;" class="fab fa-whatsapp"></i>
+                    </a>
+                   
+                    <a class="ml-2" href="tel:@i.MobileNo">
+                        <i class="fa fa-phone text-info "></i>
+                    </a>
+                </td>
+
+                <td class="p-1">@i.ResponsibleOfficeName</td>
+                <td class="p-1">@i.JobTitle</td>
+                <td class="p-1">@i.Organization</td>
+                <td class="p-1">
+                    @*@i.Remarks*@
+
+                    <a class="btn btn-primary" id="NoteBox" onclick="NoteBoxview(@i.ClientId)" data-toggle="modal" data-target="#NoteModal">
+                        <i class="fa-solid fa-eye"></i>
+                    </a> @i.Remarks
+                </td>
+
+                <td class="p-1 hvr-float">
+                    @i.StatusText
+
+                    <a data-target="#serviceStatusModal" onclick="changeServiceStatus(@i.ClientId, @i.CompanyId)"
+                       data-toggle="modal" data-placement="top" title="Change Service Status">
+                        <i class="fa fa-sync"></i>
+                    </a>
+                </td>
+                <td class="p-1">@i.ProjectText</td>
+                <td class="p-1">@i.SourceofMediaText</td>
+
+                <td class="p-1">
+                    <a data-target="#scheduleModal" class="btn btn-sm btn-primary hvr-float-shadow " onclick="changeSchedule(@i.ClientId)"
+                       data-toggle="modal" data-placement="top" title="Schedule">
+                        <i class="fa fa-plus"></i> Schedule
+                    </a>
+
+                </td>
+                <td>
+                    @*<a data-target="#CopyModel" class="btn btn-sm btn-danger hvr-float-shadow " onclick="Copy(@i.ClientId)"
+               data-toggle="modal" data-placement="top" title="Copy">
+                <i class="fa fa-copy"></i> Copy Client
+            </a>*@
+                </td>
+            </tr>
+            sl++;
+        }
+    </tbody>
+</table>
+
+<div>
+    Page @Model.CureentPage of @Model.totalPage
+    @if (Model.totalPage > 1)
+    {
+        <ul class="pagination">
+            @if (Model.CureentPage > 1)
+            {
+                <li><a href="/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@(Model.CureentPage - 1)&pageSize=@Model.pageSize">Previous</a></li>
+            }
+
+            @if (Model.CureentPage > 6)
+            {
+                <li><a href="/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=1&pageSize=@Model.pageSize">1</a></li>
+                <li>...</li>
+            }
+
+            @for (int i = Math.Max(1, Model.CureentPage - 5); i <= Math.Min(Model.totalPage, Model.CureentPage + 4); i++)
+            {
+                if (i == Model.CureentPage)
+                {
+                    <li class="active"><a href="/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@i&pageSize=@Model.pageSize">@i</a></li>
+                }
+                else
+                {
+                    <li><a href="/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@i&pageSize=@Model.pageSize">@i</a></li>
+                }
+            }
+
+            @if (Model.CureentPage < Model.totalPage - 5)
+            {
+                <li>...</li>
+                <li><a href="/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@Model.totalPage&pageSize=@Model.pageSize">@Model.totalPage</a></li>
+            }
+
+            @if (Model.CureentPage < Model.totalPage)
+            {
+                <li><a href="/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@(Model.CureentPage + 1)&pageSize=@Model.pageSize">Next</a></li>
+            }
+        </ul>
+    }
+</div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleFormId">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtclientName">
+                            <input type="hidden" class="" id="txtclientId">
+                            <input type="hidden" class="" id="txtCompanyId">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtclientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Date</label>
+
+                            <input id="txtscheduleDate" class="datepicker form-control" style="width:80%; display:revert !important">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Time</label>
+                            <div class="input-group">
+                                <input id="txtScheduleTime" type="text" class="timepicker form-control" />
+                                <div class="input-group-addon">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Schedule Type</label>
+                            <div class="input-group">
+                                <select class="form-control" id="txtScheduleType">
+                                    <option value="Follow Up">Follow Up</option>
+                                    <option value="Client Visit">Client Visit</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Note</label>
+                            <textarea class="form-control" id="txtScheduleNote"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="makeSchedule()" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="CopyModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleFormId">
+
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="copyclientName">
+                            <input type="hidden" class="" id="copyclientId">
+                            <input type="hidden" class="" id="copyCompanyId">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="copyclientMobile">
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 mt-5">
+                        <select name="" id="QSearch" class="form-control form-control select2">
+                            <option selected="selected" value="">Select</option>
+                            @*@foreach (var item in Model.SalesInfoList01)
+                                {
+                                    <option value="@item.S_ID">@item.INV_NO</option>
+                                }*@
+                        </select>
+                    </div>
+
+
+
+
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="CopySave" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="serviceStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Change Service Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClientName">
+                            <input type="hidden" class="" id="clientId">
+                            <input type="hidden" class="" id="companyId">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClientMobile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Present Service Status</label>
+                            <input type="text" class="form-control" readonly id="txtServiceStatusClient">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Change Service Status</label>
+                            <select class="form-control" id="ServiceStatusList">
+                                <option value="">--select Service Status--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label">Note</label>
+                            <textarea type="text" class="form-control" id="txtStatusNoteClient"></textarea>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-12 text-right">
+                            <button type="button" class="btn btn-secondary  " data-dismiss="modal">Close</button>
+                            <button type="button" onclick="switchServiceStatus()" class="btn btn-primary">Change Status</button>
+                        </div>
+
+                    </div>
+                </form>
+                <table id="serviceHistListId">
+
+                    <tr><td>History</td></tr>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="searchClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Search Client</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="">
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="textSearchClientByName" class="form-label">Client Name</label>
+
+                            <input type="text" class="form-control" id="textSearchClientByName" autocomplete="on" placeholder="Search Client Name ...">
+                            <input type="hidden" id="txtClientId" />
+                        </div>
+                        <div class="row">
+                        </div>
+                        <div class="col-12">
+                            <label for="textSearchClientByMobile" class="form-label">Mobile No</label>
+                            <input type="text" class="form-control" id="textSearchClientByMobile" placeholder="Search Client Mobile ...">
+                            <input type="hidden" id="txtClientId" />
+                        </div>
+                    </div>
+                    <div>
+                        <p id="txtClientId"></p>
+                        <p id="textSearchClientByName"></p>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a onclick="clientDetails()" class="btn btn-primary">Client Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="NoteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:121%">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <h5>Client Personal Notes</h5>
+                <h6 class="border border-1 p-2 text-center" id="Notevw"></h6>
+                <h6 class="border border-1 p-2 text-center" id="Ser"></h6>
+            </div>
+
+            <div class="modal-body ">
+                <h5>Change Schedule</h5>
+                <div class="card-body px-2 py-2 " id="tbl">
+                    <table class="table table-bordered " id="EduInfo">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col">Serial</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-right">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary">Save changes</button>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+
+
+
+
+
+
+    $(document).ready(function () {
+        var val = $("#pageSize").val(@Model.pageSize);
+    });
+
+
+
+
+        var clientID = 0;
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+        //$('.timepicker').timepicker({
+        //    showInputs: false
+        //});
+
+
+        function changeServiceStatus(a,b) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    console.log(data);
+                    $('#txtServiceStatusClientName').val(data.Name);
+                    $("#txtServiceStatusClientMobile").val(data.MobileNo);
+                    $('#txtServiceStatusClient').val(data.StatusText);
+                    $('#clientId').val(data.ClientId);
+                    $('#companyId').val(data.CompanyId);
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetAllServiceStatus", "Crms")",
+                data: { companyId: b },
+                success: function (i) {
+                    console.log(i.Datalist);
+                    var select = $("#ServiceStatusList");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('--select service status--'));
+                    $(i.Datalist).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.StatusId + "'>").val(item.StatusId).text(item.StatusText));
+
+                    });
+                    return false;
+
+                }
+            });
+
+             $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetClientStatusHistories", "Crms")",
+                data: { clientId: a },
+                 success: function (data) {
+                     $("#serviceHistListId tbody").empty();
+                     $("#serviceHistoryId").show();
+                     var z = 1;
+                     let rows = "";
+                     for (var i = 0; i < data.length; i++) {
+                         rows += "<tr><td>" + z + "</td><td style='text-align: left;'>" + data[i].HistoryText + "</td></tr>";
+                         z++;
+                     }
+
+                     $("#serviceHistListId tbody").append(rows);
+                }
+            });
+            }
+        function switchServiceStatus() {
+            var statusId = $('#ServiceStatusList').find(":selected").val();
+            var clientId = $('#clientId').val();
+            var statusNote = $('#txtStatusNoteClient').val();
+            var v = {
+                'Id': clientId,
+                'CustomId': statusId,
+                'Note':statusNote
+            }
+             $.ajax({
+
+                    type: "Post",
+                    url: "@Url.Action("SwitchServiceStatus", "Crms")",
+                    datatype: "Json",
+                 data: { model: v},
+                 success: function (data) {
+                     $('#serviceStatusModal').modal('hide');
+                     location.reload();
+
+
+                    }
+                });
+        }
+         function changeSchedule(a) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    $("#txtclientName").val(data.Name);
+                    $('#txtclientMobile').val(data.MobileNo);
+                    $('#txtclientId').val(data.ClientId);
+                    $('#txtCompanyId').val(data.CompanyId);
+                    var clientID = $('#txtclientId').val(data.ClientId);
+
+                }
+            });
+            }
+        function makeSchedule() {
+
+            var v = {
+                'ScheduleTimeText': $('#txtScheduleTime').val(),
+                'ScheduleDate': $('#txtscheduleDate').val(),
+                'ScheduleType': $('#txtScheduleType').val(),
+                'Note': $('#txtScheduleNote').val(),
+                'ClientId': $('#txtclientId').val(),
+                'CompanyId': $('#txtCompanyId').val()
+            };
+
+            $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("MakeSchedule", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                   // console.log(data);
+                    $('#scheduleModal').modal('hide');
+                    $('#txtScheduleTime').val('');
+                    $('#txtscheduleDate').val('');
+                    $('#txtScheduleType').val('');
+                    $('#txtScheduleNote').val('');
+                    $('#txtCompanyId').val('');
+                    location.reload();
+                }
+            });
+        }
+        $("#btnsubmit").click(function (e) {
+
+            var valdata = $("#formId").serialize();
+            //to get alert popup
+            alert(valdata);
+            console.log(valdata);
+
+        });
+
+
+
+    $("#textSearchClientByName").autocomplete({
+
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteClientName", "Crms")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#txtClientId").val(i.item.val);
+                $("#textSearchClientByName").val(i.item.label);
+
+            },
+            minLength: 3,
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+
+        $("#textSearchClientByMobile").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteClientMobile", "Crms")",
+                    data: { prefix: request.term },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#txtClientId").val(i.item.val);
+                $("#textSearchClientByName").val(i.item.label);
+
+            },
+            minLength: 3,
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+    $('#searchClientModal').on('hidden.bs.modal', function () {
+        $(this).find('form').trigger('reset');
+    });
+
+    function clientDetails() {
+        var c = $('#txtClientId').val();
+        window.location = '/Crms/GetClientDetailsById?clientId=' + c + '&companyId=' +@Model.CompanyId;
+    }
+
+
+    function switchCompany() {
+        var CompanyId = $('#companyList').find(":selected").val();
+        var ClId = $('#clientId').val();
+        var v = {
+            'Id': ClId,
+            'CustomId': CompanyId
+        }
+        console.log(v);
+         $.ajax({
+
+                type: "Post",
+                url: "@Url.Action("UpdateCompany", "Crms")",
+                datatype: "Json",
+             data: { model: v},
+             success: function (data) {
+                 console.log(data);
+               /*  location.reload();*/
+
+                }
+            });
+        }
+
+
+
+    function Copy(a) {
+            $.ajax({
+
+                type: "GET",
+                url: "@Url.Action("GetClientCopyById", "Crms")",
+                datatype: "Json",
+                data: { clientId: a },
+                success: function (data) {
+                    console.log(data);
+                    $("#copyclientName").val(data.Name);
+                    $('#copyclientMobile').val(data.MobileNo);
+                    //$('#txtclientId').val(data.ClientId);
+                    //$('#txtCompanyId').val(data.CompanyId);
+                    //var clientID = $('#txtclientId').val(data.ClientId);
+                    var select = $("#QSearch");
+                    select.children().remove();
+                    select.append($("<option>").val('').text('Select'));
+                    $(data.CompanyList).each(function (index, item) {
+                        select.append($("<option data-toggle='tooltip' title='" + item.Id + "'>").val(item.Id).text(item.Name));
+                    });
+
+                }
+            });
+    }
+
+
+    $("#CopySave").click(function () {
+        var v = {
+            'ClientId':$("#copyclientId").val(),
+            'SelectedCompanyId': $('#QSearch').find(":selected").val()
+        }
+
+        $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("CopyClientSave", "Crms")",
+            datatype: "Json",
+            data: {
+                'ClientId': $("#copyclientId").val(),
+                'SelectedCompanyId': $('#QSearch').find(":selected").val()
+            },
+                success: function (data) {
+
+
+                }
+            });
+
+    });
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "/" + month + "/" + year;
+        return date;
+    }
+
+    function NoteBoxview(ClientId) {
+        var v = {
+           'CompanyId': '@Model.CompanyId',
+            'ClientId': ClientId
+        };
+        $("#Notevw").empty();
+        $('#EduInfo tbody').empty();
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("NoteBox", "Crms")",
+             datatype: "Json",
+             data: { Model: v },
+             success: function (data) {
+                 console.log(data);
+                 console.log(data.SirviceDataList);
+                 $("#Notevw").append(data.Remarks);
+                 $("#Ser").append(data.ServiceNote);
+                     $("#EduInfo").show();
+                     var z = 1;
+                     let rows = "";
+                 for (var i = 0; i < data.ScheduleDataList.length; i++) {
+                     var scheduleDate = DateCustom(data.ScheduleDataList[i].ScheduleDate);
+                     var note = data.ScheduleDataList[i].Note;
+
+                     if (note ===null) {
+                         note = "  ";
+                     } else {
+                         note = data.ScheduleDataList[i].Note;
+                     }
+                     console.log("oi", note);
+                     $('#txtscheduleEditDate').val(scheduleDate);
+                     rows += "<tr><td>" + z + "</td><td>" + data.ScheduleDataList[i].ScheduleType + "</td><td>" + scheduleDate + "</td><td>" + data.ScheduleDataList[i].ScheduleTime.Hours + ":" + data.ScheduleDataList[i].ScheduleTime.Minutes + ":" + data.ScheduleDataList[i].ScheduleTime.Seconds + "</td><td>" + note + "</td></tr>";
+                         z++;
+                     }
+                 $("#EduInfo tbody").append(rows);
+
+
+             }
+
+                });
+
+    };
+
+    var pageeeee = 0;
+    var g = "JK";
+        $("#pageSize").change(function () {
+            var val = $("#pageSize").val();
+            pageeeee = val;
+            window.location.href = "/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@(Model.CureentPage + 1)&pageSize=" + val +"";
+        })
+        var b;
+
+
+         $(document).ready(function () {
+    var urlParams = new URLSearchParams(window.location.search);
+    var storedValue = urlParams.get("searchText");
+    var inputValue = localStorage.getItem("inputValue");
+    if (inputValue) {
+        $("#AutSersinput").val(inputValue);
+    }
+    $("#AutSers").click(function () {
+        inputValue = $("#AutSersinput").val();
+        var val2 = $("#pageSize").val();
+        pageeeee = val2;
+
+        localStorage.setItem("inputValue", inputValue);
+        window.location.href = "/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@(Model.CureentPage)&pageSize=" + pageeeee + "&searchText=" + encodeURIComponent(inputValue) + "";
+    });
+
+             $("#refreshButton").click(function () {
+                 var val3 = $("#pageSize").val();
+                 pageeeee = val3;
+        $("#AutSersinput").val("");
+        localStorage.removeItem("inputValue");
+        window.location.href = "/Crms/UserClientList?companyId=@Model.CompanyId&pageNumber=@(Model.CureentPage)&pageSize=" + pageeeee +"";
+    });
+});
+
+    </script>
+}
+

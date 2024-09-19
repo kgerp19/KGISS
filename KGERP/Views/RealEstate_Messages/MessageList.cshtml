@@ -1,0 +1,225 @@
+﻿@model  KGERP.Service.SMS_Service_Implementation.MessageViewModel
+
+@{
+    ViewBag.Title = "SMS Notification for Installment Schidule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        SMS Notification for Installment Schedule -- @Model.CompanyName
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">SMS Notification for Installment Schedule</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+
+
+
+
+            <div class="box">
+
+                <div class="box-danger">
+                    @using (Html.BeginForm("MessageList", "RealEstate_Messages", FormMethod.Post, new { @class = "form-horizontal" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="row">
+                                @Html.HiddenFor(model => model.CompanyId)
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Select Report:</label>
+                                        <br />
+                                        @Html.RadioButtonFor(m => m.SelectedOption, 1, new { id = "firstNotification" }) First SMS Notification
+                                        @Html.RadioButtonFor(m => m.SelectedOption, 2, new { id = "secondNotification" }) Second SMS Notification
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    @Html.LabelFor(model => model.FromDate, htmlAttributes: new { @class = "control-label" })
+                                    @Html.EditorFor(model => model.FromDate, new { htmlAttributes = new { id = "txtFromDate", @class = "form-control datepicker", @style = "display:flex;" } })
+                                    @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                                </div>
+
+                                <div class="col-md-4">
+                                    @Html.LabelFor(model => model.ToDate, htmlAttributes: new { @class = "control-label" })
+                                    @Html.EditorFor(model => model.ToDate, new { htmlAttributes = new { id = "txtToDate", @class = "form-control datepicker", @style = "display:flex;" } })
+                                    @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-primary">Show</button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    }
+                    <div class="box-footer">
+                        @if (Model.Result != null && Model.Result.Any())
+                        {
+
+                            <div class="table-responsive">
+                                <table id="KgErpDataTable" class="table table-bordered table-hover  table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Address</th>
+                                            <th>Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < Model.Result.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td>@Model.Result[i].Address</td>
+                                                <td>@Model.Result[i].Message</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" onclick="InsertSMSInDB()" style="width:100%" class="btn btn-primary fa fa-send">&nbsp;Send Message</button>
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+</section>
+
+
+
+
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Sending Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to send the message?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmSending()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "yy-mm-dd",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+
+        });
+        var selectedOption;
+        function InsertSMSInDB() {
+            selectedOption = $('input[name="SelectedOption"]:checked').val();
+
+            if (selectedOption !== undefined) {
+                $('#confirmationModal').modal('show');
+            } else {
+                alert("Please select an option.");
+            }
+        }
+
+
+        function confirmSending() {
+            console.log(selectedOption);
+    // Ensure selectedOption is not undefined
+            if (typeof selectedOption !== 'undefined') {               
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("InsertMessage", "RealEstate_Messages")",
+            dataType: "json",
+            data: { FromDate: '@Model.FromDate', ToDate: '@Model.ToDate', CompanyId: '@Model.CompanyId', SelectedOption: selectedOption },
+            success: function(data) {
+                console.log(data);
+                if (data === true) {
+                    showMessage("Message sent successfully.");
+                }
+            }
+        });
+    } else {
+        alert("Please select an option before sending.");
+    }
+}
+
+function showMessage(message) {
+    var messageBox = $('<div class="alert alert-success" role="alert">' + message + '</div>');
+    $('#messageContainer').html(messageBox);
+    messageBox.fadeIn().delay(3000).fadeOut();
+}
+    function toggleCheck(checkbox) {
+        var checkboxes = document.querySelectorAll('.form-check-input');
+        checkboxes.forEach(function (item) {
+            if (item !== checkbox) {
+                item.checked = false;
+            }
+        });
+    }
+
+</script>
+}

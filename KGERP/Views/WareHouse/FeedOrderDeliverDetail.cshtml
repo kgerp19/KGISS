@@ -1,0 +1,552 @@
+﻿
+@{
+    ViewData["Title"] = "Delivery Challan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+@model KGERP.Services.WareHouse.VMOrderDeliverDetail
+<section class="content-header">
+    <h1>
+        @if (Model.OrderDeliverId > 0)
+        {
+            <span>
+                Delivery Challan of Challan No <a target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetailReport?companyId=@Model.CompanyFK&orderDeliverId=@Model.OrderDeliverId">@Model.ChallanNo</a>
+            </span>
+        }
+        else
+        {
+            <span>
+                Delivery Challan Information
+            </span>
+        }
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Delivery Challan Information</li>
+    </ol>
+</section>
+@using (Html.BeginForm("FeedOrderDeliverDetail", "WareHouse", FormMethod.Post, new { id = "wareHouseOrderDeliverDetailFromID", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(x => x.CompanyFK, new { id = "CompanyFK" })
+                @Html.HiddenFor(x => x.OrderDate, new { id = "hidOrderDate" })
+                @Html.HiddenFor(x => x.StockInfoId, new { id = "ddlStockInfoId" })
+
+
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.OrderDeliverId > 0)
+                        {
+                            @Html.HiddenFor(x => x.CompanyFK, new { id = "CompanyFK" })
+
+
+
+                            <div class="row">
+                                <table class="table">
+
+                                    <tr>
+                                        <td width="15%"><b>Challan No</b></td>
+                                        <td width="1%">:</td>
+                                        <th width="34%">@Model.ChallanNo</th>
+
+                                        <td width="15%"><b>Delivery Date</b></td>
+                                        <td width="1%">:</td>
+                                        <td width="34%">@Model.DeliveryDate.Value.ToString("dd-MM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            Invoice No
+                                        </th>
+                                        <th>:</th>
+                                        <td>
+                                            <label class="col-form-label">@Model.OrderNo</label>
+                                        </td>
+                                        <th> Date</th>
+                                        <th>:</th>
+                                        <td>@Model.OrderDate.ToShortDateString()</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Zone</th>
+                                        <th>:</th>
+                                        <td>@Model.ZoneName</td>
+
+                                        <th>Incharge</th>
+                                        <th>:</th>
+                                        <td>@Model.ZoneIncharge</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerName</td>
+                                        <th>Phone</th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerPhone</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerEmail</td>
+                                        <th>Address</th>
+                                        <th>:</th>
+                                        <td>@Model.CustomerAddress</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Contact Person</th>
+                                        <th>:</th>
+                                        <td>@Model.ContactPerson</td>
+                                        <th>Created By</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedBy</td>
+                                    </tr>
+
+                                </table>
+                            </div>
+
+
+                        }
+                        else
+                        {
+
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Order Number</label>
+                                        @Html.EditorFor(model => model.OrderNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Order No", @id = "txtOrderNo" } })
+
+                                        @Html.HiddenFor(model => model.OrderMasterId, new { id = "ddlOrderMasterId" })
+
+                                        @Html.ValidationMessageFor(model => model.OrderMasterId, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Challan Date</label>
+
+                                        <input name="DeliveryDate" asp-for="DeliveryDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtDeliveryDate" placeholder="Challan Date" autocomplete="off">
+
+                                        @Html.ValidationMessageFor(model => model.DeliveryDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Vehicle No</label>
+                                        @Html.EditorFor(model => model.VehicleNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Order No", @id = "txtVehicleNo" } })
+
+                                        @Html.ValidationMessageFor(model => model.VehicleNo, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Driver Name</label>
+                                        @Html.EditorFor(model => model.DriverName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Order No", @id = "txtDriverName" } })
+
+                                        @Html.ValidationMessageFor(model => model.DriverName, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>DepoInvoice No</label>
+                                        @Html.EditorFor(model => model.DepoInvoiceNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Order No", @id = "txtDepoInvoiceNo" } })
+
+                                        @Html.ValidationMessageFor(model => model.DepoInvoiceNo, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <table id="tblInvoiceTopInfo" class="table">
+                                    <tr>
+                                        <th>Customer</th>
+                                        <td>
+                                            <span id="txtCustomerName"></span>
+                                        </td>
+                                        <th>
+                                            Address
+                                        </th>
+                                        <td><span id="txtAddress"></span></td>
+
+                                        <td>
+                                            Contact No
+                                        </td>
+                                        <td><span id="txtContactNo"></span></td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Challan No</th>
+                                        <td>
+                                            <span id="txtChallanNo"></span>
+                                            @Html.HiddenFor(model => model.ChallanNo, new { Value = "", id = "hidChallanNo" })
+
+                                        </td>
+                                        <th>
+                                            Bill No
+                                        </th>
+                                        <td>
+                                            <span id="txtBillNo"></span>
+                                            @Html.HiddenFor(model => model.InvoiceNo, new { Value = "", id = "hidBillNo" })
+
+                                        </td>
+
+                                        <th>
+                                            Order Date
+                                        </th>
+                                        <td><span id="txtOrderDate"></span></td>
+                                    </tr>
+
+                                </table>
+                                <div id="orderDetailsData"></div>
+                            </div>
+
+
+                        }
+
+
+                        <!--Body Will by Start Here-->
+
+
+
+                        @{
+                            if (Model.OrderDeliverId > 0)
+                            {
+                                <div class="box-header" style="clear:both">
+                                    <h4><b>Item:</b> </h4>
+                                </div>
+                                <div class="table-responsive col-md-12 text-nowrap">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+                                                <th class="center">Product Name </th>
+                                                <th class="center">Order Quantity</th>
+                                                <th class="center">Delivered Quantity</th>
+                                                <th class="center">Total Delivered</th>
+                                            </tr>
+                                        </thead>
+                                        @{
+                                            int sl = 0;
+                                        }
+                                        <tbody>
+                                            @foreach (var item in Model.DataListDetail)
+                                            {
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>@item.ProductSubCategory @item.ProductName</td>
+                                                    <td>@item.OrderQty @item.UnitName</td>
+                                                    <th>@item.DeliveredQty @item.UnitName</th>
+                                                    <th>@item.TotalDelivered  @item.UnitName</th>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="box-footer">
+                        @if (Model.OrderDeliverId > 0)
+                        {
+                        <div class="row">
+                            @if (Model.IsSubmitted)
+                            {
+                                <div class="col-md-2">
+                                    <a style="width:100%" href="@Url.Action("GetDeliveryInvoiceReport","Report",
+                                        new {
+                                            OrderDeliverId= Model.OrderDeliverId,
+                                            companyId= Model.CompanyFK}
+                                        )" title="Challan Copy" target="_blank" class="btn btn-danger">
+                                        <i class="fa fa-print" aria-hidden="true"></i>&nbsp;Bill Copy
+
+                                    </a>
+                                </div>
+                                <div class="col-md-2">
+                                    <a style="width:100%" href="@Url.Action("GetDeliveryChallanReport","Report",
+                                        new {
+                                            orderDeliverId= Model.OrderDeliverId,
+                                            companyId= Model.CompanyFK}
+                                        )" title="Challan Copy" target="_blank" class="btn btn-warning">
+                                        <i class="fa fa-print" aria-hidden="true"></i>&nbsp; Challan Report
+
+                                    </a>
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div class="col-md-4"></div>
+                            }
+
+
+                            <div class="col-md-2">
+                                @if (Model.VoucherId > 0)
+                                {
+                                    <a style="width:100%" href="@Url.Action("GetVoucherReport","Report",
+                                        new {
+
+                                            companyId=Model.CompanyFK,
+                                        voucherId=Model.VoucherId}
+                                        )" title="Challan Copy" target="_blank" class="btn btn-info">
+                                        <i class="fa fa-print" aria-hidden="true"></i>&nbsp; Voucher Report
+
+                                    </a>
+
+                                }
+                                else
+                                {
+                                    <a class="btn btn-info" href="#">Need To Submit</a>
+                                }
+
+                            </div>
+                            <div class="col-md-6">
+                                @if (!Model.IsSubmitted)
+                                {
+                                    <a class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitProdReferenceModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+
+                                }
+                                else
+                                {
+                                    <button class="btn btn-success btn-block" style="width:100%" disabled="disabled">Submitted</button>
+
+                                }
+
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Challan Item</b></h5>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        @Html.HiddenFor(model => model.ID, new { Value = "", id = "challanSlaveId" })
+
+                        <h3>Are you sure to delete?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btncloseandreset" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" id="btnsave" class="btn btn-primary">&nbsp;Delete</button>&nbsp;
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.OrderDeliverId > 0)
+{
+    using (Html.BeginForm("FeedOrderDeliverSubmit", "WareHouse", FormMethod.Post, new { id = "submitFeedReceivingSlaveFormId", @class = "formValidator" }))
+    {
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="submitProdReferenceModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+                        <h5 class="modal-title"><b>Submit</b></h5>
+                    </div>
+                    <div class="modal-body">
+
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
+                        @Html.HiddenFor(model => model.OrderDeliverId, new { id = "submitOrderDeliverId" })
+                        @Html.HiddenFor(model => model.OrderMasterId, new { id = "submitOrderMasterId" })
+                        @Html.HiddenFor(model => model.VendorId, new { id = "submitVendorId" })
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div style="text-align:center">
+                            <h3>Are you sure to Submit this Delivery Challan?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        function makeOrderDeliverSubmitable(rowId) {
+            $("#submitOrderDeliverId").val(rowId)
+            $('#submitCompanyFK').val("@Model.CompanyFK");
+            $('#submitActionId').val(10);
+        }
+
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+            $("#tblInvoiceTopInfo").hide();
+            $("#chkIsDefineBin input:checkbox").change(function () {
+                var ischecked = $(this).is(':checked');
+                if (ischecked) {
+                    alert('uncheckd ' + $(this).val());
+                }
+                else {
+                    alert('uncheckd ' + $(this).val());
+
+                }
+
+
+            });
+
+
+
+
+
+            $("#txtOrderNo").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+
+                    $.ajax({
+                        url:"@Url.Action("FeedOrderMastersGet", "WareHouse")",
+
+                        data: { companyId: "@Model.CompanyFK", prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+
+                        },
+                        failure: function (response) {
+
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlOrderMasterId").val(i.item.val);
+
+                      $.ajax({
+                    type: "get",
+                    url: "@Url.Action("OrderMastersById", "WareHouse")",
+                    datatype: "Json",
+                        data: { orderMasterId: i.item.val, productType : "F"},
+                     success: function (data) {
+                         console.log(data);
+                         $("#tblInvoiceTopInfo").show();
+                         $("#txtCustomerName").text(data.CustomerName);
+                         $("#txtAddress").text(data.Address);
+                         $("#txtContactNo").text(data.Phone);
+                         $("#txtChallanNo").text(data.ChallanNo);
+                         $("#hidChallanNo").val(data.ChallanNo);
+                         $("#txtBillNo").text(data.OrderMasterNo);
+                         $("#hidBillNo").val(data.OrderMasterNo);
+                         $("#ddlStockInfoId").val(data.StockInfoId);
+
+
+
+                         var orderDate = DateCustom(data.OrderDate);
+                         $('#txtOrderDate').text(orderDate);
+                         $("#hidOrderDate").val(orderDate);
+
+                    }
+                    });
+
+                 $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetFeedOrderDetailsPartial", "WareHouse")",
+                    datatype: "Json",
+                     data: { poId: i.item.val },
+                     success: function (data) {
+                         //console.log(data);
+                         $("#orderDetailsData").html(data);
+                    }
+                });
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        });
+
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#challanSlaveId').val(id);
+                $('#ActionId').val(3);
+
+            }
+        }
+        function resetForm() {
+            $('#deliveryChallanSlaveFormId')[0].reset();
+            $('#ActionId').val(1);
+        }
+
+    </script>
+}

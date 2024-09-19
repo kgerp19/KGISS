@@ -1,0 +1,115 @@
+﻿    @model KGERP.Service.HR_Pay_Roll_Service.ParollServices.VmPRollPayRoll
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Payroll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-sm-4">
+            <h3> Payroll List </h3>
+        </div>
+    </div>
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">
+            <a class="btn btn-info" href="~/Payroll/AddPayRoll?companyId=@Model.CompanyId">
+                <i class="fa fa-user "></i>Add Payroll
+            </a>
+        </li>
+    </ol>
+</section>
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Note</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Type of Payment</th>
+                <th>Created By</th>
+                <th>Created Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @{int sl = 0;}
+        <tbody>
+            @foreach (var item in Model.DataList)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td> @item.Note</td>
+                    <td> @((MonthList)item.Month) </td>
+                    <td> @item.Year </td>
+                    <td>
+                        @if (!item.IsFestivalBonus)
+                        {
+                            <span>
+                                Monthly Salary
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                Festival Bonus (Festival Date: @item.FestivalDate.Value.ToLongDateString())
+                            </span>
+                        }
+
+                    </td>
+                    <td> @item.CreatedBy</td>
+                    <td> @item.CreatedDate.ToShortDateString()</td>
+                    <td>
+                        @if (item.IsClose)
+                        {
+                            <span class="btn btn-success btn-xs">Successfully Processed </span>
+                            if (item.PRollApprovalId == 0)
+                            {
+                                <a class="btn btn-danger btn-xs" href="~/Payroll/PayrollProcess?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId&Month=@item.Month&Year=@item.Year">Regenerate Payroll</a>
+
+                            }
+
+                        }
+                        else
+                        {
+
+                            <a class="btn btn-danger btn-xs" href="~/Payroll/PayrollProcess?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId&Month=@item.Month&Year=@item.Year">Process Payroll</a>
+                        }
+                    </td>
+                    <td>
+                        @if (!item.IsFestivalBonus)
+                        {
+                            <a class="btn btn-primary btn-xs" target="_blank" href="~/Report/SalarySheetCompanyWiseReport?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId&reportType=PDF">PDF</a>
+                            <a class="btn btn-success btn-xs" target="_blank" href="~/Report/SalarySheetCompanyWiseReport?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId&reportType=EXCEL">Excel</a>
+                            <a class="btn btn-info btn-xs" href="~/Payroll/PayRollDetails?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId">Bank</a>
+
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary btn-xs" target="_blank" href="~/Report/BonusSheetCompanyWiseReport?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId&reportType=PDF">PDF</a>
+                            <a class="btn btn-success btn-xs" target="_blank" href="~/Report/BonusSheetCompanyWiseReport?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId&reportType=EXCEL">Excel</a>
+                            if (!item.IsFestivalBonus)
+                            {
+                                <a class="btn btn-info btn-xs" href="~/Payroll/PayRollDetails?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId">Bank</a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-info btn-xs" href="~/Payroll/PayRollBonusDetails?CompanyId=@item.CompanyId&PayRollId=@item.PayRollId">Bank</a>
+                            }
+                        
+
+
+                        }
+
+
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

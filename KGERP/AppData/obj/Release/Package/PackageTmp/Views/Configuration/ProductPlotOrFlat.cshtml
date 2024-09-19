@@ -1,0 +1,193 @@
+﻿@using KG.Core.Services
+@using KGERP.Utility
+
+@{
+
+    string ProductType = Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited ? "Plot" :
+Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited ? "Flat" : "";
+    ViewData["Title"] = $"{ProductType}'s List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMrealStateProductsForList
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        @ProductType's List
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Configuration/ProductPlotOrFlatCreate?companyId=@Model.CompanyId"><i class="fa fa-plus"></i>@ProductType's Create</a></li>
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">@ProductType's</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("ProductPlotOrFlat", "Configuration", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(m => m.CompanyId)
+                    <div class="box-danger">
+                        <div class="box">
+                            <div class="box-danger">
+                                <div class="box-header">
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body">
+                                    <div class="table-responsive text-nowrap">
+                                        <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                            <thead>
+                                                @if (Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
+                                                {
+                                                    <tr>
+                                                        <th>SL</th>
+                                                        <th>Project - Block</th>
+                                                        <th>Plot No (Code)</th>
+                                                        <th>Size (Unit)</th>
+                                                        <th>Road No</th>
+                                                        <th>Land Facing</th>
+
+                                                        <th>Action</th>
+                                                    </tr>
+                                                }
+                                                @if (Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited)
+                                                {
+                                                    <tr>
+                                                        <th>SL</th>
+                                                        <th>Project - Floor</th>
+                                                        <th>Flat No (Code)</th>
+                                                        <th>Size (Unit)</th>
+                                                        <th>Flat Type</th>
+                                                        <th>Flat Facing</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                }
+
+                                            </thead>
+                                            @{int sl = 0;
+                                            }
+                                            <tbody>
+                                                @if (Model.DataList != null)
+                                                {
+                                                    foreach (var item in Model.DataList)
+                                                    {
+
+                                                        <tr>
+                                                            <td>@(++sl)</td>
+                                                            <td>@item.CategoryName - @item.SubCategoryName</td>
+                                                            <td>@item.Name - @item.Code</td>
+                                                            <td>@item.PackSize -  @item.UnitName</td>
+                                                            <td>
+                                                                @if (Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited)
+                                                                {
+
+                                                                    if (item.FlatProp.IsDuplex)
+                                                                    {
+
+                                                                        <p>Duplex Floors: @string.Join(", ", @item.FlatProp.Floors) </p>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <p>Regular</p>
+                                                                    }
+
+                                                                }
+                                                                @if (Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited)
+                                                                {
+
+                                                                    <p>@item.PlotProp.RoadNo</p>
+
+                                                                }
+                                                            </td>
+                                                            <td> @item.FacingTitle</td>
+                                                            <td>
+
+                                                                <a href="/Configuration/ProductPlotOrFlatEdit?ProductId=@item.ID" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                                                <a id="@item.ID" onclick="makeDeletable(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#deleteModal" title="Delete"
+                                                                   data-placement="top">
+                                                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="box-footer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+
+
+
+
+@using (Html.BeginForm("ProductPlotOrFlat", "Configuration", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.Hidden("ID", new { Value = "", id = "productIdDelete" })
+    @Html.Hidden("ActionId", new { Value = "", id = "ActionIdDelete" })
+    @Html.Hidden("CompanyFK", new { Value = Model.CompanyId, id = "CompanyFKDelete" })
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>@ProductType Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this @ProductType?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i>Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#productIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+
+            }
+        }
+    </script>
+}
+

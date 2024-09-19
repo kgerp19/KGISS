@@ -1,0 +1,76 @@
+﻿
+@using PagedList.Mvc;
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.YearlyHolidayModel>
+@using PagedList;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm("Index", "YearlyHolidays", FormMethod.Get))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <h4><b>Yearly Holiday of @DateTime.Now.Year</b></h4>
+        </div>
+        <div class="col-md-6">
+            <div class="col-md-8">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search.." })</div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-success pull-right">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+    <table class="table table-striped">
+
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>SL</th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().HolidayDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().HolidayCategory)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Purpose)
+            </th>
+        </tr>
+
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>
+                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.HolidayDate, "{0:dd-MMM-yyyy}")
+						<span> - <b>
+					@Html.DisplayFor(modelItem => item.Data.HolidayDate.DayOfWeek)</b> </span>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.HolidayCategory)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Data.Purpose)
+                </td>
+
+            </tr>
+        }
+
+    </table>
+</div>
+
+@if (Model.PageCount > 1)
+{
+    <span class="btn btn-success">
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    </span>
+    <span class="checkbox">
+        @Html.PagedListPager(Model, Page_No => Url.Action("Index", "YearlyHolidays",
+                                     new { Page_No, Sorting_Order = Request.QueryString["Search"] }))
+    </span>
+}

@@ -1,0 +1,263 @@
+﻿@model KGERP.Service.ServiceModel.OrderMasterModel
+@using KGERP.Utility;
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Sale Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Sale Order List
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            Delivery List
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "OrderDeliver", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            @Html.HiddenFor(model => model.ProductType, new { id = "ProductType" })
+
+                            <div class="row">
+                                <div class="col-md-3">
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;">SL</th>
+                                        <th style="width:10%;">Delivery Date</th>
+                                        <th style="width:10%;">Customer</th>
+                                        <th style="width:10%;">Invoice No</th>
+                                        <th style="width:10%;">Challan No</th>
+                                        <th style="width:10%;">Order No</th>
+                                        <th style="width:10%;">Order Date</th>
+                                        <th style="width:10%;">Status</th>
+                                        <th style="width:10%;">Submission</th>
+                                        <th style="width:10%;">Report</th>
+                                        <th style="width:10%;">Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">
+                                                @(++sl)
+                                            </td>
+                                            <td>
+                                                @if (item.DeliveryDate.HasValue)
+                                                {
+                                                    @item.DeliveryDate.Value.ToString("dd MMM yyyy")
+                                                }
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Customer)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.InvoiceNo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ChallanNo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.OrderNo)
+                                            </td>
+                                            <td>
+                                                @if (item.OrderDate.HasValue)
+                                                {
+                                                    @item.OrderDate.Value.ToString("dd MMM yyyy")
+                                                }
+
+
+                                            </td>
+                                            <td style="text-align:center">
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Draft)
+                                                {
+                                                    <span class="btn btn-info btn-xs">
+                                                        Submit Pending
+                                                    </span>
+                                                }
+
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Submit)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        GM Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.GMApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        MD Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.MDApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Accounts Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.AccountsApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Deliver Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.StoreAcceptance)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Accepted By Store
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.PartialDelivered)
+                                                {
+                                                    <span class="btn btn-primary btn-xs">
+                                                        Partially Delivered
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Delivered)
+                                                {
+                                                    <span class="btn btn-success btn-xs">
+                                                        Delivered
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.IsSubmitted)
+                                                {
+                                                    <span class="text-success">
+                                                        Submitted & Delivered
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">
+                                                        Submission Pending
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td style="text-align:center">
+
+                                                @if (item.OrderStatus.Equals("D") || item.OrderStatus.Equals("P"))
+                                                {
+                                                    <a href="@Url.Action("GetDeliveryInvoiceReport","Report", new {OrderDeliverId=item.OrderDeliverId,companyId=item.CompanyId})" title="Bill Copy" target="_blank" class="btn btn-danger btn-xs">
+                                                        <i class="fa fa-download" aria-hidden="true"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=item.OrderDeliverId,companyId=item.CompanyId})" title="Challan Copy" target="_blank" class="btn btn-warning btn-xs">
+                                                        <i class="fa fa-download" aria-hidden="true"></i>
+                                                    </a>
+
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.OrderDeliverId > 0)
+                                                {
+                                                    <a title="Deliver Detail" href="~/WareHouse/FeedOrderDeliverDetail?companyId=@item.CompanyId&orderDeliverId=@item.OrderDeliverId" class="btn btn-primary btn-xs">  <i class="fa fa-eye" aria-hidden="true"></i></a>
+
+                                                }
+                                                else
+                                                {
+                                                    <a href="@Url.Action("FeedProcurementSalesOrderSlave","Procurement",  new {companyId = item.CompanyId,productType=item.ProductType,  orderMasterId=item.OrderMasterId})" title="Order Detail" class="btn btn-warning btn-xs">
+                                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                                    </a>
+                                                }
+
+
+
+                                                @*@if (item.Status == (int)EnumFeedSalesStatus.Draft)
+                                                    {
+                                                        <span>
+                                                            Approval Pending
+                                                        </span>
+                                                    }
+                                                    else if (item.OrderStatus.Equals("N") && item.Status == (int)EnumFeedSalesStatus.AccountsApproval)
+                                                    {
+                                                        <a href="@Url.Action("CreateOrUpdateOrderDeliver","OrderDeliver", new {companyId=item.CompanyId,orderMasterId=item.OrderMasterId,productType=item.ProductType,customerId=item.CustomerId})" class="btn btn-primary btn-xs">
+                                                            Deliver
+                                                        </a>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <a href="~/OrderDeliver/CreateOrUpdateOrderDeliver?companyId=@item.CompanyId&orderMasterId=@item.OrderMasterId&customerId=@item.CustomerId&productType=@item.ProductType&orderDeliverId=@item.OrderDeliverId">Details</a>
+
+                                                    }*@
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}
+

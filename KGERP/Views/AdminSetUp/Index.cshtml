@@ -1,0 +1,297 @@
+﻿
+@using KG.Core.Services
+@using PagedList.Mvc;
+@model KGERP.Service.ServiceModel.AdminSetUpModel
+@using PagedList;
+@{
+    ViewBag.Title = "Admin Info";
+}
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>&nbsp;</h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Bank</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+
+                <div class="box-danger">
+                    <div class="box-header">
+                        <h4>User List</h4>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+
+                        <div class="table-responsive ">
+                            <table id="KgErpDataTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;">SL</th>
+                                        <th style="width:20%;">Name</th>
+
+                                        <th style="width:20%;">Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+                                        <tr>
+                                            <td>@(++sl)</td>
+                                            <td id="tdBankName_@item.ID">@item.Name</td>
+
+                                            <td>
+
+                                                <a id="@item.ID" onclick="makeEditble(this);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+
+                                                <a id="@item.ID" onclick="makeDeletable(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#bankDeleteModal" title="Delete"
+                                                   data-placement="top">
+                                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                </a>
+
+                                                @*<a href="~/Configuration/CommonSubZone?companyId=@item.CompanyFK&zoneId=@item.ID" style="padding:0px 0px 0px 0px" class="btn btn-success btn-sm">Bank</a>
+                                                    <a href="~/Configuration/CommonCustomer?companyId=@item.CompanyFK&zoneId=@item.ID&subZoneId=0" style="padding:0px 0px 0px 0px" class="btn btn-success btn-sm">Customer</a>*@
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div class="box-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+
+
+@using (Html.BeginForm("CommonBank", "Configuration", FormMethod.Post, new { id = "commonBankDeleteFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.ID, new { Value = "", id = "bankIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.CompanyFK, new { Value = "", id = "CompanyFKDelete" })
+
+    <div class="modal fade" id="bankDeleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Bank Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this bank?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+        });
+
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#BankId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#txtBankName').val($('#tdBankName_' + rowId).text().trim());
+
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            }
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#bankIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+                $('#CompanyFKDelete').val("@Model.CompanyFK");
+
+            }
+        }
+        function resetForm() {
+            $('#commonBankFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+
+        }
+
+    </script>
+}
+
+
+
+
+
+
+
+
+
+<div class="container">
+
+
+    @Html.ActionLink("Create New", "CreateOrEdit", new { id = 0 })<br />
+    @using (Html.BeginForm("Index", "AdminSetUp", FormMethod.Get))
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <h4><b>Admin</b></h4>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <div class="col-md-10">@Html.TextBox("searchText", null, new { @autocomplete = "off", @class = "form-control pull-right", @placeholder = "Search..." })</div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+
+
+    <div class="row">
+
+        <table class="table table-striped">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Id)
+                </th>
+
+                <th>
+                    @Html.DisplayNameFor(model => model.First().IsActive)
+                </th>
+                <th>Action</th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @("[" + item.Employee.EmployeeId + "] " + item.Employee.Name)
+                    </td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <button class="btn btn-success btn-xs">
+                                Active
+                            </button>
+                        }
+
+                    </td>
+
+                    <td>
+                        <a href="@Url.Action("CreateOrEdit", new { id = item.AdminId })">
+                            <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                        </a>
+
+                    </td>
+                </tr>
+            }
+
+        </table>
+        <span class="btn btn-success">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </span>
+        <span class="checkbox">
+            @Html.PagedListPager(Model, Page_No => Url.Action("Index", "AdminSetUp",
+                    new { Page_No, Sorting_Order = Request.QueryString["Search"] }))
+        </span>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*<h2>Index</h2>
+
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Employee.EmployeeId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.AdminId }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.AdminId })
+            </td>
+        </tr>
+        }
+
+    </table>*@

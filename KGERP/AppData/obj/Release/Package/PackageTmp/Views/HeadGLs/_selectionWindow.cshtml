@@ -1,0 +1,57 @@
+﻿@model KGERP.Service.ServiceModel.AccountHeadProcessModel
+
+<div class="col-md-2">
+</div>
+<div class="col-md-10">
+    @if (Model.LayerNo != 6)
+    {
+        <input type="button" onclick='createOrUpdate("@Model.Id","@Model.LayerNo","@Model.AccCode","@Model.AccName","create")' value="Create New Child" class="btn btn-primary" style="margin-right:10px" />
+    }
+    <input type="button" onclick='createOrUpdate("@Model.Id","@Model.LayerNo","@Model.AccCode","@Model.AccName","update")' value="Update Existing" class="btn btn-warning" style="margin-right:10px" />
+    <input type="button" onclick='createOrUpdate("@Model.Id","@Model.LayerNo","@Model.AccCode","@Model.AccName","delete")' value="Delete Existing" class="btn btn-danger" style="margin-right:10px" />
+</div>
+<div class="col-md-1">
+</div>
+
+<script>
+    function createOrUpdate(accountHeadId, layerNo, accCode, accName, status) {
+
+        var newStatus;
+        if (status=='create') {
+            newStatus = 'Create New Child';
+        }
+
+        if (status == 'update') {
+            newStatus = 'Update Existing';
+        }
+        if (status == 'delete') {
+            newStatus = 'Delete Existing';
+        }
+
+        $('#spanStatus').html("<span style='color:#ffffff;font-size:20px;padding:3px;background-color:#dd4b39;font-weight:bold;border-radius:4px'>"+newStatus+"</span>");
+        $.ajax({
+            url: '/HeadGLs/GetChildHead?accountHeadId=' + accountHeadId + '&layerNo=' + layerNo + '&accCode=' + accCode + '&accName=' + accName+ "&status=" + status + "",
+            type: "GET",
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (data) {
+                $("#exampleModalLong").hide();
+                $('#createEditAccountHeadTitle').html("<style='font:bold;font-size:20px;'>" + accCode + "-" + accName + "</style>");
+                $(".create-edit-accont-head-modal-body").html(data);
+                $("#createEditAccountHeadModal").modal({
+                    show: true,
+                    backdrop: 'static',
+                    keyboard: false
+
+                });
+
+            },
+            error: function (xhr) {
+                alert('error');
+            }
+        });
+    }
+</script>
+
+

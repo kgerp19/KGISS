@@ -1,0 +1,200 @@
+﻿@model IEnumerable<KGERP.Service.ServiceModel.ExitInterviewVM>
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Exit Feedback";
+    int i = 0;
+}
+<style>
+    class {
+        padding: 70px;
+        border: 1px solid #4CAF50;
+    }
+
+    textarea {
+        max-width: 100%;
+    }
+</style>
+<div class="form-horizontal" style="padding-left:20px">
+    <div class="row" style="margin-bottom:10px;">
+        <div class="header text-center"><h2>Employee Exit Feedback</h2></div>
+        <div class="col-md-offset-11 col-md-1">
+            @Html.ActionLink("Create New", "CreateExitInterview", "Employee", new { @class = "btn btn-primary", @style = "float:right;" })
+        </div>
+        <div class="col-md-1">
+
+        </div>
+    </div>
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            <h3>Previous List</h3>
+            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Created Date</th>
+                        <th scope="col">Resign Date</th>
+                        <th scope="col" style="max-width:300px;">Resign for Leaving</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@(++i)</td>
+                            <td>@item.CreatedDate.ToString("dd-MMM-yyyy")</td>
+                            <td>@(item.ResignDate.HasValue?item.ResignDate.Value.ToString("dd-MMM-yyyy"):"")</td>
+                            <td>@item.ReasonForLeaving</td>
+                            <td>@item.Status</td>
+                            <td>
+
+                                @if (item.Status == KGERP.Utility.ApprovalStatusEnum.Draft)
+                                {
+                                    <a href="javascript:void(0);" class="btn btn-warning btn-xs" onclick="var confirmed = confirm('Are you sure you want to submit? after submit, a clearance paper has been generated.'); if (confirmed) { window.location.href = '/Employee/ExitInterviewClearanceMappingAdd?id=@item.Id'; }" title="Submit">
+                                       Submit
+                                    </a>
+                                    @*<a target="_self" href="~/Employee/CreateExitInterview?id=@item.Id&actionType=@ActionEnum.Edit" title="Submit"> <i class="fa fa-check"></i></a>*@
+                                    <a id="@item.Id" onclick="makeDeletable(@item.Id)" class="linkPointer text-danger" data-toggle="modal" data-target="#deleteModal" title="Delete" data-placement="top"> <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> </a>
+                                    <a target="_self" href="~/Employee/CreateExitInterview?id=@item.Id&actionType=@ActionEnum.Edit" title="Edit"> <i class="fa fa-edit"></i></a>
+                                }
+                                <a target="_self" href="~/Employee/ExitInterviewDetail?id=@item.Id" title="Details"> <i class="glyphicon glyphicon-new-window text-info text-right"></i></a>
+                                @*<a id="@item.Id" onclick="loadSignatory(@item.Id);" class="linkPointer" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top"> <i class="fa fa-eye" aria-hidden="true"></i> </a>*@
+                                @if ((int)item.Status > (int)KGERP.Utility.ApprovalStatusEnum.Draft)
+                                {
+                                    <a id="@item.Id" onclick="loadSignatory(@item.Id);" class="linkPointer" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top"> <i class="fa fa-eye" aria-hidden="true"></i> </a>
+                                    <a target="_blank" href="~/Report/GetEmployeeClearanceReport?id=@item.Id" title="Download Report"> <i class="fa fa-download" aria-hidden="true"></i></a>
+
+                                }
+
+                                @*@Html.ActionLink("Delete", "ExitInterviewDetails", "Employee", new { id = item.Id }, new { @class = "btn btn-primary", @style = "float:right;" })*@
+                                <!--@Html.ActionLink("Details", "ExitInterviewDetail", "Employee", new { id = item.Id }, new { @class = "btn btn-info" })
+       @Html.ActionLink("Edit", "CreateExitInterview", "Employee", new { id = item.Id, actionType = ActionEnum.Edit }, new { @class = "btn btn-info" })-->
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            @*<h3 class="text-danger text-center">No previous record found!</h3>*@
+            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Created Date</th>
+                        <th scope="col">Resign Date</th>
+                        <th scope="col">Resign for Leaving</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="signatoryModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b>Clearance Signatory</b></h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-responsive-md table-striped table-hover" id="signatoryTable">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Signatory Id</th>
+                            <th scope="col">Signatory</th>
+                            <th scope="col">Designation</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Approved Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sigantoryTableBody">
+                        @*@if (Model.RequisitionApprovalLIst != null)
+                            {
+                                int ii = 1;
+                                foreach (var item in Model.RequisitionApprovalLIst)
+                                {
+                                    <tr>
+                                        <td>@(ii++)</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.DesignationName</td>
+                                        <td>@item.Status</td>
+                                    </tr>
+                                }
+                            }*@
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+        //$(() => {
+        //    alert("OK");
+        //})
+
+
+        function makeDeletable(id) {
+
+            const isConfirmed = window.confirm('Are you sure you want to delete this item?');
+
+            if (isConfirmed) {
+
+                //$.ajax({
+                //    type: "GET",
+                //    url: "/Employee/DeleteExitInterview",
+                //    data: { id: id }, // your data to be sent
+                //    success: function (response) {
+                //        // handle the response from the server
+                //    }
+                //});
+                
+               window.location.href = '/Employee/DeleteExitInterview?id=' + id;
+            }
+        }
+        function loadSignatory(id) {
+            $.ajax({
+                type: "GET",
+                url: "/Employee/GetExitInterviewApprovalList",
+                data: { id: id },
+                success: function (data) {
+                    // Get the table element from the HTML
+                    const table = document.getElementById('sigantoryTableBody');
+                    while (table.rows.length > 0) {
+                        table.deleteRow(0);
+                    }
+                    data.forEach((item, index) => {
+                        const row = table.insertRow(index);
+
+                        // Display specific fields in the table
+                        const fieldsToDisplay = ['OrderBy', 'EmployeeIdString', 'EmployeeName', 'DesignationName', 'StatusString', 'ApprovedTime'];
+
+                        fieldsToDisplay.forEach((field) => {
+                            const cell = row.insertCell();
+                            cell.innerHTML = item[field];
+                        });
+                    });
+                }
+            })
+        }
+    </script>
+
+
+
+}

@@ -1,0 +1,522 @@
+﻿@model KGERP.Service.Implementation.LcInfoServices.LcInfoViewModel
+@using KGERP.Utility;
+@{
+    ViewBag.Title = "LcEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+
+<section class="content-header">
+    <h1>
+        @Model.CompanyNmae - Add New LC Information
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">  Product Requisition </li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="box">
+        <div class="box-header"></div>
+
+        <div class="box-body">
+            @using (Html.BeginForm("LcEdit", "LcInformations", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(x => x.CompanyId)
+                @Html.HiddenFor(x => x.LCId)
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.Label("LC No:", htmlAttributes: new { })
+                            @Html.EditorFor(model => model.LCNo, new { htmlAttributes = new { @id = "txtLCNo", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.LCNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            @Html.Label("LC Date:", htmlAttributes: new { })
+                            <div style="display:flex">
+                                @Html.TextBoxFor(model => model.LCDate, new { @Value = Model.LCDate.ToString("dd/MM/yyyy"), @class = "form-control datepicker", @style = "width: 240px;", @id = "txtLC.LCDate", @required = "required", @autocomplete = "off" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.LCDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.Label("PI No:", htmlAttributes: new { })
+                            @Html.EditorFor(model => model.PINo, new { htmlAttributes = new { @id = "txtPINo", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.PINo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            @Html.Label("PI Date:", htmlAttributes: new { })
+                            <div style="display:flex">
+                                @Html.TextBoxFor(model => model.PIDate, new { @Value = Model.LCDate.ToString("dd/MM/yyyy"), @class = "form-control datepicker", @style = "width: 240px;", @id = "txtLC.PIDate", @required = "required", @autocomplete = "off" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.PIDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            @Html.Label("Select Bank Or Advance / Loan:", htmlAttributes: new { })
+                            @Html.RadioButtonFor(m => m.BankOrHeahGL, 1, new { id = "BankOrHeahGL1" }) Bank
+                            @Html.RadioButtonFor(m => m.BankOrHeahGL, 2, new { id = "BankOrHeahGL2" }) Advance / Loan
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <div class="form-group" id="divCompanyBankBranchId">
+                            <label>Applicent Bank:</label>
+                            @Html.DropDownListFor(model => model.CompanyBankBranchId, new SelectList(Model.GetAllBanks, "Value", "Text"), "==Bank==", new { id = "CompanyBankId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                            @Html.ValidationMessageFor(model => model.CompanyBankBranchId, "", new { @class = "text-danger" })
+                        </div>
+                        @if (Model.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+                        {
+                            <div class="form-group" id="divAdvanceOrLoanGLId">
+                                <label>Advance / Loan:</label>
+                                @Html.DropDownListFor(model => model.AdvanceOrLoanGLId, new SelectList(Model.AdvanceAndLoan, "Value", "Text"), "==Select Advance /G. Loan==", new { id = "txtAdvanceOrLoanGLId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                                @Html.ValidationMessageFor(model => model.AdvanceOrLoanGLId, "", new { @class = "text-danger" })
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label> Principle :</label>
+                            @Html.DropDownListFor(model => model.SupplierId, new SelectList(Model.GetAllVendorList, "Value", "Text"), "==Supplier==", new { id = "SupplierId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                            @Html.ValidationMessageFor(model => model.SupplierId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label> Principle Bank:</label>
+                            @Html.DropDownListFor(model => model.SupplierBankBranchId, new SelectList(Model.GetAllBanks, "Value", "Text"), "==Supplier Bank==", new { id = "SupplierBankId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                            @Html.ValidationMessageFor(model => model.SupplierBankBranchId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label> Country of Origin:</label>
+                            @Html.DropDownListFor(model => model.CountryofOriginId, new SelectList(Model.GetAllContry, "Value", "Text"), "==Origin==", new { id = "CountryofOriginId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                            @Html.ValidationMessageFor(model => model.CountryofOriginId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Port Of Loading</label>
+                            @Html.DropDownListFor(model => model.PortOfLoadingId, Model.PortOfLoadingList as SelectList, "==Loading==", new { id = "PortOfLoadingId", @class = "searchingDropdown  customStyle", @style = "width: 100%;", required = "required" })
+                            @Html.ValidationMessageFor(model => model.PortOfLoadingId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+
+                <div class="row">
+
+
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label> Currency</label>
+                            @Html.DropDownListFor(model => model.CurrenceyId, new SelectList(Model.GetAllCurrencyList, "Value", "Text"), "==Select Currency ==", new { id = "CurrencyId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                            @Html.ValidationMessageFor(model => model.CountryofOriginId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Currency Rate</label>
+                            @Html.EditorFor(model => model.CurrenceyRate, new { htmlAttributes = new { @onkeyup = "TotalLCValueInBDT()", @id = "Currencyrate", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.CurrenceyRate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>L/C Value</label>
+                            @Html.EditorFor(model => model.LCValue, new { htmlAttributes = new { @onkeyup = "TotalLCValueInBDT()", @id = "LcVal", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.LCValue, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>L/C Value In BDT</label>
+                            @Html.EditorFor(model => model.LCValueInBDT, new { htmlAttributes = new { @id = "LCValueInBDT", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.LCValueInBDT, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>C. Margin%</label>
+                            @Html.EditorFor(model => model.CashMarginPercent, new { htmlAttributes = new { @onkeyup = "AmountByPecentage()", @id = "CashMarginPecentage", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.CashMarginPercent, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>C. Margin Amount</label>
+                            @Html.EditorFor(model => model.CashMarginAmount, new { htmlAttributes = new { @onkeyup = "PecentageByAmount()", @id = "CashMarginAmount", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.CashMarginAmount, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+
+                    @*<div class="col-md-4">
+                            <div class="form-group">
+                                <label>Amendment Increase</label>
+                                @Html.EditorFor(model => model.AmendmentIncrase, new { htmlAttributes = new { @id = "AmendentInc", @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.AmendmentIncrase, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Amendment Decrease</label>
+                                @Html.EditorFor(model => model.AmendmentDiccrase, new { htmlAttributes = new { @id = "AmendentDec", @class = "form-control", @required = "required", min = "0" } })
+                                @Html.ValidationMessageFor(model => model.AmendmentDiccrase, "", new { @class = "text-danger" })
+                            </div>
+                        </div>*@
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Freight Charges</label>
+                            @Html.EditorFor(model => model.FreightCharges, new { htmlAttributes = new { @id = "FreightCharges", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.FreightCharges, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Bank Charge</label>
+                            @Html.EditorFor(model => model.BankCharge, new { htmlAttributes = new { @id = "BankCharge", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.BankCharge, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Insurance</label>
+                            @Html.EditorFor(model => model.InsuranceValue, new { htmlAttributes = new { @id = "txtPINo", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.InsuranceValue, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Commission</label>
+                            @Html.EditorFor(model => model.CommissionValue, new { htmlAttributes = new { @id = "txtPINo", @class = "form-control", @required = "required" } })
+                            @Html.ValidationMessageFor(model => model.CommissionValue, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Other Charge</label>
+                            @Html.EditorFor(model => model.OtherCharge, new { htmlAttributes = new { @id = "OtherCharge", @class = "form-control" } })
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Means of Shipment </label>
+                            @Html.EnumDropDownListFor(model => model.Vessal, "==Select Shipment==", htmlAttributes: new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Vessal, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>L/C Type</label>
+                            @Html.EnumDropDownListFor(model => model.Lc, "==Select Lc Type==", htmlAttributes: new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.LCType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Payment Terms</label>
+                            @Html.EditorFor(model => model.PaymentTerms, new { htmlAttributes = new { @id = "txtPINo", @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.PaymentTerms, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            @Html.Label("Expiry Date:", htmlAttributes: new { })
+                            <div style="display:flex">
+                                @Html.TextBoxFor(model => model.ExparyDate, new { @Value = Model.LCDate.ToString("dd/MM/yyyy"), @class = "form-control datepicker", @style = "width: 240px;", @id = "ExparyDate", @required = "required", @autocomplete = "off" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.ExparyDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Notify Party</label>
+                            @Html.EditorFor(model => model.NotefyParty, new { htmlAttributes = new { @id = "NotefyParty", @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.NotefyParty, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Shipping Mark</label>
+                            @Html.EditorFor(model => model.ShippingMark, new { htmlAttributes = new { @id = "txtPINo", @class = "form-control" } })
+
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            @Html.Label("Shipping Date:", htmlAttributes: new { })
+                            <div style="display:flex">
+                                @Html.TextBoxFor(model => model.ShipmentDate, new { @Value = Model.LCDate.ToString("dd/MM/yyyy"), @class = "form-control datepicker", @style = "width: 240px;", @id = "ShipmentDate", @required = "required", @autocomplete = "off" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.ShipmentDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Destination:</label>
+                            @Html.DropDownListFor(model => model.CountryOfDestinationId, new SelectList(Model.GetAllContry, "Value", "Text", 19), "==Destination==", new { id = "CountryOfDestinationId", @class = "form-control searchingDropdown  customStyle ", required = "required" })
+                            @Html.ValidationMessageFor(model => model.CountryOfDestinationId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Port Of Discharge</label>
+                            @Html.DropDownListFor(model => model.PortOfDischargeId, Model.PortOfDischargeList as SelectList, "==Discharge==", new { id = "PortOfDischargeId", @class = "searchingDropdown  customStyle", @style = "width: 100%;", required = "required" })
+                            @Html.ValidationMessageFor(model => model.PortOfDischargeId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row" style="margin-top:20px">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+
+
+
+            }
+        </div>
+    </div>
+</section>
+
+
+
+
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+
+
+        $(document).ready(function () {
+            $("#divAdvanceOrLoanGLId").hide();
+
+            $('#BankOrHeahGL1').prop('checked', true);
+
+            $('#BankOrHeahGL2').click(function () {
+                var value = $(this).val();
+                if (value === '2') {
+                    $('#divAdvanceOrLoanGLId').show();
+                    $('#divCompanyBankBranchId').hide();
+                }
+            });
+
+            $('#BankOrHeahGL1').click(function () {
+                var value = $(this).val();
+                if (value === '1') {
+                    $('#divCompanyBankBranchId').show();
+                    $('#divAdvanceOrLoanGLId').hide();
+
+                }
+            });
+
+            ff();
+            ss();
+        });
+
+
+          function ff() {
+        var CountryofOriginId = $("#CountryofOriginId").val();
+        console.log(CountryofOriginId);
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "LcInformations")",
+                  datatype: "Json",
+                data: { countryid:CountryofOriginId},
+                success: function (data) {
+                    console.log(data);
+                      if (data) {
+                          $("#PortOfLoadingId").empty();
+                          $(data).each(function (index, item) {
+                              $("#PortOfLoadingId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                    }
+                  }
+            });
+    };
+
+    function ss () {
+        var CountryOfDestinationId = $("#CountryOfDestinationId").val();
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "LcInformations")",
+                  datatype: "Json",
+                data: { countryid: CountryOfDestinationId },
+                success: function (data) {
+                      if (data) {
+                          $("#PortOfDischargeId").empty();
+                          $(data).each(function (index, item) {
+                              $("#PortOfDischargeId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                    }
+                  }
+            });
+        };
+
+
+
+    $("#CountryofOriginId").change(function () {
+        var CountryofOriginId = $("#CountryofOriginId").val();
+        console.log(CountryofOriginId);
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "LcInformations")",
+                  datatype: "Json",
+                data: { countryid:CountryofOriginId},
+                success: function (data) {
+                    console.log(data);
+                      if (data) {
+                          $("#PortOfLoadingId").empty();
+                          $("#PortOfLoadingId").append("<option value=''>==Select Port Of Loading==</option>");
+                          $(data).each(function (index, item) {
+                              $("#PortOfLoadingId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                    }
+                  }
+            });
+    });
+
+    $("#CountryOfDestinationId").change(function () {
+        var CountryOfDestinationId = $("#CountryOfDestinationId").val();
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "LcInformations")",
+                  datatype: "Json",
+                data: { countryid: CountryOfDestinationId },
+                success: function (data) {
+                      if (data) {
+                          $("#PortOfDischargeId").empty();
+                          $("#PortOfDischargeId").append("<option value=''>==Select Port Of Discharge==</option>");
+                          $(data).each(function (index, item) {
+                              $("#PortOfDischargeId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                          });
+
+                    }
+                  }
+            });
+        });
+
+
+
+        function PecentageByAmount() {
+            var LCValueInBDT = $("#LCValueInBDT").val();
+            var cashMarginAmount = $("#CashMarginAmount").val();
+
+            var cashMarginAmount = $("#CashMarginAmount").val();
+            var calculation = (parseFloat(cashMarginAmount) * 100) / parseFloat(LCValueInBDT) ;
+            $("#CashMarginPecentage").val(calculation.toFixed(2));
+        }
+
+        function AmountByPecentage() {
+            var LCValueInBDT = $("#LCValueInBDT").val();
+            var cashPercentage = $("#CashMarginPecentage").val();
+            var calculation = (parseFloat(cashPercentage) * parseFloat(LCValueInBDT)) / 100;
+            $("#CashMarginAmount").val(calculation.toFixed(2));
+        }
+
+
+        function TotalLCValueInBDT() {
+            var LcVal = $("#LcVal").val();
+            var Currencyrate = $("#Currencyrate").val();
+            var calculation = (parseFloat(LcVal) * parseFloat(Currencyrate));
+            $("#LCValueInBDT").val(calculation.toFixed(2));
+        }
+
+    @*$("#CurrencyId").change(function () {
+        var curVal = $('#CurrencyId').find(":selected").val();
+            $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetGroupListByProjectId", "LcInformations")",
+                  datatype: "Json",
+                data: { countryid:CountryofOriginId},
+                success: function (data) {
+                    console.log(data);
+
+
+
+                  }
+            });
+        });*@
+
+    $("#CurrencyId").change(function () {
+        var Id = $('#CurrencyId').find(":selected").val();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetCurrencyrate", "LcInformations")",
+            datatype: "Json",
+            data: { Id: Id },
+            success: function (data) {
+                console.log(data);
+
+                $("#Currencyrate").val(data.CurrencyRate);
+
+
+
+            }
+        });
+    });
+
+
+</script>
+}

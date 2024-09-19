@@ -1,0 +1,291 @@
+﻿@model KGERP.Services.WareHouse.VMWareHousePOReceivingSlave
+<table class="table table-striped">
+    <tr>
+        <th>
+            Raw Material
+        </th>
+        <th>
+            Unit
+        </th>
+        <th>
+            PO Qty
+        </th>
+        <th>
+            Purchased Qty
+        </th>
+
+        @*<th>
+                Due Qty
+            </th>*@
+        <th>
+            Purchase Qty
+        </th>
+        <th>
+            Purchase Rate
+        </th>
+        <th>
+            Amount
+        </th>
+        <th>
+            Deduction (%)
+        </th>
+        <th>
+            Bag Weight
+        </th>
+        <th>
+            Stock Qty
+        </th>
+        <th>
+            Stock Rate
+        </th>
+        <th>
+            Stock Amount
+        </th>
+        <th>
+            Bag Qty
+        </th>
+
+    </tr>
+    @for (int i = 0; i < Model.MaterialReceiveDetailModel.Count(); i++)
+    {
+        //if (Model.MaterialReceiveDetails[i].POQty > Model.MaterialReceiveDetails[i].PurchasedQty)
+        //{
+            <tr>
+                <td width="10%">
+                    @Html.HiddenFor(model => model.MaterialReceiveDetailModel[i].ProductId)
+                    @Html.HiddenFor(model => model.MaterialReceiveDetailModel[i].PurchaseOrderDetailFk)
+
+                    @Html.DisplayFor(model => model.MaterialReceiveDetailModel[i].ProductName)
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].BagWeight, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__BagWeight", @style = "display:none" } })
+                </td>
+                <td width="5%">
+                    @Html.DisplayFor(model => model.MaterialReceiveDetailModel[i].UnitName)
+                </td>
+                <td width="8%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].POQty, new { htmlAttributes = new { @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                </td>
+                <td width="8%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].PurchasedQty, new { htmlAttributes = new { @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;background-color:#EEEEEE;width:100px;", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.MaterialReceiveDetailModel[i].PurchasedQty, "", new { @class = "text-danger" })
+                </td>
+
+
+                <td width="8%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].ReceiveQty, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__ReceiveQty", @onkeyup = "calculateAmount(" + i + ")", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.MaterialReceiveDetailModel[i].ReceiveQty, "", new { @class = "text-danger" })
+                </td>
+
+                <td width="8%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].UnitPrice, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__UnitPrice", @onkeyup = "calculateAmount(" + i + ")", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.MaterialReceiveDetailModel[i].UnitPrice, "", new { @class = "text-danger" })
+                </td>
+                <td width="8%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].Amount, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__Amount", @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                </td>
+
+                <td width="8%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].Deduction, new { htmlAttributes = new { @onkeyup = "changeDeduction(" + i + ")", @id = "MaterialReceiveDetails_" + i + "__Deduction", @class = "DeductionRate", @style = "text-align:right;padding-right:2px;width:90px;", @autocomplete = "off", } })
+                </td>
+
+                <td width="10%">
+                    @Html.DropDownListFor(model => model.MaterialReceiveDetailModel[i].BagId, new SelectList(Model.BagWeights, "Value", "Text"), new { @onchange = "changeBagDropDown(" + i + ")", @id = "MaterialReceiveDetails_" + i + "__BagId", @class = "ddlBag dropdownsize form-control", @style = "width: 100px;height: 26px;padding: 0px;" })
+                    @Html.ValidationMessageFor(model => model.MaterialReceiveDetailModel[i].BagId, "", new { @class = "text-danger" })
+                </td>
+                <td width="10%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].StockInQty, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__StockInQty", @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                </td>
+
+                <td width="10%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].StockInRate, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__StockInRate", @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                </td>
+                <td width="10%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].StockAmount, new { htmlAttributes = new { @id = "MaterialReceiveDetails_" + i + "__StockAmount", @readonly = "readonly", @class = "", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:100px;background-color:#EEEEEE;", @autocomplete = "off", } })
+                </td>
+                <td width="5%">
+                    @Html.EditorFor(model => model.MaterialReceiveDetailModel[i].BagQty, new { htmlAttributes = new { @onkeyup = "calculateStockQuantity(" + i + ")", @id = "MaterialReceiveDetails_" + i + "__BagQty", @class = "", @type = "text", @style = "text-align:right;padding-right:2px;border: 1px solid #999;width:90px;", @autocomplete = "off", } })
+                    @Html.ValidationMessageFor(model => model.MaterialReceiveDetailModel[i].BagQty, "", new { @class = "text-danger" })
+                </td>
+            </tr>
+        @*}*@
+    }
+
+
+
+</table>
+
+<div class="box-footer">
+    <div class="col-md-5">
+        <a href="@Url.Action("Index", "MaterialReceive", new { companyId = Model.CompanyId})" class="btn btn-info" style="width:100%">
+          << Back to List
+        </a>
+    </div>
+    <div class="col-md-7">
+        <input type="submit" value="Receive" style="width:100%" class="btn btn-success" />
+    </div>
+</div>
+
+<script>
+
+    //$(function () {
+    //    $('.DeductionRate').map(function (i, el) {
+    //        var deduction = $('#txtDeduction_' + i + '__Deduction').val();
+    //        alert(deduction);
+    //    })
+    //})
+
+
+
+    //function changeDeduction(id) {
+    //    var $idDeduction = "#MaterialReceiveDetails_" + id + "__Deduction";
+    //    var $idAmount = "#MaterialReceiveDetails_" + id + "__Amount";
+    //    var $idReceiveQty = "#MaterialReceiveDetails_" + id + "__ReceiveQty";
+
+    //    var $idStockInQty = "#MaterialReceiveDetails_" + id + "__StockInQty";
+    //    var $idStockInRate = "#MaterialReceiveDetails_" + id + "__StockInRate";
+    //    var $idStockAmount = "#MaterialReceiveDetails_" + id + "__StockAmount";
+
+
+    //    var $deduction = $($idDeduction).val();
+    //    var $amount = $($idAmount).val();
+    //    var $receiveQty = $($idReceiveQty).val();
+
+    //    var $stockInQty = $($idStockInQty).val();
+    //    var $stockInRate = $($idStockInRate).val();
+    //    var $stockAmount = $($idStockAmount).val();
+
+    //    var $newStockInRate = parseFloat((parseFloat($amount) - parseFloat($amount) * (parseFloat($deduction) / 100)) / parseFloat($receiveQty)).toFixed(2);
+    //    $($idStockInRate).val($newStockInRate);
+
+    //    var $newStockAmount = parseFloat(parseFloat($stockInQty) * parseFloat($newStockInRate)).toFixed(2);
+    //    $($idStockAmount).val($newStockAmount);
+    //}
+
+    function changeBagDropDown(id) {
+        var $idReceiveQty = "#MaterialReceiveDetails_" + id + "__ReceiveQty";
+        var $idStockInQty = "#MaterialReceiveDetails_" + id + "__StockInQty";
+        var $idStockInRate = "#MaterialReceiveDetails_" + id + "__StockInRate";
+        var $idStockAmount = "#MaterialReceiveDetails_" + id + "__StockAmount";
+        var $idBagWeight = "#MaterialReceiveDetails_" + id + "__BagWeight";
+
+        var $idBagId = "#MaterialReceiveDetails_" + id + "__BagId";
+
+
+
+        $.ajax({
+            url: "/Bag/GetBagInfo?bagId=" + $($idBagId).val() + "",
+            type: "GET",
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                var $bagWeight = parseFloat(result.BagValue / 1000);
+                $($idBagWeight).val($bagWeight);//Setting BagWeight per KG
+
+                var $idBagQty = "#MaterialReceiveDetails_" + id + "__BagQty";
+                var $bagQty = $($idBagQty).val();
+
+                if ($bagQty > 0) {
+                    var $totalBagWeight = parseFloat($bagQty) * parseFloat($bagWeight);
+
+                    var $receiveQty = $($idReceiveQty).val();
+                    var $stockInQty = $($idStockInQty).val();
+                    var $stockInRate = $($idStockInRate).val();
+
+                    $stockInQty = parseFloat(parseFloat($receiveQty) - parseFloat($totalBagWeight)).toFixed(2);
+
+
+                    $($idStockInQty).val($stockInQty);//Setting StockIn Qty
+
+                    $stockAmount = parseFloat($stockInQty * $stockInRate).toFixed(2);//Calculating Stock Amount
+                    $($idStockAmount).val($stockAmount);//Setting Stock Amount
+                }
+            }
+        });
+    }
+
+
+    function calculateAmount(id) {
+        var receiveQty = $("#MaterialReceiveDetails_" + id + "__ReceiveQty").val();
+        var unitPrice = $("#MaterialReceiveDetails_" + id + "__UnitPrice").val();
+        $("#MaterialReceiveDetails_" + id + "__Amount").val(parseFloat(parseFloat(receiveQty) * parseFloat(unitPrice)).toFixed(2));
+
+        //Setting StockInQty & StockInRate & StockAmount
+        $("#MaterialReceiveDetails_" + id + "__StockInQty").val(parseFloat(receiveQty).toFixed(2));
+        $("#MaterialReceiveDetails_" + id + "__StockInRate").val(parseFloat(unitPrice).toFixed(2));
+        $("#MaterialReceiveDetails_" + id + "__StockAmount").val(parseFloat(parseFloat(unitPrice) * parseFloat(unitPrice)).toFixed(2));
+    }
+
+
+
+    function stopRKey(evt) {
+        var evt = (evt) ? evt : ((event) ? event : null);
+        var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+        if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
+    }
+    document.onkeypress = stopRKey;
+
+
+    jQuery(document).ready(function () {
+        jQuery('[data-confirm]').click(function (e) {
+            if (!confirm(jQuery(this).attr("data-confirm"))) {
+                e.preventDefault();
+            }
+        });
+    });
+    function calculateSum() {
+        var sum = 0;
+        $(".amount").each(function () {
+            var value = $(this).val();
+            //console.log(value);
+            if (!isNaN(value) && value.length !== 0) {
+                sum += parseFloat(value);
+            }
+            $('#sumOfReceiveQty').text(sum);
+        });
+    }
+
+    function calculateStockQuantity(id) {
+        var $idReceiveQty = "#MaterialReceiveDetails_" + id + "__ReceiveQty";
+        var $idStockInQty = "#MaterialReceiveDetails_" + id + "__StockInQty";
+        var $idStockInRate = "#MaterialReceiveDetails_" + id + "__StockInRate";
+        var $idStockAmount = "#MaterialReceiveDetails_" + id + "__StockAmount";
+        var $idBagId = "#MaterialReceiveDetails_" + id + "__BagId";
+        var $idBagQty = "#MaterialReceiveDetails_" + id + "__BagQty";
+        var $BagWeight = 0;
+
+        $.ajax({
+            url: '/Bag/GetBagWeightByBagId?bagId=' + $($idBagId + " option:selected").val() + "",
+            type: "Post",
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (response) {
+                $BagWeight = (response / 1000);
+                // console.log("$BagWeight=" + $BagWeight);
+                var $BagQty = $($idBagQty).val();
+                //console.log("$BagQty=" + $BagQty);
+                var $TotalBagWeight = parseFloat($BagQty) * parseFloat($BagWeight);
+                //console.log("$TotalBagWeight=" + $TotalBagWeight);
+                if (isNaN($TotalBagWeight)) {
+                    alert("Please select Bag Weight")
+                    //$($idBagQty).val(0);
+                    return false;
+                }
+                var $ReceiveQty = $($idReceiveQty).val();
+                var $StockInQty = $($idStockInQty).val();
+                var $StockInRate = $($idStockInRate).val();
+
+                $StockInQty = parseFloat(parseFloat($ReceiveQty) - parseFloat($TotalBagWeight)).toFixed(2);
+                //console.log("$StockInQty=" + $StockInQty);
+                $($idStockInQty).val($StockInQty);//Setting StockIn Qty
+
+                $StockAmount = parseFloat($StockInQty * $StockInRate).toFixed(2);//Calculating Stock Amount
+                $($idStockAmount).val($StockAmount);//Setting Stock Amount
+            },
+            error: function (xhr) {
+                //alert('error');
+            }
+        });
+
+    }
+</script>

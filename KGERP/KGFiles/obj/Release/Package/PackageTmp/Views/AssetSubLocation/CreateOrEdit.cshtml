@@ -1,0 +1,88 @@
+﻿@model KGERP.ViewModel.AssetSubLocationViewModel
+@{
+    ViewBag.Title = "Create";
+}
+
+@using (Html.BeginForm("CreateOrEdit", "AssetSubLocation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <span style="font-size:25px">Asset SubLocation</span>
+        <hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 10px; border-width: 2px;" />
+    </div>
+
+    <div class="form-horizontal">
+        <div class="row">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.SubLocation.SubLocationId)
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubLocation.LocationId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.SubLocation.LocationId, new SelectList(Model.Location, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlLocation" })
+
+                        @Html.ValidationMessageFor(model => model.SubLocation.LocationId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubLocation.Name, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.SubLocation.Name, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.SubLocation.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubLocation.SerialNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.SubLocation.SerialNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @id = "txtSerialNo" } })
+                        @Html.ValidationMessageFor(model => model.SubLocation.SerialNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-offset-5 col-md-5">
+                <div class="form-group">
+                    <input type="submit" class="btn btn-primary pull-right" />
+                    <a href="@Url.Action("Index")" class="btn btn-danger pull-right" style="margin-right:8px">
+                        Close <i class="fa fa-close" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        $("#ddlLocation").change(function () {
+            var locationId = $(this).val();
+            $.ajax({
+                type: "GET",
+                url: "/AssetSubLocation/GetSerialNo",
+                data: { 'locationId': locationId },
+                dataType: "json",
+                success: function (response) {
+                    $('#txtSerialNo').val(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        })
+
+    </script>
+}

@@ -1,0 +1,146 @@
+﻿@model List<KGERP.Data.CustomModel.DeliverItemCustomModel>
+
+
+<table class="table">
+    <tr style="background-color:#4CAF50;color:#FFFFFF">
+        @*<th>
+                Product Code
+            </th>*@
+
+        <th>
+            Product Name
+        </th>
+        <th>
+            Unit
+        </th>
+        <th>
+            Order Qty
+        </th>
+        <th>
+            Unit Price
+        </th>
+        @*<th>
+                Delivered Qty
+            </th>*@
+        <th>
+            Due Qty
+        </th>
+        <th>
+            Store Available Qty
+        </th>
+        @if ((Model.First().CompanyId == 8))
+        {
+            <th>
+                Base
+            </th>
+            <th>
+                Carrying
+            </th>
+            <th>
+                Cash
+            </th>
+        }
+
+        <th>
+            Ready to Deliver
+        </th>
+        <th>
+            Remaining Qty
+        </th>
+
+    </tr>
+    @for (int i = 0; i < Model.Count(); i++)
+    {
+        <tr>
+
+            @*<td>
+                    @Html.DisplayFor(model => model[i].ProductCode)
+                </td>*@
+            <td>
+                @Html.Hidden("deliverItems.Index", (@i))
+                @Html.Hidden("deliverItems[" + i + "].ProductId", Model[i].ProductId)
+                @Html.Hidden("deliverItems[" + i + "].UnitPrice", Model[i].UnitPrice)
+                @Html.Hidden("deliverItems[" + i + "].AdditionPrice", Model[i].AdditionPrice)
+                @Html.DisplayFor(model => model[i].ProductName)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model[i].OrderUnit)
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].OrderQty", Model[i].OrderQty, new { @readonly = "readonly", @class = "", @style = "width:70px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].DisplayUnitPrice", Model[i].DisplayUnitPrice, new { @readonly = "readonly", @class = "", @style = "width:70px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+            </td>
+            @*<td>
+                    @Html.TextBox("deliverItems[" + i + "].DeliveredQty", Model[i].DeliveredQty, new { @readonly = "readonly", @class = "form-control", @style = "width:80px" })
+                </td>*@
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].DueQty", Model[i].DueQty, new { @readonly = "readonly", @class = "", @style = "width:70px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].StoreAvailableQty", Model[i].StoreAvailableQty, new { @readonly = "readonly", @class = "", @style = "border: 1px solid #999;background-color:#EEEEEE;text-align:right;width:120px;font-weight:bold;color:" + (Model[i].StoreAvailableQty <= 0 ? "red" : "green") })
+            </td>
+            @if ((Model.First().CompanyId == 8))
+            {
+                <td>
+                    @Html.TextBox("deliverItems[" + i + "].EBaseCommission", Model[i].EBaseCommission, new { @readonly = "readonly", @type = "textbox", @class = "", @style = "width:40px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+                </td>
+                <td>
+                    @Html.TextBox("deliverItems[" + i + "].ECarryingCommission", Model[i].ECarryingCommission, new { @readonly = "readonly", @type = "textbox", @class = "", @style = "width:58px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+                </td>
+                <td>
+                    @Html.TextBox("deliverItems[" + i + "].ECashCommission", Model[i].ECashCommission, new { @readonly = "readonly", @type = "textbox", @class = "", @style = "width:40px;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+                </td>
+            }
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].ReadyToDeliver", Model[i].ReadyToDeliver, new { @onkeyup = "changeRemainingQty(" + i + ")", @type = "textbox", @autocomplete = "off", @class = "readyToDeliver", @style = "width:110px;font-weight:bold;color:green;border: 1px solid #999;text-align:right" })
+            </td>
+            <td>
+                @Html.TextBox("deliverItems[" + i + "].OrderRemainingQty", Model[i].OrderRemainingQty, new { @readonly = "readonly", @class = "", @style = "width:100px;font-weight:bold;color:red;border: 1px solid #999;background-color:#EEEEEE;text-align:right" })
+
+            </td>
+        </tr>
+
+    }
+
+    <tr>
+        <td colspan="13">
+            <a id="btnSubmit" class="btn btn-success" data-toggle="modal" style="float:right; margin-left:2px">
+                Submit
+            </a>
+
+            <a href="@Url.Action("Index","OrderDeliver",new {companyId= Request.QueryString["companyId"]})" class="btn btn-danger" style="float:right">
+                Close <i class="fa fa-close" aria-hidden="true"></i>
+            </a>
+            &nbsp;
+        </td>
+    </tr>
+
+</table>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <b class="modal-title" id="exampleModalLongTitle" style="color:blue">INVOICE/ BILL</b>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <input type="submit" formnovalidate="formnovalidate" id="btnFormSubmit" class="btn btn-success" value="Confirm" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  
+</script>

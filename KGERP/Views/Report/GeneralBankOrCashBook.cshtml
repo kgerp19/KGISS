@@ -1,0 +1,148 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+       Bank Book / Cash Book
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Bank Book / Cash Book</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("GeneralBankOrCashBookReport", "Report", FormMethod.Get, new { id = "balanceSheetReportformId", @class = "formValidator", @target = "_blank", @enctype = "multipart/form-data" }))
+            {
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(model => model.CompanyId)
+                            <div class="row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Type</label>
+                                        @Html.DropDownListFor(model => model.Accounting_BankOrCashParantId, Model.BankOrCashParantList as SelectList, "==Select Type==", new { id = "ddlAccounting_BankOrCashParantId", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.Accounting_BankOrCashParantId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Bank/Cash</label>
+                                        @Html.DropDownListFor(model => model.Id, Model.BankOrCashGLList as SelectList, new { id = "ddlAccounting_BankOrCashId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-1"></div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-1"></div>
+
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>From Date</label>
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>To Date</label>
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-1"></div>
+
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+                            <div class="col-md-1">
+
+                            </div>
+                            <div class="col-md-4">
+                                <select class="pull-right" style="color:#ffffff; background-color:#dd4b39;height:34px;font-size:15px;width:100%;" name="ReportType" id="ReportType">
+                                    <option value="PDF">PDF</option>
+                                    <option value="EXCEL">EXCEL</option>
+                                    <option value="WORD">WORD</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="submit" name="EXPORT" value="EXPORT" class="btn btn-success pull-right" style="width:100%" formtarget="_blank" />
+
+
+                            </div>
+                            <div class="col-md-1">
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+        $(function () {
+              $("#ddlAccounting_BankOrCashParantId").change(function () {
+                var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+
+
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("HeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                         data: { companyId: "@Model.CompanyId", parentId: bankOrCashParantId},
+                         success: function (data) {
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                            $(data).each(function (index, item) {
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+
+
+        })
+
+        });
+
+</script>
+}
+
+
+
+
+

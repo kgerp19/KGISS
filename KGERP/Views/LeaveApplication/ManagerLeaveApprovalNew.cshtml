@@ -1,0 +1,172 @@
+﻿
+@using PagedList.Mvc;
+@using KGERP.Utility
+@model PagedList.IPagedList<KGERP.Service.ServiceModel.ManagerApproval>
+@using PagedList;
+<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
+<div class="row">
+    @using (Html.BeginForm("ManagerLeaveApprovalNew", "LeaveApplication", FormMethod.Get, new { @class = "example" }))
+    {
+        <div class="col-md-8">
+            <h4>
+                <b>
+                    @if (ViewBag.Title != null)
+                    {
+                        @ViewBag.Title
+                    }
+                </b>
+            </h4>
+        </div>
+        <div class="col-md-4">
+            @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..", @style = "width:75%" } })
+            <button type="submit"><i class="fa fa-search "></i></button>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <hr style="border-color:red; padding:0px;margin-top: 5px;margin-bottom: 10px; border-width: 2px;" />
+    <table class="table table-striped table-responsive">
+        <tr style="background-color:#4CAF50;color:#FFFFFF">
+            <th>
+                SL
+            </th>
+            <th>
+                EmployeeID
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Department
+            </th>
+            <th>
+                Leave Category
+            </th>
+            <th>
+                Reason
+            </th>
+            <th nowrap>
+                Application Date
+            </th>
+            <th>
+                Start Date
+            </th>
+            <th>
+                End Date
+            </th>
+
+            <th>
+                Leave Days
+            </th>
+            @foreach(var m in Model)
+            {
+                for(int z = 1; z <= m.MaxOrderBy; z++)
+                {
+                    <th>Level @z Approval</th>
+                }
+            }
+        </tr>
+        @{ 
+            var SL = 0;
+        }
+        @foreach (var managerApproval in Model)
+        {
+            SL = SL + 1;
+            for (int i = 0; i < managerApproval.LeaveApplications.Count; i++)
+            {
+                <tr>
+                    <td>@SL</td>
+                    <td>@managerApproval.Employees[i].EmployeeId</td>
+                    <td>@managerApproval.Employees[i].Name</td>
+                    <td>@managerApproval.Departments[i].Name</td>
+                    <td>@managerApproval.LeaveCategories[i].Name</td>
+                    <td>@managerApproval.LeaveApplications[i].Reason</td>
+                    <td>@managerApproval.LeaveApplications[i].ApplicationDate.ToShortDateString()</td>
+                    <td>@managerApproval.LeaveApplications[i].StartDate.ToShortDateString()</td>
+                    <td>@managerApproval.LeaveApplications[i].EndDate.ToShortDateString()</td>
+                    <td>@managerApproval.LeaveApplications[i].LeaveDays</td>
+                    @for (int s = 0; s < managerApproval.SigArray.Length; s++)
+                    {
+                        if (managerApproval.SigArray[s] == "button")
+                        {
+                            <td style="width:65px">
+                                @using (Html.BeginForm("ChangeApplicationStatus", "LeaveApplication", FormMethod.Get, new { @novalidate = "novalidate" }))
+                                {
+                                    <button type="submit" name="Approved" value="Approved" class="btn btn-success btn-xs" title="Approve"><i class="fa fa-check" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#managerModal" title="Denied"><i class="fa fa-check" aria-hidden="true"></i></button>
+
+                                    <div class="modal" id="managerModal" role="dialog">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    <h4 class="modal-title">Manager Comments</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="leaveApplicationId" value="@managerApproval.LeaveApplications[i].LeaveApplicationId" />
+                                                    <input type="text" name="comments" class="form-control" min="5" required />
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <input type="submit" name="Denied" value="Denied" class="btn btn-danger btn-xs" />
+                                                    <button type="button" class="btn btn-warning btn-xs" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </td>
+                        }
+                        else if (managerApproval.SigArray[s] == "Pending")
+                        {
+                            <td>
+                                <span style="width:65px" class="btn btn-warning btn-xs">Pending</span>
+                            </td>
+                        }
+                        else if (managerApproval.SigArray[s] == "Approved")
+                        {
+                            <td>
+                                <span style="width:65px" class="btn btn-success btn-xs">Approved</span>
+                            </td>
+                        }
+                        else if (managerApproval.SigArray[s] == "Rejected")
+                        {
+                            <td>
+                                <span style="width:65px" class="btn btn-danger btn-xs">Rejected</span>
+                            </td>
+                        }
+                        else if (managerApproval.SigArray[s] == "-")
+                        {
+                            <td>
+                                <span style="width:65px" class="btn btn-warning btn-xs"> </span>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        }
+    </table>
+
+</div>
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+        $("#approve").click(function () {
+            alert();
+            if ($('#approve').attr('id') == 'approve') {
+                $("#status").val("Approved")
+            }
+        })
+
+        $("#denied").click(function () {
+            if ($('#denied').attr('id') == 'denied') {
+                $("#status").val("Denied")
+            }
+        })
+    </script>
+
+}
+
+

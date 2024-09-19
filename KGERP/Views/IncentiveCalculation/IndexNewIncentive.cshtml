@@ -1,0 +1,359 @@
+﻿@model KGERP.Service.ServiceModel.IncentiveModels.IncentiveCalculationViewModel
+
+@{
+    ViewBag.Title = "Payment List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    h3 {
+        margin-top: 11px !important;
+        margin-bottom: -5px !important;
+    }
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .ui-front {
+        z-index: 2100 !important;
+    }
+
+    .ui-datepicker {
+        z-index: 2100 !important;
+    }
+
+    @@media (min-width: 768px) {
+        .modal-content {
+            width: 750px;
+        }
+    }
+
+    .input-group {
+        width: 100% !important;
+    }
+
+    .mb-2 {
+        margin-bottom: 15px !important;
+    }
+
+    .input-group .form-control {
+        max-width: 100%;
+    }
+
+    .badge-primary {
+        color: #fff;
+        background-color: #007bff;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+
+    .badge-dark {
+        color: #fff;
+        background-color: #343a40;
+    }
+
+    .badge-info {
+        color: #fff;
+        background-color: #17a2b8;
+    }
+
+    .content-header {
+        position: relative;
+        padding: 0px 15px 20px 5px;
+        background-color: #4caf5029 !important;
+    }
+
+    .list-group-horizontal {
+        -ms-flex-direction: !important;
+        flex-direction: row !important;
+    }
+
+    .list-group {
+        display: -ms-flexbox;
+        display: flex !important;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+
+
+</style>
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-sm-4">
+            <h3>
+                Incentive Calculation
+            </h3>
+        </div>
+    </div>
+</section>
+
+<div class="row">
+
+    <div class="col-md-3">
+        <div class="form-group">
+            <label>Project</label>
+            @Html.DropDownListFor(model => model.ProjectId, new SelectList(Model.ProjectList, "Value", "Text"), "==Select Project==", new { id = "ddlProjectId", @class = "form-control", required = "required", style = "max-width:100%" })
+            @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    @*<div class="col-md-6">
+            <div class="form-group">
+                <label>File Info</label>
+                @Html.DropDownListFor(model => model.CGId, Model.GroupList as SelectList, "==Select File No==", new { id = "ddlCGId", @class = "form-control searchingDropdown", required = "required", style = "max-width:100%" })
+                @Html.ValidationMessageFor(model => model.CGId, "", new { @class = "text-danger" })
+            </div>
+
+        </div>*@
+
+
+
+</div>
+<div class="pull-right" style="margin-bottom:25px;">
+    <label for="searchInput">Search: </label>
+    <input type="text" id="searchInput" oninput="filterTable()" placeholder="Type to search">
+</div>
+
+<div style="margin-top:25px;" >
+    <table  class="table table-bordered" id="data-table" border="1">
+        <thead>
+            <tr>
+                <th>Serial</th>
+                <th>Group Name</th>
+                <th>File No</th>
+                <th>
+                    @if (Model.CompanyId == 7)
+            {
+
+
+<span>Plot Name</span>
+}
+else
+            {
+                <span>Flat Name</span>
+            }
+                </th>
+
+                <th>Primary Contact No</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically appended here -->
+        </tbody>
+    </table>
+</div>
+<button onclick="submitSelectedRows()">Submit</button>
+
+<div class="mt-4" id="objectinformation" style="margin-top:20px;margin-bottom:20px">
+
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        $('.datepickeronPage').datepicker({
+            dateFormat: 'dd-M-yy',
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "1950:+150"
+        });
+
+    var selectedRows = []; // Array to store selected rows
+    var data = [];
+
+   var selectedRows = []; // Array to store selected rows
+
+$("#ddlProjectId").change(function () {
+    var projectId = $("#ddlProjectId").val();
+    console.log(projectId);
+
+    // Clear table before making AJAX call
+    $('#data-table tbody').empty();
+
+    // Show loader while waiting for AJAX response
+    showLoader();
+
+    $.ajax({
+        type: "GET",
+        url: "@Url.Action("GetGroupListByProjectIdforIncentiveNew", "RealStateMoneyReceipt")",
+        datatype: "Json",
+        data: { companyId: "@Model.CompanyId", projectId: projectId },
+        success: function (data) {
+            console.log("ok done", data);
+
+            // Append new data to the table
+            appendDataToTable(data);
+
+            // Hide loader after successful AJAX response
+            hideLoader();
+        },
+        error: function () {
+            // Handle error case
+            console.log("error");
+
+            // Hide loader on error as well
+            hideLoader();
+        }
+    });
+});
+
+// Function to show loader
+function showLoader() {
+    // You can customize this function to display your loader as per your UI design
+    // For example, you might want to show a spinner or a loading message
+    // Here's a simple example using an overlay with a loading text
+    $("body").append('<div id="loader-overlay"><div class="loader"></div>Loading...</div>');
+}
+
+// Function to hide loader
+function hideLoader() {
+    // Remove the loader overlay
+    $("#loader-overlay").remove();
+}
+
+;
+
+    function appendDataToTable(data) {
+        data.forEach(function (item, index) {
+            var row = '<tr>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + item.GroupName + '</td>' +
+                '<td>' + item.FileNo + '</td>' +
+                '<td>' + item.ProductName + '</td>' +
+                '<td>' + item.PrimaryContactNo + '</td>' +
+                '<td><input type="checkbox" name="actionCheckbox" onclick="toggleSelection(' + item.Value + ')"></td>' +
+                '</tr>';
+            $('#data-table tbody').append(row);
+        });
+    }
+
+    // Function to filter table based on search input
+    function filterTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("data-table");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1]; // Change index based on the column you want to search
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+
+    //function toggleSelection(index) {
+    //    console.log(index);
+    //    if (selectedRows.length > 0) {
+    //        var res = selectedRows.find(row => row.value == index);
+    //        console.log("res", res);
+    //        if (res == null) {
+    //            selectedRows.push(index);
+    //        } else {
+    //            selectedRows.splice(index, 1);
+    //        }
+    //    }
+    //    else {
+    //        selectedRows.push(index);
+    //    }
+    //    console.log("hi", selectedRows);
+
+    //}
+
+    function toggleSelection(index) {
+        console.log(index);
+
+        if (selectedRows.length > 0) {
+            var resIndex = selectedRows.indexOf(index);
+
+
+            if (resIndex === -1) {
+                // The index is not in the array, so add it
+                selectedRows.push(index);
+            } else {
+                // The index is in the array, so remove it
+                selectedRows.splice(resIndex, 1);
+            }
+        } else {
+            // If the array is empty, simply add the index
+            selectedRows.push(index);
+        }
+
+
+    }
+function submitSelectedRows() {
+    var listdata = JSON.stringify(selectedRows);
+    const vm = {
+        companyId: @Model.CompanyId,
+        list: listdata
+    }
+
+    console.log(selectedRows);
+    $.ajax({
+        url: '/IncentiveCalculation/ReceiveArray',
+        type: 'POST',
+        datatype: 'json',
+        data: vm,
+        traditional: true,
+        success: function (data) {
+            console.log('Server response:', data);
+
+            // Check if the server response is equal to the string 'true'
+            if (data) {
+                // Display a custom fade-away alert
+                alert('Successfully added!');
+                location.reload();
+            } else {
+                // Handle other success scenarios if needed
+            }
+        },
+        error: function (error) {
+            console.error('Error:', error);
+            // Handle error scenarios if needed
+        }
+    });
+}
+
+   
+
+
+    function getSelectedRows() {
+        console.log("hi2",selectedRows);
+    }
+
+</script>
+
+}

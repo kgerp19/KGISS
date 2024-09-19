@@ -1,0 +1,352 @@
+﻿@model KGERP.Data.CustomModel.VehicleVm
+@{
+    ViewBag.Title = "Car Requsition";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+}
+
+
+
+<style>
+    table {
+        font-family: Arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        color: white;
+        font-weight: bold;
+       
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #e0e0e0;
+    }
+
+    td {
+        font-size: 14px;
+    }
+
+    /* Custom styling for table columns */
+    .officer-column {
+        color: rgba(0, 0, 0, 0.7); /* Set the text color to a dark color with an alpha value */
+        font-weight: bold;
+    }
+
+
+    .day-type-column {
+        color: #28a745;
+    }
+
+    .time-column {
+        color: #dc3545;
+    }
+
+    .location-column {
+        color: #ffc107;
+    }
+
+    .total-persons-column {
+        color: #17a2b8;
+    }
+
+    .project-name-column {
+        color: #6610f2;
+    }
+
+    .driver-name-column {
+        color: #6c757d;
+    }
+
+
+    .tim {
+        width: 100%;
+        padding: 10px 0;
+        background-color: lightblue;
+        text-align: center;
+        font-family: Bahnschrift;
+    }
+
+
+    .clock-container {
+        background-color: #333; /* Clock background color */
+        color: #fff; /* Clock text color */
+        text-align: center;
+        padding: 20px;
+    }
+
+    #clock {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 3rem;
+        letter-spacing: 0.05em;
+        text-shadow: 0 0 20px rgba(10, 175, 230, 1), 0 0 20px rgba(10, 175, 230, 0);
+    }
+
+    #date {
+        font-size: 1rem; 
+        margin-top: 10px; 
+    }
+    /* Style for the datepicker input */
+    .datepicker {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 16px;
+        width: 100%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.2s;
+    }
+
+        .datepicker:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+
+    #btnSave {
+        border-radius: 0; 
+        padding: 12px 24px; 
+        font-size: 18px; 
+        background-color: #007bff; 
+        color: #fff; 
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+        #btnSave:hover {
+            background-color: #0056b3; 
+            transform: scale(1.05); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+        }
+
+    .btn-premium {
+        background-color: rgba(52, 152, 219, 0.7); /
+        color: #ffffff; /* White text */
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .btn-premium:hover {
+            background-color: rgba(52, 152, 219, 1); 
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+
+    #sv {
+        background-color: #F5F5F5; 
+        color: #000000; 
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s, color 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    }
+
+        #sv:hover {
+            background-color: #C0C0C0; 
+            color: #000000; 
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+    .mar {
+        background-color: #f0f0f0;
+        height: 60px;
+        align-items: center; 
+        justify-content: center;
+    }
+    marquee {
+        color: #333; 
+        font-size: 15px; 
+        font-family: "Arial", sans-serif; 
+        font-weight:  bold; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        width: 100%; 
+    }
+</style>
+<div class="clock-container">
+    <div id="clock"></div>
+    <div id="date"></div> <!-- Added a new div for displaying the date -->
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+
+        // Convert hours to 12-hour format
+        const formattedHours = (hours % 12) || 12;
+
+        const timeString = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+        document.getElementById('clock').textContent = timeString;
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('en-US', options);
+        document.getElementById('date').textContent = dateString;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock(); // Call the function once to initialize the clock.
+</script>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            @using (Html.BeginForm("CarRequisitionList", "Crms", FormMethod.Post, new { id = "CarReq", @class = "formValidator" }))
+            {
+                <section>
+                    <div class="form-group row">
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId", @class = "col-md-2" })
+                        <label class="control-label col-md-4 text-right mt-2">From Date:</label>
+                        <div class="col-md-6 input-group">
+                            @Html.EditorFor(model => model.Strdate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+                            <div class="input-group-append">
+                                <button type="submit" id="btnSave" class="btn btn-primary">Show</button>
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.Strdate, "", new { @class = "text-danger" })
+                    </div>
+                </section>
+            }
+        </div>
+    </div>
+</div>
+
+<div>
+    <marquee class="mar"><img style="height:100px;" src="~/Images/car.png" />Car Requisition</marquee>
+</div>
+
+
+
+<table id="KgErpDataTable">
+    <thead>
+        <tr>
+            <th class="officer-column">Sl</th>
+            <th class="officer-column">Officer Name</th>
+            <th class="officer-column">Date</th>
+
+            <th class="officer-column">Time</th>
+            <th class="officer-column">Location</th>
+            <th class="officer-column text-center">Total Persons</th>
+            <th class="officer-column">Project Name</th>
+            <th class="officer-column">Reason</th>
+            <th class="officer-column">Driver Name</th>
+            <th class="officer-column">Action</th>
+        </tr>
+    </thead>
+    @{int sl = 0;
+    }
+    <tbody>
+        @foreach (var item in Model.DataList)
+        {
+            <tr>
+                <td>   @(++sl)</td>
+                <td>@item.OfficerName </td>
+                <td>@item.Date.ToString("dd-MMM-yyyy") </td>
+
+                <td>@item.Time</td>
+                <td>@item.Location</td>
+                <td class="text-center">@item.TotalPersion</td>
+                <td>@item.ProjectName</td>
+                <td>@item.Reason</td>
+                <td class="drvname">
+                    <b>@item.DriverName</b>
+                </td>
+                <td>
+                    <a class="btn btn-primary btn-premium Assign">
+                        Assign <i class="fas fa-pen"></i> <!-- Use 'fas' for Font Awesome solid icons -->
+                    </a>
+                    <button id="sv" class="btn btn-success  Try d-none">Save</button>
+                    <input hidden="hidden" id="vid" value="@item.VehicleRequisitionId" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <!-- Include jQuery and jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="~/Scripts/time-picker.js"></script>
+
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+
+    $('.datepicker').datepicker({
+        dateFormat: "dd/mm/yy",
+        showOn: 'both',
+        buttonText: "<i class='fa fa-calendar'></i>",
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "2001:+50"
+    });
+        $(document).ready(function () {
+            $(".Assign").click(function () {
+                var row = $(this).closest("tr");
+                var driverNameCell = row.find(".drvname");
+                var currentDriverName = driverNameCell.find("b").text();
+                driverNameCell.html('<input type="text" id="newValue" class="form-control" value="' + currentDriverName + '">');
+                row.find(".Try").removeClass("d-none");
+                $(this).hide(); // Hide the "Assign" button
+            });
+        });
+
+    $(".Try").click(function () {
+        var row = $(this).closest("tr");
+        var b = row.find("#vid").val();
+        var abc = row.find("#newValue").val();
+
+
+        var v = {
+            'VehicleRequisitionId': b,
+            'DriverName': abc,
+        };
+           $.ajax({
+                 type: "post",
+                 url: "@Url.Action("SaveDriverName", "Crms")",
+                 datatype: "json",
+                 data: { model: v },
+                 success: function (data) {
+
+                     location.reload();
+                    }
+             });
+
+
+        });
+
+
+    </script>
+}

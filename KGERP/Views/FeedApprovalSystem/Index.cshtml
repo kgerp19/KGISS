@@ -1,0 +1,574 @@
+﻿@model KGERP.Service.Implementation.OrderApproval.ViewModels.OrderMasterSignatoryApprovalVM
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int companyId = ViewBag.CompanyId ?? 0;
+}
+<style>
+    .overdate {
+        z-index: 1400;
+        position: absolute;
+    }
+
+    textarea {
+        min-width: 100% !important;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Sale Order List
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+    </ol>
+</section>
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("Index", "FeedApprovalSystem", FormMethod.Get, new { @class = "formValidator" }))
+                        {
+                            @Html.Hidden("companyId", new { htmlAttributes = new { @value = companyId } })
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="GeneralRequisitionType" class="control-label">Approval Status</label>
+                                        @*@Html.DropDownList("SignatoryStatus", new SelectList(Enum.GetValues(typeof(SignatoryStatusEnum))), "--Select--", new { @class = "form-control", @data_val = "false", @id = "signStatus" })*@
+                                        @Html.DropDownListFor(x => x.SignatoryStatus, new SelectList(Enum.GetValues(typeof(SignatoryStatusEnum))), "--Select--", new { @class = "form-control", @data_val = "false", @id = "signStatus" })
+                                        @Html.ValidationMessage("SignatoryStatus", "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.Editor("fromDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessage("fromDate", "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.Editor("toDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessage("toDate", "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <hr />
+
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Order Date</th>
+                                        <th>OrderNo</th>
+                                        <th>Customer</th>
+                                        <th>Remarks</th>
+                                        <th>
+                                            Approval Date
+                                        </th>
+                                        <th>
+                                            Approval Time
+                                        </th>
+                                        <th>Status</th>
+                                        <th>Invoice</th>
+                                        <th>Details</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.datalist)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">
+                                                @(++sl)
+                                            </td>
+                                            <td>
+                                                @item.OrderDate.Value.ToString("dd/MMM/yyyy")
+                                            </td>
+                                            <td>@item.OrderNo</td>
+                                            <td>
+                                                @item.CoustomerName
+                                            </td>
+                                            <td>
+                                                @item.Comments
+                                            </td>
+                                            <td>
+                                                @if (item.ApprovalDate != null)
+                                                {
+                                                    @item.ApprovalDate.Value.ToString("dd/MMM/yy")
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.ApprovalDate != null)
+                                                {
+                                                    @item.ApprovalDate.Value.ToString("hh:mm tt")
+                                                }
+                                            </td>
+                                            <td style="text-align:center">
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Submit)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        GM Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.GMApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        MD Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.MDApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Accounts Approval Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.AccountsApproval)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Deliver Pending
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.StoreAcceptance)
+                                                {
+                                                    <span class="btn btn-warning btn-xs">
+                                                        Accepted By Store
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.PartialDelivered)
+                                                {
+                                                    <span class="btn btn-primary btn-xs">
+                                                        Partially Delivered
+                                                    </span>
+                                                }
+                                                @if (item.Status == (int)EnumFeedSalesStatus.Delivered)
+                                                {
+                                                    <span class="btn btn-success btn-xs">
+                                                        Delivered
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-info btn-xs" target="_blank" href="~/Report/GetFeedInvoiceReport?orderMasterId=@item.OrderMasterId"><i class="fa fa-print"></i> Sales Invoice</a>
+
+                                            </td>
+                                            <td style="text-align:center; width:50px;">
+
+                                                <a href="@Url.Action("FeedProcurementSalesOrderSlave","Procurement",  new {companyId = item.CompanyId,productType=item.ProductType,  orderMasterId=item.OrderMasterId})" title="Details" class="btn btn-primary btn-xs">
+                                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                @if (item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending)
+                                                {
+                                                    <a onclick="loadActionModal(@companyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top" class="btn btn-primary btn-xs"> <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></a>
+                                                    <a onclick="loadActionModal(@companyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Rejected));" data-toggle="modal" data-target="#actionModal" title="Reject" data-placement="top" class="btn btn-danger btn-xs">  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                                }
+                                                @*else if (item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Rejected)
+                                                    {
+                                                        <a onclick="loadActionModal(@companyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
+                                                        <button class="btn btn-sm pr-1 text-danger">@item.SignatoryStatus</button>
+                                                    }*@
+                                                else
+                                                {
+                                                    <button class="btn btn-sm pr-1 text-primary">@item.SignatoryStatus</button>
+                                                }
+                                                <a onclick="loadSignatory(@item.OrderMasterId);" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top">  <span class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("UpdateSignatoryStatus", "FeedApprovalSystem", FormMethod.Post))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="actionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h3 class="modal-title"><b>Approval Signatory</b><span id="rqNumber"></span></h3>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.Hidden("Id")
+                    @Html.Hidden("UserCompanyId")
+                    @Html.Hidden("SignatoryStatus")
+                    <textarea id="Comment" name="Comment" placeholder="Write your valuable comment here" rows="3"></textarea>
+                    <div style="text-align:center">
+                        @*<h3>Are you sure to Reject this general requisition?</h3>*@
+                        <h3 id="modalTitle"></h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetActionModal()" class="btn btn-warning fa fa-close" data-dismiss="modal">NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnName" style="width:100%" class="btn btn-danger fa fa-remove"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="modal fade" id="signatoryModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                    &times;
+                </button>
+                <h5 class="modal-title"><b>Approval Signatory</b></h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-responsive-md table-striped table-hover" id="signatoryTable">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Signatory Id</th>
+                            <th scope="col">Signatory</th>
+                            <th scope="col">Designation</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Approved Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sigantoryTableBody">
+                        @*@if (Model.RequisitionApprovalLIst != null)
+                            {
+                                int ii = 1;
+                                foreach (var item in Model.RequisitionApprovalLIst)
+                                {
+                                    <tr>
+                                        <td>@(ii++)</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.DesignationName</td>
+                                        <td>@item.Status</td>
+                                    </tr>
+                                }
+                            }*@
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#signStatus").val('');
+
+        $("#toDate").val("@(DateTime.Today.ToString("yyyy/MM/dd"))");
+        $("#fromDate").val("@(DateTime.Today.AddMonths(-2).ToString("yyyy/MM/dd"))");
+            $(function () {
+                $("#RequestForPersonName").autocomplete({
+                source: function (request, response) {
+                    $.ajax
+                        ({
+                            url: "/Configuration/EmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data,
+                                    function (item) {
+                                        return { label: item.label, value: item.label, id: item.val }
+                                    }));
+                            },
+                            error: function (e) { }
+                        });
+                },
+                minLength: 1,
+                delay: 500,
+                autoFocus: true,
+                select: function (event, ui) {
+                    console.log(ui);
+                    $("#RequestForPersonId").val(ui.item.id);
+                }
+            });
+        });
+     });
+
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+        function makeDeletable(id, companyId,rqNumber) {
+            $("#id").val(id);
+            $("#companyId").val(companyId);
+            $("#rqNumber").text(" #" + rqNumber);
+
+        }
+
+    function makeEditable(id, userCompanyId, rqNumber, requisitionTypeId, categoryId, companyId, departmentId, remarks) {
+            $("#rqNumber").text(" #" + rqNumber);
+             $("#GeneralRequisitionType").val(requisitionTypeId);
+            $("#Remarks").val(remarks);
+             $("#UserCompanyId").val(userCompanyId);
+            $("#Id").val(id);
+            LoadCategory(categoryId);
+            if (requisitionTypeId == @((int)KGERP.Utility.BusinessTypeEnum.Company)) {
+                LoadCompany(companyId);
+            }
+            if (requisitionTypeId ==  @((int)KGERP.Utility.BusinessTypeEnum.Division)) {
+                //$('#CompanyName').text("Select Division");
+                LoadDepartment(departmentId);
+            }
+        }
+        function resetUpdateModal() {
+            $("#CommonId").html("");
+            $("#Remarks").val("");
+            $("#UserCompanyId").val(null);
+          //  $("#GeneralRequisitionType").val(0);
+            $("#CategoryId").html("");
+            $("#Id").val(null);
+            $("#rqNumber").text("");
+        }
+
+        function LoaderFunction(id) {
+            var requisitionTypeId = $("#GeneralRequisitionType").val();
+            if (requisitionTypeId == 0) {
+                return;
+            }
+            LoadCategory();
+            if (requisitionTypeId == @((int)KGERP.Utility.BusinessTypeEnum.Company)) {
+                $('#CompanyName').text("Select Company");
+                LoadCompany();
+            }
+            if (requisitionTypeId ==  @((int)KGERP.Utility.BusinessTypeEnum.Division)) {
+                $('#CompanyName').text("Select Division");
+                LoadDepartment();
+            }
+        }
+        function LoadCompany(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllCompanyAutoComplete",
+                //data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    var content = '<option>Select Company</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                    if (id != null && id > 0) {
+                        $("#CommonId").val(id);
+                    }
+                }
+            })
+        }
+        function LoadDepartment(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllDepartmentAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CommonId").html("");
+                    var content = '<option>Select Division</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CommonId").append(content)
+                    if (id != null && id > 0) {
+                        $("#CommonId").val(id);
+                    }
+                }
+            })
+        }
+        function LoadCategory(id) {
+            $.ajax({
+                type: "GET",
+                url: "/AutoComplete/GetAllGRQSProductCategoryAutoComplete",
+                // data: { CompanyId: CompanyId },
+                success: function (res) {
+                    $("#CategoryId").html("");
+                    var content = '<option>Select Category</option>';
+                    $.each(res,
+                        function (index, itemData) {
+                            content += '<option value=' + itemData.Id + '>' + itemData.Name + '</option>'
+                        })
+
+                    $("#CategoryId").append(content)
+
+                    if (id != null && id > 0) {
+                        $("#CategoryId").val(id);
+                    }
+                }
+            })
+        }
+        function loadSignatory(id) {
+            $.ajax({
+                type: "GET",
+                url: "/FeedApprovalSystem/GetApprovalList",
+                data: { orderMasterId: id },
+                success: function (data) {
+                    console.log(data);
+
+                    // Assuming data is an array of signatories
+                    var tbody = $("#sigantoryTableBody");
+
+                    // Clear existing rows
+                    tbody.empty();
+
+                    // Loop through the data and add rows to the table
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        var statusCell = (item.SignatoryStatus === 0) ? "<td>Pending</td>" : (item.SignatoryStatus === 1) ? "<td>Approved</td>" : "<td>Rejected</td>";
+                        var appdate = null;
+                        if (item.ApprovalDate != null) {
+                             appdate = DateCustom(item.ApprovalDate);
+                        } else {
+                            appdate = "";
+                        }
+
+                        var row = "<tr>" +
+                            "<td>" + (i + 1) + "</td>" +
+                            "<td>" + item.EmployeeId + "</td>" +
+                            "<td>" + item.EmployeeName + "</td>" +
+                            "<td>" + item.DesignationName + "</td>" +
+                            statusCell +
+                            "<td>" + appdate + "</td>" +
+
+                            "</tr>";
+
+                        // Append the new row to the table body
+                        tbody.append(row);
+                    }
+                }
+            });
+        }
+
+        function loadActionModal(companyId, id, statusEnum) {
+
+            $("#Id").val(id);
+            $("#SignatoryStatus").val(statusEnum);
+            $("#UserCompanyId").val(companyId);
+
+            $("#Comment").removeAttr("class");
+            $("#Comment").addClass("form-control");
+
+            if (statusEnum == @((int)KGERP.Utility.SignatoryStatusEnum.Rejected)) {
+                $("#modalTitle").text("Are you sure you want to reject this item ?");
+
+                $("#modalTitle").removeAttr("class");
+                $("#modalTitle").addClass("text-danger");
+                $("#btnName").removeAttr("class");
+                $("#btnName").addClass("btn btn-danger fa fa-remove");
+                $("#btnName").text(" Reject");
+            } else {
+                $("#modalTitle").text("Are you sure you want to approved this item?");
+                $("#modalTitle").removeAttr("class");
+                $("#modalTitle").addClass("text-primary");
+                $("#btnName").removeAttr("class");
+                $("#btnName").addClass("btn btn-primary fa fa-check");
+                $("#btnName").text(" Approved");
+            }
+        }
+        $("#btnName").click(function () {
+            if ($("#btnName").text().trim() === "Approved") {
+                // Disable the button
+                $("#btnName").prop("disabled", true);
+
+                // Submit the form
+                $(this).closest('form').submit();
+            }
+        });
+        function resetActionModal() {
+            $("#Id").val(0);
+            $("#SignatoryStatus").val('');
+            $("#UserCompanyId").val(0);
+        }
+
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "/" + month + "/" + year;
+            return date;
+        }
+
+        //function loadSignatory(id) {
+        //    $.ajax({
+        //        type: "GET",
+        //        url: "/GeneralRequisition/GetApprovalList",
+        //        data: { requisitionId: id },
+        //        success: function (data) {
+        //            // Get the table element from the HTML
+        //            const table = document.getElementById('sigantoryTableBody');
+        //            while (table.rows.length > 0) {
+        //                table.deleteRow(0);
+        //            }
+        //            data.forEach((item, index) => {
+        //                const row = table.insertRow(index);
+
+        //                // Display specific fields in the table
+        //                const fieldsToDisplay = ['OrderBy', 'EmployeeIdString', 'EmployeeName', 'DesignationName', 'StatusString', 'ApprovedTime'];
+
+        //                fieldsToDisplay.forEach((field) => {
+        //                    const cell = row.insertCell();
+        //                    cell.innerHTML = item[field];
+        //                });
+        //            });
+        //        }
+        //    })
+        //}
+    </script>
+}

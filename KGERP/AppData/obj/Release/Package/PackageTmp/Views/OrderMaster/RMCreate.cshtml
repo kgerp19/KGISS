@@ -1,0 +1,372 @@
+﻿@model KGERP.Service.ServiceModel.OrderMasterModel
+@{
+    ViewBag.Title = "Order Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var productType = Request.QueryString["productType"];
+}
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    .remove {
+        width: 40px;
+        height: 25px;
+        font-size: 16px;
+        background-color: #dd4b39;
+        color: white;
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+@using (Html.BeginForm("Create", "OrderMaster", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.CompanyId)
+    @Html.HiddenFor(x => x.ProductType)
+    <div class="row">
+        <div class="panel-heading" style="background-color:#3c8dbc;color:#ffffff">
+            <span style="font-size:15px;font-family:Arial;font-weight:bold"> New Order</span>
+        </div>
+        <div class="panel-body" style="padding-left:0px;padding-right:0px">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.StockInfoId, htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownListFor(model => model.StockInfoId, new SelectList(Model.OrderLocations, "Value", "Text"), "---Select---", new { @id = "ddlOrderLocation", @class = "dropdownsize form-control" })
+                @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.CustomerId, htmlAttributes: new { @class = "control-label" })
+                <input type="hidden" id="hfVendor" name="CustomerId" />
+                @Html.EditorFor(model => model.Customer, new { htmlAttributes = new { @class = "form-control", @name = "VendorName", @id = "txtVendor" } })
+                @Html.ValidationMessageFor(model => model.Customer, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                <label for="CompanyName" class="control-label">Company Name</label>
+                <input type="text" class="form-control" id="CompanyName" readonly>
+            </div>
+            <div class="col-md-3">
+                <label for="Address" class="control-label">Address</label>
+                <input type="text" class="form-control" id="Address" readonly>
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.OrderNo, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.OrderNo, new { htmlAttributes = new { @id = "txtOrderNo", @class = "form-control", @autocomplete = "off", @readonly = "readonly" } })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.OrderDate, htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.OrderDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                <br />
+                @Html.ValidationMessageFor(model => model.OrderDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.ExpectedDeliveryDate, htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.ExpectedDeliveryDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off", } })
+                <br />
+                @Html.ValidationMessageFor(model => model.ExpectedDeliveryDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                <label for="Customer" class="control-label">Description</label>
+                <textarea id="remarks" name="Remarks" class="form-control" autocomplete="off"></textarea>
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.SalePersonId, htmlAttributes: new { @class = "control-label" })
+                <br />
+                @Html.EditorFor(model => model.SalePersonName, new { htmlAttributes = new { @class = "form-control", @name = "employee", @id = "employee" } })
+                @Html.ValidationMessageFor(model => model.SalePersonName, "", new { @class = "text-danger" })
+                @Html.HiddenFor(x => x.SalePersonId, new { @id = "salePersonId", @name = "salePersonId" })
+            </div>
+        </div>
+    </div>
+
+    <div class="row details">
+        <table class="table table-responsive">
+            <tr style="background-color:#3c8dbc;color:#ffffff">
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Amount</th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr class="mycontainer" id="mainrow">
+                <td style="width:275px">
+                    <input type="text" id="product" name="product" class="form-control" />
+                    <input type="hidden" id="hfProductId" name="productId" />
+                </td>
+                <td>
+                    <input type="text" id="qty" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid quantity required</span>
+                </td>
+
+                <td>
+                    <input type="text" id="unitPrice" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid Unit Price required</span>
+                </td>
+
+                <td hidden>
+                    <input type="hidden" id="avgPrice" class="qty form-control" autocomplete="off" style="text-align:right" />
+                    <span class="error">Valid Unit Price required</span>
+                </td>
+
+                <td>
+                    <input type="text" id="amount" class="qty form-control" autocomplete="off" style="text-align:right" readonly />
+                </td>
+                <td>
+                    <button type="button" id="add" class="btn btn-primary pull-right"><i class="fa fa-plus-circle"></i>&nbsp; Add</button>
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems">
+            <table class="table" id="orderdetailsItems">
+                <thead>
+                    <tr style="background-color:#3c8dbc;color:#ffffff;font-weight:bold">
+                        <th>Sl</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itemDetails"></tbody>
+            </table>
+            <span id="orderItemError" class="danger"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-9 pull-right">
+            <table>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input id="submit" type="submit" onclick="javascript: return SubmitForm();" value="Submit" class="btn btn-success pull-right" style="padding:5px 10px;margin-top:5px" />
+                        <a href="@Url.Action("Index",new { companyId=Model.CompanyId,productType=Model.ProductType})" id="cancel" class="btn btn-danger pull-right" style="padding:5px 10px;margin-right:10px;margin-top:5px">Cancel</a>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+}
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/Order/OrderGenerate.js"></script>
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        function SubmitForm() {
+            var r = confirm("Are you sure to submit?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        $(function () {
+            $("#txtVendor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Vendor/AutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfVendor").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        function loadCustomerInformation(customerId) {
+            $.ajax({
+                url: '/Vendor/GetCustomerInformation?customerId=' + customerId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#CompanyName').val(result.Name);
+                    $('#Address').val(result.Address);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+            $.ajax({
+                type: "post",
+                url: "/OfficerAssign/GetMarketingOfficersByCustomerZone",
+                data: { customerId: customerId },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var MarketingOfficer = "<select>";
+                    MarketingOfficer = MarketingOfficer + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        MarketingOfficer = MarketingOfficer + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    MarketingOfficer = MarketingOfficer + '</select>';
+                    $('#ddlMarketingOfficer').html(MarketingOfficer);
+                }
+            });
+        }
+
+        $(function () {
+            $("#product").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/AutoComplete/',
+                        data: '{"prefix":"' + request.term + '", "productType":"R"}',
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#hfProductId").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadProductPrice(ui.item.val);
+                    loadProductAvgPurchasePrice(ui.item.val);
+                }
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+        function loadProductPrice(productId) {
+            $.ajax({
+                type: "GET",
+                url: "/OrderMaster/GetProductUnitPrice",
+                data: { 'id': productId },
+                success: function (data) {
+                    $('#unitPrice').val(data.UnitPrice);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        function loadProductAvgPurchasePrice(productId) {
+            $.ajax({
+                type: "GET",
+                url: "/OrderMaster/GetProductAvgPurchasePrice",
+                data: { 'id': productId },
+                success: function (data) {
+                    $('#avgPrice').val(data);
+
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+
+        $(function () {
+            $("#employee").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#salePersonId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        $(function () {
+            $("#ddlOrderLocation").change(function () {
+                var stockInfoId = $("#ddlOrderLocation option:selected").val();
+                var productType = '@productType';
+
+                $.ajax({
+                    url: '/OrderMaster/GetNewOrderNo?stockInfoId=' + stockInfoId + "&productType=" + productType+"",
+                    type: "Post",
+                    async: true,
+                    processData: false,
+                    cache: false,
+                    success: function (response) {
+                        $('#txtOrderNo').val(response);
+                    },
+                    error: function (xhr) {
+                        //alert('error');
+                    }
+                });
+            });
+        });
+
+    </script>
+}
+

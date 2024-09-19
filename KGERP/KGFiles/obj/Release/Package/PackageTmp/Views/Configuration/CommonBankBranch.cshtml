@@ -1,0 +1,184 @@
+﻿@{
+
+    ViewData["Title"] = "Bank";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+@model KGERP.Service.Configuration.VMCommonBankBranch
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Bank Branch
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Bank Branch</li>
+    </ol>
+</section>
+@using (Html.BeginForm("CommonBankBranch", "Configuration", FormMethod.Post, new { id = "commonBankBranchFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">            
+                        <div class="box-body">
+                            <div class="col-md-4">   
+                                    @Html.AntiForgeryToken()
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            <h4>Add Bank Branch</h4>
+                                        <!-- /.box-header -->
+                                     <div class="box-body">
+                                            @Html.HiddenFor(model => model.ID, new { id = "bankBranchId" })
+                                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                                            @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                                            <div class="row">
+                                                <div class="form-group" style="padding:0px">
+                                                    <label for="message-text" class="col-form-label">Bank</label>
+                                                    @Html.DropDownListFor(model => model.BankId, Model.BankList as SelectList, "--Bank--", new { id = "ddlBankId", @class = "form-control", required = "true" })
+                                                    @Html.ValidationMessageFor(model => model.BankId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group" style="padding:0px">
+                                                    <label for="message-text" class="col-form-label">Bank Branch</label>
+                                                    @Html.TextBoxFor(model => model.Name, new { id = "txtBankBranchName", @class = "form-control input-sm", @placeholder = "Branch", required = "true" })
+                                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group" style="padding:0px">
+                                                    <label for="message-text" class="col-form-label">Address</label>
+                                                    @Html.TextBoxFor(model => model.Address, new { id = "txtAddress", @class = "form-control input-sm", @placeholder = "Address", required = "true" })
+                                                    @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-md-5">
+                                                        <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Reset</button>
+                                                    </div>
+                                                    <div class="col-md-7">
+                                                        <button style="width:100%;" type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>                        
+                            </div>
+                            <div class="table-responsive col-md-8">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:5%;">SL</th>
+                                            <th style="width:10%;">Bank</th>
+                                            <th style="width:15%;">Branch</th>
+                                            <th style="width:15%;">Address</th>
+                                            <th style="width:15%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    @{int sl = 0;
+                                    }
+                                    <tbody>
+                                        @foreach (var item in Model.DataList)
+                                        {
+
+                                        <tr>
+                                            <td>@(++sl)</td>
+                                            <td>
+                                                <input type="hidden" id="commonBankId_@item.ID" value="@item.BankId" />
+                                                @item.BankName
+                                            </td>
+                                            <td id="tdBankBranchName_@item.ID">@item.Name</td>
+                                            <td id="tdAddress_@item.ID">@item.Address</td>
+                                            <td>
+                                                <a id="@item.ID" onclick="makeEditble(this);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                                <a id="@item.ID" onclick="makeDeletable(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#deleteBankBranchModal" title="Delete"
+                                                   data-placement="top">
+                                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                </a>
+                                             </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                   
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+
+@using (Html.BeginForm("CommonBankBranch", "Configuration", FormMethod.Post, new { id = "commonBankBranchDeleteFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.HiddenFor(model => model.ID, new { id = "bankBranchIdDelete" })
+    @Html.HiddenFor(model => model.ActionId, new { id = "ActionIdDelete" })
+    @Html.HiddenFor(model => model.BankId, new { id = "bankIdDelete" })
+
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFKDelete" })
+
+    <div class="modal fade" id="deleteBankBranchModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Branch  Delete</b></h5>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this branch?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+
+        });
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#bankBranchId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#ddlBankId').val($('#commonBankId_' + rowId).val().trim()).trigger('change');
+                $('#txtBankBranchName').val($('#tdBankBranchName_' + rowId).text().trim());
+                $('#txtAddress').val($('#tdAddress_' + rowId).text().trim());
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#bankBranchIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+            }
+        }
+        function resetForm() {
+            $('#commonBankBranchFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+        }
+    </script>
+}
+

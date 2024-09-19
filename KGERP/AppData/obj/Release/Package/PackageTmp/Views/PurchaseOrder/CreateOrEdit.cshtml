@@ -1,0 +1,690 @@
+﻿@model KGERP.ViewModel.PurchaseOrderViewModel
+
+@{
+    ViewBag.Title = "Purchase Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string LCDIVClass = Model.PurchaseOrder.ProductOriginId == 446 ? "" : "none";
+}
+
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.PurchaseOrder.PurchaseOrderId > 0)
+        {
+            <span>Purchase Order of: <a target="_blank" href="#">@Model.PurchaseOrder.PurchaseOrderNo</a></span>
+        }
+        else
+        {
+            <span>Purchase Order</span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Purchase Order</li>
+    </ol>
+</section>
+@using (Html.BeginForm("CreateOrEdit", "PurchaseOrder", FormMethod.Post, new { id = "CreateOrEditFromId", @class = "formValidator" }))
+{
+
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                @Html.EditorFor(model => model.PurchaseOrder.PurchseOrderMessage, new { htmlAttributes = new { @id = "txtPurchseOrderMessage", @style = "display:none" } })
+                @Html.HiddenFor(x => x.PurchaseOrder.PurchaseOrderId)
+                @Html.HiddenFor(x => x.PurchaseOrder.CompanyId, new { @id = "hfCompanyId" })
+                @Html.HiddenFor(x => x.PurchaseOrder.AccountHeadId, new { @id = "hfAccountHeadId" })
+
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        @if (Model.PurchaseOrder.PurchaseOrderId > 0)
+                        {
+                            <div class="col-md-1"> </div>
+                            <div class="col-md-10">
+                                <table class="table">
+                                    <tr>
+                                        <th style="width:18%">
+                                            PO No
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.PurchaseOrder.PurchaseOrderNo</label>
+                                        </td>
+                                        <th style="width:18%"> PO Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.PurchaseOrder.PurchaseDate.Value.ToString("dd-MMM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Mode Of Purchase</th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.ModeOfPurchaseId</td>
+                                        <th>Supplier</th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.ModeOfPurchase</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Purchase Order Type</th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.ProductOrigin</td>
+                                        <th>Order Delivery Date </th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.DeliveryDate.Value.ToString("dd-MMM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Responsible Person</th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.EmployeeName</td>
+                                        <th>Demand No </th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.DemandNo</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Remarks</th>
+                                        <th>:</th>
+                                        <td>@Model.PurchaseOrder.Remarks</td>
+                                    </tr>                           
+                                </table>
+                            </div>
+                            <div class="col-md-1"> </div>
+                        }
+                    <div class="box-body">
+
+                        @if (Model.PurchaseOrder.PurchaseOrderId == 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Purchase Order No</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.PurchaseOrderNo, new { htmlAttributes = new { @id = "txtPurchaseOrderNo", @class = "form-control", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Purchase Order Date</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.PurchaseDate, new { htmlAttributes = new { @class = "datepicker", @style = "width: 200px;", @id = "txtFormulaDate", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.PurchaseDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Mode Of Purchase</label>
+                                        @Html.DropDownListFor(model => model.PurchaseOrder.ModeOfPurchaseId, new SelectList(Model.ModeOfPurchases, "Value", "Text"), "---Select---", new { id = "ddlModeOfPurchase", @class = "dropdownsize form-control" })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.Days, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="divCreditDuration" style="display:none">
+                                    <div class="form-group">
+                                        <label>Credit Duration (Days)</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.Days, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.Days, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Supplier</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.SupplierName, new { htmlAttributes = new { @class = "form-control", @name = "supplier", @id = "supplier" } })
+                                        @Html.HiddenFor(x => x.PurchaseOrder.SupplierId, new { @id = "supplierId", @name = "supplierId" })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.SupplierName, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="form-group">
+                                        <table width="100%" class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th><span id="txtName"></span></th>
+                                                </tr>
+                                                <tr>
+                                                    <th><span id="txtAddress"></span></th>
+                                                </tr>
+                                                <tr>
+                                                    <th><span id="txtPhone"></span></th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Purchase Order Type</label>
+                                        @Html.DropDownListFor(model => model.PurchaseOrder.ProductOriginId, new SelectList(Model.ProductOrigins, "Value", "Text"), "---Select---", new { @id = "ddlProductOrigin", @class = "dropdownsize form-control", })
+                                    </div>
+                                </div>
+                                <div class="col-md-4" id="divCompanyName" style="display:none">
+                                    <div class="form-group">
+                                        <label>Company Name</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.CompanyName, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4" id="divLCNo" style="display:none">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3" for="LCId">LC No:</label>
+                                        <select class="searchingDropdown form-control" name="LCId" style="width:100%" id="idddlLC"></select>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4" id="divCountry" style="display:none">
+                                    <div class="form-group">
+                                        <label>Country of Origin:</label>
+                                        @Html.DropDownListFor(model => model.PurchaseOrder.CountryId, new SelectList(Model.Countries, "Value", "Text"), "-- Country of Origun--", new { id = "ddlCountryId", @class = "searchingDropdown form-control", @style = "width:100%" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Order Delivery Date</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.DeliveryDate, new { htmlAttributes = new { @class = "datepicker", @style = "width: 200px;", @id = "txtDeliveryDate", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.DeliveryDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="TermsAndCondition" class="col-form-label">Remarks:</label>
+                                        @Html.TextAreaFor(model => model.PurchaseOrder.Remarks, new { id = "txtRemarks", placeholder = "Remarks", @class = "form-control", rows = 2 })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.Remarks, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Responsible Person</label>
+                                        @Html.EditorFor(model => model.PurchaseOrder.EmployeeName, new { htmlAttributes = new { @class = "form-control", @name = "employeeName", @id = "employeeName" } })
+                                        @Html.HiddenFor(x => x.PurchaseOrder.EmpId, new { @id = "empId", @name = "empId" })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrder.EmployeeName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Demand No</label>
+                                        @Html.DropDownListFor(model => model.PurchaseOrder.DemandId, new SelectList(Model.Demands, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlDemand" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>
+                                        Raw Material
+                                    </label>
+                                    @Html.HiddenFor(model => model.PurchaseOrderDetail.UnitId, new { @id = "hfUnitId" })
+                                    @Html.DropDownListFor(model => model.PurchaseOrderDetail.ProductId, new SelectList(Model.RawMaterials, "Value", "Text"), "--Select--", new { @class = "", @id = "ddlRawMaterial", @style = "padding:5px 0px 5px 0px;width:100%;" })
+
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label>
+                                            Unit
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.UnitName, new { htmlAttributes = new { @id = "txtUnitName", @class = "", @style = "padding: 2px;width: 50px;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Present Stock
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.PresentStock, new { htmlAttributes = new { @id = "txtPresentStock", @class = "", @style = "padding: 2px;width: 100px;text-align:right;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Required Qty
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.RequiredQty, new { htmlAttributes = new { @id = "txtRequiredQty", @class = "", @style = "padding: 2px;width: 100px;text-align:right;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Purchased Qty
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.PurchasedQty, new { htmlAttributes = new { @id = "txtPurchasedQty", @class = "", @style = "padding: 2px;width: 100px;text-align:right;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Due Qty
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.DueAmount, new { htmlAttributes = new { @id = "txtDueAmount", @class = "", @style = "padding: 2px;width: 100px;text-align:right;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group" style="width:100%;">
+                                        <label>
+                                            Demand Rate
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.DemandRate, new { htmlAttributes = new { @id = "txtDemandRate", @class = "", @style = "padding: 2px;width: 80px;text-align:right;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Purchase Qty
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.PurchaseQty, new { htmlAttributes = new { @type = "text", @id = "txtPurchaseQty", @class = "", @style = "padding: 2px;width: 100px;text-align:right;font-weight:bold;width:100%;", @onkeyup = "calculateAmount()" } })
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Purchase Rate
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.PurchaseRate, new { htmlAttributes = new { @id = "txtPurchaseRate", @class = "", @style = "padding: 2px;width: 80px;text-align:right;font-weight:bold;width:100%;", @onkeyup = "calculateAmount()" } })
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Amount
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.Amount, new { htmlAttributes = new { @id = "txtAmount", @class = "", @style = "padding: 2px;width: 100px;text-align:right;border: 1px solid #999;background-color:#EEEEEE;width:100%;", @readonly = "readlonly" } })
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            Pack Size
+                                        </label>
+                                        @Html.EditorFor(model => model.PurchaseOrderDetail.PackSize, new { htmlAttributes = new { @id = "txtPackSize", @class = "", @type = "Text", @style = "padding: 2px;width: 80px;text-align:right;width:100%;", } })
+                                        @Html.ValidationMessageFor(model => model.PurchaseOrderDetail.PackSize, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            &nbsp;
+                                        </label>
+                                        <input type="button" id="btnAdd" value="Add" class="btn btn-primary pull-right" style="width:100%;" />
+                                    </div>
+                                </div>
+                                <table id="tableGrid" class="table table-responsive">
+                                    <thead style="background-color:#ddd">
+                                        <tr>
+                                            <th>Raw Material</th>
+                                            <th>Unit</th>
+                                            <th>Present Stock</th>
+                                            <th>Required Qty</th>
+                                            <th>Purchased Qty</th>
+                                            <th>Due Qty</th>
+                                            <th>Demand Rate</th>
+                                            <th>Purchase Qty</th>
+                                            <th>Purchase Rate</th>
+                                            <th>Amount</th>
+                                            <th>Pack Size</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails"></tbody>
+                                </table>
+                            </div>
+
+                        }
+                        @if (Model.PurchaseOrder.PurchaseOrderId > 0)
+                        {
+                            <div class="row">
+                                <table id="tableGrid" class="table table-responsive">
+                                    <thead style="background-color:#ddd;">
+                                        <tr>
+                                            <th>Raw Material</th>
+                                            <th>Unit</th>
+                                            <th>Present Stock</th>
+                                       
+                                            <th>Purchased Qty</th>
+                                          
+                                            <th>Demand Rate</th>
+                                            <th>Purchase Qty</th>
+                                            <th>Purchase Rate</th>
+                                            <th>Amount</th>
+                                            <th>Pack Size</th>
+                                  
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.PurchaseOrder.ItemList)
+                                        {
+
+                                            <tr>
+                                                <td>@item.RawMaterial</td>
+                                                <td>@item.UnitName</td>
+                                                <td>@item.PresentStock</td>
+                                               
+                                                <td>@item.PurchasedQty</td>
+                                         
+                                                <td>@item.DemandRate</td>
+                                                <td>@item.PurchaseQty</td>
+                                                <td>@item.PurchaseRate</td>
+                                                <td>@item.Amount</td>
+                                                <td>@item.PackSize</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        }
+
+                    </div>
+                        <div class="box-footer">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <a href="@Url.Action("Index", "PurchaseOrder", new { companyId = Model.PurchaseOrder.CompanyId})"
+                                       class="btn btn-warning">
+                                        <i class="fa fa-arrow-left" aria-hidden="true"></i> Back to List
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    @if (Model.PurchaseOrder.PurchaseOrderId == 0)
+                                    {
+                                        <input type="submit" id="btnSubmit" value="Submit" disabled onclick="return confirmSubmit()" class="btn btn-success" style="width:100%" />
+                                    }                                   
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Body Will by Start Here-->
+                        
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+
+
+
+
+
+<script src="~/Scripts/ApplicationScripts/Inventory_Feed/PurchaseOrder/PurchaseOrder.js"></script>
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        function confirmSubmit() {
+            var accountHeadId = $("#hfAccountHeadId").val();
+            var message = $("#txtPurchseOrderMessage").val();
+
+            if (accountHeadId == '') {
+                alert("The suppplier is not integrated with Accounts.\n Please set suppplier A/C number first.");
+                return false;
+            }
+            else {
+                if (message.length == 0) {
+                    return confirm("Are you sure you want to Submit this Purchase Order?")
+                }
+                return confirm(message);
+            }
+        }
+        $(function () {
+            $("#ddlModeOfPurchase").change(function () {
+                var value = $("#ddlModeOfPurchase option:selected").text();
+                if (value == 'Credit Purchase') {
+                    $("#divCreditDuration").show();
+                }
+                else {
+                    $("#divCreditDuration").hide();
+                }
+            });
+        })
+    var LCList;
+        $(function () {
+            $("#ddlProductOrigin").change(function () {
+                var value = $("#ddlProductOrigin option:selected").text();
+                ClearBindedValue();
+                if (value == 'Local') {
+                    $("#divCompanyName").show();
+                    $("#divCountry").hide();
+                    $("#divLCNo").hide();
+                    $('#idddlLC').empty();
+                }
+                else if (value == "LC (Foreign)") {
+                    $("#divCompanyName").hide();
+                    $("#divCountry").show();
+                    //$("#divForeignLC").show();
+                    $("#divLCNo").show();
+                    $('#idddlLC').empty();
+                    LCList = null;
+                    BindSelectBoxValue();
+                }
+                else  {
+                    $("#divCompanyName").hide();
+                    $("#divCountry").show();
+                    //$("#divForeignLC").hide();
+                    $("#divLCNo").hide();
+                    $('#idddlLC').empty();
+                   // LCList = null;
+                    //BindSelectBoxValue();
+                }
+            });
+        })
+        function ClearBindedValue() {
+            $("#txtPONo").val("");
+            //$("#ddlCountryId option[value='']").attr("selected", "selected");
+            //$("#ddlProductOriginId option[value='']").attr("selected", "selected");
+            $("#ddlCountryId").val("").trigger("change");
+            $("#ddlProductOriginId").val("").trigger("change");
+            $("#txtFreightCharge").val('');
+            $("#txtOtherCharge").val('');
+            $("#txtLCValue").val('');
+            $("#txtInsuranceNo").val('');
+            $("#txtPremiumValue").val('');
+        }
+        function BindSelectBoxValue() {
+             $.ajax({
+                type: "post",
+                 url: "/LC/GetLCList",
+                 data: { companyId: "@Model.PurchaseOrder.CompanyId.Value", LcType: $('#ddlProductOrigin').val() },
+                datatype: "json",
+                traditional: true,
+                 success: function (data) {
+                     console.log(data);
+                     LCList = data;
+                    var RawMaterial = "<select>";
+                    RawMaterial = RawMaterial + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        RawMaterial = RawMaterial + '<option value=' + data[i].LCId + '>' + data[i].LCNo + '</option>';
+                    }
+                    RawMaterial = RawMaterial + '</select>';
+                     $('#idddlLC').html(RawMaterial);
+                }
+            });
+    }
+        $("#idddlLC").change(function () {
+            var selectedLCID = document.getElementById("idddlLC").value;
+            console.log(selectedLCID);
+            if (LCList != null) {
+                let obj = LCList.find(o => o.LCId == selectedLCID);
+                console.log(obj);
+                $("#txtPONo").val(obj.PINo);
+                $("#ddlCountryId option[value='" + obj.OriginCountry + "']").attr("selected", "selected");
+                $("#ddlProductOriginId option[value='" + obj.ProductCountry + "']").attr("selected", "selected");
+                $('#ddlCountryId').select2().trigger('change');
+                $('#ddlProductOriginId').select2().trigger('change');
+                $("#txtFreightCharge").val(obj.FreighterCharge);
+                $("#txtOtherCharge").val(obj.OtherCharge);
+                $("#txtLCValue").val(obj.LCValue);
+                $("#txtInsuranceNo").val(obj.InsuranceNo);
+                $("#txtPremiumValue").val(obj.PremiumValue);
+            }
+        });
+
+        function calculateAmount() {
+            var purchaseQty = $('#txtPurchaseQty').val();
+            var purchaseRate = $('#txtPurchaseRate').val();
+            $('#txtAmount').val(parseFloat(parseFloat(purchaseQty) * parseFloat(purchaseRate)).toFixed(2));
+        }
+        $('#ddlDemand').change(function () {
+            var demandId = $('#ddlDemand option:selected').val();
+            var demand = $('#ddlDemand option:selected').text();
+            var purchaseOrderNo = $('#txtPurchaseOrderNo').val();
+            $('#txtPurchaseOrderNo').val(purchaseOrderNo + "/" + demand);
+            $.ajax({
+                type: "post",
+                url: "/Products/GetRawmaterialByDemand",
+                data: {companyId: "@Model.PurchaseOrder.CompanyId", demandId: $('#ddlDemand').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    var RawMaterial = "<select>";
+                    RawMaterial = RawMaterial + '<option value="">--Select--</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        RawMaterial = RawMaterial + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+                    }
+                    RawMaterial = RawMaterial + '</select>';
+                    $('#ddlRawMaterial').html(RawMaterial);
+                }
+            });
+        });
+        $(function () {
+            $("#ddlRawMaterial").change(function () {
+                var productId = $("#ddlRawMaterial option:selected").val();
+                var demandId = $('#ddlDemand option:selected').val();
+                console.log(productId);
+                console.log(demandId);
+
+                $.ajax({
+                    url: '/PurchaseOrder/GetPurchaseOrderItemInfo?productId=' + productId + '&demandId=' + demandId + '',
+                    type: "GET",
+                    async: true,
+                    processData: false,
+                    cache: false,
+                    success: function (result) {
+                        console.log(result.UnitId);
+                        $('#hfUnitId').val(result.UnitId);
+                        $('#txtUnitName').val(result.UnitName);
+                        $('#txtPresentStock').val(result.PresentStock);
+                        $('#txtRequiredQty').val(result.RequiredQty);
+                        $('#txtPurchasedQty').val(result.PurchasedQty);
+                        $('#txtDueAmount').val(result.DueAmount);
+                        $('#txtDemandRate').val(result.DemandRate);
+                        $('#txtPurchaseQty').val(result.PurchaseQty);
+                        $('#txtPurchaseRate').val(result.PurchaseRate);
+                        $('#txtAmount').val(result.Amount);
+                    },
+                    error: function (xhr) {
+                        alert('error');
+                    }
+                });
+            });
+        });
+        $(function () {
+            $("#supplier").autocomplete({
+                source: function (request, response) {
+                         $.ajax({
+                        url:"@Url.Action("GetSupplierAutoComplete", "Vendor")",
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.PurchaseOrder.CompanyId", prefix: request.term },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+
+                },
+                select: function (e, i) {
+                    $("#supplierId").val(i.item.val);
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    loadCustomerInformation(ui.item.val);
+                }
+
+
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+        function loadCustomerInformation(supplierId) {
+            $.ajax({
+                url: '/Vendor/GetSupplierInformation?supplierId=' + supplierId,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    $('#txtName').text("Name: " + result.ContactName);
+                    $('#txtAddress').text("Address: "+ result.Address);
+                    $('#txtPhone').text("Phone: "+result.Phone);
+                    $('#txtPurchseOrderMessage').val(result.Message);
+                    $('#hfAccountHeadId').val(result.HeadGLId);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+
+        }
+        $(function () {
+            $("#employeeName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeDesignationAutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '", "productType":"F"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#empId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+    </script>
+}

@@ -1,0 +1,114 @@
+﻿@model KGERP.Service.ServiceModel.ProductFormulaModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = TempData["message"];
+}
+
+@using (Html.BeginForm("CreateOrEdit", "ProductFormula", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.ProductFormulaId)
+    @Html.HiddenFor(x => x.CompanyId)
+
+    <div class="form-horizontal">
+        <h4>Product Formula</h4>
+        <hr style="border-color:#ff0000; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FProductId, htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.Product.ProductName, new { htmlAttributes = new { @class = "form-control", @name = "productName", @id = "productName" } })
+                @Html.HiddenFor(x => x.FProductId, new { @id = "fProductId", @name = "fProductId" })
+                @Html.ValidationMessageFor(model => model.FProductId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FQty, htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.FQty, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off", @readonly = "readonly" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FormulaDate, htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.FormulaDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.FormulaDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-3 ">
+                <a href="@Url.Action("Index",new { companyId=Model.CompanyId})" class="btn btn-danger" style="margin-right:15px">
+                    Cancel
+                </a>
+                <input type="submit" onclick='return confirm("Are you sure you want to submit?");' value="@Model.ButtonName" class="btn btn-primary" />
+            </div>
+        </div>
+
+    </div>
+}
+
+@*<div>
+        @Html.ActionLink("Back to List", "Index", new { productId = Request.QueryString["productId"] })
+    </div>*@
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+         var message = '@message';
+        if(message){
+            alert(message);
+        }
+
+        $(function () {
+            $("#productName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Products/FinishProductAutoComplete/',
+                        data: "{ 'prefix': '" + request.term + "'}",
+                        dataType: "json",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#fProductId").val(i.item.val);
+                },
+                minLength: 1,
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+            jQuery(document).ready(function () {
+            jQuery('[data-confirm]').click(function (e) {
+                if (!confirm(jQuery(this).attr("data-confirm"))) {
+                    e.preventDefault();
+                   window.location.href = '@Url.Action("Index", "ProductFormula")';
+                }
+            });
+        });
+
+    </script>
+}

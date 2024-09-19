@@ -1,0 +1,351 @@
+﻿@model KGERP.Data.CustomModel.CrmScheduleListVm
+@{
+    ViewBag.Title = "Client Details";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+
+}
+@Html.Partial("_ErrorMessage")
+<div class="row mb-3">
+    <a class="btn hvr-sweep-to-bottom  text-dark border " href="@Url.Action("AddNewClient","Crms", new {companyId=Model.ClientData.CompanyId})"><i class="fa-plus"></i> &nbsp; New Client</a>
+    <a class="btn btn-warning" href="@Url.Action("UserClientList", "Crms" , new {companyId= @Model.ClientData.CompanyId})">Back to List</a>
+
+    <button class="btn btn-sm btn-secondary" onclick="refreshWindow()">
+        <i class="fa fa-sync"></i> &nbsp; Refresh
+    </button>
+</div>
+
+
+<input asp-for="ClientData.CompanyId" value="@Model.ClientData.CompanyId" type="hidden" />
+<input asp-for="ClientData.ClientId" value="@Model.ClientData.ClientId" type="hidden" />
+<div class="row">
+    <div class="col-md-10">
+        <table class="table table-borderless">
+            <thead>
+
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="6">
+                        <strong><i>Client - Personal Information</i></strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1" style="width:15%;">Name</td>
+                    <td class="pb-1" style="width:1%;">:</td>
+                    <td class="pb-1" style="width:33%;">
+                        <input class="form-control col-md-12 ml-2" id="name" value="@Model.ClientData.Name " />
+                    </td>
+                    <td class="pb-1" style="width:15%;">Gender</td>
+                    <td class="pb-1" style="width:1%;">:</td>
+                    <td class="pb-1" style="width:50%;">
+                        <select required class=" form-control col-md-12 ml-2 " asp-for="staff.GenderId" name="GenderId" id="Gender">
+                            <option value="0">---Select Gender  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.GenderList)
+                                {
+                                    if (item.Id == Model.ClientData.GenderId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Religion</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="ReligionId" id="Religion">
+                            <option value="0">---Select Religion  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.ReligionList)
+                                {
+                                    if (item.Id == Model.ClientData.ReligionId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td class="pb-1">Date of Birth</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1" style="display:flex;">
+                        <input class=" form-control ml-2 datepicker" name="DateofBirth" id="Dob" value="@Model.ClientData.DateofBirthText" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Mobile</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input readonly class=" form-control col-md-12 ml-2" id="mob" value=" @Model.ClientData.MobileNo" />
+                    </td>
+                    <td class="pb-1">Mobile(2)</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2 " id="mob2" name="MobileNo2" value="@Model.ClientData.MobileNo2" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Email</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2" id="email" name="Email" value=" @Model.ClientData.Email" />
+                    </td>
+                    <td class="pb-1">Eamil(2)</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2" name="Email2" id="email2" value="@Model.ClientData.Email2" />
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="pb-1">Job Title</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2 " id="job" name="JobTitle" value=" @Model.ClientData.JobTitle" />
+                    </td>
+                    <td class="pb-1">Organization</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2 " id="org" name="OrganizationText" value="  @Model.ClientData.OrganizationText" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Remarks</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2 " id="Remarks" name="Remarks" value=" @Model.ClientData.Remarks" />
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <strong><i>Marketing Information</i></strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Source of Media</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="SourceMediaId" id="SourceMedia">
+                            <option value="0">---Select Source Media  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.SourceofMediaList)
+                                {
+                                    if (item.Id == Model.ClientData.SourceofMediaId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td class="pb-1">Campaign Name</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <input class=" form-control col-md-12 ml-2 " name="CampaignText" id="cam" value=" @Model.ClientData.CampaignText" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Promotional Offer</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="OfferId" id="Offer">
+                            <option value="0">---Select Promotional Offer  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.PromotionalOfferList)
+                                {
+                                    if (item.Id == Model.ClientData.OfferId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td class="pb-1">Choice of Area</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="ChoiceAreaId" id="ChoiceArea">
+                            <option value="0">---Select Choice Area  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.ChoiceofAreaList)
+                                {
+                                    if (item.Id == Model.ClientData.ChoiceAreaId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1" colspan="6">
+                        <strong><i>Service Information</i></strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Dealing Officer</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="ResponsibleOfficerId" id="responsibleOfficerId">
+                            <option value="0">---select Project  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.DealingOfficerList)
+                                {
+                                    if (item.Id == Model.ClientData.ResponsibleOfficerId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td class="pb-1">Project</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="ProjectId" id="projectId">
+                            <option value="0">---select Project  --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.ProjectList)
+                                {
+                                    if (item.Id == Model.ClientData.ProjectId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pb-1">Type of Interest</td>
+                    <td class="pb-1">:</td>
+                    <td class="pb-1">
+                        <select required class=" form-control col-md-12 ml-2 " name="TypeofInterestId" id="typeofInterestId">
+                            <option value="0">---select Type of Interest --- </option>
+                            @{
+                                foreach (var item in Model.ClientData.TypeofInterestList)
+                                {
+                                    if (item.Id == Model.ClientData.TypeofInterestId)
+                                    {
+                                        <option value="@item.Id" selected>@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td class="pb-1">Referred By</td>
+                    <td class="p-1">:</td>
+                    <td>
+                        <input class="form-control col-md-12 ml-2 " name="ReferredBy" id="referredBy" value=" @Model.ClientData.ReferredBy" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button id="sbmt" class="btn btn-primary"> <i class="fa fa-save"></i> &nbsp; Update</button></td>
+                    <td><a id="sbmt" href="@Url.Action("GetScheduleByClientId", "Crms", new {clientId= Model.ClientData.ClientId, companyId=Model.ClientData.CompanyId})" class="btn btn-secondary"> <i class="fa fa-arrow-alt-circle-right"></i> &nbsp; Back</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script>
+
+        $("#sbmt").click(function () {
+            var a=@Model.ClientData.ClientId;
+            var conceptName = $('#aioConceptName').find(":selected").val();
+
+
+        var v = {
+
+           'Name': $('#name').val(),
+           'MobileNo': $('#mob').val(),
+           'DateofBirth': $('#Dob').val(),
+           'CompanyId': '@Model.ClientData.CompanyId',
+           'ClientId': a,
+           'GenderId': $('#Gender').find(":selected").val(),
+           'ReligionId': $('#Religion').find(":selected").val(),
+           'MobileNo2': $('#mob2').val(),
+           'Email': $('#email').val(),
+           'Email2': $('#email2').val(),
+           'JobTitle': $('#job').val(),
+            'Organization': $('#org').val(), 
+            'Remarks': $('#Remarks').val(),
+           'SourceofMediaId': $('#SourceMedia').find(":selected").val(),
+           'CampaignText': $('#cam').val(),
+           'OfferId': $('#Offer').find(":selected").val(),
+           'ChoiceAreaId': $('#ChoiceArea').find(":selected").val(),
+           'ProjectId': $('#projectId').find(":selected").val(),
+           'ResponsibleOfficerId': $('#responsibleOfficerId').find(":selected").val(),
+           'ReferredBy': $('#referredBy').val(),
+           'TypeofInterestId': $('#typeofInterestId').find(":selected").val()
+        };
+
+        $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddNewClient", "Crms")",
+                datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    location.reload();
+                    }
+                });
+        });
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+    </script>
+
+}
+
+

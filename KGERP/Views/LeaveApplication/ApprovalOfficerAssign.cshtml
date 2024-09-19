@@ -1,0 +1,356 @@
+﻿@model KGERP.Service.ServiceModel.LeaveApplicationVmm
+@{
+    ViewBag.Title = "ApprovalOfficerAssign";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    /* Table styles */
+    #signatoryTable {
+        font-family: Arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        margin-top:50px;
+    }
+
+        #signatoryTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #signatoryTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+
+    /* Button styles */
+    .remove-btn {
+        background-color: #f44336; /* Red */
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 2px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+        .remove-btn:hover {
+            background-color: #d32f2f; /* Darker red */
+        }
+</style>
+
+<h2>Approval Officer Assign</h2>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="form-group">
+            
+            <input type="text" autocomplete="on" class="form-control" id="employee" placeholder="Employee">
+            <input hidden name="EmpId" id="EmpId" />
+        </div>
+    </div>
+</div>
+<br />
+<div id="targetElement1">
+
+    <div class="row" id="initialRow">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="ManagerId">Manager Name</label>
+
+                <input id="ManagerId" hidden />
+                <input id="MnId" name="ManagerId" class="form-control" value="" placeholder="Manager" readonly />
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="managerOrder">Manager Order</label>
+                <input id="managerOrder" class="form-control" placeholder="Enter Order" />
+
+                <input id="ManagerOrderValue" type="hidden" />
+            </div>
+        </div>
+    </div>
+    <div class="row" id="secondaryRow">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="HrId">HR Name</label>
+                <input id="HrId" hidden />
+                <input id="HrrId" name="HrAdminId" class="form-control" value="" placeholder="HR" readonly />
+
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="hrOrder">HR Order</label>
+                <input id="hrOrderText" class="form-control" placeholder="Highest Order" readonly />
+                <input id="hrOrder" class="form-control" placeholder="Enter Order" type="hidden" />
+                <input id="hrOrderValue" type="hidden" />
+            </div>
+        </div>
+    </div>
+    <div id="targetElement"></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <button id="addBtn" class="btn btn-success">Add</button>
+        <button id="SaveBtn" class="btn btn-primary">Save</button>
+    </div>
+</div>
+
+<table id="signatoryTable">
+    <thead>
+
+    </thead>
+    <tbody>
+        <!-- Table rows will be dynamically added here -->
+    </tbody>
+</table>
+
+
+
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script type="text/javascript">
+    var GEmpId;
+    var SignatoryEmpId;
+    console.log("jnj", SignatoryEmpId)
+function addRow() {
+    var newRow = $("<div>").addClass("row");
+    var col1 = $("<div>").addClass("col-md-5");
+    var col2 = $("<div>").addClass("col-md-5");
+
+    var formGroup1 = $("<div>").addClass("form-group");
+    var formGroup2 = $("<div>").addClass("form-group");
+
+    var label1 = $("<label>").text("Others Name");
+    var label2 = $("<label>").text("Others Order");
+
+  var input1 = $("<input>").attr({
+    type: "text",
+    placeholder: "Enter name",
+    class: "othersName form-control"  // Use class instead of ID
+}).autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: '/Employee/EmployeeAutoComplete/',
+            data: JSON.stringify({ prefix: request.term }),
+            dataType: "json",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                console.log(data);
+                response($.map(data, function(item) {
+                    return item;
+                }));
+            },
+            error: function(response) {
+
+            }
+        });
+    },
+    minLength: 1,
+    select: function (event, ui) {
+
+        $(this).val(ui.item.val);
+
+        SignatoryEmpId = ui.item.val;
+        console.log("SignatoryEmpId:", SignatoryEmpId);
+
+
+        $(this).closest('.row').data('SignatoryEmpId', SignatoryEmpId);
+    }
+});
+
+
+
+    var input2 = $("<input>").attr({
+        type: "text",
+        placeholder: "Enter Order",
+        class: "othersOrder form-control"
+    });
+
+    formGroup1.append(label1, input1);
+    formGroup2.append(label2, input2);
+
+    col1.append(formGroup1);
+    col2.append(formGroup2);
+
+    newRow.append(col1, col2);
+
+    var col3 = $("<div>").addClass("col-md-2");
+    var removeBtn = $("<button>").text("Remove").addClass("btn btn-danger remove-row-btn");
+    col3.append(removeBtn);
+
+    newRow.append(col3);
+    $("#targetElement").empty();
+    $("#targetElement").append(newRow);
+}
+
+     $(function () {
+            $("#employee").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Employee/EmployeeAutoComplete/',
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }));
+                        },
+                        error: function (response) {
+
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#EmpId").val(i.item.val);
+                    var empId = i.item.val;
+                    GEmpId = i.item.val;
+                    AjaxAllSigInfo(empId);
+                },
+                minLength: 1,
+                cache: true
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        $("#SaveBtn").click(() => {
+            var managerOrderValue = $("#managerOrder").val();
+            $("#ManagerOrderValue").val(managerOrderValue);
+            var hrOrderValue = $("#hrOrder").val();
+            $("#hrOrderValue").val(hrOrderValue);
+            var viewModel = {
+                EmpId: $("#EmpId").val(),
+                ManagerId: $("#ManagerId").val(),
+                HrAdminId: $("#HrId").val(),
+                CompanyId:@Model.CompanyId,
+                managerOrder: $("#ManagerOrderValue").val(),
+                hrOrder: $("#hrOrderValue").val(),
+                othersData: []
+            };
+            
+            $("#targetElement .row").each(function () {
+                var SignatoryEmpId = $(this).data("SignatoryEmpId");
+                if (SignatoryEmpId) {
+                    var OrderBy = $(this).find(".othersOrder").val();
+                    console.log("SignatoryEmpId:", SignatoryEmpId);
+                    console.log("OrderBy:", OrderBy);
+            
+                    viewModel.othersData.push({ SignatoryEmpId: parseInt(SignatoryEmpId), OrderBy: parseInt(OrderBy) });
+                }
+            });
+        
+            $.ajax({
+                url: '/LeaveApplication/AssignSignatory',
+                type: 'POST',
+                data: JSON.stringify(viewModel),
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    //location.reload();
+                    AjaxAllSigInfo(GEmpId);
+                },
+                error: function (xhr, status, error) {
+            
+                }
+            });
+        })
+
+    
+
+    $('#signatoryTable').on('click', '.remove-btn', function () {
+        var row = $(this).closest('tr');
+        var requisitionSignatoryId = $(this).data('requisitionSignatoryId');// Retrieve signatoryId from data attribute
+
+        $.ajax({
+            url: '/LeaveApplication/RemoveSignatory',
+            type: 'POST',
+            data: { requisitionSignatoryId: requisitionSignatoryId },
+            success: function (response) {
+                console.log("Sig Response: ");
+                console.log(response);
+                if (response.success) {
+                    toastr.success(response.message);
+                    AjaxAllSigInfo(GEmpId);
+                    //row.remove();
+                } else {
+                    toastr.error(response.message);
+                }
+                
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+    function AjaxAllSigInfo(empId) {
+        $.ajax({
+            url: '/LeaveApplication/ManagerAndHr/',
+            data: { empId: empId },
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            success: function (response) {
+                console.log(response);
+                removeRowsWithClass();
+                $('#MnId').val(response.ManagerName);
+                $('#ManagerId').val(response.ManagerId);
+                $("#managerOrder").val(response.managerOrder)
+                $("#hrOrder").val(response.hrOrder)
+                $('#HrrId').val(response.Hrname);
+                $('#HrId').val(response.HrAdminId);
+                $('#signatoryTable tbody').empty();
+                if (Array.isArray(response.DataLIstSignatory) && response.DataLIstSignatory.length > 0) {
+                    // Append rows to the table
+                    $.each(response.DataLIstSignatory, function (index, item1) {
+                        var row = $('<tr>').append(
+                            $('<td>').text(item1.SignatoryName),
+                            $('<td>').text(item1.SignatoryEmpDesignation),
+                            $('<td>').text(item1.OrderBy),
+                        );
+
+                        if (item1.SignatoryEmpId != response.HrAdminId && item1.SignatoryEmpId != response.ManagerId) {
+                            row.append($('<td>').append($('<button>').addClass('remove-btn').html('<i class="fa fa-times"></i>').data('requisitionSignatoryId', item1.RequisitionSignatoryId)));
+                        }
+                        $('#signatoryTable tbody').append(row);
+                    });
+                } else {
+                    console.log("No signatory data found.");
+                }
+
+                $("#addBtn").on("click", function () {
+                    addRow();
+                });
+
+
+                $("#targetElement").on("click", ".remove-row-btn", function () {
+                    $(this).closest(".row").remove();
+                });
+            },
+
+            error: function (response) {
+
+            }
+        });
+    }
+    function removeRowsWithClass() {
+        $("#targetElement").find(".row").has("button.remove-row-btn").remove();
+        $("#targetElement").empty();
+    }
+
+</script>
+}

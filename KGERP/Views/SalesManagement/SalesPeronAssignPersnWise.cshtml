@@ -1,0 +1,214 @@
+﻿@model KGERP.Service.KGSalesAchivementDetailVm
+
+
+<style>
+    .custom-card {
+        background: linear-gradient(145deg, #f3f3f3, #e7e7e7);
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s;
+    }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .card-body {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .card-title {
+        color: #007bff;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+
+    .card-text span {
+        font-size: 1.5rem;
+        color: #555;
+    }
+</style>
+@{
+    string[] monthNames = new string[] {
+        "Invalid month",
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+}
+<div class="card custom-card shadow mb-4 border-0 rounded-lg">
+    <div class="card-body p-4">
+
+        <span class="d-block"><strong>Sale Person History</strong></span>
+        <h5 class="card-title text-primary font-weight-bold">@Model.Title</h5>
+        <p class="card-text">
+
+            <span class="d-block"><strong>Targeted Amount:</strong> @Model.MonthlySalesTergetedAmount</span>
+        </p>
+    </div>
+</div>
+
+
+
+
+
+<div class="table-responsive col-md-12">
+    <table id="KgErpDataTable" class="table table-striped" width="100%">
+        <thead class="thead-light">
+            <tr style="background-color:#44AA88">
+                <th colspan="2" style="border-right: 2px solid gray;"></th>
+                <th colspan="3" style="text-align: center; font-size: 15px; border-right:2px solid gray; ">Sales</th>
+                <th colspan="3" style="text-align: center; font-size: 15px; border-right:2px solid gray; ">Qty</th>
+                <th colspan="3" style="text-align: center; font-size: 15px; border-right: 2px solid gray;">Collection</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>Month</th>
+                <th>Salary</th>
+                <th>Target</th>
+                <th> Achievement </th>
+                <th> Percent </th>
+                <th>Target</th>
+                <th>Achievement</th>
+                <th> Percent </th>
+                <th>Target</th>
+                <th> Achievement </th>
+                <th> Percent </th>
+
+                @*<th>Action</th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.DataList)
+            {
+                <tr data-id="@item.KGSalesAchievementDetailsId">
+                    <td>@(item.Month >= 1 && item.Month <= 12 ? monthNames[item.Month] : "Invalid month")</td>
+                    <td>@item.Salary</td>
+                    <td>@item.SalesTargetAount</td>
+                    <td>
+                        <span class="displayMode">@item.SalesAchievementAmount</span>
+                        <input type="text" class="form-control editMode" value="@item.SalesAchievementAmount" style="display:none;">
+                    </td>
+                    <td>
+                        @{
+                            var a = item.SalesAchievementAmount;
+                            var b = item.SalesTargetAount; // Correcting the typo to SalesTargetAmount
+                            var d = (a / b) * 100;
+                            var formattedD = d.ToString("F2");
+                        }
+                        <span class="displayMode">@formattedD%</span> <!-- Display the calculated percentage -->
+                    </td>
+
+                    <td>
+                        <span class="displayMode">@item.SalesTargetQuantity</span>
+                        <input type="text" class="form-control editMode" value="@item.SalesAchievementQuantity" style="display:none;">
+                    </td>
+
+                    <td>
+                        <span class="displayMode">@item.SalesAchievementQuantity</span>
+                        <input type="text" class="form-control editMode" value="@item.SalesAchievementQuantity" style="display:none;">
+                    </td>
+                    <td>
+                        @{
+                            var w = item.SalesAchievementQuantity;
+                            var e = item.SalesTargetQuantity; // Correcting the typo to SalesTargetAmount
+                            var r = e > 0 ? (w / e) * 100 : 0;
+                            var t = r.ToString("F2");
+                        }
+                        <span class="displayMode">@t%</span> <!-- Display the calculated percentage -->
+                    </td>
+
+                    <td>
+                        <span class="displayMode">@item.MonthlyCollectionTergetedAmount</span>
+
+                    </td>
+
+                    <td>
+                        <span class="displayMode">@item.RecoveryAchievementAmount</span>
+                        <input type="text" class="form-control editMode" value="@item.RecoveryAchievementAmount" style="display:none;">
+                    </td>
+                    <td>
+                        @{
+                            var f = item.RecoveryAchievementAmount;
+                            var g = item.MonthlyCollectionTergetedAmount; // Correcting the typo to SalesTargetAmount
+                            var h = (f / g) * 100;
+                            var formattere = h.ToString("F2");
+                        }
+                        <span class="displayMode">@formattere%</span> <!-- Display the calculated percentage -->
+                    </td>
+                    @*<td>
+            <button type="button" class="btn btn-sm btn-primary editBtn">Edit</button>
+            <button type="button" class="btn btn-sm btn-success saveBtn" style="display:none;">Save</button>
+        </td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script>
+    $(document).ready(function () {
+        // Edit button click handler
+        $('.editBtn').on('click', function () {
+            var row = $(this).closest('tr');
+
+            // Toggle between display and edit mode
+            row.find('.displayMode').hide();
+            row.find('.editMode').show();
+
+            // Toggle buttons
+            row.find('.editBtn').hide();
+            row.find('.saveBtn').show();
+        });
+
+        // Save button click handler
+        $('.saveBtn').on('click', function () {
+            var row = $(this).closest('tr');
+
+            // Update displayed values with edited values
+            var amountInput = row.find('.editMode:eq(0)').val();
+            var quantityInput = row.find('.editMode:eq(1)').val();
+            var recoveryInput = row.find('.editMode:eq(2)').val();
+
+            row.find('.displayMode:eq(0)').text(amountInput);
+            row.find('.displayMode:eq(1)').text(quantityInput);
+            row.find('.displayMode:eq(2)').text(recoveryInput);
+
+            // Toggle between display and edit mode
+            row.find('.editMode').hide();
+            row.find('.displayMode').show();
+
+            // Toggle buttons
+            row.find('.saveBtn').hide();
+            row.find('.editBtn').show();
+            console.log(quantityInput);
+
+            $.ajax({
+                url: '@Url.Action("SaveAchievementDetails", "SalesManagement")',
+                method: 'POST',
+                data: {
+                    KGSalesAchievementDetailsId: row.data('id'),
+                    SalesAchievementAmount: amountInput,
+                    SalesAchievementQuantity: quantityInput,
+                    RecoveryAchievementAmount: recoveryInput
+                },
+                success: function (response) {
+                    // Handle success
+                },
+                error: function (err) {
+                    // Handle error
+                }
+            });
+        });
+    });
+
+
+    </script>
+
+}

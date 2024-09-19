@@ -1,0 +1,357 @@
+﻿@model  KGERP.Service.HR_Pay_Roll_Service.ParollServices.VmSalaryDetails
+@using KGERP.Utility
+@{
+    ViewBag.Title = "Payroll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int indexOfList = 0;
+}
+@*ani*@
+<style>
+    .minimize_col {
+        max-width: 35px;
+    }
+    /* Custom table styles */
+    .outer-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        margin-bottom: 20px; /* Add some space between tables */
+    }
+
+    .inner-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+    }
+
+    .inner-table th, .inner-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .inner-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .inner-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .inner-table tr:hover {
+        background-color: #e2e2e2;
+    }
+
+    /* Styling for checkboxes */
+    .checkbox {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Minimize column */
+    .minimize_col {
+        width: 5%; /* Adjust width as needed */
+    }
+
+    /* Align right */
+    .align-right {
+        text-align: right;
+    }
+</style>
+<section class="content-header" style="margin-bottom:20px">
+    <div class="row">
+        <div class="col-md-3">
+            <h3> Payroll List </h3>
+        </div>
+    </div>
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">
+            Payroll
+        </li>
+    </ol>
+</section>
+
+@using (Html.BeginForm("PayRollBonusDetails", "Payroll", FormMethod.Post, new { id = "payRollDetailsForm", @class = "formValidator", target = "_blank" }))
+{
+    <div class="row">
+        <div class="col-md-2">
+
+        </div>
+        <div class="col-md-6">
+            <label class="col-form-label">Select Branch</label>
+            @Html.DropDownListFor(x => x.BankBranchId, new SelectList(ViewBag.BranchList, "Value", "Text"), "--Select--", new { @class = "form-control" })
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Disbursement Date</label>
+                <div style="display:flex">
+                    @Html.EditorFor(x => x.SalaryDisbursementDate, new { htmlAttributes = new { @class = "datepicker form-control", @id = "datepicker", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(x => x.SalaryDisbursementDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+    
+            <div class="col-md-2">
+                <label for="searchInput">Search:</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+        
+        </div>
+
+    </div>
+    @Html.HiddenFor(x => x.SalaryReportType)
+    @Html.HiddenFor(model => model.CompanyId)
+    @Html.HiddenFor(model => model.PayRollId)
+<div class="table-responsive col-md-12">
+    @{ 
+        var salaryList = Model.SalaryList.GroupBy(x => x.SheetName).ToList();
+
+    }
+
+  
+    <table id="" style="max-width:100%;" class="table">
+        @for (int i = 0; i < salaryList.Count(); i++)
+        {
+            <tr>
+                <td>
+                    <table class="table">
+                        <tr>
+                            <th class="minimize_col">SL</th>
+                            <th class="minimize_col"><input onclick="GroupSelect(@salaryList[i].First().PRollSheetId)" type="checkbox" id="select_all_@salaryList[i].First().PRollSheetId" />&nbsp;Select All</th>
+
+                            <th>Employee Id</th>
+                            <th> Employee Name</th>
+                            <th style="max-width:110px; "> Designation Name </th>
+                            <th> Account Name </th>
+                            <th> Account No</th>
+                            <th style="text-align:right"> Net Payable</th>
+                        </tr>
+
+
+                        <br />
+                        @{int sl = 0;}
+                        <thead>
+                            <h4><b>@salaryList[i].Key </b></h4>
+                        </thead>
+                        @{
+                            var subList = salaryList[i].Select((x, o) => new { Data = x, Index = o }).ToList();
+
+                            for (int y = 0; y < subList.Count(); y++)
+                            {
+                              
+                                <tr>
+                                    <td>
+                                        @(++sl)
+                                        @Html.HiddenFor(model => model.SalaryList[subList[y].Data.Index].Id)
+                                    </td>
+                                    <td>
+                                        @Html.CheckBoxFor(model => model.SalaryList[subList[y].Data.Index].BankSheetFlag, new { @class = "checkbox checkToInstruction_" + @subList[y].Data.PRollSheetId })
+                                    </td>
+                                    <td> @subList[y].Data.EmployeeId</td>
+                                    <td> @subList[y].Data.EmployeeName</td>
+                                    <td> @subList[y].Data.DesignationName </td>
+                                    @*<td> @datas.Data.JoiningDate.ToString("yyyy-MM-dd")</td>*@
+                                    <td> @subList[y].Data.BankAccountName</td>
+
+                                    <td> @subList[y].Data.BankAccountNumber</td>
+                                    @*<td style="text-align:right"> @datas.Data.BasicSalary</td>
+                    <td style="text-align:right"> @datas.Data.GrossSalary</td>
+                    <td style="text-align:right"> @datas.Data.TotalDeduction</td>*@
+                                <td style="text-align:right">
+                                    @subList[y].Data.NetPayment
+
+
+                                    
+                                </td>
+
+
+
+                                </tr>
+                                indexOfList++;
+                            }
+                        }
+
+
+
+
+                    </table>
+
+
+                </td>
+
+            </tr>
+        }
+
+
+
+    </table>
+
+
+                
+        @if (Model.SalaryList != null && Model.SalaryList.Count() > 0)
+        {
+            <div class="row" style="margin-top:5px;">
+
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <label for="message-text" class="col-form-label">Report Type:</label>
+                        @Html.RadioButtonFor(m => m.ReportTypeId, 1) Excel
+                        @Html.RadioButtonFor(m => m.ReportTypeId, 2) PDF
+                    </div>
+
+                    <button type="button" id="btnBankAdvice" class="btn btn-primary" formtarget="_blank" style="float:right;">Bank Advice</button>
+                    <button type="button" id="btnPaymentDone" class="btn btn-primary" style="float:right; margin-right:7px;">Payment Done</button>
+                    <button type="button" id="btnPaymentAndAdvice" class="btn btn-primary" style="float:right; margin-right:7px;">Payment Done & Advice Sheet</button>
+                </div>
+                <script>
+                document.getElementById('btnBankAdvice').onclick = function () {
+                    document.getElementById('SalaryReportType').value = '@((int)SalaryReportTypeEnum.BankAdviceSheet)';
+                    var bankBranchId = $("#BankBranchId").val();
+                    if (bankBranchId > 0) {
+
+                        document.getElementById('payRollDetailsForm').submit();
+                    } else {
+
+                        alert("Please select branch name");
+                       // document.getElementById('payRollDetailsForm').submit();
+                    }
+
+                };
+
+                document.getElementById('btnPaymentDone').onclick = function () {
+                    document.getElementById('SalaryReportType').value = '@((int)SalaryReportTypeEnum.PaymentDone)';
+                    document.getElementById('payRollDetailsForm').submit();
+                };
+
+                document.getElementById('btnPaymentAndAdvice').onclick = function () {
+                    document.getElementById('SalaryReportType').value = '@((int)SalaryReportTypeEnum.BankAdviceAndPaymentDone)';
+                    var bankBranchId = $("#BankBranchId").val();
+                    if (bankBranchId > 0) {
+
+                        document.getElementById('payRollDetailsForm').submit();
+                    } else {
+                        alert("Please select branch name");
+                    }
+                };
+                </script>
+            </div>
+        }
+
+
+    </div>
+
+}
+
+
+
+
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "yy-mm-dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        if (message) {
+            alert(message);
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            //$("#btnsave").click(function () {
+            //    $('#datatableid > tbody  > tr').each(function (index, tr) {
+            //        console.log(index);
+            //        console.log(tr);
+            //    });
+            //})
+           
+
+            //$("#select_all").change(function () {  //"select all" change
+            //    $(".checkToInstruction").prop('checked', $(this).prop("checked")); //change all ".checkbox" checked status
+            //});
+
+            //".checkbox" change
+            $('.checkToInstruction').change(function () {
+                //uncheck "select all", if one of the listed checkbox item is unchecked
+                if (false == $(this).prop("checked")) { //if this item is unchecked
+                    $("#select_all").prop('checked', false); //change "select all" checked status to false
+                }
+                //check "select all" if all checkbox items are checked
+                if ($('.checkToInstruction:checked').length == $('.checkToInstruction').length) {
+                    $("#select_all").prop('checked', true);
+                }
+            });
+
+            $("#select_allPayment").change(function () {  //"select all" change
+                $(".checkToInstructionPayment").prop('checked', $(this).prop("checked")); //change all ".checkbox" checked status
+            });
+
+            //".checkbox" change
+            $('.checkToInstructionPayment').change(function () {
+                //uncheck "select all", if one of the listed checkbox item is unchecked
+                if (false == $(this).prop("checked")) { //if this item is unchecked
+                    $("#select_allPayment").prop('checked', false); //change "select all" checked status to false
+                }
+                //check "select all" if all checkbox items are checked
+                if ($('.checkToInstructionPayment:checked').length == $('.checkToInstructionPayment').length) {
+                    $("#select_allPayment").prop('checked', true);
+                }
+            });
+
+
+
+        });
+
+        function GroupSelect(key) {
+            var isChecked = $("#select_all_" + key).prop('checked');             
+            if (isChecked) {
+                $(".checkToInstruction_" + key).each(function () {
+                    $(this).prop('checked', true);
+
+                })
+            }
+            else {
+                $(".checkToInstruction_" + key).each(function () {
+                    $(this).prop('checked', false);
+
+                })
+            }
+        }
+    
+            // Function to filter table rows based on search input
+            function filterTableRows() {
+                var query = $('#searchInput').val().trim().toLowerCase();
+                $('tbody tr').each(function () {
+                    var rowData = $(this).text().toLowerCase();
+                    if (rowData.indexOf(query) === -1) {
+                        $(this).hide(); // Hide rows that don't match the search query
+                    } else {
+                        $(this).show(); // Show rows that match the search query
+                    }
+                });
+            }
+
+            // Call filterTableRows() when search input changes
+            $('#searchInput').on('input', function () {
+                filterTableRows();
+            });
+
+            // Call filterTableRows() initially to show all rows
+            filterTableRows();
+      
+
+    </script>
+}

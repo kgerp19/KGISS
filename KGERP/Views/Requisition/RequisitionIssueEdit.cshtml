@@ -1,0 +1,369 @@
+﻿@model KGERP.ViewModel.StoreViewModel
+
+@{
+    ViewBag.Title = "Store Detail Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        
+        @if (Model.Requisition.RequisitionStatus == "D")
+        {
+        <span>
+            Production Issue <a target="_blank" href="@Url.Action("RequisitionDeliverEdit", "Requisition",
+                                        new {companyId = Model.Requisition.CompanyId, requisitionId = Model.Requisition.RequisitionId })"
+                                class="btn btn-link">
+                @Model.Store.ReceivedCode
+            </a>
+        </span>
+        }
+        else
+        {
+        <span> Production Issue </span>
+        }
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Production Issue</li>
+    </ol>
+</section>
+@if (Model.Requisition.RequisitionStatus == "I")
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Store.RequisitionId, new { @id = "hfRequisitionId" })
+                @Html.HiddenFor(model => model.Store.CompanyId)
+
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="col-md-1"> </div>
+                        <div class="col-md-10">
+                            <table class="table">
+                                <tr>
+                                    <td width="15%"><b>Received Code</b></td>
+                                    <td width="1%">:</td>
+                                    <th width="34%">@Model.Requisition.RequisitionNo</th>
+
+                                    <td width="15%"><b>Received Date</b></td>
+                                    <td width="1%">:</td>
+                                    <td width="34%">@Model.Requisition.RequisitionDate.Value.ToString("dd-MM-yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td>Delivery No</td>
+                                    <td>:</td>
+                                    <td>@Model.Requisition.DeliveryNo</td>
+                                    <td>Delivery Date</td>
+                                    <td>:</td>
+                                    <td>@Model.Requisition.DeliveredDate</td>
+                                </tr>
+                                <tr>
+                                    <td>Requisition No</td>
+                                    <td>:</td>
+                                    <td>@Model.Requisition.RequisitionBy</td>
+                                    <td>Requisition Status</td>
+                                    <td>:</td>
+                                    <td>@Model.Requisition.RequisitionStatus</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-1"> </div>
+
+                        <div class="box-header" style="clear:both">
+                            <h4><b>Finished Goods:</b> </h4>
+                        </div>
+                        <div class="table-responsive col-md-12 text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>ProductName</th>
+                                        <th>Qty</th>
+                                        <th>Input Qty</th>
+                                        <th>Output Qty</th>
+                                        <th>Production Rate</th>
+                                        @*<th>Current Avg. Rate</th>*@
+                                        <th style="text-align:right;">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int sl = 0;
+                                    decimal grandTotal = 0m;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.Requisition.RequisitionItemDataList)
+                                    {
+                                        grandTotal += item.OutputQty * item.ProductionRate;
+                                        <tr>
+                                            <td>@(++sl)</td>
+                                            <td>@item.ProductName</td>
+                                            <td>@item.Qty</td>
+                                            <td>@item.InputQty</td>
+                                            <td>@item.OutputQty</td>
+                                            <td>@item.ProductionRate</td>
+                                            @*<td>@item.CostingPrice</td>*@
+                                            <td style="text-align:right;">@(item.OutputQty * item.ProductionRate)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th colspan="5">Finished Goods Grand Total</th>
+                                        <th style="text-align:right;">@grandTotal</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="box-header" style="clear:both">
+                            <h4><b>Raw Consume:</b> </h4>
+                        </div>
+                        <div class="table-responsive col-md-12 text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <td>Raw Product Name</td>
+                                        <td>Raw Qty</td>
+                                        <td>Raw ProcessLoss</td>
+                                        <td>Raw Extra Qty</td>
+                                        <td>RAw Total Qty</td>
+                                        <td>Raw Unit Price</td>
+                                        <th style="text-align:right;">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int rawsl = 0;
+                                    decimal rawGrandTotal = 0m;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.Requisition.RequisitionItemDetailDataList)
+                                    {
+                                        rawGrandTotal += item.RTotalQty.Value * item.RUnitPrice;
+                                        <tr>
+                                            <td>@(++rawsl)</td>
+                                            <td>@item.RProductName</td>
+                                            <td>@item.RQty</td>
+                                            <td>@item.RProcessLoss</td>
+                                            <td>@item.RExtraQty</td>
+                                            <td>@item.RTotalQty</td>
+                                            <td>@item.RUnitPrice</td>
+
+                                            <td style="text-align:right;">@(item.RTotalQty * item.RUnitPrice)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th colspan="6">Raw Consume Grand Total</th>
+                                        <th style="text-align:right;">@rawGrandTotal</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+                        <div class="box-header" style="clear:both">
+                            <h4><b>Packing (Bag) Consume:</b> </h4>
+                        </div>
+                        <div class="table-responsive col-md-12 text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>SL</td>
+                                        <td>Product Name</td>
+                                        <td>Bag Qty</td>
+                                        <td>Bag Unit Price</td>
+                                        <td>Bag Rate</td>
+                                        <td style="text-align:right;">Subtotal</td>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int bagsl = 0;
+                                    decimal bagGrandTotal = 0m;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.Requisition.BagDataList)
+                                    {
+                                        bagGrandTotal += item.BagQty * item.BagUnitPrice;
+                                        <tr>
+                                            <td>@(++bagsl)</td>
+                                            <td>@item.ProductName</td>
+                                            <td>@item.BagQty</td>
+                                            <td>@item.BagUnitPrice</td>
+                                            <td>@item.BagRate</td>
+
+                                            <td style="text-align:right;">@(item.BagQty * item.BagUnitPrice)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th colspan="4">Raw Consume Grand Total</th>
+                                        <th style="text-align:right;">@bagGrandTotal</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
+else
+{
+    using (Html.BeginForm("StoreUpdateAfterProduction", "Store", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Store.RequisitionId, new { @id = "hfRequisitionId" })
+        @Html.HiddenFor(model => model.Store.CompanyId)
+<div class="box">
+    <div class="box-success">
+       
+        <div class="box-body">
+            <div class="row">
+                <table class="table table-bordered">
+                   
+
+                    <tr>
+                        <td>
+                            <div class="col-md-2">
+
+                                @Html.LabelFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "control-label" })
+                                @Html.TextBoxFor(model => model.Store.ReceivedCode, htmlAttributes: new { @class = "form-control", @id = "reciveCode", @readonly = "readonly" })
+
+                            </div>
+
+                            <div class="col-md-2">
+                                @Html.Label("Requisition No", htmlAttributes: new { @class = "control-label" })
+                                @Html.TextBoxFor(model => model.Store.RequisitionNo, htmlAttributes: new { @class = "form-control", @autocomplete = "off", @readonly = "readonly" })
+                                @Html.HiddenFor(model => model.Store.RequisitionId)
+                            </div>
+                            <div class="col-md-2">
+                                @Html.Label("Requisition Date", htmlAttributes: new { @class = "control-label" })
+                                <input type="text" class="form-control" name="RequisitionDate" readonly="readonly" value="@Model.Requisition.RequisitionDate.Value.ToShortDateString()" />
+
+                                @Html.HiddenFor(model => model.Requisition.RequisitionDate)
+                            </div>
+                            <div class="col-md-3">
+                                @Html.Label("Issue Date", null, htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.Store.ReceivedDate, new { htmlAttributes = new { @class = "datepicker", @id = "receivedDate", @autocomplete = "off", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.Store.ReceivedDate, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.Store.StockInfoId, htmlAttributes: new { @class = "control-label " })
+                                @Html.DropDownListFor(model => model.Store.StockInfoId, new SelectList(Model.StockInfos, "Value", "Text"), "---Select---", new { id = "StockInfoId", @class = "dropdownsize form-control" })
+                                @Html.ValidationMessageFor(model => model.Store.StockInfoId, "", new { id = "StockInfosmsId", @class = "text-danger" })
+                            </div>
+
+
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div id="productionItems">
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+       
+
+
+
+
+    }
+
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+
+   
+    <script type="text/javascript">
+
+
+        $('#receivedDate').change(function () {
+            debugger;
+            var strIssueDate = $('#receivedDate').val();
+            var requisitionId = $('#hfRequisitionId').val();
+            var companyId = '@Model.Requisition.CompanyId';
+            $.ajax({
+                url: '/Requisition/GetProductionItems?companyId=' + companyId +"&requisitionId=" + requisitionId + "&strIssueDate=" + strIssueDate,
+                type: "GET",
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (data) {
+                    $('#productionItems').html(data);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+        });
+
+        $("#StockInfosmsId").change(function () {
+            var id = $("#StockInfoId").val();
+            if (id !== "") {
+                $("#StockInfosmsId").text("");
+            } else {
+                $("#StockInfosmsId").text("required store");
+            }
+        });
+
+
+        function SubmitForm() {
+            var id = $("#StockInfoId").val();
+            var r = window.confirm("Are you sure to Issue ?");
+            if (r == true && id !== "") {
+                $("#submitId").hide();
+                $("#spinnerId").show();
+                return true;
+            }
+            else {
+                $("#StockInfosmsId").text("required store");
+                return false;
+    
+            }
+
+        }
+
+        function getIssueStatus() {
+            var requisitionId = $('#requisitionId').val();
+            var storeId = $('#ddlStoreId').val();
+            $.ajax({
+                url: '/RequisitionIssue/GetIssueStatus?requisitionId=' + requisitionId + '&storeId=' + storeId + "",
+                type: "GET",
+                async: true,
+                dataType: "html",
+                success: function (data) {
+                    $('#productionStatus').html(data);
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+        }
+    </script>
+}

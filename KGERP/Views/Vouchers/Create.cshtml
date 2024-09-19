@@ -1,0 +1,398 @@
+﻿@model KGERP.ViewModel.VoucherViewModel
+@{
+    ViewBag.Title = "Create";
+    var message = TempData["message"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .panel-default > .panel-heading {
+        color: #ffffff;
+        background-color: #32527B;
+        border-color: #ddd;
+    }
+
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+
+@using (Html.BeginForm("CreateVoucher", "Vouchers", FormMethod.Post, new { @id = "idForm" }))
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Voucher.VoucherId)
+    @Html.HiddenFor(model => model.Voucher.CompanyId, new { @id = "hfCompanyId" })
+
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span style="font-size:15px;font-family:Arial;font-weight:bold"> New Voucher</span>
+                <a href="@Url.Action("Index",new { companyId=Request.QueryString["companyId"]})" class="btn btn-danger pull-right" style="padding-bottom: 0px;" id="btnBack">
+                    <span class="glyphicon glyphicon-arrow-left"></span> Backdatepicker
+                </a>
+            </div>
+            <div class="panel-body" style="padding-left:0px;padding-right:0px">
+                <div class="row">
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Voucher.VoucherTypeId, htmlAttributes: new { @class = "control-label" })
+
+                        @Html.DropDownListFor(model => model.Voucher.VoucherTypeId, new SelectList(Model.VoucherTypes, "Value", "Text"), "---Select---", new { @id = "ddlVoucherType", @onchange = "generateVoucherNo()", @class = "searchingDropdown form-control" })
+                        @Html.ValidationMessageFor(model => model.Voucher.VoucherTypeId, "", new { @class = "text-danger" })
+
+                    </div>
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Voucher.VoucherDate, htmlAttributes: new { @class = "control-label" })
+                        <br />
+                        @Html.EditorFor(model => model.Voucher.VoucherDate, new { htmlAttributes = new { @class = "", @id = "txtVoucherDate", @autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.Voucher.VoucherDate, "", new { @class = "text-danger" })
+
+                    </div>
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Voucher.VoucherNo, htmlAttributes: new { @class = "control-label" })
+
+                        @Html.EditorFor(model => model.Voucher.VoucherNo, new { htmlAttributes = new { @class = "form-control", @id = "txtVoucherNo" } })
+                        @Html.ValidationMessageFor(model => model.Voucher.VoucherNo, "", new { @class = "text-danger" })
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="bankHead col-md-4" style="display:none">
+                        @Html.LabelFor(model => model.Voucher.ChqNo, htmlAttributes: new { @class = "control-label" })
+
+                        @Html.EditorFor(model => model.Voucher.ChqNo, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Voucher.ChqNo, "", new { @class = "text-danger" })
+
+                    </div>
+                    <div class="bankHead col-md-4" style="display:none">
+                        @Html.LabelFor(model => model.Voucher.ChqDate, htmlAttributes: new { @class = "control-label" })
+                        <br />
+                        @Html.EditorFor(model => model.Voucher.ChqDate, new { htmlAttributes = new { @class = "datepicker", @id = "txtChqDate", @autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.Voucher.ChqDate, "", new { @class = "text-danger" })
+
+                    </div>
+                    <div class="bankHead col-md-4" style="display:none">
+                        @Html.LabelFor(model => model.Voucher.ChqName, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.Voucher.ChqName, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Voucher.ChqName, "", new { @class = "text-danger" })
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">
+                        @Html.LabelFor(model => model.Voucher.Narration, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.Voucher.Narration, new { htmlAttributes = new { @class = "narration form-control" } })
+                        @Html.ValidationMessageFor(model => model.Voucher.Narration, "", new { @class = "text-danger" })
+                    </div>
+                    @if (Model.Voucher.CompanyId == 21)
+                    {
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.Voucher.Accounting_CostCenterFk, htmlAttributes: new { @class = "control-label" })
+
+                            @Html.DropDownListFor(model => model.Voucher.Accounting_CostCenterFk, new SelectList(Model.CostCenters, "Value", "Text"), new { @id = "ddlCostCenterId", @class = "searchingDropdown form-control" })
+                            @Html.ValidationMessageFor(model => model.Voucher.Accounting_CostCenterFk, "", new { @class = "text-danger" })
+
+                        </div>
+                    }
+                    else if (Model.Voucher.CompanyId == 7 || Model.Voucher.CompanyId == 9)
+                    {
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.Voucher.Accounting_CostCenterFk, htmlAttributes: new { @class = "control-label" })
+
+                            @Html.DropDownListFor(model => model.Voucher.Accounting_CostCenterFk, new SelectList(Model.CostCenters, "Value", "Text"), new { @id = "ddlProjectId", @class = "searchingDropdown form-control" })
+                            @Html.ValidationMessageFor(model => model.Voucher.Accounting_CostCenterFk, "", new { @class = "text-danger" })
+
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <span style="font-size:20px;font-family:Arial">Transaction Detail</span>
+        <hr style="border-color:#32527B; padding:0px;margin-top: 5px;margin-bottom: 10px; border-width: 2px;" />
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            @Html.LabelFor(model => model.Voucher.AccountHeadId, htmlAttributes: new { @class = "control-label" })
+            @Html.EditorFor(model => model.Voucher.AccountHeadName, new { htmlAttributes = new { @class = "form-control", @name = "accountName", @id = "accountName" } })
+            @Html.ValidationMessageFor(model => model.Voucher.AccountHeadName, "", new { @class = "text-danger" })
+            @Html.HiddenFor(x => x.Voucher.AccountHeadId, new { @id = "accountHeadId", @name = "accountHeadId" })
+        </div>
+        <div class="col-md-4">
+            @Html.LabelFor(model => model.Voucher.Particular, htmlAttributes: new { @class = "control-label" })
+            @Html.EditorFor(model => model.Voucher.Particular, new { htmlAttributes = new { @class = "particular form-control", @autocomplete = "off", @id = "particular" } })
+        </div>
+        <div class="col-md-2">
+            @Html.LabelFor(model => model.Voucher.DebitAmount, htmlAttributes: new { @class = "control-label" })
+            @Html.EditorFor(model => model.Voucher.DebitAmount, new { htmlAttributes = new { @class = "amount form-control", @autocomplete = "off", @id = "txtDebitAmount", @onkeyup = "enableAddButton()" } })
+            @Html.ValidationMessageFor(model => model.Voucher.DebitAmount, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-2">
+            @Html.LabelFor(model => model.Voucher.CreditAmount, htmlAttributes: new { @class = "control-label" })
+            @Html.EditorFor(model => model.Voucher.CreditAmount, new { htmlAttributes = new { @class = "amount form-control", @autocomplete = "off", @id = "txtCreditAmount", @onkeyup = "enableAddButton()" } })
+            @Html.ValidationMessageFor(model => model.Voucher.CreditAmount, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="col-md-1">
+            <input type="button" style="margin-top:23px" value="Add" id="add" class="btn btn-success" />
+        </div>
+
+    </div>
+    <br />
+    @*<div id="divVoucherGrid" class="row"></div>*@
+    <div id="divVoucher">
+        <table class="table" id="divVoucherGrid">
+            <thead>
+                <tr style="background-color:#32527B;color:white;font-weight:bold">
+                    <th>A/C Code</th>
+                    <th>Account Name</th>
+                    <th>Particulars</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="voucherItems"></tbody>
+        </table>
+        <span id="voucherItemsError" class="danger"></span>
+    </div>
+    <div>
+        <a href="@Url.Action("Index",new { companyId=Model.Voucher.CompanyId})" id="cancel" class="btn btn-warning pull-right" style="float:right; padding:5px 10px; margin-top:5px;">Cancel</a>
+        <input id="submit" type="submit" value="Submit" onclick='return confirm("Are you sure you want to submit this Voucher ?")' class="btn btn-success pull-right" style="float:right; padding:5px 10px; margin-top:5px;margin-right:10px;" />
+    </div>
+
+
+
+
+}
+
+
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script src="~/Scripts/ApplicationScripts/Accounting/Voucher.js"></script>
+    <script>
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+        $('#btnAdd').unbind("click").bind("click", function () {
+            var form = $('#idForm');
+            var url = "/Vouchers/CreateTempVoucher";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "html",
+                data: form.serialize(),
+                beforeSend: function () {
+
+                },
+                success: function (resp) {
+                    $('#divVoucherGrid').html(resp);
+                    var damount = $('#txtDebitAmount').val();
+                    $('#accountName').val('')
+                    //$('#particular').val('');
+                    $('#txtDebitAmount').val('')
+                    $('#txtCreditAmount').val('')
+
+
+                },
+                error: function (request, status, error) {
+                    alert("Error");
+                }
+            });
+
+        });
+
+        $(document).ready(function () {
+            if ($('.amount').val() == 0) {
+                $('#btnAdd').prop("disabled", true);
+            }
+        });
+
+        function enableAddButton() {
+            if (parseInt($('#txtCreditAmount').val()) > 0 || parseInt($('#txtDebitAmount').val()) > 0) {
+                $('#btnAdd').prop("disabled", false);
+            }
+            else {
+                $('#btnAdd').prop("disabled", true);
+            }
+        }
+
+
+        //$("#ddlVoucherType").change(function () {
+        //    if ($('#ddlPaymentMode option:selected').text() === "Bank") {
+        //        $("#lblRefAccountHead").html("Bank")
+        //        $('.bankHead').show();
+        //        $('#bankCharge').show();
+
+        //    }
+
+        //    if ($('#ddlPaymentMode option:selected').text() === "Adjustment") {
+        //        $('.bankHead').hide();
+        //        $('#divBank').show();
+        //        $("#lblRefAccountHead").html("Account No")
+        //        $('#txtChqDate').val('');
+        //    }
+
+        //    if ($('#ddlPaymentMode option:selected').text() === "Cash") {
+        //        $('.bankHead').hide();
+
+        //        $('#bankCharge').hide();
+        //        $('#txtChqDate').val('');
+
+        //        //------------আগে ছিল  $('#divBank').show();
+        //        //-------------আর এখন$ ('#divBank').show()
+
+        //        $('#divBank').hide();
+        //    }
+
+        //    if ($('#ddlPaymentMode option:selected').text() === "Contra") {
+        //        $('.bankHead').show();
+        //        $('#divBank').show();
+        //    }
+        //});
+
+        $(function () {
+            $("#accountName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/HeadGLs/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#accountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        $(function () {
+            $("#bankName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#refAccountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+        $(function () {
+            $("#txtDescription").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/GeneralLedgers/AutoCompleteDescription/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#txtDescription").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+        function generateVoucherNo() {
+            var voucherTypeId = $("#ddlVoucherType option:selected").val();
+            //For Bank
+            if (voucherTypeId == 1 || voucherTypeId == 2) {
+                $('.bankHead').show();
+            }
+            else {
+                $('.bankHead').hide();
+            }
+
+
+            var companyId = $("#hfCompanyId").val();
+
+            $.ajax({
+                url: '/Vouchers/GetVoucherNo?voucherTypeId=' + voucherTypeId + "&companyId=" + companyId,
+                type: "GET",
+                success: function (data) {
+                    console.log(data);
+                    $("#txtVoucherNo").val(data);
+                },
+                error: function (response) {
+                    //alert(response.responseText);
+                },
+            })
+        }
+    </script>
+}

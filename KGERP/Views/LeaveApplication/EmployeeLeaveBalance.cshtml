@@ -1,0 +1,113 @@
+﻿@model KGERP.Data.CustomViewModel.EmployeeLeaveBalanceCustomModel
+@{
+    ViewBag.Title = "Employee Leave Balance";
+}
+
+<div class="row">
+    @using (Html.BeginForm("EmployeeLeaveBalance", "LeaveApplication", FormMethod.Get))
+    {
+        <div class="col-md-6">
+            @Html.Label("Employee Leave Balance", new { @style = "font-size:20px" })
+        </div>
+        <div class="col-md-6">
+            @Html.Hidden("employeeId")
+            <div class="col-md-10"> @Html.TextBox("EmployeeName", null, new { @autocomplete = "on", @placeholder = "KG ID", @class = "form-control" })</div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Search&nbsp;<i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    }
+    <div class="col-md-6">
+        @if (!string.IsNullOrEmpty(ViewBag.message))
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>
+                    @ViewBag.message
+                </strong>
+            </div>
+        }
+    </div>
+</div>
+
+<hr style="border-color:red; padding:0px;margin-top: 10px;margin-bottom: 20px; border-width: 2px;" />
+
+<div class="row">
+    @if (Model.LeaveBalanceCustomModels.Any())
+    {
+        <div class="col-md-3">
+            <div><b> Name:  @Model.EmployeeCustomModel.EmployeeName</div>
+            <div> ID :  @Model.EmployeeCustomModel.EmployeeID</div>
+
+        </div>
+
+        <div class="col-md-9">
+            <table class="table table-striped table-responsive">
+                <thead>
+                    <tr style="background-color:#4CAF50;color:#FFFFFF">
+                        <th>Leave Type</th>
+                        <th>Total Leave</th>
+                        <th>Leave Availed</th>
+                        <th>Leave Due</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.LeaveBalanceCustomModels)
+                    {
+                        <tr>
+                            <td><span>@item.LeaveCategory</span></td>
+                            <td><span class="badge" style="background-color:blue">@item.MaxDays</span></td>
+                            <td><span class="badge" style="background-color:red">@item.LeaveAvailed</span></td>
+                            <td><span class="badge" style="background-color:forestgreen">@(item.MaxDays - item.LeaveAvailed)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>
+<div>
+    @if (ViewBag.leaveHistory != null)
+    {
+        @Html.Raw(ViewBag.leaveHistory)
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+                $(document).ready(function () {
+            $(function () {
+                $("#EmployeeName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/AutoComplete/GetAllEmployeeAutoComplete",
+                            dataType: "json",
+                            data: { prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.Name, value: item.Name, id: item.Id, employeeId: item.EmployeeId};
+                                }));
+                            },
+                            error: function (e) {
+                                // Handle error, if needed
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 500,
+                    autoFocus: true,
+                    select: function (event, ui) {
+                        $("#employeeId").val(ui.item.employeeId);
+                        //LoadDesignation(ui.item.id);
+                    }
+                });
+            });
+        });
+    </script>
+
+}

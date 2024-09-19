@@ -1,0 +1,345 @@
+﻿@model KGERP.Service.Configuration.VMrealStateProductsForList
+@using KG.Core.Services
+@using KGERP.Utility
+
+@{
+
+    string ProductType = Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited ? "Glorious Lands & Developments Limited   Plot" :
+  Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited ? "Krishibid Properties Limited   Flat" : "";
+    ViewData["Title"] = $"{ProductType}'s List";
+    ViewBag.Title = "AvailableProductForSales";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        margin-left: 0.5em;
+        height: 40px;
+        width: 345px;
+        margin-right: 5px;
+        margin-bottom: 10px;
+    }
+
+    input[type="search"]:focus {
+        outline: thick solid #32a1ce !important;
+    }
+
+    .bg-w {
+        background: #b0e9b2;
+        padding: 4px 0px;
+        margin-bottom: 0px;
+        font-weight: 900;
+    }
+
+    .box {
+        border: none;
+    }
+
+    .box-body {
+        padding: 0px !important;
+    }
+
+    .box-body {
+        padding: 0px !important;
+    }
+
+    .box-header {
+        padding: 0px !important;
+    }
+    @@media(max-width: 600px) {
+        .table-responsive {
+            font-size: 13px !important;
+        }
+        .bg-w b {
+            font-size: 16px !important;
+        }
+        }
+  
+    @@media(min-width: 80px) {
+        .padd-cust {
+            padding: 10px !important;
+        }
+}
+</style>
+<div class="bg-w">
+    <h4> <b style="padding-left:10px">  @ProductType's List </b></h4>
+</div>
+
+<div class="" style="margin-top:10px; border: 1px solid #f0ffff; padding: 11px 8px 2px 9px; background: #4caf501f ">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label">Project<b style="color:red"> *</b> </label>
+                <div style="display:flex">
+                    @Html.DropDownListFor(model => model.ProductCategory, new SelectList(Model.ProductCategoryList, "Value", "Text"), "---Select Project---", new { id = "ddlCommon_ProductCategoryFk", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                    @Html.ValidationMessageFor(model => model.ProductCategory, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                @if (Model.CompanyId == 7)
+                {
+                    <label class="control-label">Block<b style="color:red"> </b> </label>
+                }
+                else
+                {
+                    <label class="control-label">Floor<b style="color:red"> </b> </label>
+                }
+
+                <div style="display:flex">
+                    @Html.DropDownListFor(model => model.SubProductCategory, Model.ProductSubCategoryList as SelectList, "---Select Block---", new { id = "ddlCommonProductSubCategoryFk", @class = "searchingDropdown  customStyle", @style = "width: 100%;" })
+                    @Html.ValidationMessageFor(model => model.SubProductCategory, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <button style="margin-top: 24px;" type="button" class="btn btn-primary  btn-block" onclick="exprote()">Show data</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("AvailableProductForSales", "ProductBooking", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(m => m.CompanyId)
+                @Html.HiddenFor(m => m.ProductType)
+                <div class="box-danger">
+                    <div class="box">
+                        <div class="box-danger">
+                            <div class="box-header">
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+
+                                <div class="table-responsive text-nowrap">
+                                    <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                        <thead>
+                                            @if (Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
+                                            {
+                                                <tr>
+                                                    <th>SL</th>
+                                                    <th>Project - Block</th>
+                                                    <th>Plot No</th>
+                                                    <th>Size (Unit)</th>
+                                                    <th>Road No</th>
+                                                    <th>Land Facing</th>
+                                                    <th>Status</th>
+                                                    <th>Remark</th>
+                                                </tr>
+                                            }
+                                            @if (Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited)
+                                            {
+                                                <tr>
+                                                    <th>SL</th>
+                                                    <th>Project - Floor</th>
+                                                    <th>Flat No</th>
+                                                    <th>Size (Unit)</th>
+                                                    <th>Flat Type</th>
+                                                    <th>Flat Facing</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            }
+
+                                        </thead>
+                                        @{int sl = 0;
+                                        }
+                                        <tbody>
+                                            @if (Model.DataList != null)
+                                            {
+                                                foreach (var item in Model.DataList)
+                                                {
+
+                                                    <tr>
+                                                        <td>@(++sl)</td>
+                                                        <td>@item.CategoryName - @item.SubCategoryName</td>
+                                                        <td>@item.Name</td>
+                                                        <td>@item.PackSize -  @item.UnitName</td>
+                                                        <td>
+                                                            @if (Model.CompanyId == (int)CompanyName.KrishibidPropertiesLimited)
+                                                            {
+
+                                                                if (item.FlatProp.IsDuplex)
+                                                                {
+                                                                    <span> Duplex Floors</span>
+
+                                                                    @*if (item.GetList != null)
+                                                                        {
+                                                                            textfor = "";
+
+                                                                            foreach (var item2 in item.GetList)
+                                                                            {
+                                                                                if (item.FlatProp.Floors.Where(e => e == item2.Value.ToString()).Count() > 0)
+                                                                                {
+                                                                                    textfor = textfor + item2.Text;
+                                                                                }
+                                                                            }
+
+                                                                           <span>Duplex Floors : @textfor </span>
+                                                                        }*@
+                                                                }
+                                                                else
+                                                                {
+                                                                    <p>Regular</p>
+                                                                }
+
+                                                            }
+                                                            @if (Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
+                                                            {
+
+                                                                <p>@item.PlotProp.RoadNo</p>
+
+                                                            }
+                                                        </td>
+                                                        <td> @item.FacingTitle</td>
+                                                        <td>
+                                                            @if (Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
+                                                            {
+
+                                                                <span>
+                                                                    @(((ProductStatusEnumGLDL)item.Status).ToString())
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>
+                                                                    @(((ProductStatusEnumKPL)item.Status).ToString())
+                                                                </span>
+                                                            }
+
+                                                        </td>
+                                                        @if (Model.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
+                                                        {
+                                                            <td> @item.Remarks</td>
+
+                                                        }
+
+
+                                                    </tr>
+                                                }
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</section>
+
+
+
+
+
+@using (Html.BeginForm("ProductPlotOrFlat", "Configuration", FormMethod.Post, new { id = "commonProductformId", @class = "formValidator", @enctype = "multipart/form-data" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" name="ActionId" id="ActionIdDelete" />
+    <input type="hidden" name="ID" id="productIdDelete" />
+    <input type="hidden" name="CompanyFK" id="CompanyFKDelete" />
+    @*@Html.Hidden("ID", new { Value = "", id = "productIdDelete" })
+        @Html.Hidden("ActionId", new { Value = "", id = "ActionIdDelete" })*@
+    @*@Html.Hidden("CompanyFK", new { Value = Model.CompanyId, id = "CompanyFKDelete" })*@
+
+    <div class="modal fade" id="deleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>@ProductType Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete this @ProductType?</h3>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i>Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        function makeDeletable(id, company) {
+            if (id !== null) {
+                $('#productIdDelete').val(id);
+                $('#ActionIdDelete').val(3);
+                $('#CompanyFKDelete').val(company);
+
+            }
+        }
+        $(document).ready(function () {
+            lodedata();
+            })
+        $("#ddlCommon_ProductCategoryFk").change(function () {
+            lodedata();
+
+        })
+            function exprote() {
+                var ddlCommon_ProductCategoryFk = $("#ddlCommon_ProductCategoryFk option:selected").val();
+                var ddlCommonProductSubCategoryFk = $("#ddlCommonProductSubCategoryFk option:selected").val();
+                var url = "ProductBooking/AvailableProductForSales";
+                window.location.href = "/" + url + "?companyId=" + @Model.CompanyId + "&&categoryId=" + ddlCommon_ProductCategoryFk + "&&subCategoryId=" + ddlCommonProductSubCategoryFk + "";
+        }
+
+        function lodedata() {
+         var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
+        $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProductSubCategory", "WareHouse")",
+                datatype: "Json",
+                         data: { id: productCategoryFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductSubCategoryFk").empty();
+                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+        }
+    </script>
+}
+

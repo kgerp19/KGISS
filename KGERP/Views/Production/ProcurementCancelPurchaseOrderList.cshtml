@@ -1,0 +1,193 @@
+﻿@model KGERP.Services.Procurement.VMPurchaseOrder
+@using KGERP.Utility;
+@{
+    ViewData["Title"] = "Cancel Purchase Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Cancel Purchase Order List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Cancel Purchase Order</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <table id="KgErpDataTable" class="table table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+                                    <th>PO NO</th>
+                                    <th>Order Date</th>
+
+                                    <th>Payment Method</th>
+
+
+                                    <th>Supplier</th>
+                                    <th>Status</th>
+                                    <th>Description</th>
+
+                                    <th>Delivery Date</th>
+                                    <th>Delivery Address</th>
+                                    <th>Total PO Value</th>
+
+                                    <th>Details</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DataList)
+                                {
+                                    #region Link Title
+                                    string cancelRenewTitle = "";
+
+                                    ///////////////////////
+                                    if (item.IsCancel)
+                                    { cancelRenewTitle = "Make Renew"; }
+                                    else
+                                    { cancelRenewTitle = "Make Cancel"; }
+
+
+                                    #endregion
+
+                                    <tr>
+                                        <th>@(++sl)</th>
+                                        <td>@item.CID</td>
+                                        <td>@item.OrderDate.Value.ToString("dd-MM-yyyy")</td>
+
+
+                                        <td>@item.POPaymentMethodName</td>
+
+
+                                        <td>@item.SupplierName</td>
+                                        <td>@item.EnumStatusName</td>
+                                        <td>@item.Description</td>
+
+                                        <td>@item.DeliveryDate.Value.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.DeliveryAddress</td>
+                                        <td>@item.TotalPOValue</td>
+
+
+                                        <td><a target="_blank" href="~/Procurement/ProcurementPurchaseOrderReport/@item.PurchaseOrderId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a></td>
+                                        <td>
+                                            <a id="@item.ID" onclick="makCancelable(@item.PurchaseOrderId)" class="linkPointer" data-toggle="modal" data-target="#cancelRenewProcurementPurchaseOrderModal" title="@cancelRenewTitle" data-placement="top">
+                                                @if (item.IsCancel)
+                                                {<i class="glyphicon glyphicon-folder-open"></i> }
+                                                else
+                                                {<i class="fa fa-ban"></i>}
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    @*@if (Model.ID > 0)
+                        {
+                            <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                        }*@
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@using (Html.BeginForm("CancelRenewProcurementPurchaseOrder", "Procurement", FormMethod.Post))
+{
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="modal fade" id="cancelRenewProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            &times;
+                        </button>
+                        <h5 class="modal-title"><b><span class="cancelRenewText"></span> Purchase Order (<span id="cancelRenewPOCIDText"></span>)</b></h5>
+                    </div>
+                    <div class="modal-body">
+                        @Html.HiddenFor(model => model.PurchaseOrderId, new { id = "hidcancelRenewProcurementPurchaseOrderId" })
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "hidCompanyFK" })
+                        @Html.HiddenFor(model => model.ActionId, new { id = "hidActionId" })
+
+
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div style="text-align:center">
+                            <h3>Are you sure to <span class="cancelRenewText"></span> this Purchase Order?</h3>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col-md-3">
+                            <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        </div>
+                        <div class="col-md-9">
+                            <button type="submit" id="btnHoldOrUnhold" style="width:100%" class="btn btn-primary">&nbsp;<span class="cancelRenewText"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+}
+    @section scripts {
+
+        <script type="text/javascript">
+
+
+
+            function makCancelable(rowId) {
+                console.log(rowId);
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
+                        datatype: "Json",
+                        data: { id: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#cancelRenewPOCIDText').text(data.CID);
+
+                            if (data.isCancel == true) {
+                                $('.cancelRenewText').text("Renew");
+                            }
+                            else {
+                                $('.cancelRenewText').text("Cancel");
+
+                            }
+                        }
+                 });
+                $('#hidcancelRenewProcurementPurchaseOrderId').val(rowId);
+            }
+
+
+        </script>
+    }
+

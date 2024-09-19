@@ -1,0 +1,177 @@
+﻿@model KGERP.Data.CustomModel.PromotionalOfferListVm
+@{
+    ViewBag.Title = "Promotional Offer";
+    Layout = "~/Views/Shared/_LayoutCrm.cshtml";
+    int sl = 0;
+}
+
+<div class="row">
+    <div class=" col-8">
+        <h5 class="bg-gray">Promotional Offer List</h5>
+        <table class="table">
+            <thead >
+                <tr >
+                    <th class="p-1">S.L</th>
+                    <th class="p-1">Name</th>
+                    <th class="p-1">Start Date</th>
+                    <th class="p-1">End Date</th>
+                    <th class="p-1" >Offer Days</th>
+                    <th class="p-1">Remain Days</th>
+                    <th class="p-1">Status</th>
+                    <th class="p-1">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in Model.Datalist)
+                {
+                    sl = sl + 1;
+                    <tr>
+                        <td class="p-1">@{ @sl}</td>
+                        <td class="p-1">@i.OfferName</td>
+                        <td class="p-1">@i.StartDate.ToShortDateString()</td>
+                        <td class="p-1">@i.EndDate.ToShortDateString()</td>
+                        <td class="p-1">@i.OfferDays</td>
+                        <td class="p-1"> @Convert.ToInt32((@i.EndDate-@DateTime.Now).TotalDays)</td>
+                        <td class="p-1">@i.OfferStatusText</td>
+                        <td class="p-1">
+                            <button onclick="EditItem(@i.OfferId)"  class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></button>
+                      
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-4">
+    
+            <h5 class="p-3">Promotional Offer</h5>
+            <div class="mb-3 col-12">
+                <input  id="offerId" type="hidden" name="offerId" value="0" />
+           
+                <label for="offerName" class="form-label">Offer Name</label>
+                <input type="text" class="form-control" name="" id="offerName" placeholder="Offer Name">
+            </div>
+            <div class=" mb-3 col-12">
+                <label class="form-label">Start Date</label>
+                <div style="display:flex;">
+                    <input id="StartDate" type="datetime" name="StartDate" class="datepicker form-control" >
+                </div>
+            </div>
+            <div class="mb-3 col-12">
+                <label class="form-label">End Date</label>
+                <div style="display:flex;">
+                    <input id="EndDate" type="datetime" class="datepicker form-control" name="EndDate" >
+                    </div>
+                </div>
+                <div class="form-check ml-3">
+                    <input class="form-check-input" name="IsOpen" type="checkbox" value="" id="opn">
+                    <label class="form-check-label" for="flexCheckChecked">
+                        IsOpen
+                    </label>
+
+                    <div class="mb-3 col-12 mt-3">
+                        <button id="sbmt" type="submit" class="btn btn-primary col-12">Save</button>
+                   
+                    </div>
+                </div>
+
+            </div>
+ </div> 
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+<script>
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+    $("#sbmt").click(function () {
+        var v = {
+            'OfferName': $('#offerName').val(),
+            'StartDate': $('#StartDate').val(),
+            'EndDate': $('#EndDate').val(),
+            'IsOpen': $('#opn').val(),
+            'CompanyId': '@Model.CompanyId',
+            'OfferId' : $("#offerId").val()
+        };
+        console.log(v);
+        $.ajax({
+
+                type: "POST",
+                url: "@Url.Action("PromootionalOffer", "Crms")",
+                datatype: "Json",
+            data: { model: v },
+            success: function (data) {
+                location.reload();
+                }
+            });
+
+    });
+
+        $(document).ready(function () {
+            $('input[type="checkbox"]').click(function () {
+                if ($(this).prop("checked") == true) {
+
+                    $("#opn").val(true);
+
+                }
+                else if ($(this).prop("checked") == false) {
+                    $("#opn").val(false);
+                }
+            });
+        });
+
+     function EditItem(id) {
+         var eid = id;
+
+     $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetPromotionalOfferById", "Crms")",
+                datatype: "Json",
+          data: { id: eid },
+                success: function (data) {
+                    console.log(data);
+                    $("#offerName").val(data.OfferName);
+                    $("#offerId").val(data.OfferId);
+                    var strDate = DateCustom(data.StartDate);
+                    $("#StartDate").val(strDate);
+                    var Endd = DateCustom(data.EndDate);
+                    $("#EndDate").val(Endd);
+                    if (data.IsOpen == true) {
+                        $("#opn").prop("checked",true)
+                       /* $("#opn").attr('checked', 'checked')*/
+                    }
+                    else if (data.IsOpen == false) {
+                        $("#opn").prop("checked", false)
+                    };
+                    $("#sbmt").html(" <span>Update</span>");
+
+                }
+            });
+
+        }
+
+    function DateCustom(orderDate) {
+        var dateString = orderDate.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var day = currentTime.getDate();
+        var year = currentTime.getFullYear();
+        var date = day + "/" + month + "/" + year;
+        return date;
+    }
+
+
+</script>
+
+}

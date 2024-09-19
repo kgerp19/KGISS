@@ -1,0 +1,143 @@
+﻿@model List<KGERP.Service.ServiceModel.PurchaseOrderDetailModel>
+<table class="table">
+    <tr style="background-color:#4CAF50;color:#FFFFFF">
+        <th class="text-center">
+            SL
+        </th>
+        <th>
+            Code
+        </th>
+        <th>
+            Raw Material
+        </th>
+        <th>
+            Unit
+        </th>
+        <th>
+            Required Qty
+        </th>
+        <th>
+            Purchased Qty
+        </th>
+
+        <th>
+            Demand Rate
+        </th>
+        <th>
+            Purchase Qty
+        </th>
+        <th>
+            Purchase Rate
+        </th>
+        <th class="text-right" style="padding-right:10px">
+            Amount
+        </th>
+
+    </tr>
+    @for (int i = 0; i < Model.Count(); i++)
+    {
+    <tr>
+        <td class="text-center" width="3%">
+            @(i + 1)
+        </td>
+        <td  width="5%">
+            @Html.Hidden("purchaseOrderDetails.Index", (@i))
+            @Html.Hidden("purchaseOrderDetails[" + i + "].ProductId", Model[i].ProductId)
+            @Html.Hidden("purchaseOrderDetails[" + i + "].UnitId", Model[i].UnitId)
+            @Html.DisplayFor(model => model[i].ProductCode)
+        </td>
+
+        <td width="29%">
+            @Html.DisplayFor(model => model[i].RawMaterial)
+        </td>
+        <td width="3%">
+            @Html.DisplayFor(model => model[i].UnitName)
+        </td>
+        <td width="10%">
+            @Html.TextBox("purchaseOrderDetails[" + i + "].RequiredQty", Model[i].RequiredQty, new { @readonly = "readonly", @style = "padding-right:2px;border: 1px solid #999;width:100px;font-weight:bold;text-align:right;background-color:#EEEEEE" })
+        </td>
+        <td width="10%">
+            @Html.TextBox("purchaseOrderDetails[" + i + "].PurchasedQty", Model[i].PurchasedQty, new { @readonly = "readonly", @class = "purchasedQty", @style = "padding-right:2px;border: 1px solid #999;width:100px;text-align:right;background-color:#EEEEEE" })
+        </td>
+
+        <td width="10%">
+            @Html.TextBox("purchaseOrderDetails[" + i + "].DemandRate", Model[i].DemandRate, new { @readonly = "readonly", @style = "padding-right:2px;border: 1px solid #999;width:100px;background-color:#EEEEEE;text-align:right" })
+        </td>
+        <td width="10%">
+            @Html.TextBox("purchaseOrderDetails[" + i + "].PurchaseQty", Model[i].PurchaseQty, new { @autocomplete = "off", @class = "purchaseQty", @style = "padding-right:2px;border: 1px solid #999;width:100px;text-align:right" })
+        </td>
+        <td width="10%">
+            @Html.TextBox("purchaseOrderDetails[" + i + "].PurchaseRate", Model[i].PurchaseRate, new { @autocomplete = "off", @style = "padding-right:2px;border: 1px solid #999;width:100px;text-align:right" })
+        </td>
+
+        <td width="10%" class="text-right" style="padding-right:10px">
+            @(Model[i].PurchasedQty * Model[i].PurchaseRate)
+        </td>
+    </tr>
+
+    }
+    @*<tr style="background-color:orange;color:#000000">
+            <td colspan="3"></td>
+            <td>
+                <b> @Model.Sum(x => x.DemandQty) </b>
+            </td>
+            <td>
+                <b id="sumOfOrderQty">@Model.Sum(x => x.Qty) </b>
+            </td>
+            <td colspan="2">
+                <b>Total </b>
+            </td>
+            <td>
+                <b> @Model.Sum(x => x.DemandRate * x.DemandQty)</b>
+            </td>
+        </tr>*@
+    <tr>
+        <td colspan="13">
+            <br />
+            <input type="submit" value="Submit" data-confirm="Are you sure to submit?" class="btn btn-success pull-right" />
+            <a href="@Url.Action("Index", "PurchaseOrder", new { companyId = Model.First().CompanyId})" class="btn btn-danger" style="float:right;margin-right:10px">
+                Close <i class="fa fa-close" aria-hidden="true"></i>
+            </a>
+            &nbsp;
+        </td>
+    </tr>
+
+</table>
+
+
+
+
+
+
+
+<script>
+    function stopRKey(evt) {
+        var evt = (evt) ? evt : ((event) ? event : null);
+        var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+        if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
+    }
+    document.onkeypress = stopRKey;
+
+
+    jQuery(document).ready(function () {
+        jQuery('[data-confirm]').click(function (e) {
+            if (!confirm(jQuery(this).attr("data-confirm"))) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    function calculateSum() {
+        var sum = 0;
+        $(".orderQty").each(function () {
+            var value = $(this).val();
+            console.log(value);
+            if (!isNaN(value) && value.length !== 0) {
+                sum += parseFloat(value);
+            }
+            $('#sumOfOrderQty').text(sum);
+        });
+    }
+
+
+</script>

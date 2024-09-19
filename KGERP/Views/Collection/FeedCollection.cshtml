@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewData["Title"] = "Invoice List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@model KGERP.Service.Implementation.VMFeedPayment
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Collection History of <span style="color:maroon">@Model.CommonCustomerCode-@Model.CommonCustomerName</span>
+    </h1>
+    <ol class="breadcrumb">
+       
+    </ol>
+</section>
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        function makeProdReferenceSubmitable(rowId) {
+            $("#submitPaymentMasterId").val(rowId)
+            $('#submitCompanyFK').val("@Model.CompanyFK");
+            $('#submitCustomerId').val("@Model.CustomerId");
+            $('#submitActionId').val(10);
+        }
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+
+             $("#ddlZoneFk").change(function () {
+                var ZoneFk = $("#ddlZoneFk").val();
+                $.ajax({
+                type: "GET",
+                url: "@Url.Action("CustomerLisByZonetGet", "Procurement")",
+                datatype: "Json",
+                    data: { zoneId: ZoneFk },
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCustomerId").empty();
+                            $("#ddlCustomerId").append("<option value=''>==Select Customer==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCustomerId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+                        }
+                    }
+                });
+            })
+
+            $("#ddlCustomerId").change(function () {
+
+                var customerId = $("#ddlCustomerId").val();
+                $.ajax({
+                type: "GET",
+                url: "@Url.Action("SalesOrderLisByCustomerIdGet", "Procurement")",
+                datatype: "Json",
+                    data: { customerId: customerId},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+
+                            $("#ddOrderMasterId").empty();
+                            $("#ddOrderMasterId").append("<option value=''>--Invoice No--</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddOrderMasterId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+                        }
+                    }
+                });
+            })
+
+
+
+            @*$("#ddOrderMasterId").change(function () {
+                var orderMasterId = $('#ddOrderMasterId').val();
+                $.ajax({
+                       type: "GET",
+                    url: "@Url.Action("GetOrderMasterPayableValue", "Procurement")",
+                    datatype: "Json",
+                    data: { companyId : "@Model.CompanyFK", orderMasterId: orderMasterId },
+                    success: function (data) {
+                        $('#txtPayableAmount').val(data);
+
+                        $('#txtPaidAmount').val(data);
+
+                    }
+                });
+            });*@
+
+             $("#ddlAccounting_BankOrCashParantId").change(function () {
+                var bankOrCashParantId = $("#ddlAccounting_BankOrCashParantId").val();
+
+
+                $.ajax({
+
+                    type: "GET",
+                    url: "@Url.Action("FeedHeadGLByHead5ParentIdGet", "Vouchers")",
+                    datatype: "Json",
+                         data: { companyId: "@Model.CompanyFK", parentId: bankOrCashParantId},
+                         success: function (data) {
+                         var items = "";
+                            if (data) {
+                            $("#ddlAccounting_BankOrCashId").empty();
+                            $(data).each(function (index, item) {
+                                $("#ddlAccounting_BankOrCashId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+
+
+        })
+        });
+
+
+    </script>
+}
+
+

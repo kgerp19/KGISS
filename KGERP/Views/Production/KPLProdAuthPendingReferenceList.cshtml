@@ -1,0 +1,256 @@
+﻿@model KGERP.Service.Implementation.Production.VMProdReference
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Authorization Pending Production List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h3><span>Authorization Pending Production List</span></h3>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"> Authorization Pending</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+                <div class="box-header">
+                    @using (Html.BeginForm("KPLProdAuthPendingReferenceList", "Production", FormMethod.Post, new { @class = "formValidator" }))
+                    {
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyId" })
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <table id="KgErpDataTable" class="table table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+                                    <th>Production NO</th>
+                                    <th>Production Date</th>
+                                    <th>Customer</th>
+                                    <th>Job No</th>
+                                    <th>Job Date</th>
+                                    <th>PO NO</th>
+                                    <th>Submission</th>
+                                    <th>Authoorized</th>
+                                    <th>Approval</th>
+                                    <th style="text-align:center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DataList)
+                                {
+                                    <tr>
+                                        <th>@(++sl)</th>
+                                        <td><a target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@item.ProdReferenceId">@item.ReferenceNo</a></td>
+                                        <td>@item.ReferenceDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.CustomerBy </td>
+                                        <td>@item.JobNo</td>
+                                        <td>@item.JobDate.Value.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.CustomerPONo</td>
+                                        <td>
+                                            @if (item.IsSubmitted)
+                                            {
+                                                <span style="width:60px" class="text-success">
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="width:60px" class="text-danger">
+                                                    Submission Pending
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.IsAuthorized == true)
+                                            {
+                                                <span style="width:60px" class="text-success">
+                                                    Approved
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="width:60px" class="text-danger">
+                                                    Approval Pending
+                                                </span>
+                                            }
+                                        </td>
+
+                                        <td style="text-align:center;">
+                                            @if (item.IsSubmitted)
+                                            {
+                                                <a id="ProdRefeId_@item.ProdReferenceId" onclick="makeEdit(@item.ProdReferenceId,@item.CompanyFK)" class="linkPointer text-danger" data-toggle="modal" data-target="#AuthSubmitModal" title="Authorization" data-placement="top"> <i class="fa fa-paper-plane" aria-hidden="true"></i> </a>
+
+                                            }
+                                            <a target="_blank" href="~/Production/KPLProdReferenceAuthDetails?companyId=@item.CompanyFK&prodReferenceId=@item.ProdReferenceId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@using (Html.BeginForm("KpLProdReferenceUpdate", "Production", FormMethod.Post, new { @class = "formValidator" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.ProdReferenceId)
+    @Html.HiddenFor(model => model.CompanyFK)
+
+
+    <div class="modal fade" id="updateModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetLcValueModal()" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"><b>Production Reference</b></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.Label("Reference Date:", htmlAttributes: new { })
+                                <div style="display:flex">
+                                    @Html.TextBoxFor(model => model.ReferenceDate, new { @class = "form-control datepicker", @style = "width: 240px;", @required = "required", @autocomplete = "off" })
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-8">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+
+@using (Html.BeginForm("AuthSubmitProdReferenceForKpl", "Production", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="AuthSubmitModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Authorize  Production</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.ProdReferenceId, new { id = "hdnProdReferenceId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "hdnCompanyId" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "editActionId" })
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Authorized this Production?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnDelete" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Authorize</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+
+        })
+
+        //let makeEditable = (dates, id, comId) => {
+
+        //    $("#ReferenceDate").val(dates);
+        //    $("#ProdReferenceId").val(id);
+        //    $("#CompanyFK").val(comId);
+        //}
+        let makeEdit = (ProdReferenceId, CompanyId) => {
+            $('#hdnProdReferenceId').val(ProdReferenceId);
+            $('#hdnCompanyId').val(CompanyId);
+            $('#editActionId').val(2);
+        }
+
+    </script>
+}
+

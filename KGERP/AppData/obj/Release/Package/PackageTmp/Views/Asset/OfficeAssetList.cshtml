@@ -1,0 +1,127 @@
+﻿
+@model KGERP.Service.ServiceModel.AssetModelVm
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Office Assets";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <h1>
+        Office Assets List
+    </h1>
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("CreateOrEditAsset", new { id = 0 })" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> Add
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+
+                        @using (Html.BeginForm("OfficeAssetList", "Asset", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                          
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            @Html.DropDownListFor(model => model.CompanyId, Model.CompanyList as SelectList, "---Select Company List---", new { id = "ddlCompanyFK", @class = "searchingDropdown form-control input-sm" })
+                                            @Html.ValidationMessageFor(model => model.CompanyId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                             
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Asset Name</th>
+                                        <th>Asset Location</th>
+                                        <th>Company Name</th>
+                                        <th>Serial Number</th>
+                                        <th>Style</th>
+                                        <th>Department Name</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        <tr>
+                                            <td style="width:10px;">
+                                                @(++sl)
+                                            </td>
+                                            <td>@item.AssetName</td>
+                                            <td>@item.AssetLocation</td>
+                                            <td>@item.CompanyName</td>
+                                            <td>@item.SerialNo</td>
+                                            <td>@item.StyleName</td>
+                                            <td>@item.DepartmentName</td>
+                                            <td>@item.Quantity</td>
+                                            <td>@item.UnitPrice</td>
+                                            <td>
+                                                <a href="@Url.Action("CreateOrEditAsset", new { id = item.AssteId })" title="Edit" class="btn btn-info btn-xs">
+                                                    <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="@Url.Action("AssetDetails", new { id = item.AssteId})" title="Details" class="btn btn-primary btn-xs">
+                                                    <i class="fa fa-eye" style="font-size:15px;" aria-hidden="true"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        var message = '@message';
+    if(message){
+        alert(message);
+    }
+
+    </script>
+
+}
+

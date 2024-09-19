@@ -1,0 +1,380 @@
+﻿@model KGERP.ViewModel.MaterialReceiveViewModel
+@{
+    ViewData["Title"] = "Material Issue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        @if (Model.VMReceivingSlave.MaterialReceiveId > 0)
+        {
+            <span>
+                Material Issue of:
+                <a href="@Url.Action("GetMRRReport","Report", new {materialReceiveId=Model.VMReceivingSlave.MaterialReceiveId,reportName="MRRReport"})" target="_blank" class="btn btn-primary btn-xs">
+                    @Model.VMReceivingSlave.ChallanCID
+                </a>
+            </span>
+        }
+        else
+        {
+            <span>Material Issue</span>
+        }
+
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Purchase Order</li>
+    </ol>
+</section>
+
+
+<section class="content">
+    <div class="row">
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.VMReceivingSlave.Procurement_PurchaseOrderFk, new { id = "hidPurchaseOrderId" })
+            @Html.HiddenFor(model => model.VMReceivingSlave.MaterialReceiveId, new { id = "hidMaterialReceiveId" })
+            @Html.HiddenFor(model => model.VMReceivingSlave.ActionId, new { id = "ActionId" })
+            @Html.HiddenFor(model => model.VMReceivingSlave.CompanyFK, new { id = "CompanyFK" })
+
+            <div class="box-danger">
+
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="col-md-1"> </div>
+                    <div class="col-md-10">
+                        <table class="table">
+                            <tr>
+                                <th style="width:18%">
+                                    MRR No
+                                </th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">
+                                    <label class="col-form-label">@Model.VMReceivingSlave.ChallanCID</label>
+
+
+                                </td>
+                                <th style="width:18%">Demand No</th>
+                                <th style="width:2%">:</th>
+                                <td style="width:30%">@Model.VMReceivingSlave.DemandNo</td>
+                            </tr>
+                            <tr>
+                                <th>MRR Date</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.ReceivedDate</td>
+
+                                <th>Purchase Order No</th>
+                                <th>:</th>
+                                <td><a href="~/Report/GetPurchaseOrderTemplateReport?purchaseOrderId=@Model.VMReceivingSlave.Procurement_PurchaseOrderFk&EXPORT=EXPORT&reportType=PDF" target="_blank" title="See All Receiving History of This PO"> @Model.VMReceivingSlave.POCID </a> </td>
+
+                            </tr>
+                            <tr>
+                                <th>Challan</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.Challan</td>
+                                <th>Challan Date</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.ChallanDate</td>
+
+                            </tr>
+                            <tr>
+                                <th>Unloading Date</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.UnloadingDate</td>
+                                <th>Received Warehouse</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.Factory</td>
+
+                            </tr>
+
+                            <tr>
+                                <th>Received By</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.EmployeeName</td>
+                                <th>Truck No</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.TruckNo</td>
+
+                            </tr>
+
+                            <tr>
+                                <th>Supplier</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.SupplierName</td>
+                                <th>Driver Name</th>
+                                <th>:</th>
+                                <td>@Model.VMReceivingSlave.DriverName</td>
+
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-1"> </div>
+                  
+                    <div class="table-responsive col-md-12  text-nowrap">
+                        <h4><b>Received Item:</b> </h4>
+                        <table id="KgErpDataTable" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+
+                                    <th style="text-align:left;">Product Name</th>
+                                    <th style="text-align:center;">Received</th>
+                                    <th style="text-align:right;">Unit Price</th>
+                                    <th style="text-align:right;">Deduction</th>
+                                    <th style="text-align:center;">StockIn Qty</th>
+                                    <th style="text-align:right;">StockIn Rate</th>
+                                    <th style="text-align:right;">Total Amount</th>
+                                    <th style="text-align:center;">Bag Name</th>
+                                    <th style="text-align:center;">Bag Qty</th>
+                                    <th style="text-align:center;">Bag Weight</th>
+
+
+                                </tr>
+                            </thead>
+                            @{
+                                int sl = 0;
+                                decimal StockInAmount = 0;
+                            }
+                            <tbody>
+                                @foreach (var item in Model.VMReceivingSlave.DataListSlave)
+                                {
+                                    StockInAmount += item.StockInQty * item.StockInRate;
+                                    <tr>
+                                        <td>@(++sl) </td>
+                                        <td style="text-align:left;">@item.ProductSubCategory @item.ProductName  </td>
+                                        <td style="text-align:center;"> @item.ReceivedQuantity @item.UnitName</td>
+                                        <th style="text-align:right;"> @item.PurchasingPrice </th>
+                                        <th style="text-align:right;"> @item.Deduction </th>
+                                        <td style="text-align:center;"> @item.StockInQty @item.UnitName</td>
+                                        <th style="text-align:right;"> @item.StockInRate </th>
+                                        <td style="text-align:right;"> @(item.StockInQty * item.StockInRate)  </td>
+                                        <td style="text-align:center;">
+                                            @if (item.BagName != null)
+                                            {
+                                                <span>
+                                                    @item.BagName
+                                                </span>
+                                            }
+                                        </td>
+                                        <td style="text-align:center;"> @item.BagQty </td>
+                                        <td style="text-align:center;"> @item.BagWeight </td>
+                                    </tr>
+
+                                }
+                                <tr>
+                                    <td> </td>
+                                    <th colspan="6">Total </th>
+
+                                    <th style="text-align:right;"> @StockInAmount  </th>
+                                    <td>
+                                    </td>
+                                    <td>  </td>
+                                    <td>  </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a href="@Url.Action("MateriaIssueIndex", "MaterialReceive", new { companyId = Model.VMReceivingSlave.CompanyFK})" class="btn btn-warning" style="float:right;margin-right:10px">
+                                <i class="fa fa-arrow-left"></i> &nbsp; Back To List
+                            </a>
+                        </div>
+                        @if (Model.VMReceivingSlave.IsSubmitted == false && Model.VMReceivingSlave.MaterialReceiveStatus == "OPEN")
+                        {
+                            <div class="col-md-3">
+                                <a class="btn btn-danger btn-block"
+                                   style="width:100%" data-toggle="modal" data-target="#purchaseOrderCancelModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Cancel</a>
+
+                            </div>
+                            <div class="col-md-5">
+                                <a onclick="makeMaterialIssueSubmitable(@Model.VMReceivingSlave.MaterialReceiveId);" class="btn btn-success btn-block"
+                                   style="width:100%" data-toggle="modal" data-target="#submitProdReferenceModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Issue & Submit</a>
+
+                            </div>
+                        }
+
+
+                        else
+                        {
+                            if (Model.VMReceivingSlave.MaterialReceiveStatus == "CANCEL")
+                            {
+                                <div class="col-md-8">
+                                    <button style="width:100%" disabled class="btn btn-danger">Canceled</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("GetMRRReport","Report", new {materialReceiveId=Model.VMReceivingSlave.MaterialReceiveId,reportName="MRRReport"})" target="_blank" style="width:100%" class="btn btn-info">
+                                        Report of @Model.VMReceivingSlave.ChallanCID
+                                    </a>
+                                </div>
+                                <div class="col-md-2">
+                                    <a href="@Url.Action("GetVoucherReport","Report", new { companyId = Model.VMReceivingSlave.CompanyFK, voucherId = Model.VMReceivingSlave.VoucherId ,reportName =""})" style="width:100%" target="_blank" class="btn btn-warning">
+                                        Voucher Report
+                                    </a>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <button style="width:100%" disabled class="btn btn-success">Successfully Issued</button>
+                                </div>
+                            }
+
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@using (Html.BeginForm("FeedPOReceivingCancel", "MaterialReceive", FormMethod.Post, new { @class = "formValidator" }))
+{
+    <div class="modal fade bd-example-modal-lg" id="purchaseOrderCancelModal" tabindex="-1" role="dialog" aria-labelledby="purchaseOrderCancelModalTitle" aria-hidden="true" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="modal-title" id="purchaseOrderCancelModalTitle" style="color:blue">Material Issue Cancel</b>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(x => x.VMReceivingSlave.MaterialReceiveId)
+                    @Html.HiddenFor(x => x.VMReceivingSlave.CompanyFK)
+                    <div class="form-horizontal">
+                        <div class="row">
+                            <div class="form-group">
+                                @Html.Label("Reason", htmlAttributes: new { @class = "control-label col-md-2" })
+                                @Html.EditorFor(model => model.VMReceivingSlave.Remarks, new { htmlAttributes = new { @class = "form-control col-md-8", @style = "max-width: 400px" } })
+                                <input type="submit" name="ActionName" value="Cancel" class="btn btn-danger" style="margin-left: 10px;" />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginForm("FeedPOReceivingSubmit", "WareHouse", FormMethod.Post, new { @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProdReferenceModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Submit</b></h5>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(model => model.VMReceivingSlave.CompanyFK, new { id = "submitCompanyFK" })
+                    @Html.HiddenFor(model => model.VMReceivingSlave.MaterialReceiveId, new { id = "submitMaterialReceiveId" })
+
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Issue this ?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@*<div class="modal fade bd-example-modal-lg" id="purchaseOrderCancelModal" tabindex="-1" role="dialog" aria-labelledby="purchaseOrderCancelModalTitle" aria-hidden="true" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="modal-title" id="purchaseOrderCancelModalTitle" style="color:blue">Material Issue Cancel</b>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(x => x.VMReceivingSlave.MaterialReceiveId)
+                    @Html.HiddenFor(x => x.VMReceivingSlave.CompanyId)
+                    <div class="form-horizontal">
+                        <div class="row">
+                            <div class="form-group">
+                                @Html.Label("Reason", htmlAttributes: new { @class = "control-label col-md-2" })
+                                @Html.EditorFor(model => model.VMReceivingSlave.Remarks, new { htmlAttributes = new { @class = "form-control col-md-8", @style = "max-width: 400px" } })
+                                <input type="submit" name="ActionName" value="Cancel" class="btn btn-danger" style="margin-left: 10px;" />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>*@
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+
+
+    function makeMaterialIssueSubmitable(rowId) {
+        $("#submitMaterialIssueId").val(rowId)
+        $('#submitCompanyFK').val("@Model.VMReceivingSlave.CompanyFK");
+        $('#submitActionId').val(10);
+            }
+
+
+
+    jQuery(document).ready(function () {
+        jQuery('[data-confirm]').click(function (e) {
+            if (!confirm(jQuery(this).attr("data-confirm"))) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    //$('#btnCancel').click(function () {
+    //    $("#purchaseOrderCancelModal").modal({
+    //        show: true,
+    //        backdrop: 'static',
+    //        keyboard: false
+
+    //    });
+    //});
+
+    </script>
+
+}

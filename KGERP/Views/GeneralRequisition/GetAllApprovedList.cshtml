@@ -1,0 +1,206 @@
+﻿@model IEnumerable<KGERP.Service.Implementation.General_Requisition.GeneralRequisitionMasterVM>
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Requisition List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int companyId = ViewBag.CompanyId;
+    int sl = 1;
+}
+<style>
+    .overdate {
+        z-index: 1400;
+        position: absolute;
+    }
+</style>
+<section class="content-header">
+    <h1>General Requisition List</h1>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        @using (Html.BeginForm("GetAllApprovedList", "GeneralRequisition", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.Hidden("companyId",companyId)
+                            <div class="row">
+                                @*<div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="GeneralRequisitionType" class="control-label">Requisition Status</label>
+                                        @Html.EnumDropDownListFor(model => model.FirstOrDefault().Status, "--Select--", htmlAttributes: new { @class = "form-control", @data_val = "false" })
+                                    </div>
+                                </div>*@
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.Editor("fromDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessage("fromDate", "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.Editor("toDate", new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessage("toDate", "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <hr />
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table id="KgErpDataTable" style="width:100%; background-color:#ddd;" class="table table-responsive table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Requisiton No</th>
+                                            <th>Requisition Date</th>
+                                            <th>Company</th>
+                                            <th>Project</th>
+                                            <th>Category</th>
+                                            <th>Type</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @(sl++)
+                                                </td>
+                                                <td>
+                                                    <a href="~/Report/GeneralRequisitionReport?companyId=@item.UserCompanyId&&masterId=@item.Id" target="_blank">  @item.RequisitionNumber </a>
+                                                </td>
+                                                <td>@item.RequisitionDate.ToString("yyyy-MM-dd")</td>
+                                                <td>@(item.GeneralRequisitionType == KGERP.Utility.BusinessTypeEnum.Company?item.CompanyName:item.DivisionName)</td>
+                                                <td>@item.ProjectName</td>
+                                                <td>@item.CategoryName</td>
+                                                <td>@(item.IsAsset?"Asset":"OpEX")</td>
+                                                <td>@item.Remarks</td>
+                                                <td>@item.Status</td>
+                                                <td>
+                                                   <a id="@item.Id" onclick="loadSignatory(@item.Id);" class="linkPointer" data-toggle="modal" data-target="#signatoryModal" title="View" data-placement="top"> <i class="fa fa-eye" aria-hidden="true"></i> </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal fade" id="signatoryModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                    &times;
+                                </button>
+                                <h5 class="modal-title"><b>Requisition Signatory</b></h5>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-responsive-md table-striped table-hover" id="signatoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Signatory Id</th>
+                                            <th scope="col">Signatory</th>
+                                            <th scope="col">Designation</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Comment</th>
+                                            <th scope="col">Approved Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sigantoryTableBody">
+                                        @*@if (Model.RequisitionApprovalLIst != null)
+                                            {
+                                                int ii = 1;
+                                                foreach (var item in Model.RequisitionApprovalLIst)
+                                                {
+                                                    <tr>
+                                                        <td>@(ii++)</td>
+                                                        <td>@item.EmployeeName</td>
+                                                        <td>@item.DesignationName</td>
+                                                        <td>@item.Status</td>
+                                                    </tr>
+                                                }
+                                            }*@
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+         $("#toDate").val("@(DateTime.Today.ToString("yyyy/MM/dd"))");
+        $("#fromDate").val("@(DateTime.Today.AddMonths(-2).ToString("yyyy/MM/dd"))");
+     });
+
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "yy/mm/dd",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+
+    function loadSignatory(id) {
+        $.ajax({
+            type: "GET",
+            url: "/GeneralRequisition/GetApprovalList",
+             data: { requisitionId: id },
+            success: function (data) {
+                // Get the table element from the HTML
+                const table = document.getElementById('sigantoryTableBody');
+                while (table.rows.length > 0) {
+                    table.deleteRow(0);
+                }
+                data.forEach((item, index) => {
+                    const row = table.insertRow(index);
+                    // Display specific fields in the table
+                    const fieldsToDisplay = ['OrderBy', 'EmployeeIdString', 'EmployeeName', 'DesignationName', 'StatusString','Comment','ApprovedTime'];
+                    fieldsToDisplay.forEach((field) => {
+                        const cell = row.insertCell();
+                        cell.innerHTML = item[field];
+                    });
+                });
+            }
+        })
+    }
+   
+    </script>
+}

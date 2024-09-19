@@ -1,0 +1,362 @@
+﻿@model KGERP.Service.Configuration.VMPackagingPurchaseRequisition
+@using KGERP.Utility;
+
+
+@{
+    ViewData["Title"] = "Bill Of Metarials";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+    decimal TotalPrice = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            Bill of metarials
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Purchase Requisition</li>
+    </ol>
+</section>
+@using (Html.BeginForm("PackagingPurchaseRequisition", "Procurement", FormMethod.Post, new { id = "procurementRequisitionFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+             
+                @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                <div class="box-danger">
+
+                    <!-- /.box-header -->
+                    <div class="box-body">
+
+                        <div class="box-body">
+                            <div class="col-sm-12">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Requisition Date</label>
+                                        <input name="RequisitionDate" asp-for="RequisitionDate" type="text" required="required" class="datePicker form-control" id="txtRequisitionDate" placeholder="Requisition Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.RequisitionDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        @{
+                                            List<SelectListItem> list = new List<SelectListItem>();
+                                            list.Add(new SelectListItem { Text = "--Select One--", Value = "0" });
+                                            list.Add(new SelectListItem { Text = "Department--1", Value = "1" });
+                                            list.Add(new SelectListItem { Text = "Department--2", Value = "2" });
+                                        }
+
+                                        <label>To Department</label>
+                                        @Html.DropDownListFor(model => model.ToRequisitionId, list, new { id = "ddlOrdStyleNo", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                        @*@Html.DropDownListFor("lists", list, new { id = "ddlOrdStyleNo", @class = "form-control ddlReset", style = "width:100%", required = "required" })*@
+                                        @Html.ValidationMessageFor(model => model.ToRequisitionId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Raw Item:</label>
+
+                                        @Html.EditorFor(model => model.RawProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
+
+                                        @Html.HiddenFor(model => model.ProductId, new { id = "ddlRProductFK" })
+                                        @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Required Quantity </label>
+                                        <div class="input-group">
+                                            @Html.TextBoxFor(model => model.Qty, new { id = "txtPurchaseQuantity", type = "number", step = "0.01", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Purchase Quantity", required = "Required" })
+                                            @Html.ValidationMessageFor(model => model.Qty, "", new { @class = "text-danger" })
+
+                                            <div class="input-group-addon">
+                                                <span class="txtUnitName"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-md-3">
+                            <div class="form-group">
+                                @{
+                                    List<SelectListItem> list1 = new List<SelectListItem>();
+                                    list1.Add(new SelectListItem { Text = "--Select One--", Value = "0" });
+                                    list1.Add(new SelectListItem { Text = "KG", Value = "1" });
+                                    list1.Add(new SelectListItem { Text = "Pic", Value = "2" });
+                                    list1.Add(new SelectListItem { Text = "Ton", Value = "3" });
+                                }
+                                <label>Unit</label>
+
+                                @Html.DropDownList("StaticData1", list1, new { id = "ddlOrdStyleNo", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+
+                            </div>
+                        </div>*@
+
+
+
+
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+                            <div class="row">
+                                <div class="col-md-8">
+
+                                </div>
+                                <div class="col-lg-4 col-md-4">
+                                    <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        @if (Model.RequisitionId > 0)
+                                        {
+                                            <span>Add Item  </span>
+                                        }
+                                        else
+                                        {
+                                            <span>Create New </span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Body Will by Start Here-->
+                        @{
+                            if (Model.RequisitionId > 0)
+                            {
+
+                                @Html.HiddenFor(model => model.RequisitionId, new { id = "hidSlaveID" })
+                                <div class="table-responsive col-md-12  text-nowrap">
+                                    <table id="KgErpDataTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding:5px;text-align:center;">SL</th>
+                                                <th style="padding:5px;text-align:left;">Item</th>
+                                                <th style="padding:5px;text-align:center;">Quantity</th>
+                                                <th style="padding:5px;text-align:center;">Unit Price</th>
+                                                <th style="padding:5px;text-align:right;">Total Price</th>
+                                                <th style="padding:5px;text-align:center;">Action</th>
+
+                                            </tr>
+                                        </thead>
+
+
+
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+
+
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        function makeDeletale(rowId) {
+            $('#hidDeleteOrderDetailId').val(rowId);
+            $('#deleteActionId').val(3);
+                                                    }
+        function resetProcurementPurchaseRequisitionSlaveForm() {
+            $('#procurementRequisitionFormId')[0].reset();
+            $('#ActionId').val(1);
+        }
+
+
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+
+            $("#ddlFinalDestinationCountryFk").val(19).change();
+              $("#txtProductName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("AutoCompleteProductGet", "Configuration")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: 20, prefix: request.term, productType : "R" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+            select: function (e, i) {
+                console.log(i);
+                    $("#ddlRProductFK").val(i.item.val);
+
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("CommonProductByID", "Configuration")",
+                        datatype: "Json",
+                        data: { id: i.item.val },
+                        success: function (data) {
+                            console.log(data);
+                            var items = "";
+                            if (data) {
+
+                                $('.txtUnitName').text(data.UnitName);
+
+                                var customerTypeFK = $("#hidCustomerTypeFk").val();
+                                if (customerTypeFK == "@((int)CustomerType.Dealer)") {
+                                    $("#txtUnitPrice").val(data.TPPrice);
+
+                                }
+                                if (customerTypeFK == "@((int)CustomerType.Retail)") {
+                                    $("#txtUnitPrice").val(data.MRPPrice);
+
+                                }
+
+                            }
+                        }
+                    });
+                    $('#txtProductName').focus();
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+                });
+
+
+
+
+
+            $("#TermsAndConditionid").change(function () {
+                                                            var termsAndConditionid = $('#TermsAndConditionid').val();
+                $.ajax({
+                                                            type: "GET",
+                    url: "@Url.Action("GetTermNCondition", "Procurement")",
+                    datatype: "Json",
+                    data: { id: termsAndConditionid },
+                    success: function (data) {
+                        $('#txtTermsAndCondition').empty();
+                        $('#txtTermsAndCondition').append(data.description);
+
+                                                                }
+                                                            });
+                                                        });
+
+
+
+            $("#ddlSupplierPaymentMethodEnumFK").change(function () {
+                var paymethod = $("#ddlSupplierPaymentMethodEnumFK").val();
+                if (paymethod === "@((int)VendorsPaymentMethodEnum.LC)") {
+                    $("#piReletedDivId").show();
+                }
+                else {
+                    $("#piReletedDivId").hide();
+                }
+
+            })
+
+            $("#txtConsumption").keyup(function () {
+                var Consumption= $("#txtConsumption").val();
+
+                $("#txtPurchaseQuantity").val(Consumption *@Model.Qty);
+
+            })
+
+
+        });
+            function makeEditble(rowId) {
+                console.log(rowId);
+            $.ajax({
+
+                  type: "POST",
+                  url: "@Url.Action("GetFinishProductBOM", "Procurement")",
+                  datatype: "Json",
+                  data: { id: rowId },
+                  success: function (data) {
+                      console.log(data);
+                      $('#poCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                      $("#hidRequisitionId").val(data.ID);
+                      $('#ActionId').val(2);
+                      $("#CompanyFK").val(data.CompanyFK);
+                      $("#txtProductName").val(data.RawProductName);
+                      $("#ddlRProductFK").val(data.RProductFK);
+                      $("#txtConsumption").val(data.RawConsumeQuantity);
+                      $("#txtPurchaseQuantity").val(data.RequiredQuantity);
+
+                      $("#txtSupplierName").val(data.SupplierName);
+                      $("#ddlCommon_SupplierFK").val(data.SupplierId);
+
+                      $('#txtUnitPrice').val(data.UnitPrice);
+                      $("#hidOrderDetailId").val(data.OrderDetailId)
+                      $("#hidORDStyle").val(data.ORDStyle)
+                      $('.txtUnitName').text(data.UnitName);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                 });
+            }
+
+        function makeSubmitble(rowId) {
+                // console.log(rowId);
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglOrderMastersGet", "Procurement")",
+                        datatype: "Json",
+                    data: { RequisitionId: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftPOCIDText').text(data.OrderNo);
+
+                            if (data.Status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+                $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+    </script>
+}

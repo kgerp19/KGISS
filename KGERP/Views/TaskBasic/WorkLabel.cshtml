@@ -1,0 +1,212 @@
+﻿
+@{
+    ViewData["Title"] = "Work Label";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model KGERP.Service.Configuration.VMWorkLabel
+<script src="~/bower_components/jquery/dist/jquery.min.js"></script>
+
+<style type="text/css">
+    input, select, textarea {
+        max-width: 100%;
+    }
+    .color-picker {
+        -webkit-appearance: none;
+        border: none;
+        width: 100%;
+        height: 38px;
+        cursor: pointer;
+        padding: 0;
+        background: none;
+    }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            padding: 0;
+        }
+</style>
+
+<section class="content-header">
+    <h1>
+        Work Label
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+        <li class="active">Work Label</li>
+    </ol>
+</section>
+@using (Html.BeginForm("WorkLabel", "TaskBasic", FormMethod.Post, new { id = "labelFormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
+    @Html.HiddenFor(model => model.WokboardId, new { id = "idLabelId" })
+    @Html.HiddenFor(model => model.WorkspaceId, new { id = "idLabelId" })
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>Add Work Label</h4>
+                        </div>
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.WorkLabelId, new { id = "hidLabelId" })
+                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Work Label</label>
+                                        @Html.TextBoxFor(model => model.WorkLabelName, new { id = "txtLabelName", @class = "form-control input-sm", @placeholder = "Work Label" })
+                                        @Html.ValidationMessageFor(model => model.WorkLabelName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="txtColorName">Color</label>
+                                        @Html.TextBoxFor(model => model.ColorName, new { id = "txtColorName", @class = "form-control input-sm color-picker", @type = "color", @placeholder = "Color" })
+                                        @Html.ValidationMessageFor(model => model.ColorName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block"><i class='fa fa-edit'></i> Add</button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-12">
+                <div class="box">
+
+                    <div class="box-danger">
+                        <div class="box-header">
+                            <h4>Work Label List</h4>
+                        </div>
+                        <div class="box-body">
+
+                            <div class="table-responsive col-md-12">
+                                <table id="KgErpDataTable" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:10px">SL</th>
+                                            <th style="width:20px">Work Label</th>
+                                            <th style="width:20px">Color</th>
+                                            <th style="width:10px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    @{int sl = 0;
+                                    }
+                                    <tbody>
+                                        @foreach (var item in Model.DataList)
+                                        {
+
+                                            <tr>
+                                                <td>@(++sl)</td>
+
+                                                <td id="tdLabelName_@item.WorkLabelId">@item.WorkLabelName</td>
+                                                <td id="tdColorName_@item.WorkLabelId">@item.ColorName</td>
+                                                <td>
+                                                    <a id="@item.WorkLabelId" onclick=" makeEditble(this);" class="linkPointer" data-toggle="modal" data-target="#exampleModal" title="Edit" data-placement="top"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                                                    <a id="@item.WorkLabelId" onclick="makeDeletable(@item.WorkLabelId);" class="linkPointer" data-toggle="modal" data-target="#itemActionModal" title="Delete"
+                                                       data-placement="top">
+                                                        <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="itemActionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Work Label Delete</b></h5>
+
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center">
+                        <h3>Are you sure to delete?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnClose" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnDelete" class="deleteId btn btn-primary"><i class="glyphicon glyphicon-check"></i> Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Include Bootstrap JS (assuming you haven't already included it) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <!-- Include Bootstrap Colorpicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/js/bootstrap-colorpicker.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+        });
+
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#hidLabelId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#txtLabelName').val($('#tdLabelName_' + rowId).text().trim());
+                $('#txtColorName').val($('#tdColorName_' + rowId).text().trim());
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            }
+        }
+
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#hidLabelId').val(id);
+                $('#ActionId').val(3);
+
+            }
+        }
+        function resetForm() {
+            $('#labelFormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+        }
+
+    </script>
+}
+

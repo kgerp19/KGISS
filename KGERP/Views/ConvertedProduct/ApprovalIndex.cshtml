@@ -1,0 +1,185 @@
+﻿@model KGERP.Service.ServiceModel.ConvertedProductModel
+
+@{
+    var message = TempData["successMessage"];
+    ViewBag.Title = "Converted Product Approval List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Product Coversion Approval List
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li>
+            <a href="@Url.Action("CreateOrEdit")" class="btn btn-primary pull-right">
+                <span class="fa fa-plus"></span> New
+            </a>
+        </li>
+    </ol>
+</section>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+
+                        @using (Html.BeginForm("ApprovalIndex", "ConvertedProduct", FormMethod.Post, new { @class = "formValidator" }))
+                        {
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                            <div class="row">
+                                <div class="col-md-3">
+
+
+
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <hr />
+                        <div class="table-responsive">
+                            <table id="KgErpDataTable" style="width:100%;" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Invoice No</th>
+                                        <th>Conversion Date</th>
+                                        <th>Convert From</th>
+                                        <th>Convert To</th>
+                                        <th>Qty</th>
+                                        <th>Convert From Unit Price</th>
+                                        <th>Converted Unit Price</th>
+
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                @{int sl = 0;
+                                }
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                    <tr>
+                                        <td style="width:10px;">
+                                            @(++sl)
+                                        </td>
+
+                                        <td>@item.InvoiceNo</td>
+                                        <td>
+                                            @item.ConvertedDate.ToString("dd/MMM/yyyy")
+                                        </td>
+                                        <td>
+                                            @item.FromItem
+                                        </td>
+                                        <td>
+                                            @item.ToItem
+                                        </td>
+                                        <td>
+                                            @item.ConvertedQty
+                                        </td>
+                                        <td>
+                                            @item.ConvertFromUnitPrice
+                                        </td>
+                                        <td>
+                                            @item.ConvertedUnitPrice
+                                        </td>
+                                        <td>
+                                            @if (item.ConvertStatus.Equals("P"))
+                                            {
+
+                                                using (Html.BeginForm("ChangeConvertStatus", "ConvertedProduct", FormMethod.Get, new { @novalidate = "novalidate" }))
+                                                {
+                                                    @Html.Hidden("convertedProductId", item.ConvertedProductId)
+                                                    @Html.Hidden("companyId", item.CompanyId.ToString())
+                                                    <button type="submit" name="convertStatus" value="A" onclick="javascript: return SubmitFormApprove();" class="btn btn-success btn-xs" title="Approve"><i class="fa fa-check" aria-hidden="true"></i></button>
+                                                    <button type="submit" name="convertStatus" value="D" onclick="javascript: return SubmitFormDeny();" class="btn btn-danger btn-xs" title="Deny"><i class="fa fa-check" aria-hidden="true"></i></button>
+                                                }
+                                            }
+                                            else if (item.ConvertStatus.Equals("A"))
+                                            {
+                                                <span class="btn btn-success btn-xs">Approved</span>
+                                            }
+                                            else if (item.ConvertStatus.Equals("D"))
+                                            {
+                                                <span class="btn btn-danger btn-xs">Denied</span>
+                                            }
+                                        </td>
+
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+        $(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+          var message = '@message';
+        if(message){
+            alert(message);
+        }
+
+        function SubmitFormApprove() {
+            var r = confirm("Are you sure to Approve?");
+            if (r == false) {
+                return false;
+            }
+        }
+
+        function SubmitFormDeny() {
+            var r = confirm("Are you sure to Deny?");
+            if (r == false) {
+                return false;
+            }
+        }
+</script>
+
+}

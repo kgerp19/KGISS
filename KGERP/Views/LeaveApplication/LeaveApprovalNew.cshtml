@@ -1,0 +1,309 @@
+﻿@model KGERP.Service.Implementation.Leave.ViewModels.LeaveAllDetailVM
+@using KGERP.Utility
+@{
+    ViewData["Title"] = "Leave Approval Details";
+}
+<style>
+    .badge {
+        display: inline-block;
+        padding: 1em 0.7em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        width: 80px;
+    }
+
+    .badge-warning {
+        color: #212529;
+        background-color: #ffc107;
+    }
+
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+
+    .badge-danger {
+        background-color: #d9534f;
+        color: #ffffff;
+    }
+</style>
+
+@using (Html.BeginForm("LeaveApprovalNew", "LeaveApplication", FormMethod.Post, new { id = "issueListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Status</th>
+
+
+                                        <th>Sl</th>
+                                        <th>Id</th>
+                                        <th>Name</th>
+                                        <th>Leave Category</th>
+                                        <th>Leave Days</th>
+                                        <th>Apply Date</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Reason</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int sl = 0;}
+                                    @foreach (var item in Model.LeaveApprovalDataList)
+                                    {
+                                    <tr>
+                                        <td style="display: flex; flex-wrap: nowrap; align-items: center;">
+                                            @if (item.Status == 0)
+                                            {
+                                                <a class="btn btn-primary btn-sm" onclick="AprroveLeave(@item.SigID, @item.LeaveApplicationID)" data-toggle="modal" data-target="#exampleModal" style="width: 147px; margin-right: 5px;">
+                                                    Approve
+                                                </a>
+                                            }
+                                            else if (item.Status == 1)
+                                            {
+                                                <span class="badge badge-success" style="margin-right: 5px;">Approved</span>
+                                            }
+                                            else if (item.Status == 2)
+                                            {
+                                                <span class="badge badge-danger" style="margin-right: 5px;">Rejected</span>
+                                            }
+                                            else if (item.Status == -1)
+                                            {
+                                                <span class="badge badge-warning" style="margin-right: 5px;">-</span>
+                                            }
+
+                                            <a href="/Report/NewLeaveManagement?CompanyId=@item.CompanyID&LeaveApplicationID=@item.LeaveApplicationID&reportType=PDF&applicationType=@item.TableName" target="_blank" class="btn btn-sm btn-primary" title="Application" style="margin-right: 5px;">
+                                                <i class="glyphicon glyphicon-envelope" style="font-size: 12px;"></i>
+                                            </a>
+
+                                            <a href="#" onclick="ViewReport(@item.LeaveApplicationID)" class="btn btn-info btn-sm" data-toggle="modal" data-target=".bd-example-modal-lg">
+                                                <i class="glyphicon glyphicon-eye-open" style="font-size: 12px;"></i>
+                                            </a>
+                                        </td>
+
+                                        <td>
+
+                                            @if (item.LeaveStatus == (int)LeaveStatusEnum.Pending)
+                                            {
+                                                <span class="badge badge-warning">Pending</span>
+                                            }
+                                            else if (item.LeaveStatus == (int)LeaveStatusEnum.Denied)
+                                            {
+                                                <span class="badge badge-danger">Rejected</span>
+                                            }
+                                            else if (item.LeaveStatus == (int)LeaveStatusEnum.Approved)
+                                            {
+                                                <span class="badge badge-success">Approved</span>
+                                            }
+
+
+                                        </td>
+
+                                        <td>@(++sl) </td>
+                                        <td>@item.EmployeeKGid</td>
+                                        <td>@item.ApplicantName</td>
+                                        <td>@item.LeaveCategory</td>
+                                        <td>@item.LeaveDays</td>
+                                        <td>@item.ApplyDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.StartDate.ToString("dd-MM-yyyy")
+
+                                        <td>@item.EndDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.Reason</td>
+
+
+                                    </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"> <b id="exampleModalScrollableTitle"> </b></h4>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Sl</th>
+                                <th>Authorized By</th>
+                                <th>ID</th>
+                                <th>Approved date </th>
+                                <th>Status </th>
+                            </tr>
+                        </thead>
+                        <tbody id="Installment">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("LeaveApprovalNew", "LeaveApplication", FormMethod.Post))
+{
+    @Html.HiddenFor(m => m.SigID, new { @id = "EmployeeID" })
+    @Html.HiddenFor(m => m.LeaveApplicationID, new { @id = "LeaveApplicationID" })
+    @Html.HiddenFor(m => m.StrFromDate, new { @id = "strFromDateHid" })
+    @Html.HiddenFor(m => m.StrToDate, new { @id = "strToDateHid" })
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="exampleFormControlSelect1">Select Approval Status</label>
+                        <select class="form-control" id="ApprovalStatus" name="ApprovalStatus">
+                            <option value="1">Approve</option>
+                            <option value="2">Reject</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <input type="submit" value="Save Change" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script>
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+        function AprroveLeave(empId, leaveID) {
+            console.log("Emp and Leave id", empId, leaveID);
+            $("#LeaveApplicationID").val(leaveID);
+            $("#EmployeeID").val(empId);
+        }
+    function ViewReport(id) {
+            var text = $("#copyId").text();
+            //$("#exampleModalScrollableTitle").text(LObj.ReportCategoryName + " for (" +text +")");
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("LeaveSignatories", "LeaveApplication")",
+                datatype: "Json",
+                data: { applicationId:id},
+                success: function (data) {
+                    console.log(data);
+                    var tag = '';
+                    var count = data.SignatoryDataList.length-1;
+                    console.log("ffff", count);
+                    $.each(data.SignatoryDataList, function (key, item) {
+
+                        tag += '<tr id="' + key + '">';
+                        tag += '<td> ' + (key + 1) + '</td>';
+                        if (item.SigIndID === item.UserId && item.ApprovalStatus ==0) {
+                            tag += '<td style="background-color: #ffeb3b!important;"> ' + item.SigName + '</td>';
+                        } else {
+                            tag += '<td> ' + item.SigName + '</td>';
+                        }
+                        tag += '<td> ' + item.KgID + '</td>';
+                        if (item.ApproveDate == null) {
+                            tag += '<td> <span> ...... </span></td>';
+                        } else {
+                            var StringApprovdate = DateCustom(item.ApproveDate);
+                            tag += '<td> ' + StringApprovdate + '</td>';
+                        }
+                        if (item.SigApprovalStatus == "Approved") {
+                            tag += '<td> <span class="badge badge-success"> ' + item.SigApprovalStatus + '</span></td>';
+                        } else if (item.SigApprovalStatus == "Pending") {
+                            tag += '<td> <span class="badge badge-warning"> ' + item.SigApprovalStatus + '</span></td>';
+                        } else if (item.SigApprovalStatus == "Rejected") {
+                            tag += '<td> <span class="badge badge-danger"> ' + item.SigApprovalStatus + '</span></td>';
+                        } else if (item.SigApprovalStatus == "-") {
+                            tag += '<td> <span class="badge badge-success"> ' + item.SigApprovalStatus + '</span></td>';
+                        }
+                        tag += '</tr>';
+                    })
+                    $('#Installment').html(tag);
+                }
+            });
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = day + "-" + month + "-" + year;
+            return date;
+        }
+    </script>
+}

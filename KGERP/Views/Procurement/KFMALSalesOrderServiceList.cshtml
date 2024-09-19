@@ -1,0 +1,519 @@
+﻿@model KGERP.Services.Procurement.VMSalesOrder
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Govt.Subsidy Sales Invoice List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+
+            Govt. Subsidy Sales Invoice List
+
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">
+            Govt. Subsidy Sales Invoice List
+        </li>
+    </ol>
+</section>
+
+
+@using (Html.BeginForm("KfmalServiceSalesOrderfilter", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+
+    <div class="box">
+        <div class="box-danger">
+            <div class="box-header">
+                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                <div class="row">
+                    <div class="col-md-3">
+
+                        @Html.Label("Status", htmlAttributes: new { @class = "control-label" })
+                        <br />
+                        @Html.DropDownListFor(model => model.Status, Model.EnumStatusList as SelectList, "==Select Status==", new { id = "ddlStatusEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                            @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                        </div>
+
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                            @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@using (Html.BeginForm("KFMALProcurementSalesOrderList", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="">
+            <div class="box-danger">
+                <div class="box-header">
+
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                    <hr />
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Sales NO</th>
+
+                                        <th>Order Date</th>
+                                        <th>Customer</th>
+                                        <th>Delivery Date</th>
+
+                                        <th>Payment Method</th>
+
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                        <th>Print</th>
+                                        <th>Change Status</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+                                        #region Link Title
+
+                                        string statusTitle = "";
+
+
+                                        //////////////////////////
+                                        if (item.Status == (int)EnumPOStatus.Draft)
+                                        { statusTitle = "Make Submit"; }
+                                        if (item.Status == (int)EnumPOStatus.Submitted)
+                                        { statusTitle = "Undo Submit"; }
+
+
+                                        #endregion
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+                                            <td><a target="_blank" href="~/Procurement/ProcurementSalesOrderDetailsReport?companyId=@item.CompanyFK&orderMasterId=@item.OrderMasterId">@item.OrderNo</a></td>
+
+                                            <td>@item.OrderDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.CommonCustomerName</td>
+
+                                            <td>
+                                                @if (item.ExpectedDeliveryDate != null)
+                                                {<span>@item.ExpectedDeliveryDate.Value.ToString("dd-MM-yyyy")</span>}
+                                            </td>
+
+                                            <td>@item.POPaymentMethodName</td>
+                                            <td>@item.EnumStatusName</td>
+
+                                            <td>
+                                                <a id="@item.OrderMasterId" onclick=" makeEditble(@item.OrderMasterId);" class="linkPointer" data-toggle="modal" data-target="#editPOModal" title="Edit" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                <a id="@item.OrderMasterId" onclick="makeDeletale(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                <a href="~/Procurement/KFMALSalesServiceOrderSlave?companyId=@item.CompanyFK&orderMasterId=@item.OrderMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                            </td>
+                                            <td>
+                                                @if (item.Status == (int)EnumPOStatus.Submitted)
+                                                {
+                                                    <a class="btn btn-sm btn-xs btn-warning" style="width:100%" target="_blank" href="~/Report/GCCLSalesInvoiceReport?companyId=@Model.CompanyFK&orderMasterId=@item.OrderMasterId&reportName=GCCLSalesInvoiceReports">
+                                                        <i class="fa fa-print"></i>Print
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span>Print</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.Status == (int)EnumPOStatus.Closed)
+                                                {
+                                                    <span class="border:1px solid;border-color:#006400;"><i style="color:#006400;">Closed</i></span>
+                                                }
+                                                else
+                                                {
+                                                    <a id="@item.OrderMasterId" onclick="makeSubmitble(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#submitProcurementPurchaseOrderModal" title="@statusTitle" data-placement="top">
+                                                        @if (item.Status == (int)EnumPOStatus.Submitted)
+                                                        {<i>Undo Submit</i> }
+                                                        else
+                                                        { <i>Submit</i>}
+                                                    </a>
+                                                }
+
+
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        @*@if (Model.ID > 0)
+                            {
+                                <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                            }*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade modal-lg" id="editPOModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-lg ui-front" role="document">
+            <div class="modal-content">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="modal-header">
+                            <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                &times;
+                            </button>
+                            <h4 class="modal-title"><b>Sales Order Edit (<span id="pSOCIDText"></span>)</b></h4>
+                        </div>
+                        <div class="modal-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.ActionId, new { id = "SOEditActionId" })
+                            @Html.HiddenFor(model => model.CompanyFK, new { id = "SOEditCompanyFK" })
+
+                            @Html.HiddenFor(model => model.OrderMasterId, new { id = "hidOrderMasterId" })
+
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>PO Date</label>
+                                        <input name="OrderDate" asp-for="OrderDate" type="text" required="required" class="datePicker form-control" id="txtOrderDate" placeholder="Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.OrderDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <label>Payment Method</label>
+                                        @Html.DropDownListFor(model => model.CustomerPaymentMethodEnumFK, Model.POPaymentMethodList as SelectList, "==Payment Method==", new { id = "ddlCustomerPaymentMethodEnumFKK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.CustomerPaymentMethodEnumFK, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Supplier</label>
+                                        @Html.EditorFor(model => model.CommonCustomerName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Customer Name", @id = "txtCommonCustomerName" } })
+
+                                        @Html.HiddenFor(model => model.CustomerId, new { id = "ddlCustomerId" })
+                                        @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Delivery Date</label>
+                                        <input name="ExpectedDeliveryDate" asp-for="ExpectedDeliveryDate" type="text" required="required" class="datePicker form-control" id="txtDeliveryDate" placeholder="Delivery Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.ExpectedDeliveryDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <div class="col-md-8">
+                                <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@using (Html.BeginForm("DeleteOrderMasters", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Sales Order</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.OrderMasterId, new { id = "hidProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POdeleteCompanyFK" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Sales Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@using (Html.BeginForm("SubmitOrderMasters", "Procurement", FormMethod.Post))
+{
+
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Purchase Order (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.OrderMasterId, new { id = "hidsubmitProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POSubmitCompanyFK" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="submitOrDraftText"></span> this Purchase Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+
+
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+            function resetForm() {
+                $('#procurementvmSalesOrderListFormId')[0].reset();
+                $('#SOEditActionId').val(1);
+            }
+            $("#txtCommonCustomerName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCustomerId").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        })
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+            //console.log(actionId);
+            //console.log("@((int)ActionEnum.Approve)");
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+
+
+
+            function makeSubmitble(rowId) {
+                // console.log(rowId);
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglOrderMastersGet", "Procurement")",
+                        datatype: "Json",
+                    data: { orderMasterId: rowId },
+                        success: function (data) {
+                            console.log(data);
+                            $('#submitOrDraftPOCIDText').text(data.OrderNo);
+
+                            if (data.Status == 0) {
+                                $('.submitOrDraftText').text("Make Submit");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft");
+
+                            }
+                        }
+                 });
+                $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+
+
+
+
+
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+            function makeEditble(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglOrderMastersGet", "Procurement")",
+                        datatype: "Json",
+                     data: { orderMasterId: rowId },
+                        success: function (data) {
+                            console.log("hhhhhhhhhhhhhhhhhhh",data);
+
+                            $('#pSOCIDText').text(data.OrderNo);
+                            $("#hidOrderMasterId").val(data.OrderMasterId);
+                            $('#SOEditActionId').val(2);
+                            //$("#POEditCompanyFK").val(data.CompanyFK);
+
+                            var orderDate = DateCustom(data.OrderDate);
+
+                            $('#txtOrderDate').val(orderDate);
+                            $('#ddlCustomerPaymentMethodEnumFKK').val(data.CustomerPaymentMethodEnumFK).change();
+                            $('#txtCommonCustomerName').val(data.CommonCustomerName);
+
+                            var deliveryDate = DateCustom(data.ExpectedDeliveryDate);
+                            $('#txtDeliveryDate').val(deliveryDate);
+                            $('#ddlCustomerId').val(data.CustomerId);
+
+
+
+                            //$('#ddlPOTypeEnumFK').val(data.poTypeEnumFK).change();
+                            //$('#ddlProcurementOriginTypeEnumFK').val(data.procurementOriginTypeEnumFK).change();
+                            //$('#ddlCommon_CurrencyFK').val(data.common_CurrencyFK).change();
+
+                        }
+                 });
+            }
+
+
+    </script>
+}
+

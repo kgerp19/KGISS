@@ -1,0 +1,216 @@
+﻿@model KGERP.Service.Implementation.Configuration.VendorProfessionVm
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+
+<h2>Vendor Profession</h2>
+<button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" style="float:right;margin-top:10px;">Add New</button>
+<table class="table table-bordered border-primary" style="margin-top:20px">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+
+            <th>Action</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Datalist)
+        {
+            <tr>
+                <td>@(++sl)</td>
+                <td>@item.Name</td>
+
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="makeDelete(@item.ProfessionId)"> Delete </button>
+                    <button type="button" data-toggle="modal" data-target="#exampleModal1" class="btn btn-primary" onclick="makeEdit(@item.ProfessionId)"> Edit </button>
+
+                </td>
+            </tr>
+
+
+        }
+
+    </tbody>
+</table>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="catagory"></h5>
+                <h5 class="" id="comm"></h5>
+                <input hidden value="" id="commm" />
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-md-6  ">
+                        <label for="message-text" class="col-form-label ">Name</label>
+                      <input class="form-control" id="name" value="" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="svaepersent" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+           <input class="form-control" value="" id="Edname" />
+                <input type="hidden" id="inceid" class="form-control form-group" value="" />
+               
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="PercentgaeSave" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+<script>
+        $('#svaepersent').click(function () {
+
+            var v = {
+                'Name': $("#name").val()
+            };
+          var b=  $("#name").val()
+            var Schedule = @Html.Raw(Json.Encode(Model.Datalist));
+            console.log("Test",b);
+            var LObj = Schedule.filter(x => x.Name == b);
+            if (LObj.length >0) {
+                alert("Name Already Exist");
+                return ;
+            }
+            $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveVendorProfession", "Vendorprofession")",
+            datatype: "Json",
+                data: { model: v },
+                success: function (data) {
+                    console.log(data);
+                    if (data == "True") {
+
+                        alert("Add SuccesFully")
+                    } else {
+
+                        alert("Not Added")
+                    }
+                    location.reload();
+
+
+            }
+        });
+
+
+        });
+
+    function makeEdit(id) {
+
+
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Foredit", "Vendorprofession")",
+            datatype: "Json",
+            data: { id: id },
+            success: function (data) {
+                console.log(data);
+                $("#Edname").val(data.Name)
+                $("#inceid").val(data.ProfessionId)
+
+
+
+            }
+        });
+    }
+
+        $("#PercentgaeSave").click(function () {
+      var v = {
+          'ProfessionId': $('#inceid').val(),
+          'Name': $('#Edname').val(),
+
+        };
+         $.ajax({
+                type: "POST",
+                url: "@Url.Action("EditSavevendor", "Vendorprofession")",
+                datatype: "Json",
+             data: { model: v },
+             success: function (response) {
+                 console.log(response)
+                 if (response == "True" || response=="true") {
+                     alert("Update SuccesFull")
+                 } else {
+                     console.log(typeof(response));
+                     alert("Not Update");
+                 }
+                 location.reload();
+             }
+         });
+
+    });
+
+    function makeDelete(id) {
+            $.confirm({
+                title: 'Are You Want sure to delete!',
+                content: 'This will be permanenly delete',
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Delete',
+                        btnClass: 'btn-red',
+                        action: function () {
+
+               $.ajax({
+            type: "POST",
+            url: "@Url.Action("Deletevendor", "Vendorprofession")",
+            datatype: "Json",
+            data: { id: id },
+                   success: function (data) {
+                       if (data == "True") {
+
+                           alert("Delete SuccesFully")
+                       } else {
+
+                           alert("Not Delete")
+                       }
+                       location.reload();
+
+            }
+        });
+
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+        }
+
+
+
+</script>
+}

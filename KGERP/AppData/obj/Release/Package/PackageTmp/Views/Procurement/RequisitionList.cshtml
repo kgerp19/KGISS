@@ -1,0 +1,935 @@
+﻿@model KGERP.Services.Procurement.VmDemandService
+@using KGERP.Utility;
+
+@{
+    ViewBag.Title = "Requisition List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .bg-success {
+        background-color: #00a65a;
+    }
+
+    .bg-warning {
+        background-color: #f39c12 !important;
+    }
+
+    .badge {
+        display: inline-block;
+        min-width: 10px;
+        padding: 3px 7px;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-radius: 10px;
+    }
+
+    @@media (min-width: 992px) {
+        .modal-lg {
+            width: 1101px;
+        }
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Requisition List
+        </span>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Requisition List</li>
+    </ol>
+</section>
+
+
+
+
+
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-danger">
+
+                @using (Html.BeginForm("RequisitionList", "Procurement", FormMethod.Post, new { @class = "formValidator" }))
+                {
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                    <div class="row">
+                        <div class="col-md-3">
+
+
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                            </div>
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                <br />
+                                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <hr />
+
+                @using (Html.BeginForm("UpdateDemand", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+                {
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" style="background-color: #ddd;" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>PRF NO</th>
+
+                                        <th>PRF Date</th>
+                                        <th>Customer</th>
+
+                                        <th>Payment Method</th>
+
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                        <th>Change Status</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.dataList)
+                                    {
+                                        #region Link Title
+
+                                        string statusTitle = "";
+                                        //////////////////////////
+                                        if (item.IsSubmitted == false)
+                                        { statusTitle = "Pending"; }
+                                        if (item.IsSubmitted == true)
+                                        { statusTitle = "Approved"; }
+                                        #endregion
+                                        <tr>
+                                            <th>@(++sl)</th>
+                                            <td>
+                                                @if (@item.CompanyFK == 8)
+                                                {
+                                                    <a target="_blank" href="~/Report/GCCLPRFInvoiceReport?companyId=@item.CompanyFK&DemandId=@item.DemandId&reportName=FeedPRFInvoiceReports&CustomerId=@item.CustomerId&AsOnDate=@item.CreatedDate.ToString("dd-MM-yyyy")">@item.DemandNo</a>
+                                                }
+                                                else
+                                                {
+                                                    <a target="_blank" href="~/Report/GCCLPRFInvoiceReport?companyId=@item.CompanyFK&DemandId=@item.DemandId&reportName=GCCLPRFInvoiceReports&CustomerId=@item.CustomerId&AsOnDate=@item.CreatedDate.ToString("dd-MM-yyyy")">@item.DemandNo</a>
+                                                }
+
+
+                                            </td>
+                                            <td>@item.DemandDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.CompanyName</td>
+                                            <td>@item.POPaymentMethod</td>
+                                            <td>
+                                                @if (item.IsSubmitted == true)
+                                                {<b> <i class="text-success">Approved</i> </b> }
+                                                else
+                                                { <b> <i class="text-warning">Pending</i> </b>}
+                                            </td>
+                                            <td>
+                                                @if (!item.IsInvoiceCreated)
+                                                {
+
+                                                    <a id="@item.DemandId" onclick="makeDeletale(@item.DemandId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderModal" title="Delete" data-placement="top"> <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> </a>
+                                                    if (item.CompanyFK == 8)
+                                                    {
+                                                        <a id="@item.DemandId" onclick="makeEditblefeed(@item.DemandId);" class="linkPointer" data-toggle="modal" data-target="#editPOModalfeed" title="Edit" data-placement="top"> <i class="fa fa-edit" aria-hidden="true"></i> </a>
+                                                        <a target="_blank" href="~/Procurement/FeedDemandOrder?companyId=@item.CompanyFK&demandOrderId=@item.DemandId" title="Details"> <i class="glyphicon glyphicon-new-window"></i> </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a id="@item.DemandId" onclick="makeEditble(@item.DemandId);" class="linkPointer" data-toggle="modal" data-target="#editPOModal" title="Edit" data-placement="top"> <i class="fa fa-edit" aria-hidden="true"></i> </a>
+                                                        <a target="_blank" href="~/Procurement/DemandOrderSlave?companyId=@item.CompanyFK&demandOrderId=@item.DemandId" title="Details"> <i class="glyphicon glyphicon-new-window"></i> </a>
+                                                    }
+
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.Status == (int)EnumPOStatus.Closed)
+                                                {
+                                                    <span class="border:1px solid;border-color:#006400;"><i style="color:#006400;">Closed</i></span>
+                                                }
+                                                else
+                                                {
+                                                    if (!item.IsInvoiceCreated)
+                                                    {
+                                                        <a href="#" id="@item.DemandId" onclick="makeSubmitble(@item.DemandId)" class="linkPointer" data-toggle="modal" data-target="#submitProcurementPurchaseOrderModal" title="@statusTitle" data-placement="top">
+                                                            @if (item.IsSubmitted == true)
+                                                            {<b> <i class="badge bg-success">Approved</i> </b> }
+                                                            else
+                                                            {<b><i class="badge bg-warning text-dark">Pending</i> </b>}
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p>   Sale  Invoice Created</p>
+                                                    }
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                <div class="box-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+@using (Html.BeginForm("UpdateDemand", "Procurement", FormMethod.Post, new { id = "submitOrderMastersFromSlaveFormId", @class = "formValidator" }))
+{
+
+    <div class="modal fade modal-lg" id="editPOModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-lg ui-front" role="document">
+            <div class="modal-content">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="modal-header">
+                            <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                &times;
+                            </button>
+                            <h4 class="modal-title"><b>Purchase Order Edit (<span id="pSOCIDText"></span>)</b></h4>
+                        </div>
+                        <div class="modal-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.DemandId, new { id = "hidDemandId" })
+                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                            @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>PRF Date</label>
+                                        <input name="DemandDate" asp-for="DemandDate" type="text" required="required" class="datePicker form-control" id="txtDemandDate" placeholder="PRF Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.DemandDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Payment Method</label>
+                                        @Html.DropDownListFor(model => model.CustomerPaymentMethodEnumFK, Model.POPaymentMethodList as SelectList, "==Select Payment Method==", new { id = "ddlSupplierPaymentMethodEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.CustomerPaymentMethodEnumFK, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Territory</label>
+
+                                        @Html.DropDownListFor(model => model.SubZoneFkName, Model.SubZoneList as SelectList, "==Select Territory==", new { id = "ddlSubZoneFk", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.HiddenFor(model => model.SubZoneFk, new { id = "ddlSubZoneFk" })
+                                        @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Customer</label>
+                                        @Html.DropDownListFor(model => model.CustomerId, Model.CustomerList as SelectList, "==Select Customer==", new { id = "ddlCustomerIdprf", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <span id="txtCreditLimit" style="font-weight:bold;color:darkred;text-decoration:underline;text-decoration-color:orangered;text-align:right">
+
+                                        </span>
+                                        <br />
+                                        <span id="txtCustomerAddress" style="font-weight:bold;color:darkred;text-decoration:underline;text-decoration-color:orangered;text-align:right">
+
+                                        </span>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Warehouse:</label>
+                                        @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "StockInfoId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="txtDescription" class="col-form-label">Remarks:</label>
+                                        @Html.TextAreaFor(model => model.Remarks, new { id = "txtDescription", placeholder = "Description", @class = "form-control", rows = 1 })
+                                        @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <div class="col-md-8">
+                                <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@*<div class="modal fade modal-lg" id="editPOModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-lg ui-front" role="document">
+            <div class="modal-content">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="modal-header">
+                            <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                &times;
+                            </button>
+                            <h4 class="modal-title"><b>Purchase Order Edit (<span id="pSOCIDText"></span>)</b></h4>
+                        </div>
+                        <div class="modal-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.DemandId, new { id = "hidDemandId" })
+                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                            @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>PRF Date</label>
+                                        <input name="DemandDate" asp-for="DemandDate" type="text" required="required" class="datePicker form-control" id="txtDemandDate" placeholder="PRF Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.DemandDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Payment Method</label>
+                                        @Html.DropDownListFor(model => model.CustomerPaymentMethodEnumFK, Model.POPaymentMethodList as SelectList, "==Select Payment Method==", new { id = "ddlSupplierPaymentMethodEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.CustomerPaymentMethodEnumFK, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Territory</label>
+
+                                        @Html.DropDownListFor(model => model.SubZoneFkName, Model.SubZoneList as SelectList, "==Select Territory==", new { id = "ddlSubZoneFk", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.HiddenFor(model => model.SubZoneFk, new { id = "ddlSubZoneFk" })
+                                        @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Customer</label>
+                                        @Html.DropDownListFor(model => model.CustomerId, Model.CustomerList as SelectList, "==Select Customer==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <span id="txtCreditLimit" style="font-weight:bold;color:darkred;text-decoration:underline;text-decoration-color:orangered;text-align:right">
+
+                                        </span>
+                                        <br />
+                                        <span id="txtCustomerAddress" style="font-weight:bold;color:darkred;text-decoration:underline;text-decoration-color:orangered;text-align:right">
+
+                                        </span>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Warehouse:</label>
+                                        @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "StockInfoId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="txtDescription" class="col-form-label">Remarks:</label>
+                                        @Html.TextAreaFor(model => model.Remarks, new { id = "txtDescription", placeholder = "Description", @class = "form-control", rows = 1 })
+                                        @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <div class="col-md-8">
+                                <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+
+
+
+@using (Html.BeginForm("DemandupdateFeed", "Procurement", FormMethod.Post, new { id = "submitOrderMastersFromSlaveFormId", @class = "formValidator" }))
+{
+
+    <div class="modal fade modal-lg" id="editPOModalfeed" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-lg ui-front" role="document">
+            <div class="modal-content">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="modal-header">
+                            <button type="button" onclick="resetForm()" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                                &times;
+                            </button>
+                            <h4 class="modal-title"><b>Purchase Order Edit Feed (<span id="pSOCIDText"></span>)</b></h4>
+                        </div>
+                        <div class="modal-body">
+
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.DemandId, new { id = "hid2DemandId" })
+                            @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
+                            @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK2" })
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>PRF Date</label>
+                                        <input name="DemandDate" asp-for="DemandDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtDemandDate" placeholder="Date" autocomplete="off">
+                                        @Html.ValidationMessageFor(model => model.DemandDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                @*<div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Payment Method</label>
+                                            @Html.DropDownListFor(model => model.CustomerPaymentMethodEnumFK, Model.POPaymentMethodList as SelectList, "==Select Payment Method==", new { id = "ddlSupplierPaymentMethodEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.CustomerPaymentMethodEnumFK, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Zones</label>
+                                            @Html.DropDownListFor(model => model.SubZoneFk, Model.ZoneList as SelectList, "==Select Zones==", new { id = "ddlSubZoneFk", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Customer</label>
+                                        @Html.DropDownListFor(model => model.CustomerId, Model.CustomerList as SelectList, "==Select Customer==", new { id = "CustomerId", @class = "form-control searchingDropdown", style = "width:100%" })
+                                        @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Payment By</label>
+                                        @Html.DropDownListFor(model => model.HeadGLId, Model.PaymentByList as SelectList, "==Select Payment By==", new { id = "HeadGLId", @class = "form-control searchingDropdown", style = "width:100%" })
+                                        @Html.ValidationMessageFor(model => model.HeadGLId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("Amount", htmlAttributes: new { @class = "control-label" })
+                                        @Html.EditorFor(model => model.PayAmount, new { htmlAttributes = new { @id = "txtPayAmount", @class = "form-control", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.PayAmount, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+
+                            <div class="row">
+
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Warehouse:</label>
+                                        @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "ddlStockInfoId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        @Html.Label("Sales Status", htmlAttributes: new { @class = "control-label" })
+                                        @Html.EditorFor(model => model.SalesStatus, new { htmlAttributes = new { @id = "txtSalesStatus", @class = "form-control", @autocomplete = "off", @required = "required" } })
+                                        @Html.ValidationMessageFor(model => model.SalesStatus, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        @Html.Label("Credit Status", htmlAttributes: new { @class = "control-label" })
+                                        @Html.EditorFor(model => model.CreditStatus, new { htmlAttributes = new { @id = "txtCreditStatus", @class = "form-control", @autocomplete = "off", @required = "required" } })
+                                        @Html.ValidationMessageFor(model => model.CreditStatus, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="txtRemarks" class="col-form-label">Remarks:</label>
+                                        @Html.TextAreaFor(model => model.Remarks, new { id = "txtRemarks", placeholder = "Description", @class = "form-control", rows = 1 })
+                                        @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <div class="col-md-8">
+                                <button type="button" onclick="resetForm()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" style="width:100%" id="btnsave" class="btn btn-primary"><i class="fa fa-floppy-o"></i>&nbsp;Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("DemandOrderUpdateforlist", "Procurement", FormMethod.Post, new { id = "submitOrderMastersFromSlaveFormId", @class = "formValidator" }))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span>  Product Requisition  (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.DemandId, new { id = "hidsubmitOrderMasterId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "hidsubmitCompanyFK" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="submitOrDraftText"></span> this  Product Requisition ?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("DeleteDemandMasters", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deleteProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Sales Order</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.DemandId, new { id = "hidProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POdeleteCompanyFK" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Sales Order?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            dateFormat: "dd/mm/yy",
+            showOn: 'both',
+            buttonText: "<i class='fa fa-calendar'></i>",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+
+
+    </script>
+
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#ddlSupplierPaymentMethodEnumFK").change(function () {
+                var productId = $("#ddlRProductFK").val();
+
+                $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("ProductStockByProduct", "Procurement")",
+                        datatype: "Json",
+                    data: { companyId: "@Model.CompanyFK", productId: productId },
+                        success: function (data) {
+                            var items = "";
+                            if (data) {
+                                $('#tblStockAvailable').show();
+                                $('.txtUnitName').text(data.UnitName);
+                                $('#stockAvailable').text(data.CurrentStock + ' ' + data.UnitName);
+                                var customerTypeFK = $("#ddlSupplierPaymentMethodEnumFK").val();
+                                if (customerTypeFK == "@((int)VendorsPaymentMethodEnum.Cash)") {
+                                    $("#txtUnitPrice").val(data.TPPrice);
+                                }
+                                if (customerTypeFK == "@((int)VendorsPaymentMethodEnum.Credit)") {
+                                    $("#txtUnitPrice").val(data.CreditSalePrice);
+                                }
+                            }
+                        }
+                    });
+            })
+
+            $("#ddlSubZoneFk").change(function () {
+                var subZoneFk = $("#ddlSubZoneFk").val();
+                $.ajax({
+                type: "GET",
+                url: "@Url.Action("CustomerLisBySubZonetGet", "Procurement")",
+                datatype: "Json",
+                    data: { subZoneId: subZoneFk},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCustomerId").empty();
+                            $("#ddlCustomerId").append("<option value=''>==Select Customer==</option>");
+                            $(data).each(function (index, item) {
+                             $("#ddlCustomerId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+                        }
+                    }
+                });
+            })
+
+            $("#ddlCustomerIdprf").change(function () {
+                var customerId = $("#ddlCustomerIdprf").val();
+                $.ajax({
+                type: "GET",
+                url: "@Url.Action("CustomerRecevableAmountByCustomer", "Procurement")",
+                datatype: "Json",
+                    data: { companyId: "@Model.CompanyFK", customerId: customerId},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+
+                            $("#txtCreditLimit").text("Credit Limit of " + data.CommonCustomerName + " is " + data.CreditLimit + " and Recevable Amount is " + (data.PayableAmount - (data.ReturnAmount + data.InAmount)));
+                            $("#hidCustomerTypeFk").val(data.CustomerTypeFk);
+                            $("#txtCustomerAddress").text(data.CustomerAddress);
+                            $("#hidCreditLimit").val(data.CreditLimit);
+                            $("#hidPayableAmount").val((data.PayableAmount - (data.ReturnAmount + data.InAmount)));
+
+
+                        }
+                    }
+                });
+            })
+
+            $("#TermsAndConditionid").change(function () {
+                     var termsAndConditionid = $('#TermsAndConditionid').val();
+                $.ajax({
+                     type: "GET",
+                    url: "@Url.Action("GetTermNCondition", "Procurement")",
+                    datatype: "Json",
+                    data: { id: termsAndConditionid },
+                    success: function (data) {
+                        $('#txtTermsAndCondition').empty();
+                        $('#txtTermsAndCondition').append(data.description);
+
+                                                                }
+                                                            });
+                                                        });
+
+
+
+            $("#ddlSupplierPaymentMethodEnumFK").change(function () {
+                var paymethod = $("#ddlSupplierPaymentMethodEnumFK").val();
+                if (paymethod === "@((int)VendorsPaymentMethodEnum.LC)") {
+                    $("#piReletedDivId").show();
+                }
+                else {
+                    $("#piReletedDivId").hide();
+                }
+
+            })
+
+
+
+
+
+
+
+
+
+            function resetForm() {
+                $('#procurementvmSalesOrderListFormId')[0].reset();
+                $('#SOEditActionId').val(1);
+            }
+            $("#txtCommonCustomerName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCustomerId").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+        })
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+            //console.log(actionId);
+            //console.log("@((int)ActionEnum.Approve)");
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+
+
+
+        function makeSubmitble(rowId) {
+
+                $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglDemandMasters", "Procurement")",
+                        datatype: "Json",
+                    data: { id: rowId },
+                        success: function (data) {
+                            $("#hidsubmitOrderMasterId").val(data.DemandId);
+                            $("#hidsubmitCompanyFK").val(data.CompanyFK);
+                            $('#submitOrDraftPOCIDText').text(data.DemandNo);
+
+                            if (data.IsSubmitted == 0) {
+                                $('.submitOrDraftText').text("Make Approval");
+                            }
+                            else {
+                                $('.submitOrDraftText').text("Make Draft Approval");
+
+                            }
+                        }
+                 });
+                $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
+            }
+
+
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+        function makeEditble(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglDemandMasters", "Procurement")",
+                        datatype: "Json",
+                     data: { id: rowId },
+                        success: function (data) {
+                          console.log("list",data);
+                            $("#ddlSupplierPaymentMethodEnumFK").val(data.CustomerPaymentMethodEnumFK);
+                            var DemandDate = DateCustom(data.DemandDate);
+                            $("#txtDemandDate").val(DemandDate);
+                            $("#ddlSubZoneFk").val(data.SubZoneFk).change();
+                            $("#ddlSubZoneFkName").val(data.SubZoneFkName);
+                            $("#ddlCustomerIdprf").val(data.CustomerId).change();
+                            $("#StockInfoId").val(data.StockInfoId).change();
+                            $("#txtDescription").val(data.Remarks);
+                            $("#hidDemandId").val(data.DemandId);
+                            $("#CompanyFK").val(data.CompanyFK);
+                        }
+                 });
+        }
+
+        function makeEditblefeed(rowId) {
+                 $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetSinglDemandMasters", "Procurement")",
+                        datatype: "Json",
+                     data: { id: rowId },
+                        success: function (data) {
+                          console.log("list",data);
+                            $("#ddlSupplierPaymentMethodEnumFK").val(data.CustomerPaymentMethodEnumFK);
+                            var DemandDate = DateCustom(data.DemandDate);
+                            $("#txtDemandDate").val(DemandDate);
+                            $("#CustomerId").val(data.CustomerId).change();
+                            $("#ddlStockInfoId").val(data.StockInfoId).change();
+                            $("#txtRemarks").val(data.Remarks);
+                            $("#hid2DemandId").val(data.DemandId);
+                            $("#CompanyFK2").val(data.CompanyFK);
+                            $("#HeadGLId").val(data.HeadGLId).change();
+                            $("#txtPayAmount").val(data.PayAmount);
+                            $("#txtSalesStatus").val(data.SalesStatus);
+                            $("#txtCreditStatus").val(data.CreditStatus);
+                        }
+                 });
+            }
+
+    </script>
+}
