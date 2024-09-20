@@ -1870,10 +1870,10 @@ namespace KGERP.Services.WareHouse
 
             foreach (VMOrderDeliverDetailPartial item in list)
             {
-                var sql = $"exec SeedStockQuantityByProduct '{item.CompanyFK}',{item.ProductId}";
-                var currentStock = _db.Database.SqlQuery<SeedProductCurrentStockModel>(sql).FirstOrDefault();
-                item.CurrentStock = currentStock.CurrentStock;
-
+                VMProductStock vmProductStock = new VMProductStock();
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                item.CurrentStock = vmProductStock.ClosingQty;
+                item.ClosingRate = vmProductStock.ClosingRate;
 
             }
 
@@ -3627,12 +3627,11 @@ namespace KGERP.Services.WareHouse
         public async Task<long> WareHouseOrderDeliverDetailAdd(VMOrderDeliverDetail vmModel, VMOrderDeliverDetailPartial vmModelList)
         {
             long result = -1;
-            var dataListSlavePartial = vmModelList.DataToList.Where(x => x.Flag).ToList();
+            var dataListSlavePartial = vmModelList.DataToList.Where(x => x.Flag && x.DeliverQty > 0).ToList();
             if (dataListSlavePartial.Any())
             {
                 for (int i = 0; i < dataListSlavePartial.Count(); i++)
                 {
-                    var productdata = await _db.Products.FindAsync(dataListSlavePartial[i].ProductId);
                     OrderDeliverDetail orderDeliverDetail = new OrderDeliverDetail
                     {
                         OrderDetailId = dataListSlavePartial[i].OrderDetailId,
@@ -3640,11 +3639,11 @@ namespace KGERP.Services.WareHouse
                         UnitPrice = dataListSlavePartial[i].UnitPrice,
                         ProductId = dataListSlavePartial[i].ProductId,
                         OrderDeliverId = vmModel.OrderDeliverId,
-                        COGSPrice = Math.Round(productdata.CostingPrice, 2),
-
-                        BaseCommission = dataListSlavePartial[i].DiscountUnit,      // Unit Discount
-                        CashCommission = dataListSlavePartial[i].DiscountRate,       // Cash Discount
-                        SpecialDiscount = dataListSlavePartial[i].SpecialDiscount,   // Special Discount
+                        COGSPrice = dataListSlavePartial[i].ClosingRate,
+                         
+                        BaseCommission = 0,      // Unit Discount
+                        CashCommission = 0,       // Cash Discount
+                        SpecialDiscount = 0,   // Special Discount
 
                         EBaseCommission = 0,
                         ECashCommission = 0,
