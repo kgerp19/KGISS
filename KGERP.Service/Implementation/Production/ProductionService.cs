@@ -121,7 +121,6 @@ namespace KGERP.Services.Production
             VMProdReference vmProdReference = new VMProdReference();
             vmProdReference.CompanyFK = companyId;
             vmProdReference.DataList = await Task.Run(() => (from t1 in _db.Prod_Reference.Where(x => x.IsActive && x.CompanyId == companyId)
-                                                             join t2 in _db.HeadGLs on t1.HeadGLId equals t2.Id
 
                                                              where t1.ReferenceDate >= fromDate
                                                              && t1.ReferenceDate <= toDate
@@ -130,7 +129,6 @@ namespace KGERP.Services.Production
                                                                  ProdReferenceId = t1.ProdReferenceId,
                                                                  ReferenceDate = t1.ReferenceDate,
                                                                  ReferenceNo = t1.ReferenceNo,
-                                                                 ManagerReferenceName = t2.AccCode + " - " + t2.AccName,
                                                                  CompanyFK = t1.CompanyId,
                                                                  IsSubmitted = t1.IsSubmitted
                                                              }).OrderByDescending(x => x.ProdReferenceId).AsEnumerable());
@@ -225,6 +223,9 @@ namespace KGERP.Services.Production
                 CompanyId = vmProdReferenceSlave.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
+                // Remarks = vmProdReferenceSlave.Remarks,
+
+
                 IsActive = true
             };
             _db.Prod_Reference.Add(prodReference);
@@ -387,7 +388,8 @@ namespace KGERP.Services.Production
                                                              CompanyName = t3.Name,
                                                              CompanyAddress = t3.Address,
                                                              CompanyEmail = t3.Email,
-                                                             CompanyPhone = t3.Phone
+                                                             CompanyPhone = t3.Phone,
+                                                             // Remarks = t1.Remarks
                                                          }).FirstOrDefault());
 
             vmProdReferenceSlave.DataListSlave = await Task.Run(() => (from t1 in _db.Prod_ReferenceSlave.Where(x => x.IsActive && x.ProdReferenceId == prodReferenceId && x.CompanyId == companyId)
@@ -406,23 +408,42 @@ namespace KGERP.Services.Production
                                                                            CompanyFK = t1.CompanyId,
                                                                            CostingPrice = t1.CostingPrice,
                                                                            TotalPrice = t1.Quantity * t1.CostingPrice,
-                                                                           RowProductConsumeList = (from aaa in _db.Prod_ReferenceSlaveConsumption.Where(x => x.IsActive == true && x.ProdReferenceSlaveID == t1.ProdReferenceSlaveID)
-                                                                                                    join bbb in _db.Products on aaa.RProductId equals bbb.ProductId
-                                                                                                    join ccc in _db.ProductSubCategories on bbb.ProductSubCategoryId equals ccc.ProductSubCategoryId
-                                                                                                    join ddd in _db.ProductCategories on ccc.ProductCategoryId equals ddd.ProductCategoryId
 
-                                                                                                    join eee in _db.Units on bbb.UnitId equals eee.UnitId
-                                                                                                    select new VMProdReferenceSlaveConsumption
-                                                                                                    {
-                                                                                                        ProdReferenceSlaveConsumptionID = aaa.ProdReferenceSlaveConsumptionID,
-                                                                                                        RProductName = bbb.ProductName,
-                                                                                                        RSubCategoryName = ccc.Name,
-                                                                                                        RCategoryName = ddd.Name,
-                                                                                                        UnitName = eee.Name,
-                                                                                                        TotalConsumeQuantity = aaa.TotalConsumeQuantity
-                                                                                                    }).OrderBy(x => x.ProdReferenceSlaveConsumptionID).ToList()
 
                                                                        }).OrderByDescending(x => x.ProdReferenceSlaveID).AsEnumerable());
+
+
+            vmProdReferenceSlave.RowProductConsumeList = (from aaa in _db.Prod_ReferenceSlaveConsumption.Where(x => x.IsActive == true)
+                                                          join fff in _db.Prod_ReferenceSlave.Where(x => x.IsActive == true) on aaa.ProdReferenceSlaveID equals fff.ProdReferenceSlaveID
+
+                                                          join bbb in _db.Products on aaa.RProductId equals bbb.ProductId
+                                                          join ccc in _db.ProductSubCategories on bbb.ProductSubCategoryId equals ccc.ProductSubCategoryId
+                                                          join ddd in _db.ProductCategories on ccc.ProductCategoryId equals ddd.ProductCategoryId
+                                                          join eee in _db.Units on bbb.UnitId equals eee.UnitId
+
+
+                                                          join fbbb in _db.Products on fff.FProductId equals fbbb.ProductId
+                                                          join fccc in _db.ProductSubCategories on fbbb.ProductSubCategoryId equals fccc.ProductSubCategoryId
+                                                          join fddd in _db.ProductCategories on fccc.ProductCategoryId equals fddd.ProductCategoryId
+                                                          join feee in _db.Units on fbbb.UnitId equals feee.UnitId
+
+                                                          where fff.ProdReferenceId == prodReferenceId
+                                                          select new VMProdReferenceSlaveConsumption
+                                                          {
+                                                              ProdReferenceSlaveConsumptionID = aaa.ProdReferenceSlaveConsumptionID,
+                                                              RProductName = ddd.Name + " " + ccc.Name + " " + bbb.ProductName,
+                                                              FProductName = fddd.Name + " " + fccc.Name + " " + fbbb.ProductName,
+
+                                                              UnitName = eee.Name,
+                                                              FUnitName = feee.Name,
+
+                                                              TotalConsumeQuantity = aaa.TotalConsumeQuantity,
+                                                              COGS = aaa.COGS,
+                                                              TotalCOGS = aaa.TotalConsumeQuantity * aaa.COGS
+                                                          }).OrderBy(x => x.ProdReferenceSlaveConsumptionID).ToList();
+
+
+
             return vmProdReferenceSlave;
         }
 
@@ -482,7 +503,7 @@ namespace KGERP.Services.Production
                                                                        join t4 in _db.ProductSubCategories on t3.ProductSubCategoryId equals t4.ProductSubCategoryId
                                                                        join t5 in _db.ProductCategories on t4.ProductCategoryId equals t5.ProductCategoryId
                                                                        join t6 in _db.Units on t3.UnitId equals t6.UnitId
-                                                                       
+
                                                                        select new VMProdReferenceSlave
                                                                        {
                                                                            CompanyFK = t1.CompanyId,
@@ -502,7 +523,7 @@ namespace KGERP.Services.Production
 
                                                                        }).OrderByDescending(x => x.ProdReferenceSlaveID).AsEnumerable());
 
-             
+
             return vmProdReferenceSlave;
         }
 
@@ -598,18 +619,21 @@ namespace KGERP.Services.Production
                 result = prodReferenceSlave.ProdReferenceSlaveID;
             }
 
-            if (result > 0 && !vmProdReferenceSlave.MakeFinishInventory)
+            if (result > 0)
             {
                 var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive).AsEnumerable();
                 List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
                 foreach (var bom in bomsOfProduct)
                 {
-                    var rawProduct = _db.Products.Find(bom.RProductFK);
+                    VMProductStock vMProductStock = new VMProductStock();
+                    vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", bom.RProductFK, bom.CompanyId).FirstOrDefault();
+
+
                     Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
                     {
                         RProductId = bom.RProductFK,
                         TotalConsumeQuantity = bom.RequiredQuantity * vmProdReferenceSlave.Quantity,
-                        COGS = rawProduct.CostingPrice,
+                        COGS = vMProductStock.ClosingRate,
                         ProdReferenceSlaveID = result,
                         CompanyId = vmProdReferenceSlave.CompanyFK,
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
@@ -621,57 +645,18 @@ namespace KGERP.Services.Production
                 _db.Prod_ReferenceSlaveConsumption.AddRange(List);
                 await _db.SaveChangesAsync();
             }
-
-            if (prodReferenceSlave.Quantity > 0)
+            #region Update Finished Goods COGS
+            var consumeAmount = _db.Prod_ReferenceSlaveConsumption.Where(x => x.ProdReferenceSlaveID == result
+                               && x.IsActive).Select(x => x.TotalConsumeQuantity * x.COGS).DefaultIfEmpty(0).Sum();
+            if (consumeAmount > 0)
             {
-                #region Ready To GRN
-
-                var consumptionCost = (from t1 in _db.FinishProductBOMs.Where(x => x.FProductFK == prodReferenceSlave.FProductId && x.IsActive)
-                                       join t2 in _db.Products on t1.RProductFK equals t2.ProductId
-                                       select t1.RequiredQuantity * t2.CostingPrice).DefaultIfEmpty(0).Sum();
-
-                vmProdReferenceSlave.ProdReferenceSlaveID = prodReferenceSlave.ProdReferenceSlaveID;
-                vmProdReferenceSlave.FProductId = prodReferenceSlave.FProductId;
-                vmProdReferenceSlave.Quantity = prodReferenceSlave.Quantity;
-                vmProdReferenceSlave.CostingPrice = consumptionCost;
-                #endregion
-
-                await ProductGRNEdit(vmProdReferenceSlave);
-            }
-
-            if (result > 0 && vmProdReferenceSlave.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                Prod_Reference prodReference = await _db.Prod_Reference.Where(x => x.ProdReferenceId == prodReferenceSlave.ProdReferenceId).FirstOrDefaultAsync();
-
-                var totalRawCnsumeAmount = _db.Prod_ReferenceSlaveConsumption
-                                              .Where(x => x.ProdReferenceSlaveID == prodReferenceSlave.ProdReferenceSlaveID && x.IsActive)
-                                              .Select(x => x.TotalConsumeQuantity * x.COGS).DefaultIfEmpty(0).Sum();
-
-                Product finishProduct = await _db.Products.Where(x => x.ProductId == prodReferenceSlave.FProductId).FirstOrDefaultAsync();
-                List<string> rawProduct = (from t1 in _db.Prod_ReferenceSlaveConsumption.Where(x => x.ProdReferenceSlaveID == prodReferenceSlave.ProdReferenceSlaveID && x.IsActive)
-                                           join t2 in _db.Products on t1.RProductId equals t2.ProductId
-                                           join t3 in _db.ProductSubCategories on t2.ProductSubCategoryId equals t3.ProductSubCategoryId
-                                           select t3.Name + " " + t2.ProductName).ToList();
-                string rawProductNames = string.Join(",", rawProduct);
-
-                string title = "Integrated Journal- Production Process: " + prodReference.ReferenceNo + ". Reference Date: " + prodReference.ReferenceDate.ToShortDateString();
-                string description = "From Raw Materials: " + rawProductNames + ". To Finish Item: " + finishProduct.ProductName;
-
-                List<AccountList> crAccountList = (from t1 in _db.Prod_ReferenceSlaveConsumption
-                                              .Where(x => x.ProdReferenceSlaveID == prodReferenceSlave.ProdReferenceSlaveID && x.IsActive)
-                                                   join t2 in _db.Products on t1.RProductId equals t2.ProductId
-                                                   join t3 in _db.ProductSubCategories on t2.ProductSubCategoryId equals t3.ProductSubCategoryId
-                                                   select new AccountList
-                                                   {
-                                                       AccountingHeadId = t3.AccountingHeadId,
-                                                       Value = t1.TotalConsumeQuantity * t1.COGS
-                                                   }).ToList();
-
-                int drAccountHead = await (from t1 in _db.ProductSubCategories.Where(x => x.ProductSubCategoryId == finishProduct.ProductSubCategoryId)
-                                           select t1.AccountingHeadId.Value).FirstOrDefaultAsync();
-                await _accountingService.AccountingJournalPushGCCL(prodReference.ReferenceDate, vmProdReferenceSlave.CompanyFK.Value, drAccountHead, crAccountList, totalRawCnsumeAmount, title, description, (int)JournalEnum.JournalVoucer);
+                Prod_ReferenceSlave referenceSlave = _db.Prod_ReferenceSlave.Find(result);
+                referenceSlave.CostingPrice = consumeAmount / referenceSlave.Quantity;
+                await _db.SaveChangesAsync();
 
             }
+            #endregion
+
 
             return result;
         }
@@ -700,17 +685,22 @@ namespace KGERP.Services.Production
                 }
 
 
-                if (result > 0 && !item.MakeFinishInventory)
+                if (result > 0 )
                 {
                     var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == prodReferenceSlave.FProductId).AsEnumerable();
                     List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
                     foreach (var bom in bomsOfProduct)
                     {
+                        VMProductStock vMProductStock = new VMProductStock();
+                        vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", bom.RProductFK, bom.CompanyId).FirstOrDefault();
+
+
                         Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
                         {
                             RProductId = bom.RProductFK,
                             TotalConsumeQuantity = bom.RequiredQuantity * item.Quantity,
                             ProdReferenceSlaveID = result,
+                            COGS = vMProductStock.ClosingRate,
                             CompanyId = vmProdReferenceSlave.CompanyFK,
                             CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                             CreatedDate = DateTime.Now,
@@ -722,75 +712,25 @@ namespace KGERP.Services.Production
                     await _db.SaveChangesAsync();
                 }
 
-                if (prodReferenceSlave.Quantity > 0)
+                #region Update Finished Goods COGS
+                var consumeAmount = _db.Prod_ReferenceSlaveConsumption.Where(x => x.ProdReferenceSlaveID == result
+                                   && x.IsActive).Select(x => x.TotalConsumeQuantity * x.COGS).DefaultIfEmpty(0).Sum();
+                if (consumeAmount > 0)
                 {
-                    #region Ready To GRN
-                    var referenceSlaveConsumption = await _db.Prod_ReferenceSlaveConsumption.Where(x => x.IsActive && x.ProdReferenceSlaveID == prodReferenceSlave.ProdReferenceSlaveID).FirstOrDefaultAsync();
-                    var product = await _db.Products.Where(x => x.ProductId == referenceSlaveConsumption.RProductId).FirstOrDefaultAsync();
-                    item.ProdReferenceSlaveID = prodReferenceSlave.ProdReferenceSlaveID;
-                    item.FProductId = prodReferenceSlave.FProductId;
-                    item.Quantity = prodReferenceSlave.Quantity;
-                    item.CostingPrice = product.CostingPrice;
-
-                    #endregion
-
-                    await ProductGRNEdit(item);
-                }
-
-                if (result > 0 && vmProdReferenceSlave.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-                {
-                    Prod_Reference prodReference = await _db.Prod_Reference.Where(x => x.ProdReferenceId == prodReferenceSlave.ProdReferenceId).FirstOrDefaultAsync();
-
-                    Prod_ReferenceSlaveConsumption prodReferenceSlaveConsumption = await _db.Prod_ReferenceSlaveConsumption
-                                                   .Where(x => x.ProdReferenceSlaveID == prodReferenceSlave.ProdReferenceSlaveID && x.IsActive)
-                                                   .FirstOrDefaultAsync();
-                    MaterialReceiveDetail materialReceiveDetails = await _db.MaterialReceiveDetails.Where(x => x.ProductId == prodReferenceSlaveConsumption.RProductId)
-                                                   .OrderByDescending(x => x.MaterialReceiveDetailId).FirstOrDefaultAsync();
-                    decimal amount = (materialReceiveDetails.UnitPrice * prodReferenceSlaveConsumption.TotalConsumeQuantity);
-                    Product finishProduct = await _db.Products.Where(x => x.ProductId == prodReferenceSlave.FProductId).FirstOrDefaultAsync();
-                    Product rawProduct = await _db.Products.Where(x => x.ProductId == prodReferenceSlaveConsumption.RProductId).FirstOrDefaultAsync();
-
-                    string title = "Integrated Journal- Production Process: " + prodReference.ReferenceNo + ". Reference Date: " + prodReference.ReferenceDate.ToShortDateString();
-                    string description = "From Raw Materials: " + rawProduct.ProductName + ". To Finish Item: " + finishProduct.ProductName;
-                    int crAccountHead = await (from t1 in _db.ProductSubCategories.Where(x => x.ProductSubCategoryId == rawProduct.ProductSubCategoryId)
-                                               join t2 in _db.ProductCategories on t1.ProductCategoryId equals t2.ProductCategoryId
-                                               select t2.AccountingHeadId.Value).FirstOrDefaultAsync();
-                    int drAccountHead = await (from t1 in _db.ProductSubCategories.Where(x => x.ProductSubCategoryId == finishProduct.ProductSubCategoryId)
-                                               join t2 in _db.ProductCategories on t1.ProductCategoryId equals t2.ProductCategoryId
-                                               select t2.AccountingHeadId.Value).FirstOrDefaultAsync();
-
-                    await _accountingService.AccountingJournalPush(prodReference.ReferenceDate, vmProdReferenceSlave.CompanyFK.Value, drAccountHead, crAccountHead, amount, title, description, (int)JournalEnum.JournalVoucer); //Raw Materials 30803 Paddy seeds
+                    Prod_ReferenceSlave referenceSlave = _db.Prod_ReferenceSlave.Find(result);
+                    referenceSlave.CostingPrice = consumeAmount / referenceSlave.Quantity;
+                    await _db.SaveChangesAsync();
 
                 }
+                #endregion
+
+
             }
             return result;
         }
 
 
-        public async Task<int> ProductGRNEdit(VMProdReferenceSlave vmProdReferenceSlave)
-        {
-            var result = -1;
-            var priviousStockQty = _db.Prod_ReferenceSlave.Where(x => x.FProductId == vmProdReferenceSlave.FProductId && x.ProdReferenceSlaveID != vmProdReferenceSlave.ProdReferenceSlaveID && x.IsActive).Select(x => x.Quantity).DefaultIfEmpty(0).Sum()
-                                    - Convert.ToDecimal(_db.OrderDeliverDetails.Where(x => x.ProductId == vmProdReferenceSlave.FProductId && x.IsActive).Select(x => x.DeliveredQty).DefaultIfEmpty(0).Sum())
-                                    + _db.SaleReturnDetails.Where(x => x.ProductId == vmProdReferenceSlave.FProductId && x.IsActive).Select(x => x.Qty ?? 0).DefaultIfEmpty(0).Sum();
-
-            Product product = _db.Products.Find(vmProdReferenceSlave.FProductId);
-            var priviousStockPrice = (priviousStockQty * (product != null ? product.CostingPrice : 0));
-
-            product.CostingPrice = (((vmProdReferenceSlave.Quantity * vmProdReferenceSlave.CostingPrice) + (priviousStockPrice > 0 ? priviousStockPrice : 0))
-                / ((vmProdReferenceSlave.Quantity) + (priviousStockQty > 0 ? priviousStockQty : 0)));
-
-            var Prod_ReferenceSlave = _db.Prod_ReferenceSlave.Find(vmProdReferenceSlave.ProdReferenceSlaveID);
-            Prod_ReferenceSlave.CostingPrice = product.CostingPrice;
-
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                result = product.ProductId;
-            }
-
-            return result;
-        }
-
+   
         public async Task<int> ProdReferenceSlaveRawConsumptionEdit(VMProdReferenceSlave vmProdReferenceSlave)
         {
             var result = -1;
@@ -947,9 +887,12 @@ namespace KGERP.Services.Production
             if (prodReferenceSlave != null)
             {
                 prodReferenceSlave.IsActive = false;
+
+                List<Prod_ReferenceSlaveConsumption> conList = await _db.Prod_ReferenceSlaveConsumption.Where(x => x.ProdReferenceSlaveID == prodReferenceSlave.ProdReferenceSlaveID && x.IsActive).ToListAsync();
+                conList.ForEach(x => x.IsActive = false);
                 if (await _db.SaveChangesAsync() > 0)
                 {
-                    result = prodReferenceSlave.ProdReferenceSlaveID;
+                    result = prodReferenceSlave.ProdReferenceId;
                 }
             }
             return result;

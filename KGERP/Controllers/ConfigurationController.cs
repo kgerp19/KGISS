@@ -456,10 +456,19 @@ namespace Pos.App.Controllers
             return RedirectToAction(nameof(CommonFinishProductSubCategory), new { companyId = vmCommonProductSubCategory.CompanyFK, categoryId = vmCommonProductSubCategory.Common_ProductCategoryFk });
         }
 
-       
+
         #endregion
 
         #region Common Finish Product
+        public async Task<ActionResult> FinishedProductList(int companyId)
+        {
+
+            VMCommonProduct vmCommonProduct = new VMCommonProduct();
+            vmCommonProduct = await Task.Run(() => _service.GetProduct(companyId, 0, 0, "F"));
+             
+            return View(vmCommonProduct);
+        }
+
         public async Task<ActionResult> CommonFinishProduct(int companyId, int categoryId = 0, int subCategoryId = 0)
         {
 

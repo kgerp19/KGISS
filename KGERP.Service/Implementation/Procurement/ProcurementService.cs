@@ -555,7 +555,7 @@ namespace KGERP.Services.Procurement
             vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.OrderMasters
                                                           .Where(x => x.IsActive
                                                           && x.CompanyId == companyId
-                                                              && x.OrderDate >= fromDate && x.OrderDate <= toDate)    
+                                                              && x.OrderDate >= fromDate && x.OrderDate <= toDate)
                                                           join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
 
                                                           select new VMSalesOrder
@@ -591,12 +591,12 @@ namespace KGERP.Services.Procurement
 
             vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.OrderMasters
                                                           .Where(x => x.IsActive
-                                                          && x.CompanyId == companyId && x.SalePersonId==employee.Id)
+                                                          && x.CompanyId == companyId && x.SalePersonId == employee.Id)
                                                               //&& x.OrderDate >= fromDate && x.OrderDate <= toDate
                                                               //&& !x.IsOpening)
 
                                                           join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
-                                                          
+
 
                                                           select new VMSalesOrder
                                                           {
@@ -1947,7 +1947,7 @@ namespace KGERP.Services.Procurement
                             RequisitionQuantity = t1.RequiredQuantity,
                             RequiredQuantity = (t1.RequiredQuantity -
                             (_db.RequisitionItemDetails.Where(s => s.FinishProductBOMId == t1.ID && s.IsActive).Select(s => s.RQty.Value).DefaultIfEmpty(0).Sum())),
-                            RequestedQuantity=(_db.RequisitionItemDetails.Where(s => s.FinishProductBOMId == t1.ID && s.IsActive).Select(s => s.RQty.Value).DefaultIfEmpty(0).Sum()),
+                            RequestedQuantity = (_db.RequisitionItemDetails.Where(s => s.FinishProductBOMId == t1.ID && s.IsActive).Select(s => s.RQty.Value).DefaultIfEmpty(0).Sum()),
                             Consumption = t1.Consumption,
 
                             UnitName = t6.Name,
@@ -3086,19 +3086,15 @@ namespace KGERP.Services.Procurement
                                                       join t4 in _db.SubZones on t2.SubZoneId equals t4.SubZoneId
                                                       join t5 in _db.Zones on t4.ZoneId equals t5.ZoneId
                                                       join t6 in _db.StockInfoes on t1.StockInfoId equals t6.StockInfoId into t6_Join
-                                                      from t6 in t6_Join.DefaultIfEmpty()
-                                                      join t3 in _db.Companies on t1.CompanyId equals t3.CompanyId
-                                                      join t7 in _db.Demands on t1.DemandId equals t7.DemandId into t7_join
-                                                      from t7 in t7_join.DefaultIfEmpty()
+                                                      from t6 in t6_Join.DefaultIfEmpty() 
                                                       join t8 in _db.Employees on t1.SalePersonId equals t8.Id into t8_Join
                                                       from t8 in t8_Join.DefaultIfEmpty()
                                                       select new VMSalesOrderSlave
                                                       {
-                                                          WareHouse = t6 != null ? t6.Name : "",
-                                                          DemandNo = t7 == null ? "" : t7.DemandNo,
+                                                          WareHouse = t6 != null ? t6.Name : "",                                                           
                                                           Propietor = t2.Propietor,
                                                           CreatedDate = t1.CreateDate,
-                                                          ComLogo = t3.CompanyLogo,
+                                                         
                                                           CustomerPhone = t2.Phone,
                                                           CustomerAddress = t2.Address,
                                                           CustomerEmail = t2.Email,
@@ -3113,10 +3109,7 @@ namespace KGERP.Services.Procurement
                                                           CustomerPaymentMethodEnumFK = t1.PaymentMethod,
                                                           ExpectedDeliveryDate = t1.ExpectedDeliveryDate,
                                                           CommonCustomerName = t2.Name,
-                                                          CompanyName = t3.Name,
-                                                          CompanyAddress = t3.Address,
-                                                          CompanyEmail = t3.Email,
-                                                          CompanyPhone = t3.Phone,
+                                                          
                                                           ZoneName = t5.Name,
                                                           ZoneIncharge = t5.ZoneIncharge,
                                                           SubZonesName = t4.Name,
@@ -3144,23 +3137,24 @@ namespace KGERP.Services.Procurement
                                                                     join t6 in _db.Units.Where(x => x.IsActive) on t3.UnitId equals t6.UnitId
                                                                     select new VMSalesOrderSlave
                                                                     {
-                                                                        ProductName = t4.Name + " " + t3.ProductName,
-                                                                        ProductCategoryName = t5.Name,
+                                                                        
                                                                         OrderMasterId = t1.OrderMasterId.Value,
                                                                         OrderDetailId = t1.OrderDetailId,
+
+                                                                        ProductName = t5.Name + " " + t4.Name + " " + t3.ProductName,
                                                                         Qty = t1.Qty,
-                                                                        UnitPrice = t1.UnitPrice,
                                                                         UnitName = t6.Name,
-                                                                        TotalAmount = t1.Amount,
-                                                                        PackQuantity = t1.PackQuantity,
-                                                                        Consumption = t1.Comsumption,
-                                                                        PromotionalOfferId = t1.PromotionalOfferId,
-                                                                        ProductCategoryId = t5.ProductCategoryId,
-                                                                        ProductSubCategoryId = t4.ProductSubCategoryId,
-                                                                        FProductId = t3.ProductId,
-                                                                        DiscountRate = t1.DiscountRate,
-                                                                        ProductDiscountUnit = t1.DiscountUnit,
-                                                                        ProductDiscountTotal = t1.DiscountAmount
+                                                                        UnitPrice = t1.UnitPrice,                                                                       
+                                                                        PackSize = t3.PackSize,
+                                                                        TotalAmount = t1.Qty + t1.UnitPrice,
+
+
+                                                                        FProductId = t3.ProductId
+
+
+                                                                        //DiscountRate = t1.DiscountRate,
+                                                                        //ProductDiscountUnit = t1.DiscountUnit,
+                                                                        //ProductDiscountTotal = t1.DiscountAmount
                                                                     }).OrderByDescending(x => x.OrderDetailId).AsEnumerable());
 
 
@@ -3549,21 +3543,30 @@ namespace KGERP.Services.Procurement
                                           }).FirstOrDefault());
             return v;
         }
-        public VMProductStock ProductStockByProductGet(int companyId, int productId)
+        public VMCommonProduct ProductStockByProductGet(int companyId, int productId)
         {
+            VMCommonProduct vmProduct = new VMCommonProduct();
+
+            vmProduct = (from t1 in _db.Products.Where(x => x.IsActive && x.ProductId == productId)
+                         join t2 in _db.Units on t1.UnitId equals t2.UnitId
+
+                         select new VMCommonProduct
+                         {
+                             Name = t1.ProductName,
+                             UnitName = t2.Name,
+                             PackSize = t1.PackSize,
+                             CompanyFK = t1.CompanyId,
+                             FormulaQty = t1.FormulaQty,
+                             UnitPrice = t1.UnitPrice??0
+
+                         }).FirstOrDefault();
+
             VMProductStock vmProductStock = new VMProductStock();
-            if (companyId == (int)CompanyName.KrishibidSeedLimited)
-            {
-                vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedStockQuantityByProduct {0},{1}", companyId, productId).FirstOrDefault();
+            vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", productId, companyId).FirstOrDefault();
+            vmProduct.CurrentStock = vmProductStock.ClosingRate;
+             
 
-            }
-            if (companyId == (int)CompanyName.GloriousCropCareLimited || companyId == (int)CompanyName.KrishibidFeedLimited)
-            {
-                vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GCCLFinishedStockQuantityByProduct {0},{1}", companyId, productId).FirstOrDefault();
-
-            }
-
-            return vmProductStock;
+            return vmProduct;
         }
         public async Task<long> OrderDetailAdd(VMSalesOrderSlave vmSalesOrderSlave)
         {
@@ -3685,7 +3688,7 @@ namespace KGERP.Services.Procurement
             var totalOrderThisMonth = _db.OrderDetails
                 .Where(od => od.OrderDate >= firstDayOfMonth && od.OrderDate <= lastDayOfMonth)
                 .OrderByDescending(od => od.OrderDetailId); // Ensure it's ordered   
-           
+
             // Use FirstOrDefault after ordering to get the last object  
             var lastObjects = await totalOrderThisMonth.FirstOrDefaultAsync();
             DateTime date = vmSalesOrderSlave.JobOrderDate.Value;
@@ -3718,9 +3721,9 @@ namespace KGERP.Services.Procurement
                     }
                 }
             }
-            
 
-           
+
+
 
 
             OrderDetail orderDetail = new OrderDetail
@@ -4202,8 +4205,8 @@ namespace KGERP.Services.Procurement
                 SalePersonId = vmSalesOrderSlave.SalePersonId,
                 Remarks = vmSalesOrderSlave.Remarks,
                 IsService = vmSalesOrderSlave.IsService,
-               
-                
+
+
 
             };
             _db.OrderMasters.Add(orderMaster);
@@ -4398,8 +4401,8 @@ namespace KGERP.Services.Procurement
                                                           CourierCharge = t1.CourierCharge,
                                                           FinalDestination = t1.FinalDestination,
                                                           CourierNo = t1.CourierNo,
-                                                          OfficerNAme= t7 != null ? t7.Name:""
-                                                          
+                                                          OfficerNAme = t7 != null ? t7.Name : ""
+
 
 
 
@@ -5823,114 +5826,114 @@ namespace KGERP.Services.Procurement
         }
 
         //Written by hridoy 
-            public async Task<long> OrderMasterAddForPRF(VMSalesOrderSlave vmSalesOrderSlave, List<VmDemandItemService> demandItems)
+        public async Task<long> OrderMasterAddForPRF(VMSalesOrderSlave vmSalesOrderSlave, List<VmDemandItemService> demandItems)
+        {
+            long result = -1;
+            var poMax = _db.OrderMasters.Where(x => x.CompanyId == vmSalesOrderSlave.CompanyFK && !x.IsOpening).Count() + 1;
+            string poCid = "";
+
+            if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidSeedLimited)
             {
-                long result = -1;
-                var poMax = _db.OrderMasters.Where(x => x.CompanyId == vmSalesOrderSlave.CompanyFK && !x.IsOpening).Count() + 1;
-                string poCid = "";
+                poCid = poMax.ToString();
+            }
+            else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.GloriousCropCareLimited)
+            {
+                poCid = @"SI#" + poMax.ToString();
+            }
+            else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidFeedLimited)
+            {
+                poCid = vmSalesOrderSlave.OrderNo;
+            }
+            else
+            {
+                poCid =
+                           @"SO-" +
+                                DateTime.Now.ToString("yy") +
+                                DateTime.Now.ToString("MM") +
+                                DateTime.Now.ToString("dd") + "-" +
 
-                if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidSeedLimited)
-                {
-                    poCid = poMax.ToString();
-                }
-                else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.GloriousCropCareLimited)
-                {
-                    poCid = @"SI#" + poMax.ToString();
-                }
-                else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidFeedLimited)
-                {
-                    poCid = vmSalesOrderSlave.OrderNo;
-                }
-                else
-                {
-                    poCid =
-                               @"SO-" +
-                                    DateTime.Now.ToString("yy") +
-                                    DateTime.Now.ToString("MM") +
-                                    DateTime.Now.ToString("dd") + "-" +
+                           poMax.ToString();
+            }
 
-                               poMax.ToString();
-                }
+            OrderMaster orderMaster = new OrderMaster
+            {
+                TotalAmount = (decimal)vmSalesOrderSlave.TotalAmount,
+                GrandTotal = vmSalesOrderSlave.GrandTotal,
+                DiscountRate = vmSalesOrderSlave.DiscountRate,
+                DiscountAmount = vmSalesOrderSlave.DiscountAmount,
+                OrderStatus = vmSalesOrderSlave.CompanyFK == 8 ? "N" : "",
+                OrderMonthYear = vmSalesOrderSlave.OrderDate.Year.ToString() + vmSalesOrderSlave.OrderDate.Day.ToString(),
+                OrderNo = poCid,
+                OrderDate = vmSalesOrderSlave.OrderDate,
+                CustomerId = vmSalesOrderSlave.CustomerId,
+                DemandId = vmSalesOrderSlave.DemandId,
+                ExpectedDeliveryDate = vmSalesOrderSlave.ExpectedDeliveryDate,
+                PaymentMethod = vmSalesOrderSlave.CustomerPaymentMethodEnumFK,
+                ProductType = "F",
+                Status = (int)EnumPOStatus.Draft,
+                CourierNo = vmSalesOrderSlave.CourierNo,
+                FinalDestination = vmSalesOrderSlave.FinalDestination,
+                CourierCharge = vmSalesOrderSlave.CourierCharge,
+                CurrentPayable = Convert.ToDecimal(vmSalesOrderSlave.PayableAmount),
+                StockInfoId = vmSalesOrderSlave.StockInfoId,
+                CompanyId = vmSalesOrderSlave.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),// System.Web.HttpContext.Current.User.Identity.Name,
+                CreateDate = DateTime.Now,
+                Remarks = vmSalesOrderSlave.Remarks,
+                IsActive = true
+            };
 
-                OrderMaster orderMaster = new OrderMaster
+            using (var scope = _db.Database.BeginTransaction())
+            {
+                try
                 {
-                    TotalAmount = (decimal)vmSalesOrderSlave.TotalAmount,
-                    GrandTotal = vmSalesOrderSlave.GrandTotal,
-                    DiscountRate = vmSalesOrderSlave.DiscountRate,
-                    DiscountAmount = vmSalesOrderSlave.DiscountAmount,
-                    OrderStatus = vmSalesOrderSlave.CompanyFK == 8 ? "N" : "",
-                    OrderMonthYear = vmSalesOrderSlave.OrderDate.Year.ToString() + vmSalesOrderSlave.OrderDate.Day.ToString(),
-                    OrderNo = poCid,
-                    OrderDate = vmSalesOrderSlave.OrderDate,
-                    CustomerId = vmSalesOrderSlave.CustomerId,
-                    DemandId = vmSalesOrderSlave.DemandId,
-                    ExpectedDeliveryDate = vmSalesOrderSlave.ExpectedDeliveryDate,
-                    PaymentMethod = vmSalesOrderSlave.CustomerPaymentMethodEnumFK,
-                    ProductType = "F",
-                    Status = (int)EnumPOStatus.Draft,
-                    CourierNo = vmSalesOrderSlave.CourierNo,
-                    FinalDestination = vmSalesOrderSlave.FinalDestination,
-                    CourierCharge = vmSalesOrderSlave.CourierCharge,
-                    CurrentPayable = Convert.ToDecimal(vmSalesOrderSlave.PayableAmount),
-                    StockInfoId = vmSalesOrderSlave.StockInfoId,
-                    CompanyId = vmSalesOrderSlave.CompanyFK,
-                    CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),// System.Web.HttpContext.Current.User.Identity.Name,
-                    CreateDate = DateTime.Now,
-                    Remarks = vmSalesOrderSlave.Remarks,
-                    IsActive = true
-                };
-
-                using (var scope = _db.Database.BeginTransaction())
-                {
-                    try
+                    _db.OrderMasters.Add(orderMaster);
+                    if (await _db.SaveChangesAsync() > 0)
                     {
-                        _db.OrderMasters.Add(orderMaster);
-                        if (await _db.SaveChangesAsync() > 0)
+                        result = orderMaster.OrderMasterId;
+                    }
+                    List<OrderDetail> LstOrderDetails = new List<OrderDetail>();
+                    foreach (var item in demandItems)
+                    {
+                        LstOrderDetails.Add(new OrderDetail
                         {
-                            result = orderMaster.OrderMasterId;
-                        }
-                        List<OrderDetail> LstOrderDetails = new List<OrderDetail>();
-                        foreach (var item in demandItems)
-                        {
-                            LstOrderDetails.Add(new OrderDetail
-                            {
-                                OrderMasterId = result,
-                                DemandItemId = Convert.ToInt32(item.DemandItemId),
-                                ProductId = item.ProductId,
-                                Qty = item.ItemQuantity,
-                                UnitPrice = item.UnitPrice,
-                                Amount = (item.ItemQuantity * item.UnitPrice),
-                                Comsumption = null,
-                                PackQuantity = null,
-                                DiscountUnit = item.ProductDiscountUnit,
-                                DiscountAmount = 0,
-                                DiscountRate = item.CashDiscountPercent,
-                                SpecialBaseCommission = item.SpecialDiscount,
-                                CompanyId = vmSalesOrderSlave.CompanyFK,
-                                CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
-                                CreateDate = DateTime.Now,
-                                StyleNo = Convert.ToString(DateTime.Now.Ticks),
-                                IsActive = true
-                            });
-                        }
-                        _db.OrderDetails.AddRange(LstOrderDetails);
+                            OrderMasterId = result,
+                            DemandItemId = Convert.ToInt32(item.DemandItemId),
+                            ProductId = item.ProductId,
+                            Qty = item.ItemQuantity,
+                            UnitPrice = item.UnitPrice,
+                            Amount = (item.ItemQuantity * item.UnitPrice),
+                            Comsumption = null,
+                            PackQuantity = null,
+                            DiscountUnit = item.ProductDiscountUnit,
+                            DiscountAmount = 0,
+                            DiscountRate = item.CashDiscountPercent,
+                            SpecialBaseCommission = item.SpecialDiscount,
+                            CompanyId = vmSalesOrderSlave.CompanyFK,
+                            CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
+                            CreateDate = DateTime.Now,
+                            StyleNo = Convert.ToString(DateTime.Now.Ticks),
+                            IsActive = true
+                        });
+                    }
+                    _db.OrderDetails.AddRange(LstOrderDetails);
+                    await _db.SaveChangesAsync();
+                    var demand = await _db.Demands.FindAsync(orderMaster.DemandId);
+                    if (demand != null)
+                    {
+                        demand.IsInvoiceCreated = true;
                         await _db.SaveChangesAsync();
-                        var demand = await _db.Demands.FindAsync(orderMaster.DemandId);
-                        if (demand != null)
-                        {
-                            demand.IsInvoiceCreated = true;
-                            await _db.SaveChangesAsync();
-                        }
-                        scope.Commit();
-                        return result;
                     }
-                    catch (Exception ex)
-                    {
-                        scope.Rollback();
-                        return 0;
-                    }
+                    scope.Commit();
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    scope.Rollback();
+                    return 0;
                 }
             }
+        }
         //ends hridoy
 
 
@@ -6450,7 +6453,7 @@ namespace KGERP.Services.Procurement
                 IssueMasterInfo model = await _db.IssueMasterInfoes.FindAsync(item.IssueMasterId);
                 model.Achknolagement = true;
                 model.AchknologeBy = vm.AchknologeById;
-                model.AcknologeDate = DateTime.Now;             
+                model.AcknologeDate = DateTime.Now;
                 await _db.SaveChangesAsync();
 
                 VMPackagingPurchaseRequisition vmPurchaseRequisition = new VMPackagingPurchaseRequisition();

@@ -617,6 +617,7 @@ namespace KGERP.Service.Configuration
         public decimal PurchasePrice { get; set; }
         public decimal? CreditSalePrice { get; set; }
         public decimal DamageQuantity { get; set; }
+         
         public double DeliveredQty { get; set; }
         public decimal RawConsumeQuantity { get; set; }
         public string Description { get; set; }

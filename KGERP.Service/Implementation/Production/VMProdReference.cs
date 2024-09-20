@@ -109,14 +109,17 @@ namespace KGERP.Service.Implementation.Production
         public int ProdReferenceSlaveID { get; set; }
         public int RProductId { get; set; }
         public string RProductName { get; set; }
+        public string FProductName { get; set; }
         public string RSubCategoryName { get; set; }
         public string RCategoryName { get; set; }
 
         public string UnitName { get; set; }
+        public string FUnitName { get; set; }
 
         public decimal TotalConsumeQuantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal COGS { get; set; }
+        public decimal TotalCOGS { get; set; }
 
 
     }

@@ -8,6 +8,7 @@ using KGERP.Service.Implementation.PortCountry;
 using KGERP.Service.Implementation.TaskManagment;
 using KGERP.Service.ServiceModel;
 using KGERP.Service.ServiceModel.RealState;
+using KGERP.Services.Procurement;
 using KGERP.Utility;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -768,6 +769,9 @@ namespace KGERP.Service.Implementation
 
             return v;
         }
+
+         
+
 
         public object GCCLGetAutoCompleteRawPackingMaterials(int companyId, string prefix)
         {
@@ -2683,7 +2687,7 @@ namespace KGERP.Service.Implementation
                                                   ID = t1.ProductId,
                                                   Name = t1.ProductName,
                                                   ShortName = t1.ShortName,
-                                                  MRPPrice = t1.UnitPrice == null ? 0 : t1.UnitPrice.Value,
+                                                  UnitPrice =   t1.UnitPrice??0,
                                                   TPPrice = t1.TPPrice,
                                                   CreditSalePrice = t1.CreditSalePrice,
                                                   SubCategoryName = t2.Name,
@@ -2691,8 +2695,7 @@ namespace KGERP.Service.Implementation
                                                   UnitName = t4.Name,
                                                   ProductType = t1.ProductType,
                                                   Code = t1.ProductCode,
-                                                  PackId = t1.PackId,
-                                                  PackName = t5 != null ? t6.Name + " " + t5.ProductName : "",
+                                                  
                                                   DieSize = t1.DieSize,
                                                   PackSize = t1.PackSize,
                                                   ProcessLoss = t1.ProcessLoss,
@@ -2964,7 +2967,7 @@ namespace KGERP.Service.Implementation
                 ProductCode = productID,
                 ShortName = vmCommonProduct.ShortName,
                 ProductName = vmCommonProduct.Name,
-                UnitPrice = vmCommonProduct.MRPPrice,
+                UnitPrice = vmCommonProduct.UnitPrice,
                 TPPrice = vmCommonProduct.TPPrice,
                 CreditSalePrice = vmCommonProduct.CreditSalePrice,
 
@@ -3208,19 +3211,24 @@ namespace KGERP.Service.Implementation
             Product commonProduct = _db.Products.Find(vmCommonProduct.ID);
 
             commonProduct.ProductName = vmCommonProduct.Name;
-            commonProduct.UnitPrice = vmCommonProduct.MRPPrice;
-            commonProduct.TPPrice = vmCommonProduct.TPPrice;
-            commonProduct.ShortName = vmCommonProduct.ShortName;
-            commonProduct.CreditSalePrice = vmCommonProduct.CreditSalePrice;
+            commonProduct.UnitPrice = vmCommonProduct.UnitPrice;
+            commonProduct.PackSize = vmCommonProduct.PackSize;
+            commonProduct.FormulaQty = vmCommonProduct.FormulaQty;
             commonProduct.ProductSubCategoryId = vmCommonProduct.Common_ProductSubCategoryFk;
             commonProduct.UnitId = vmCommonProduct.Common_UnitFk;
             commonProduct.CompanyId = vmCommonProduct.CompanyFK.Value;
             commonProduct.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             commonProduct.ModifiedDate = DateTime.Now;
+
+
+            commonProduct.TPPrice = vmCommonProduct.TPPrice;
+            commonProduct.ShortName = vmCommonProduct.ShortName;
+            commonProduct.CreditSalePrice = vmCommonProduct.CreditSalePrice;
+            
             commonProduct.Remarks = vmCommonProduct.Remarks;
             commonProduct.DieSize = vmCommonProduct.DieSize;
             commonProduct.PackId = vmCommonProduct.PackId;
-            commonProduct.PackSize = vmCommonProduct.PackSize;
+           
             commonProduct.ProcessLoss = vmCommonProduct.ProcessLoss;
 
             if (await _db.SaveChangesAsync() > 0)
@@ -3327,7 +3335,7 @@ namespace KGERP.Service.Implementation
                      {
                          ID = t1.ProductId,
                          Name = t1.ProductName,
-                         MRPPrice = t1.UnitPrice.Value,
+                         UnitPrice = t1.UnitPrice??0,
                          TPPrice = t1.TPPrice,
                          ShortName = t1.ShortName,
                          SubCategoryName = t2.Name,
@@ -3390,17 +3398,19 @@ namespace KGERP.Service.Implementation
                                                        select new VMFinishProductBOM
                                                        {
                                                            FProductFK = t1.ProductId,
+
                                                            Name = t1.ProductName,
                                                            MRPPrice = t1.UnitPrice.Value,
+                                                           TPPrice = t1.TPPrice,
                                                            SubCategoryName = t2.Name,
                                                            CategoryName = t3.Name,
                                                            UnitName = t4.Name,
+
                                                            Common_ProductSubCategoryFk = t1.ProductSubCategoryId,
                                                            Common_UnitFk = t1.UnitId,
                                                            Common_ProductCategoryFk = t2.ProductCategoryId,
                                                            CompanyFK = t1.CompanyId,
-                                                           CostingPrice = t1.CostingPrice
-
+                                                          
                                                        }).FirstOrDefault());
 
             vmFinishProductBOM.DataListProductBOM = await Task.Run(() => (from t1 in _db.FinishProductBOMs.Where(x => x.CompanyId == companyId && x.FProductFK == productId)
@@ -3421,15 +3431,24 @@ namespace KGERP.Service.Implementation
                                                                               UnitName = t5.Name,
                                                                               RequiredQuantity = t1.RequiredQuantity,
                                                                               //RProcessLoss = t1.RProcessLoss,
-
+                                                                              CompanyId = t1.CompanyId,
 
                                                                               Common_ProductSubCategoryFk = t2.ProductSubCategoryId,
                                                                               Common_UnitFk = t2.UnitId,
                                                                               Common_ProductCategoryFk = t2.ProductCategoryId,
                                                                               CompanyFK = t1.CompanyId
 
-                                                                          }).AsEnumerable());
+                                                                          }).ToListAsync());
 
+
+            foreach (var item in vmFinishProductBOM.DataListProductBOM)
+            {
+
+                VMProductStock vMProductStock = new VMProductStock();
+                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", item.RProductFK, item.CompanyId).FirstOrDefault();
+                item.CurrentStock = vMProductStock.ClosingQty;
+
+            }
 
 
             return vmFinishProductBOM;

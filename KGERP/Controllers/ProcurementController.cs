@@ -976,9 +976,10 @@ namespace KG.App.Controllers
         [HttpGet]
         public async Task<ActionResult> ProcurementSalesOrderList(int companyId, DateTime? fromDate, DateTime? toDate, int? vStatus)
         {
-            if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-2); ;
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-            if (!toDate.HasValue) toDate = DateTime.Now;
             VMSalesOrder vmSalesOrder = new VMSalesOrder();
             vmSalesOrder = await _service.ProcurementOrderMastersListGet(companyId, fromDate, toDate, vStatus);
             vmSalesOrder.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
@@ -1000,9 +1001,10 @@ namespace KG.App.Controllers
         [HttpGet]
         public async Task<ActionResult> KFMALSalesOrderList(int companyId, DateTime? fromDate, DateTime? toDate, int? vStatus)
         {
-            if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-2); ;
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-            if (!toDate.HasValue) toDate = DateTime.Now;
 
 
             VMSalesOrder vmSalesOrder = new VMSalesOrder();

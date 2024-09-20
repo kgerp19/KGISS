@@ -30,46 +30,46 @@
 @using (Html.BeginForm("ProcurementSalesOrderfilter", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
 {
 
-        <div class="">
-            <div class="box-danger">
-                <div class="box-header">
-                    @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
-                    <div class="row">
-                        <div class="col-md-3">
+    <div class="">
+        <div class="box-danger">
+            <div class="box-header">
+                @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                <div class="row">
+                    <div class="col-md-3">
 
-                            @Html.Label("Status", htmlAttributes: new { @class = "control-label" })
+                        @Html.Label("Status", htmlAttributes: new { @class = "control-label" })
+                        <br />
+                        @Html.DropDownListFor(model => model.Status, Model.EnumStatusList as SelectList, "==Select Status==", new { id = "ddlStatusEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
                             <br />
-                            @Html.DropDownListFor(model => model.Status, Model.EnumStatusList as SelectList, "==Select Status==", new { id = "ddlStatusEnumFK", @class = "form-control ddlReset", style = "width:100%", required = "required" })
-
+                            @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                            @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
                         </div>
 
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
-                                <br />
-                                @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
-                                @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
-                            </div>
-
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                            <br />
+                            @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                            @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
-                                <br />
-                                @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
-                                @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-                        <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
-                            </div>
+                    </div>
+                    <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 }
 
 
@@ -136,56 +136,62 @@
                                             </td>
 
                                             <td>@item.POPaymentMethodName</td>
-                                            <td>@item.EnumStatusName</td>
-
                                             <td>
-                                                <a id="@item.OrderMasterId" onclick=" makeEditble(@item.OrderMasterId);" class="linkPointer" data-toggle="modal" data-target="#editPOModal" title="Edit" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i></a>
-                                                <a id="@item.OrderMasterId" onclick="makeDeletale(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
-                                                @if (item.CompanyFK == ((int)CompanyName.GloriousCropCareLimited))
+                                                @if (item.EnumStatusName == "Submitted")
                                                 {
-                                                    <a href="~/Procurement/GCCLProcurementSalesOrderSlave?companyId=@item.CompanyFK&orderMasterId=@item.OrderMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
-
+                                                    <span class="btn btn-success btn-xs">
+                                                        @item.EnumStatusName
+                                                    </span>
                                                 }
                                                 else
                                                 {
-                                                    <a href="~/Procurement/ProcurementSalesOrderSlave?companyId=@item.CompanyFK&orderMasterId=@item.OrderMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
-
+                                                    <span class="btn btn-warning btn-xs">
+                                                        @item.EnumStatusName
+                                                    </span>
                                                 }
-
-                                            </td>
-                                            <td>
-                                                @if (item.Status == (int)EnumPOStatus.Submitted)
-                                                {
-                                                    <a class="btn btn-sm btn-xs btn-warning" style="width:100%" target="_blank" href="~/Report/GCCLSalesInvoiceReport?companyId=@Model.CompanyFK&orderMasterId=@item.OrderMasterId&reportName=GCCLSalesInvoiceReports">
-                                                <i class="fa fa-print"></i>Print</a>
-                                                }
-                                                else
-                                                {
-                                            <span>Print</span> 
-                                                }
-
-                                            </td>
-                                            <td>
-                                                @if (item.Status == (int)EnumPOStatus.Closed)
-                                                {
-                                                    <span class="border:1px solid;border-color:#006400;"><i style="color:#006400;">Closed</i></span>
-                                                }
-                                                else
-                                                {
-                                                    <a id="@item.OrderMasterId" onclick="makeSubmitble(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#submitProcurementPurchaseOrderModal" title="@statusTitle" data-placement="top">
-                                                        @if (item.Status == (int)EnumPOStatus.Submitted)
-                                                        {<i>Undo Submit</i> }
-                                                        else
-                                                        { <i>Submit</i>}
-                                                    </a>
-                                                }
-
-
-
                                             </td>
 
-                                        </tr>
-                                    }
+                                        <td>
+                                            <a id="@item.OrderMasterId" onclick=" makeEditble(@item.OrderMasterId);" class="linkPointer" data-toggle="modal" data-target="#editPOModal" title="Edit" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                            <a id="@item.OrderMasterId" onclick="makeDeletale(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                            <a href="~/Procurement/ProcurementSalesOrderSlave?companyId=@item.CompanyFK&orderMasterId=@item.OrderMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+
+                                        </td>
+                                        <td>
+                                            @if (item.Status == (int)EnumPOStatus.Submitted)
+                                            {
+                                                <a class="btn btn-sm btn-xs btn-warning" style="width:100%" target="_blank" href="~/Report/GCCLSalesInvoiceReport?companyId=@Model.CompanyFK&orderMasterId=@item.OrderMasterId&reportName=GCCLSalesInvoiceReports">
+                                                    <i class="fa fa-print"></i>Print
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span>Print</span>
+                                            }
+
+                                        </td>
+                                        <td>
+                                            @if (item.Status == (int)EnumPOStatus.Closed)
+                                            {
+                                                <span class="border:1px solid;border-color:#006400;"><i style="color:#006400;">Closed</i></span>
+                                            }
+                                            else
+                                            {
+                                                <a id="@item.OrderMasterId" onclick="makeSubmitble(@item.OrderMasterId)" class="linkPointer" data-toggle="modal" data-target="#submitProcurementPurchaseOrderModal" title="@statusTitle" data-placement="top">
+                                                    @if (item.Status == (int)EnumPOStatus.Submitted)
+                                                    {<i>Undo Submit</i> }
+                                                    else
+                                                    { <i>Submit</i>}
+                                                </a>
+                                            }
+
+
+
+                                        </td>
+
+                                    </tr>
+                                }
                                 </tbody>
                             </table>
                         </div>

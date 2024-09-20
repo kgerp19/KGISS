@@ -3,7 +3,7 @@
 
 
 @{
-    ViewData["Title"] = "Purchase Order";
+    ViewData["Title"] = "Packaging";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     int sl = 0;
@@ -22,13 +22,13 @@
         @if (Model.ProdReferenceId > 0)
         {
             <span>
-                Production Process History of: <a target="_blank" href="~/Production/ProdReferenceSlaveReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.ProdReferenceId">@Model.ReferenceNo</a>
+                Packaging Detail of: <a target="_blank" href="~/Production/ProdReferenceSlaveReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.ProdReferenceId">@Model.ReferenceNo</a>
             </span>
         }
         else
         {
             <span>
-                Production Process : @DateTime.Today.ToString("dd-MM-yyyy")
+                Packaging : @DateTime.Today.ToString("dd-MM-yyyy")
             </span>
         }
 
@@ -36,7 +36,12 @@
     </h1>
     <ol class="breadcrumb">
         <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
-        <li class="active">Production Process</li>
+        <li class="active">Packaging</li>
+        <li class="active">
+
+            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/Production/ProdReferenceSlave?companyId=@Model.CompanyFK">Add New Packaging</a>
+
+        </li>
     </ol>
 </section>
 @using (Html.BeginForm("ProdReferenceSlave", "Production", FormMethod.Post, new { id = "procurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
@@ -65,7 +70,7 @@
                                 <table class="table">
                                     <tr>
                                         <th style="width:18%">
-                                            Reference No
+                                            Packaging No
                                         </th>
                                         <th style="width:2%">:</th>
                                         <td style="width:30%">
@@ -73,11 +78,35 @@
 
 
                                         </td>
-                                        <th style="width:18%"> Production Date</th>
+                                        <th style="width:18%"> Packaging Date</th>
                                         <th style="width:2%">:</th>
                                         <td style="width:30%">@Model.ReferenceDate.ToString("dd-MM-yyyy")</td>
                                     </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Created By
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            <label class="col-form-label">@Model.CreatedBy</label>
 
+
+                                        </td>
+                                        <th style="width:18%"> Created Date</th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">@Model.CreatedDate.ToString("dd-MM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:18%">
+                                            Remarks
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td colspan="4" style="width:30%">
+                                            <label class="col-form-label">@Model.Remarks</label>
+
+
+                                        </td>
+                                    </tr>
 
                                 </table>
                             </div>
@@ -87,23 +116,30 @@
                     </div>
                     <div class="box-body">
                         @*@if (Model.ProdReferenceId == 0)
-                            {
-                                <div class="row">
-                                    <div class="form-group" style="padding:0px">
-                                        @Html.CheckBoxFor(model => model.MakeFinishInventory, new { htmlAttributes = new { @id = "txtMakeFinishInventory" } }) Is Opening Stock
+            {
+                <div class="row">
+                    <div class="form-group" style="padding:0px">
+                        @Html.CheckBoxFor(model => model.MakeFinishInventory, new { htmlAttributes = new { @id = "txtMakeFinishInventory" } }) Is Opening Stock
 
-                                    </div>
-                                </div>
-                            }*@
+                    </div>
+                </div>
+            }*@
 
                         @if (Model.ProdReferenceId == 0)
                         {
                             <div class="row">
                                 <div class="col-md-5">
                                     <div class="form-group">
-                                        <label>Production Date</label>
-                                        <input name="ReferenceDate" asp-for="ReferenceDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" style = "width:100%;border:1px black solid" required="required" class="datePicker form-control" id="txtReferenceDate" placeholder="Date" autocomplete="off">
+                                        <label>Packaging Date</label>
+                                        <input name="ReferenceDate" asp-for="ReferenceDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" style="width:100%;border:1px black solid" required="required" class="datePicker form-control" id="txtReferenceDate" placeholder="Date" autocomplete="off">
                                         @Html.ValidationMessageFor(model => model.ReferenceDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        @Html.TextAreaFor(model => model.Remarks, new { @autocomplete = "on", @style = "width:100%;border:1px black solid", @class = "form-control", @id = "txtRemarks", Rows = 1 })
+                                        @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
                             </div>
@@ -111,7 +147,7 @@
 
                     <div class="row">
 
-                        <div class="col-md-7">
+                        <div class="col-md-6">
                             <div class="form-group" style="padding:0px">
                                 <label for="message-text" class="col-form-label">Finish Item:</label>
                                 @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @style = "width:100%;border:1px black solid", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
@@ -121,47 +157,34 @@
                             </div>
                         </div>
 
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Production Qty</label>
                                 <div class="input-group">
                                     @Html.TextBoxFor(model => model.Quantity, new { id = "txtQuantity", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Quantity", required = "Required" })
                                     @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger" })
 
-                                    <div class="input-group-addon" style = "border:1px black solid">
+                                    <div class="input-group-addon" style="border:1px black solid">
                                         <span class="txtUnitName"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Costing Price</label>
-                                <div class="input-group">
-                                    @Html.TextBoxFor(model => model.CostingPrice, new { id = "txtCostingPrice",  @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Costing Price" })
-                                    @Html.ValidationMessageFor(model => model.CostingPrice, "", new { @class = "text-danger" })
 
-                                   
-                                </div>
+                        <div class="col-md-2">
+                            <div class="form-group" style="padding:0px">
+                                <label for="message-text" class="col-form-label">Packaging Formula:</label>
+                                <a class="btn-link btn btn-default" id="linkProductFormulaId" target="_blank" href="~/Production/ProdReferenceSlave?companyId=@Model.CompanyFK">Formula & RM Stock</a>
+
                             </div>
                         </div>
-                        @*<div class="col-md-2">
-                            <div class="form-group">
-                                <label>Over Qty</label>
-                                <div class="input-group">
-                                    @Html.TextBoxFor(model => model.QuantityOver, new { id = "txtQuantityOver" , @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Quantity"})
-                                    @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger" })
-
-                                    <div class="input-group-addon" style = "border:1px black solid">
-                                        <span class="txtUnitName"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>*@
+                        
 
                     </div>
                     </div>
                     <div class="box-footer">
+
+
                         <div class="row">
                             <div class="col-md-4">
 
@@ -171,11 +194,11 @@
                                     <i class='fa fa-plus'></i>
                                     @if (Model.ProdReferenceId > 0)
                                     {
-                                        <span>Add Product In Production Process</span>
+                                        <span>Add Finished Product</span>
                                     }
                                     else
                                     {
-                                        <span>Production Process</span>
+                                        <span>Packaging</span>
                                     }
                                 </button>
                             </div>
@@ -184,61 +207,114 @@
 
                     <!--Body Will by Start Here-->
                     @{
-                            if (Model.ProdReferenceId > 0)
-                            {
+                        if (Model.ProdReferenceId > 0)
+                        {
 
-                                decimal GrossTotal = 0;
-                                @Html.HiddenFor(model => model.ID, new { id = "hidSlaveID" })
-                                <div class="table-responsive col-md-12  text-nowrap">
-                                <table id="KgErpDataTable" class="table table-striped">
+                            decimal GrossTotal = 0;
+                            decimal GrossRMCOGSTotal = 0;
+                            @Html.HiddenFor(model => model.ID, new { id = "hidSlaveID" })
+                            <h4>
+                                Finished Goods
+                            </h4>
+                            <div class="table-responsive col-md-12  text-nowrap">
+                                <table id="" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th style="padding:5px;text-align:center;">SL</th>
                                             <th style="padding:5px;text-align:left;">Product</th>
-                                            <th style="padding:5px;text-align:center;">Processing Qty</th>
-                                            <th style="padding:5px;text-align:right;">Costing Price</th>
-                                            <th style="padding:5px;text-align:right;">Total Price</th>
+                                            <th style="padding:5px;text-align:center;">Packaging Qty</th>
+                                            <th style="padding:5px;text-align:right;">COGS</th>
+                                            <th style="padding:5px;text-align:right;">Total COGS</th>
 
-                                            @*@if (Model.IsSubmitted == false)
-        {
-            <th style="padding:5px;text-align:center;">Action</th>
-        }*@
+                                            @if (Model.IsSubmitted == false)
+                                            {
+                                                <th style="padding:5px;text-align:center;">Action</th>
+                                            }
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach (var item in Model.DataListSlave)
                                         {
                                             GrossTotal += item.TotalPrice;
-                                        <tr>
-                                            <td style="padding:5px">@(++sl)</td>
-                                            <td style="padding:5px;text-align:left;">@item.ProductName</td>
+                                            <tr>
+                                                <td style="padding:5px">@(++sl)</td>
+                                                <td style="padding:5px;text-align:left;">@item.ProductName</td>
 
 
 
-                                            <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Quantity) @item.UnitName</td>
-                                            <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.CostingPrice)</td>
-                                            <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.TotalPrice)</td>
+                                                <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Quantity) @item.UnitName</td>
+                                                <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.CostingPrice)</td>
+                                                <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.TotalPrice)</td>
 
 
-                                            @*@{ if (Model.IsSubmitted == false)
-            {
-                <td style="padding:5px;text-align:center;">
-                    <a id="@item.ID" onclick=" makeEditble(@item.ProdReferenceSlaveID);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                @{ if (Model.IsSubmitted == false)
+                                                    {
+                                                        <td style="padding:5px;text-align:center;">
+                                                            @*<a id="@item.ID" onclick=" makeEditble(@item.ProdReferenceSlaveID);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>*@
 
-                    <a id="@item.ID" onclick="makeDeletale(@item.ProdReferenceSlaveID)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
-                </td>
-            }
-        }*@
-                                        </tr>
+                                                            <a id="@item.ID" onclick="makeDeletale(@item.ProdReferenceSlaveID)" class="linkPointer" data-toggle="modal" data-target="#ReferenceSlaveDeleteModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                        </td>
+                                                    }
+                                                }
+                                            </tr>
                                         }
 
-                                    
+
                                     </tbody>
                                     <tfoot>
                                         <tr>
                                             <td></td>
-                                            <td colspan="3"><strong>Total Price</strong></td>
+                                            <td colspan="3"><strong>Gross COGS</strong></td>
                                             <td style="padding:5px;text-align:right;"><strong>@String.Format("{0:0.00}", GrossTotal)</strong></td>
+
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </div>
+                            <h4>
+                                Raw Materials
+                            </h4>
+                            <div class="table-responsive col-md-12  text-nowrap">
+                                <table id="" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="padding:5px;text-align:center;">SL</th>
+                                            <th style="padding:5px;text-align:left;">Finished Goods</th>
+                                            <th style="padding:5px;text-align:left;">Raw Materials</th>
+                                            <th style="padding:5px;text-align:center;">Consumed Qty</th>
+                                            <th style="padding:5px;text-align:right;">COGS</th>
+                                            <th style="padding:5px;text-align:right;">Total COGS</th>
+                                             
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.RowProductConsumeList)
+                                        {
+                                            GrossRMCOGSTotal += item.TotalCOGS;
+                                            <tr>
+                                                <td style="padding:5px">@(++sl)</td>
+                                                <td style="padding:5px;text-align:left;">@item.FProductName</td>
+                                                <td style="padding:5px;text-align:left;">@item.RProductName</td>
+
+
+
+                                                <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.TotalConsumeQuantity) @item.UnitName</td>
+
+                                                <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.COGS)</td>
+                                                <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.TotalCOGS)</td>
+
+                                                 
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="4"><strong>Gross COGS</strong></td>
+                                            <td style="padding:5px;text-align:right;"><strong>@String.Format("{0:0.00}", GrossRMCOGSTotal)</strong></td>
 
                                         </tr>
                                     </tfoot>
@@ -248,7 +324,37 @@
                         }
                     }
                     <div class="box-footer">
+                        @if (Model.ProdReferenceId > 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-4">
 
+                                </div>
+                                <div class="col-md-4">
+                                    <a style="width:100%" class="btn btn-info" target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@Model.ProdReferenceId">Print Packaging</a>
+
+                                </div>
+                                <div class="col-md-4">
+
+                                    @if (Model.IsSubmitted)
+                                    {
+                                        <span style="width:100%" class="btn btn-success"> Submitted Successfully</span>
+
+
+                                    }
+                                    else
+                                    {
+                                        <a style="width: 100%" onclick="makeSubmit('@Model.ProdReferenceId','@Model.CompanyFK')" class="linkPointer btn btn-warning" data-toggle="modal" data-target="#SubmitModal" data-placement="top"> <i class="glyphicon glyphicon-ok" aria-hidden="true"></i> Submit Packaging </a>
+
+                                    }
+
+
+
+                                </div>
+
+                            </div>
+
+                        }
                     </div>
                 </div>
             </div>
@@ -258,20 +364,20 @@
 
 
 
-@using (Html.BeginForm("DeleteProcurementPurchaseOrderSlave", "Procurement", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
+@using (Html.BeginForm("ReferenceSlaveDelete", "Production", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
 {
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="modal fade" id="deleteProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal fade" id="ReferenceSlaveDeleteModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
                         &times;
                     </button>
-                    <h5 class="modal-title"><b>Delete PO Item</b></h5>
+                    <h5 class="modal-title"><b>Delete Packaging</b></h5>
                 </div>
                 <div class="modal-body">
-                    @Html.HiddenFor(model => model.ProdReferenceId, new { id = "hidDeleteProcurementPurchaseOrderSlaveId" })
+                    @Html.HiddenFor(model => model.ProdReferenceSlaveID, new { id = "hidDeleteProdReferenceSlaveID" })
                     @Html.HiddenFor(model => model.CompanyFK, new { id = "deleteCompanyFK" })
 
                     @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
@@ -280,7 +386,7 @@
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                     <div style="text-align:center">
-                        <h3>Are you sure to Delete this PO Item?</h3>
+                        <h3>Are you sure to Delete this Packaging?</h3>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -302,8 +408,8 @@
 
     <script type="text/javascript">
 
-        function makeDeletale(rowId) {
-            $('#hidDeleteProcurementPurchaseOrderSlaveId').val(rowId);
+        function makeDeletale(referenceSlaveID) {
+            $('#hidDeleteProdReferenceSlaveID').val(referenceSlaveID);
             $('#deleteActionId').val(3);
                                                     }
                                                     function resetProcurementPurchaseRequisitionSlaveForm() {
@@ -321,9 +427,9 @@
                     //console.log(response);
 
                     $.ajax({
-                        url:"@Url.Action("AutoCompleteProductGet", "Configuration")",// '/AccountHeads/AutoComplete/',
+                        url:"@Url.Action("AutoCompleteFinishedGoodsGet", "Configuration")",// '/AccountHeads/AutoComplete/',
                         //data: "{ 'prefix': '" + request.term + "'}",
-                        data: { companyId: "@Model.CompanyFK", prefix: request.term, productType : "F" },
+                        data: { companyId: "@Model.CompanyFK", prefix: request.term },
                         dataType: "json",
                         type: "get",
                         cache: true,
@@ -344,7 +450,11 @@
 
             select: function (e, i) {
                 console.log(i);
-                    $("#ddlRProductFK").val(i.item.val);
+                $("#ddlRProductFK").val(i.item.val);
+                $('#linkProductFormulaId').attr('href', '../Configuration/CommonFinishProductBOM?companyId=' + @Model.CompanyFK + '&productId=' + i.item.val);
+
+
+
 
                     $.ajax({
                         type: "GET",
@@ -361,7 +471,7 @@
                             }
                         }
                     });
-                    $('#txtProductName').focus();
+                $('#txtQuantity').focus();
 
                 },
                 minLength: 1,

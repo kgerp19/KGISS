@@ -121,14 +121,14 @@ namespace KG.App.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> DeleteProcurementPurchaseOrderSlave(VMProdReferenceSlave vmProdReferenceSlave)
+        public async Task<ActionResult> ReferenceSlaveDelete(VMProdReferenceSlave vmProdReferenceSlave)
         {
             if (vmProdReferenceSlave.ActionEum == ActionEnum.Delete)
             {
                 //Delete
                 vmProdReferenceSlave.ProdReferenceId = await _service.Prod_ReferenceSlaveDelete(vmProdReferenceSlave.ProdReferenceSlaveID);
             }
-            return RedirectToAction(nameof(ProdReferenceSlave), new { companyId = vmProdReferenceSlave.CompanyFK, purchaseOrderId = vmProdReferenceSlave.ProdReferenceId });
+            return RedirectToAction(nameof(ProdReferenceSlave), new { companyId = vmProdReferenceSlave.CompanyFK, prodReferenceId = vmProdReferenceSlave.ProdReferenceId });
         }
 
         
@@ -137,10 +137,11 @@ namespace KG.App.Controllers
         {
             if (companyId > 0)
             {  Session["CompanyId"] = companyId; }
-            if (fromDate == null)
-            { fromDate = DateTime.Now.AddMonths(-2);}
-            if (toDate == null)
-            { toDate = DateTime.Now;}
+
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
 
             VMProdReference vmPaymentMaster = new VMProdReference();
             vmPaymentMaster = await Task.Run(() => _service.ProdReferenceListGet(companyId, fromDate, toDate));
