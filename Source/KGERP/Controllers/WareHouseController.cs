@@ -1663,7 +1663,7 @@ namespace KGERP.Controllers
             }
             else if (materialReceiveId > 0)
             {
-                vmReceiving = await _service.PackagingPOReceivingGet(companyId, materialReceiveId);
+                vmReceiving = await _service.ISSPOReceivingGet(companyId, materialReceiveId);
             }
             return View(vmReceiving);
         }

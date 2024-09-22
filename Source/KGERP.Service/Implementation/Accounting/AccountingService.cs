@@ -6652,7 +6652,7 @@ namespace KGERP.Service.Implementation
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
                 JournalType = journalType,
-                Title = "<a href='" + _urlInfo + "Report/PackagingPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
+                Title = "<a href='" + _urlInfo + "Report/ISSPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
                 Narration = vmPOReceiving.ChallanCID + " " + vmPOReceiving.Challan + " Date: " + vmPOReceiving.ChallanDate.ToString(),
                 CompanyFK = CompanyFK,
                 Date = vmPOReceiving.ChallanDate,
@@ -6717,18 +6717,6 @@ namespace KGERP.Service.Implementation
                 Accounting_HeadFK = 50624173  // Labour Bill
             });
 
-            //if (vmPOReceiving.TDSDeduction > 0)
-            //{
-            //    vMJournalSlave.DataListSlave.Add(new VMJournalSlave
-            //    {
-            //        Particular = "TDS Payable Against " + vmPOReceiving.POCID,
-            //        Debit = 0,
-            //        Credit = Convert.ToDouble(vmPOReceiving.TDSDeductionAmount),
-            //        Accounting_HeadFK = 50623218, //TDS Payable Against Supplier (Packaging)
-
-            //    });
-
-            //}
 
             foreach (var item in vmPOReceiving.DataListSlave)
             {

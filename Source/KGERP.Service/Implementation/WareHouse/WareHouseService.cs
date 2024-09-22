@@ -1142,71 +1142,12 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.MaterialReceiveId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await GCCLPOReceivingSlaveACPushGet(vmModel.CompanyFK.Value, vmModel.MaterialReceiveId);
-                await _accountingService.AccountingPurchasePushGCCL(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await SEEDPOReceivingACPushGet(vmModel.CompanyFK.Value, vmModel.MaterialReceiveId);
-                await _accountingService.AccountingPurchasePushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.PurchaseVoucher);
-                #endregion
-            }
-            //Genarel PO
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await FeedGeneralPOReceivingACPushGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-                await _accountingService.AccountiingPurchasePushFeed(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                //await _accountingService.FeedMaterialsRecivedSMSPush(AccData);
+            #region Ready To Account Integration
+            VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
+            await _accountingService.PackagingMRPush(vmModel.CompanyFK.Value, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
+             
 
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-
-                if (vmModel.SupplierPaymentMethodEnumFK == (int)VendorsPaymentMethodEnum.LC)
-                {
-                    VMWareHousePOReceivingSlave AccData = await KFMALLCPOReceivingSlaveGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-
-                    await _accountingService.MaterialReceivedViaLCPushKFMAL(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                    //await KFMALProductGRNEdit(AccData);
-                }
-                else
-                {
-                    VMWareHousePOReceivingSlave AccData = await KFMALReceivingSlaveGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-
-                    await _accountingService.MaterialReceivedPushKFMAL(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                    await KFMALProductGRNEdit(AccData);
-
-                }
-
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await PackagingPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-                await _accountingService.PackagingMRPush(vmModel.CompanyFK.Value, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
-                //await KFMALProductGRNEdit(AccData);
-                //if (vmModel.SupplierPaymentMethodEnumFK == (int)VendorsPaymentMethodEnum.LC)
-                //{
-                //    await _accountingService.PackagingMRLCPush(vmModel.CompanyFK.Value, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
-                //    //await KFMALProductGRNEdit(AccData);
-                //}
-                //else
-                //{
-
-
-                //}
-
-                #endregion
-            }
+            #endregion
             return result;
         }
         public async Task<long> SubmitMaterialReturn(VMWareHousePOReturnSlave vmModel)
@@ -2292,7 +2233,7 @@ namespace KGERP.Services.WareHouse
         }
 
 
-        public async Task<VMWareHousePOReceivingSlave> PackagingPOReceivingGet(int companyId, int materialReceiveId)
+        public async Task<VMWareHousePOReceivingSlave> ISSPOReceivingGet(int companyId, int materialReceiveId)
         {
             VMWareHousePOReceivingSlave vmWareHousePOReceivingSlave = new VMWareHousePOReceivingSlave();
             vmWareHousePOReceivingSlave = await Task.Run(() => (from t1 in _db.MaterialReceives
@@ -2320,12 +2261,13 @@ namespace KGERP.Services.WareHouse
                                                                     IsSubmitted = t1.IsSubmitted,
                                                                     ReceiverName = t5.Name,
                                                                     stockname = t6.Name,
+
                                                                     WareHouseRentBill = t1.WareHouseRentBill,
                                                                     FinancialCharge = t1.FinancialCharge,
                                                                     LabourBill = t1.LabourBill, //Load Unload Cost
                                                                     TruckFare = t1.TruckFare,   //Transport 
                                                                     CandFBill = t1.CandFBill,
-                                                                    TDSDeduction = t1.TDSDiduction,
+                                                                     
                                                                     AccountingHeadId = t3.HeadGLId,
 
                                                                     IntegratedFrom = "MaterialReceive"
@@ -6069,7 +6011,7 @@ namespace KGERP.Services.WareHouse
                 model.ModifiedDate = DateTime.Now;
                 await _db.SaveChangesAsync();
 
-                VMWareHousePOReceivingSlave AccData = await PackagingPOReceivingGet(item.CompanyId, (int)item.MaterialReceiveId);
+                VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(item.CompanyId, (int)item.MaterialReceiveId);
                 await _accountingService.PackagingMRPush(item.CompanyId, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
             }
             return 0;

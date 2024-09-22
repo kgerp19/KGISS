@@ -8724,8 +8724,8 @@ namespace KGERP.Controllers
                 ToDate = DateTime.Now,
                 StrFromDate = DateTime.Now.ToShortDateString(),
                 StrToDate = DateTime.Now.ToShortDateString(),
-                ReportName = "PackagingRMStockReport",
-                NoteReportName = "PackagingRMStockSummeryReport",
+                ReportName = "ISSRMStockReport",
+                NoteReportName = "ISSRMStockSummeryReport",
 
                 Title = title
             };
