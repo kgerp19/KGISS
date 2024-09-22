@@ -537,6 +537,32 @@ namespace KGERP.Service.Implementation
             return List;
 
         }
+        public List<object> CRVVoucherTypesDownList(int companyId)
+        {
+            var List = new List<object>();
+            _db.VoucherTypes
+        .Where(x => x.IsActive && x.CompanyId == companyId && x.Code == "CRV").Select(x => x).ToList()
+        .ForEach(x => List.Add(new
+        {
+            Value = x.VoucherTypeId,
+            Text = x.Name
+        }));
+            return List;
+
+        }
+        public List<object> DRVVoucherTypesDownList(int companyId)
+        {
+            var List = new List<object>();
+            _db.VoucherTypes
+        .Where(x => x.IsActive && x.CompanyId == companyId && x.Code == "DRV").Select(x => x).ToList()
+        .ForEach(x => List.Add(new
+        {
+            Value = x.VoucherTypeId,
+            Text = x.Name
+        }));
+            return List;
+
+        }
         public List<object> VoucherTypesJournalVoucherDropDownList()
         {
             var List = new List<object>();

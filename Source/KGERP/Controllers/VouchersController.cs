@@ -729,8 +729,13 @@ namespace KGERP.Controllers
                 vmJournalSlave = await Task.Run(() => _accountingService.GetVoucherDetails(companyId, voucherId));
             }
             vmJournalSlave.CostCenterList = new SelectList(_accountingService.CostCenterDropDownList(companyId), "Value", "Text");
-            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
- 
+            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.DRVVoucherTypesDownList(companyId), "Value", "Text");
+
+
+            var voucherTypes = _accountingService.DRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            vmJournalSlave.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            vmJournalSlave.VoucherTypeId = (int)selectedVoucherTypeId;
 
             return View(vmJournalSlave);
         }
@@ -785,8 +790,12 @@ namespace KGERP.Controllers
                 vmJournalSlave = await Task.Run(() => _accountingService.GetVoucherDetails(companyId, voucherId));
             }
             vmJournalSlave.CostCenterList = new SelectList(_accountingService.CostCenterDropDownList(companyId), "Value", "Text");
-            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
+            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.CRVVoucherTypesDownList(companyId), "Value", "Text");
 
+            var voucherTypes = _accountingService.CRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            vmJournalSlave.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            vmJournalSlave.VoucherTypeId = (int)selectedVoucherTypeId;
 
             return View(vmJournalSlave);
         }
