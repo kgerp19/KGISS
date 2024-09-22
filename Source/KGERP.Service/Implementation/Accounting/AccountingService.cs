@@ -1441,7 +1441,7 @@ namespace KGERP.Service.Implementation
                      join h4 in _db.Head4 on h5.ParentId equals h4.Id
 
                      where hgl.CompanyId == companyId
-                     && h5.AccCode== "2401001001"
+                     && ((h4.AccCode == "1301001") ||( h5.AccCode== "2401001001"))
                      && hgl.IsActive 
                      && h5.IsActive 
                      && h4.IsActive
@@ -1460,9 +1460,9 @@ namespace KGERP.Service.Implementation
             var v = (from hgl in _db.HeadGLs
                      join h5 in _db.Head5 on hgl.ParentId equals h5.Id
                      join h4 in _db.Head4 on h5.ParentId equals h4.Id
-                     join h3 in _db.Head3 on h4.ParentId equals h3.ParentId
+                     join h3 in _db.Head3 on h4.ParentId equals h3.Id
                      where hgl.CompanyId == companyId
-                     && (h3.AccCode=="1304" || h4.AccCode=="1301001")
+                     && ((h3.AccCode=="1304") || (h4.AccCode=="1301001"))
                      && hgl.IsActive 
                      && h5.IsActive 
                      && h4.IsActive
@@ -7187,6 +7187,46 @@ namespace KGERP.Service.Implementation
             return resultData.VoucherId;
         }
 
+        public async Task<VoucherModel> GetVouchersList(int companyId, DateTime? fromDate, DateTime? toDate, bool? vStatus, int? voucherTypeId)
+        {
+            VoucherModel voucherModel = new VoucherModel();
+            voucherModel.CompanyId = companyId;
+            voucherModel.VoucherTypeId = voucherTypeId;
+            voucherModel.DataList = await Task.Run(() => (from t1 in _db.Vouchers
+                                                          join t2 in _db.VoucherTypes on t1.VoucherTypeId equals t2.VoucherTypeId
+                                                          join t3 in _db.Accounting_CostCenter on t1.Accounting_CostCenterFk equals t3.CostCenterId
+                                                          where t1.CompanyId == companyId && t1.IsActive
+                                                          && (voucherTypeId > 0 ? t1.VoucherTypeId == voucherTypeId : t1.VoucherTypeId > 0)
+                                                          && t1.VoucherDate >= fromDate && t1.VoucherDate <= toDate
+                                                          && t1.IsSubmit == vStatus
+                                                          select new VoucherModel
+                                                          {
+                                                              VoucherId = t1.VoucherId,
+                                                              VoucherDate = t1.VoucherDate,
+                                                              Narration = t1.Narration,
+                                                              VoucherNo = t1.VoucherNo,
+                                                              VoucherTypeId = t1.VoucherTypeId,
+                                                              VoucherTypeName = t2.Name,
+                                                              CompanyId = t1.CompanyId,
+                                                              CreateDate = t1.CreateDate,
+                                                              ChqNo = t1.ChqNo,
+                                                              ChqDate = t1.ChqDate,
+                                                              ChqName = t1.ChqName,
+                                                              IsStock = t1.IsStock,
+                                                              IsSubmit = t1.IsSubmit,
+                                                              IsIntegrated = t1.IsIntegrated,
+                                                              CostCenterName = t3.Name,
+                                                              ReportApprovalId = ((from t1s in _db.ReportApprovalDetails
+                                                                                   join t2s in _db.ReportApprovals on t1s.ReportApprovalId equals t2s.ReportApprovalId
+                                                                                   where t2s.CompanyId == t1.CompanyId &&
+                                                                                   t2s.Month == t1.VoucherDate.Value.Month &&
+                                                                                   t2s.Year == t1.VoucherDate.Value.Year &&
+                                                                                   t1s.ApprovalStatus == 3
+                                                                                   select t2s.ReportApprovalId
+                                                                                ).FirstOrDefault())
+                                                          }).OrderByDescending(x => x.VoucherId).AsEnumerable());
+            return voucherModel;
+        }
 
     }
 }
