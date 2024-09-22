@@ -100,8 +100,8 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
         public async Task<long> DeleteSeedProcessingDetails(long SeedProcessingDetailsId)
         {
             long result = -1;
-            var SeedProdessingDetailsData = await _db.SeedProcessingDetails.FirstOrDefaultAsync(x => x.SeedProcessingDetailsId == SeedProcessingDetailsId);
-            if (SeedProdessingDetailsData.SeedProcessingDetailsId > 0)
+            var SeedProdessingDetailsData = await _db.SeedProcessingDetails.FirstOrDefaultAsync(x => x.SeedProcessingDetailId == SeedProcessingDetailsId);
+            if (SeedProdessingDetailsData.SeedProcessingDetailId > 0)
             {
                 SeedProdessingDetailsData.IsActive = false;
                 SeedProdessingDetailsData.ModifiedDate = DateTime.Now;
@@ -142,7 +142,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                     {
                                         ProductId = l1.ProductId.Value,
                                         ProductName = l2.ProductName,
-                                        SeedProcessingDetailsId = l1.SeedProcessingDetailsId,
+                                        SeedProcessingDetailsId = l1.SeedProcessingDetailId,
                                         Amount = l1.Amount,
                                         ReceiveQty = l3.ReceiveQty,
                                         StockInQty = l3.StockInQty,
@@ -182,8 +182,8 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
         public async Task<long> SeedProcessingDetailsUpdate(SeedProcessingDetailsVM detailsVM)
         {
             long result = -1;
-            var SeedProdessingDetailsData = await _db.SeedProcessingDetails.FirstOrDefaultAsync(x => x.SeedProcessingDetailsId == detailsVM.SeedProcessingDetailsId);
-            if (SeedProdessingDetailsData.SeedProcessingDetailsId > 0)
+            var SeedProdessingDetailsData = await _db.SeedProcessingDetails.FirstOrDefaultAsync(x => x.SeedProcessingDetailId == detailsVM.SeedProcessingDetailsId);
+            if (SeedProdessingDetailsData.SeedProcessingDetailId > 0)
             {
                 SeedProdessingDetailsData.Amount = detailsVM.Amount;
                 _db.Entry(SeedProdessingDetailsData).State = EntityState.Modified;
