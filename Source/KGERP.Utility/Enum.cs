@@ -25,6 +25,11 @@ namespace KGERP.Utility
     //    GMD,
     //    HRAdmin
     //}
+    public enum TransportTypeEnum
+    {
+        Courier = 1,
+        Truck
+    }
 
     public enum LeaveStatusEnum
     {

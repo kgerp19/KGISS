@@ -460,6 +460,8 @@ namespace KGERP.Services.WareHouse
 
         public long OrderDeliverId { get; set; }
         public long? OrderMasterId { get; set; }
+        public int? TransportTypeId { get; set; }
+        public string CourierName { get; set; }
         public string ProductType { get; set; }
         public int StockInfoId { get; set; }
         public DateTime? DeliveryDate { get; set; }
@@ -469,6 +471,8 @@ namespace KGERP.Services.WareHouse
         public string OrderNo { get; set; }
         public string InvoiceNo { get; set; }
         public string VehicleNo { get; set; }
+        public double? TruckFair { get; set; }
+        public string DriverMobileNo { get; set; }
         public string DriverName { get; set; }
         public decimal? TotalAmount { get; set; }
         public decimal? Commission { get; set; }
@@ -501,6 +505,8 @@ namespace KGERP.Services.WareHouse
         public string StrToDate { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
+
+        public SelectList TransportTypeList { get { return new SelectList(BaseFunctionalities.GetEnumList<TransportTypeEnum>(), "Value", "Text"); } }
     }
 
     public partial class VMOrderDeliverDetail : VMOrderDeliver
