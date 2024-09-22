@@ -1034,11 +1034,7 @@ namespace Pos.App.Controllers
             var products = _service.GetAutoCompleteProduct(companyId, prefix, productType);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult GCCLAutoCompleteRawPackingMaterialsGet(int companyId, string prefix)
-        {
-            var products = _service.GCCLGetAutoCompleteRawPackingMaterials(companyId, prefix);
-            return Json(products, JsonRequestBehavior.AllowGet);
-        }
+        
         public JsonResult AutoCompleteRawPackingMaterialsGet(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawPackingMaterials(companyId, prefix);
