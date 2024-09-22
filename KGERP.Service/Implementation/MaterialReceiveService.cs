@@ -1,6 +1,7 @@
 ﻿using KGERP.Data.Models;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
+using KGERP.Service.ServiceModel.SeedProcessingModel;
 using KGERP.Services.WareHouse;
 using KGERP.Utility;
 using System;
@@ -756,6 +757,54 @@ as SupplierName,
         public Task<long> SubmitMaterialIssue(MaterialReceiveModel model)
         {
             throw new NotImplementedException();
+        }
+        public async Task<object> CompanyWiseMaterialReceiveId(string prefix, int CompanyId)
+        {
+            var MaterialReceiveNo = context.MaterialReceives
+                .Where(t1 => t1.IsActive && t1.ReceiveNo.StartsWith(prefix))
+                .Select(t1 => new
+                {
+                    t1.MaterialReceiveId,
+                    t1.ReceiveNo,
+                    t1.CompanyId
+                });
+
+            if (CompanyId > 0)
+            {
+                MaterialReceiveNo = MaterialReceiveNo.Where(x => x.CompanyId == CompanyId);
+            }
+
+            var result = await MaterialReceiveNo
+                .Select(x => new
+                {
+                    val = x.MaterialReceiveId.ToString(),
+                    label = x.ReceiveNo
+                })
+                .OrderBy(x => x.label)
+                .Take(50) // Consider adjusting or testing this  
+                .ToListAsync();
+
+            return result;
+        }
+
+        public async Task<List<MaterialReceiveDetailsWithProductVM>> MaterialReceiveWiseMaterialReceiveDetailsDataList(long materialReceiveId)
+        {
+            MaterialReceiveDetailsWithProductVM model = new MaterialReceiveDetailsWithProductVM();
+            model.DataListPro = await (from t1 in context.MaterialReceiveDetails
+                                       join t2 in context.Products on t1.ProductId equals t2.ProductId
+                                       where t1.IsActive && t1.MaterialReceiveId == materialReceiveId
+                                       select new MaterialReceiveDetailsWithProductVM
+                                       {
+                                           MaterialReceiveDetailId = t1.MaterialReceiveDetailId,
+                                           ProductName = t2.ProductName,
+                                           ReceiveQty = t1.ReceiveQty,
+                                           UnitPrice = t1.UnitPrice,
+                                           StockInQty = t1.StockInQty,
+                                           ProductId = t1.ProductId.Value
+                                       }).ToListAsync();
+
+
+            return model.DataListPro;
         }
     }
 }

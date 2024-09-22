@@ -1,0 +1,181 @@
+﻿@model KGERP.Service.ServiceModel.SeedProcessingModel.SeedProcessingDetailsVM
+@{
+    ViewBag.Title = "SeedProcessingList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+
+    .hasDatepicker {
+        position: relative;
+        z-index: 9999;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Issue Item List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li><a class="btn btn-warning btn-xs" href="~/SeedProcessing/SeedProcessingCreate?companyId=@Model.CompanyFK"><i class="fa fa-line"></i>Seed Process Create</a></li>
+    </ol>
+</section>
+@using (Html.BeginForm("SeedProcessingList", "SeedProcessing", FormMethod.Post, new { id = "SeedProcessingListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Process No</th>
+                                        <th>ProcessDate</th>
+                                        <th>ProcessBy</th>
+                                        <th>Created Date</th>
+                                        <th>Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+                                            <td>
+                                                <a style="color:blue" href="~/Report/GetSeedProcessingReport?SeedProcessingId=@item.SeedProcessingId" target="_blank"> @item.SeedProcessNo </a>
+                                            </td>
+                                            <td>@(item.SeedProcessDate==null?"N/A":item.SeedProcessDate.Value.ToString("dd-MMM-yyyy"))</td>
+                                            <td>@item.SeedProcessBy</td>
+                                            <td>@(item.CreatedDate==null?"N/A":item.CreatedDate.ToString("dd-MMM-yyyy"))</td>
+                                            <td>
+                                                <a onclick="makeEditble('@item.SeedProcessingId','@item.SeedProcessDate.Value','@item.CompanyFK')" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                &nbsp;
+                                                <a onclick="makeDeletale('@item.SeedProcessingId','@item.CompanyFK')" class="linkPointer"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                &nbsp;
+                                                <a target="_blank" href="~/SeedProcessing/SeedProcessingCreate?companyId=21&SeedProcessingId=@item.SeedProcessingId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+@using (Html.BeginForm("SeedProcessingUpdate", "SeedProcessing", FormMethod.Post, new { id = "frmSeedProcessingUpdate" }))
+{
+    <div class="modal fade" id="modalDiv" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm ui-front" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="margin-bottom:0%;padding-bottom:0%">
+                    <h5 class="modal-title">Seed Process</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Seed Process Date</label>
+                                    <div class="form-group" style="display:flex">
+                                        @Html.HiddenFor(model => model.SeedProcessingId, new { id = "hdnModalSeedProcessingId" })
+                                        @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForUpdate" })
+                                        @Html.EditorFor(model => model.SeedProcessDate, new { htmlAttributes = new { id = "modalSeedProcessDate", @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off", value = DateTime.Today } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="modUpdate">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("SeedProcessingDelete", "SeedProcessing", FormMethod.Post, new { id = "SeedProcessingDeleteFormId" }))
+{
+    <div class="modal fade" id="deleteSeedProcessingDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Delete</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForDelete" })
+                    @Html.HiddenFor(model => model.SeedProcessingId, new { @id = "hdnSeedProcessingId" })
+                    <h3 class="text-center">Are You Delete This?</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+        })
+
+
+        const makeDeletale = (seedProcessingId,companyId) => {
+            $('#hdnSeedProcessingId').val(seedProcessingId);
+            $('#hdnCompanyForDelete').val(companyId);
+            $("#deleteSeedProcessingDeleteModal").modal('toggle');
+        }
+
+
+        const makeEditble = (seedProcessId, seedProcessDate, companyIdFK) => {
+            $('#hdnModalSeedProcessingId').val(seedProcessId);
+            $('#hdnCompanyForUpdate').val(companyIdFK);
+            $('#modalSeedProcessDate').val(seedProcessDate);
+            $("#modalDiv").modal('toggle');
+
+        }
+
+
+    </script>
+}
+
