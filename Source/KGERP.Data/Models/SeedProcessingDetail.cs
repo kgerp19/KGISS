@@ -14,7 +14,7 @@ namespace KGERP.Data.Models
     
     public partial class SeedProcessingDetail
     {
-        public long SeedProcessingDetailsId { get; set; }
+        public long SeedProcessingDetailId { get; set; }
         public long SeedProcessingId { get; set; }
         public long MaterialReceiveDetailId { get; set; }
         public decimal Amount { get; set; }

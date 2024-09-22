@@ -30,5 +30,6 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> AuthorizedDate { get; set; }
         public long OrderDetailId { get; set; }
         public bool IsAuthorized { get; set; }
+        public string Remarks { get; set; }
     }
 }
