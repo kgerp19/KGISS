@@ -1,5 +1,6 @@
 ﻿using KGERP.Data.Models;
 using KGERP.Service.ServiceModel;
+using KGERP.Service.ServiceModel.SeedProcessingModel;
 using KGERP.Services.WareHouse;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,9 @@ namespace KGERP.Service.Interface
         bool MaterialIssueCancel(VMWareHousePOReceivingSlave VMReceivingSlave);
         MaterialReceiveModel GetMaterialReceiveEdit(long id);
         bool MaterialReceiveEdit(MaterialReceiveModel materialReceive);
+
+        Task<object> CompanyWiseMaterialReceiveId(string prefix, int CompanyId = 0);
+        Task<List<MaterialReceiveDetailsWithProductVM>> MaterialReceiveWiseMaterialReceiveDetailsDataList(long materialReceiveId);
         //Task<long> SubmitMaterialIssue(MaterialReceiveModel model);
 
         //StoreModel GetStore(long id);

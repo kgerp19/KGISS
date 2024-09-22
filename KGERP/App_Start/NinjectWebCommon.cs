@@ -48,6 +48,7 @@ using KGERP.Utility.ImplementInterfaces;
 using KGERP.Service.Implementation.EmployeeAppResult;
 using KGERP.Service.Implementation.QualityExceptionComplaints;
 using KGERP.Service.Implementation.SalesManagement;
+using KGERP.Service.Implementation.SeedProcessingServ;
 
 [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NinjectWebCommon), "Start")]
 [assembly: WebActivatorEx.ApplicationShutdownMethodAttribute(typeof(NinjectWebCommon), "Stop")]
@@ -196,6 +197,7 @@ namespace KGERP.App_Start
             kernel.Bind<IEmployeeResultService>().To<EmployeeResultService>().InRequestScope();
             kernel.Bind<IQualityExceptionComplaintService>().To<QualityExceptionComplaintService>().InRequestScope();
             kernel.Bind<ISalesManagementService>().To<SalesManagementService>().InRequestScope();
+            kernel.Bind<ISeedProcessingService>().To<SeedProcessingService>().InRequestScope();
 
         }
     }
