@@ -1,0 +1,361 @@
+﻿@model KGERP.Service.ServiceModel.SeedProcessingModel.SeedProcessingDetailsVM
+@{
+    ViewBag.Title = "SeedProcessingCreate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sl = 0;
+}
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        <span>
+            Seed Processing Create
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active"><a class="text-success btn btn-success btn-xs" style="color:white" href="~/SeedProcessing/SeedProcessingList?companyId=@Model.CompanyFK"><i class="fa fa-link"></i>Seed Process List</a></li>
+    </ol>
+</section>
+
+@using (Html.BeginForm("SeedProcessingCreate", "SeedProcessing", FormMethod.Post, new { id = "SeedProcessingFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-body">
+                        <div class="box-body">
+                            @Html.HiddenFor(model => model.CompanyFK)
+                            @if (Model.SeedProcessingId == 0)
+                            {
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Seed Process Date</label>
+                                            <div class="form-group" style="display:flex">
+                                                @Html.EditorFor(model => model.SeedProcessDate, new { htmlAttributes = new { @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off" } })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Material Receive No</label>
+                                            @Html.EditorFor(model => model.MaterialReceiveNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Supplier Name", @id = "txtMaterialReceiveNo" } })
+
+                                            @Html.HiddenFor(model => model.MaterialReceiveDetailId, new { id = "ddlMaterialReceiveDetailId" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="box-footer">
+
+                                    <div id="MaterialReceiveDetailData">
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+
+                                        </div>
+                                        <div class="col-lg-4 col-md-4">
+                                            <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block hidden">
+                                                <i class='fa fa-plus'></i>
+                                                <span>Create New </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.SeedProcessingId > 0)
+                            {
+
+
+                                <div class="col-md-1"> </div>
+                                <div class="col-md-10">
+                                    <table class="table">
+
+                                        <tr>
+                                            <th>Seed Process No</th>
+                                            <th>:</th>
+                                            <td>@Model.SeedProcessNo</td>
+                                            <th>Seed Process Date</th>
+                                            <th>:</th>
+                                            <td>@Model.SeedProcessDate.Value.ToShortDateString()</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Seed Process By</th>
+                                            <th>:</th>
+                                            <td>@Model.SeedProcessBy</td>
+                                            <th>Created Date</th>
+                                            <th>:</th>
+                                            <td>@Model.CreatedDate.ToShortDateString()</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-1"> </div>
+
+                            }
+
+                            @{
+
+                                if (Model.SeedProcessingId > 0)
+                                {
+                                    if (Model.DataList != null && Model.DataList.Count > 0)
+                                    {
+                                        <div class="row">
+                                            <div class="table-responsive col-md-12  text-nowrap">
+                                                <table id="KgErpDataTable" class="table table-striped">
+
+                                                    <thead>
+                                                        <tr>
+                                                            <th>SL</th>
+                                                            <th>Product Name</th>
+                                                            <th>Receive Qty.</th>
+                                                            <th>StockIn Qty.</th>
+                                                            <th>Unit Price</th>
+                                                            <th>Amount</th>
+                                                            <th class="text-center">Action</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.DataList)
+                                                        {
+                                                            <tr>
+                                                                <td style="padding:5px">@(++sl)</td>
+                                                                <td style="padding:5px">@item.ProductName</td>
+                                                                <td style="padding:5px">@item.ReceiveQty</td>
+                                                                <td style="padding:5px">@item.StockInQty</td>
+                                                                <td style="padding:5px">@item.UnitPrice</td>
+                                                                <td style="padding:5px">@item.Amount</td>
+                                                                @if (!Model.IsSumitted)
+                                                                {
+                                                                    <td class="text-center">
+                                                                        <button class="btn btn-primary btn-sm" type="button" onclick="UpdateSeedDetails('@item.SeedProcessingDetailsId','@item.Amount');">Update</button>
+                                                                        &nbsp;
+                                                                        <button class="btn btn-danger btn-sm" type="button" onclick="DeleteSeedDetails('@item.SeedProcessingDetailsId');">Delete</button>
+                                                                    </td>
+                                                                }
+
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 2%;">
+                                            <div class="col-md-4">
+
+                                            </div>
+                                            <div class="col-md-4">
+                                                <a class="btn btn-info" href="~/Report/GetSeedProcessingReport?SeedProcessingId=@Model.SeedProcessingId" target="_blank" style="width:100%">Show Report </a>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button class="btn btn-primary btn-sm" type="button" style="width:100%" onclick="SeedProcessingSubmited('@Model.SeedProcessingId','@(Model.IsSumitted==true?1:0)')">
+                                                    @if (Model.IsSumitted)
+                                                    {
+                                                        <span>
+                                                            Undo Submitted
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>
+                                                            Submitted
+                                                        </span>
+                                                    }
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4 class="text-center text-danger">Item Can't Found!</h4>
+                                            </div>
+                                        </div>
+                                    }
+
+                                }
+
+                            }
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@using (Html.BeginForm("SeedProcessingDetailsDelete", "SeedProcessing", FormMethod.Post, new { id = "SeedProcessingDeleteFormId", @class = "formValidator" }))
+{
+    <div class="modal fade" id="deleteSeedProcessingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Delete</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForDelete" })
+                    @Html.HiddenFor(model => model.SeedProcessingDetailsId, new { @id = "hdnSeedProcessingDetailsId" })
+                    <h3 class="text-center">Are You Delete This?</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@using (Html.BeginForm("SeedProcessingSubmitted", "SeedProcessing", FormMethod.Post, new { id = "SeedProcessingSubmittedFormId" }))
+{
+    <div class="modal fade" id="SeedProcessingSubmittedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="SubmittedModalLabel"></h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForSubmitted" })
+                    @Html.HiddenFor(model => model.IsSumitted, new { @id = "hdnIsSubmitted" })
+                    @Html.HiddenFor(model => model.SeedProcessingId, new { @id = "hdnSubmittedSeedProcessingId" })
+                    <h3 class="text-center" id="txtSubmitted"></h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+@using (Html.BeginForm("SeedProcessingDetailsUpdate", "SeedProcessing", FormMethod.Post, new { id = "SeedProcessingDetailsUpdateFormId" }))
+{
+    <div class="modal fade" id="SeedProcessingDetailsUpdateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Update</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForUpdate" })
+                    @Html.HiddenFor(model => model.SeedProcessingDetailsId, new { @id = "hdnUpdateSeedProcessingDetailsId" })
+                    @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @autocomplete = "off", @class = "form-control", @id = "txtAmountModal", type = "number" } })
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    <script type="text/javascript">
+
+        const DeleteSeedDetails = (seedProcessingDetailsId) => {
+            $('#hdnSeedProcessingDetailsId').val(seedProcessingDetailsId);
+            $("#deleteSeedProcessingModal").modal('toggle');
+        }
+        const UpdateSeedDetails = (seedProcessingDetailsId,amount) => {
+            $('#hdnUpdateSeedProcessingDetailsId').val(seedProcessingDetailsId);
+            $('#txtAmountModal').val(amount);
+            $("#SeedProcessingDetailsUpdateModal").modal('toggle');
+        }
+
+        const SeedProcessingSubmited = (seedProcessingId, isSubmitted) => {
+
+            let textWillbe = isSubmitted == true ? 'Undo Submited' : 'Submited'
+            let textWillbeLebel = isSubmitted == true ? 'Are you sure to Undo Submitted this?' : ' Are you sure to Submitted this?'
+            $('#hdnSubmittedSeedProcessingId').val(seedProcessingId);
+            $('#hdnIsSubmitted').val('@Model.IsSumitted');
+            $('#SubmittedModalLabel').text(textWillbe);
+            $('#txtSubmitted').text(textWillbeLebel);
+            $("#SeedProcessingSubmittedModal").modal('toggle');
+        }
+        const GetMaterialReceiveDetailListDOM = (requisitionId) => {
+            debugger
+            $("#ddlMaterialReceiveDetailId").val(requisitionId);
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetMetrialReciveDetailsDataList", "SeedProcessing")",
+                datatype: "json",
+                data: { materialReceiveId: requisitionId },
+                success: function (response) {
+                    console.log(response);
+                    $("#MaterialReceiveDetailData").html(response);
+                    $('#poCreateBtn').removeClass('hidden')
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error occurred while fetching packaging data:", error);
+                }
+            });
+        }
+
+
+
+        $(document).ready(function () {
+            $("#txtMaterialReceiveNo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url:"@Url.Action("GetMetrialReciveDetailsList", "SeedProcessing")",
+                        data: { prefix: request.term, companyId:21 },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                        },
+                        failure: function (response) {
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    GetMaterialReceiveDetailListDOM(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+    </script>
+
+}
+
