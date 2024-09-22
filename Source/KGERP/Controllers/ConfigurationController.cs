@@ -654,7 +654,7 @@ namespace Pos.App.Controllers
                 //Add 
                 vmCommonProductCategory.ProductType = "R";
 
-                await _service.ProductFinishCategoryAdd(vmCommonProductCategory);
+                await _service.ProductRawCategoryAdd(vmCommonProductCategory);
             }
             else if (vmCommonProductCategory.ActionEum == ActionEnum.Edit)
             {
@@ -1131,16 +1131,11 @@ namespace Pos.App.Controllers
             if (vmCommonSupplier.ActionEum == ActionEnum.Add)
             {
                 //Add 
-                if (vmCommonSupplier.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
-                    await _service.KfmalSupplierAdd(vmCommonSupplier);
+               
+                    await _service.SEEDSupplierAdd(vmCommonSupplier);
 
-                }
-                else
-                {
-                    await _service.SupplierAdd(vmCommonSupplier);
-
-                }
+                
+               
             }
             else if (vmCommonSupplier.ActionEum == ActionEnum.Edit)
             {

@@ -1208,7 +1208,7 @@ namespace KGERP.Service.Implementation
             return result;
         }
 
-        public async Task<int> KfmalSupplierAdd(VMCommonSupplier vmCommonSupplier)
+        public async Task<int> SEEDSupplierAdd(VMCommonSupplier vmCommonSupplier)
         {
             var result = -1;
 
@@ -1240,16 +1240,15 @@ namespace KGERP.Service.Implementation
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = commonSupplier.VendorId;
-                if (commonSupplier.CompanyId == 10)
-                {
-                    VMHeadIntegration vmHeadIntegration = new VMHeadIntegration();
+                var head5id = await _db.Head5.Where(x => x.AccCode == "2401001001" && x.IsActive == true && x.CompanyId == vmCommonSupplier.CompanyFK).FirstOrDefaultAsync();
+                VMHeadIntegration vmHeadIntegration = new VMHeadIntegration();
                     vmHeadIntegration = new VMHeadIntegration
                     {
                         AccName = commonSupplier.Name,
                         LayerNo = 6,
                         Remarks = "GL Layer",
                         IsIncomeHead = false,
-                        ParentId = 50604284, // General Payable // Head5 Kfmal
+                        ParentId = head5id.Id, // General Payable // Head5 Kfmal
                         IsActive = true,
 
                         CompanyFK = commonSupplier.CompanyId,
@@ -1257,8 +1256,8 @@ namespace KGERP.Service.Implementation
                         CreatedDate = DateTime.Now,
                     };
 
-                    HeadGL headGl = await KfmalSupplierHeadAdd(vmHeadIntegration, commonSupplier.VendorId);
-                }
+                    HeadGL headGl = await SEEDSupplierHeadAdd(vmHeadIntegration, commonSupplier.VendorId);
+                
 
 
             }
@@ -1503,7 +1502,7 @@ namespace KGERP.Service.Implementation
             return headGL;
         }
 
-        public async Task<HeadGL> KfmalSupplierHeadAdd(VMHeadIntegration vmHeadIntegration, int vendorId)
+        public async Task<HeadGL> SEEDSupplierHeadAdd(VMHeadIntegration vmHeadIntegration, int vendorId)
         {
             long result = -1;
 
@@ -1759,10 +1758,9 @@ namespace KGERP.Service.Implementation
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = zone.ZoneId;
-                if (zone.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
 
-                    int ParentId = 50615170; // Account Recevable / Head 3
+
+                var zone3id = await _db.Head3.Where(x => x.AccCode == "1304" && x.IsActive == true && x.CompanyId == vmCommonZone.CompanyFK).FirstOrDefaultAsync(); // Account Recevable / Head 3
 
                     VMHeadIntegration integration = new VMHeadIntegration
                     {
@@ -1770,16 +1768,16 @@ namespace KGERP.Service.Implementation
                         LayerNo = 4,
                         Remarks = "4 Layer",
                         IsIncomeHead = false,
-                        ParentId = ParentId,
+                        ParentId = zone3id.Id,
                         IsActive = true,
 
                         CompanyFK = zone.CompanyId,
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
                     };
-                    int head4Id = KfmalZoneHead4Push(integration, zone.ZoneId);
+                    int head4Id = ISSZoneHead4Push(integration, zone.ZoneId);
 
-                }
+                
             }
             return result;
         }
@@ -1878,8 +1876,7 @@ namespace KGERP.Service.Implementation
             {
                 result = subZone.SubZoneId;
 
-                if (subZone.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
+                
 
                     int ParentId = _db.Zones.Find(subZone.ZoneId).HeadGLId;
 
@@ -1896,9 +1893,9 @@ namespace KGERP.Service.Implementation
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
                     };
-                    int head4Id = KfmalSubZoneHead5Push(integration, subZone.SubZoneId);
+                    int head4Id = ISSSubZoneHead5Push(integration, subZone.SubZoneId);
 
-                }
+                
 
             }
             return result;
@@ -1987,67 +1984,14 @@ namespace KGERP.Service.Implementation
                 NoOfFloors= productCategoryModel.NoOfFloors??"",
                 FlatSizeSpecification=productCategoryModel.FlatSizeSpecification??"",
                 IsActive = true,
-                AccountingIncomeHeadId = productCategoryModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited ? 37656: 0, // Finished Goods Income
-                AccountingHeadId = productCategoryModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited ? 40529:0, // Finished Goods Stock
-                AccountingExpenseHeadId = productCategoryModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited ? 37684:0 // Finished Goods Purchase
+            
 
             };
             _db.ProductCategories.Add(productCategory);
             if (await _db.SaveChangesAsync() > 0)
             {
-                if (productCategory.CompanyId == (int)CompanyName.GloriousCropCareLimited)
-                {
 
-                    var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = catetegory.Name,
-                        LayerNo = 5,
-                        Remarks = "5 Layer",
-                        IsIncomeHead = false,
-                        ProductType = catetegory.ProductType,
-                        CompanyFK = productCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-
-
-                    int head5Id = AccHead5Push(integration, productCategory.ProductCategoryId);
-
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
-                }
-
-                if (productCategory.CompanyId == (int)CompanyName.KrishibidFeedLimited)
-                {
-
-                    var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = catetegory.Name,
-                        LayerNo = 5,
-                        Remarks = "5 Layer",
-                        IsIncomeHead = false,
-                        ProductType = catetegory.ProductType,
-                        CompanyFK = productCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-
-
-                    int head5Id = AccHead5Push(integration, productCategory.ProductCategoryId);
-
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
-                }
-
-
-                if (productCategory.CompanyId == (int)CompanyName.KrishibidSeedLimited)
-                {
+                
 
                     var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
                     VMHeadIntegration integration = new VMHeadIntegration
@@ -2061,79 +2005,58 @@ namespace KGERP.Service.Implementation
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
                     };
-
-
                     int head5Id = AccHeadGlPushSeed(integration, productCategory.ProductCategoryId);
-
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
-                }
-
-
-
-
-                //if (productCategory.CompanyId == (int)CompanyName.KrishibidPackagingLimited)
-                //{
-
-                //    var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
-                //    VMHeadIntegration integration = new VMHeadIntegration
-                //    {
-                //        AccName = catetegory.Name,
-                //        LayerNo = 6,
-                //        Remarks = "GL Layer",
-                //        IsIncomeHead = false,
-                //        ProductType = catetegory.ProductType,
-                //        CompanyFK = productCategory.CompanyId,
-                //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                //        CreatedDate = DateTime.Now,
-                //    };
-
-
-                //    int head5Id = AccHeadGlPushKPL(integration, productCategory.ProductCategoryId);
-
-                //    //if (headGlId != null)
-                //    //{
-                //    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                //    //}
-                //}
-
-
-
-
-
-
-                if (productCategory.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
-
-                    var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = catetegory.Name,
-                        LayerNo = 4,
-                        Remarks = "4 Layer",
-                        IsIncomeHead = false,
-                        ProductType = catetegory.ProductType,
-                        CompanyFK = productCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-
-
-                    int head5Id = AccHead4Push(integration, productCategory.ProductCategoryId);
-
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
-                }
-
 
                 result = productCategory.ProductCategoryId;
             }
             return result;
         }
+
+        public async Task<int> ProductRawCategoryAdd(VMCommonProductCategory productCategoryModel)
+        {
+            var result = -1;
+            ProductCategory productCategory = new ProductCategory
+            {
+
+                Name = productCategoryModel.Name,
+                ProductType = productCategoryModel.ProductType,
+                CashCustomerRate = productCategoryModel.CashCommission,
+
+                Remarks = productCategoryModel.Remarks,
+                CompanyId = productCategoryModel.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                CreatedDate = DateTime.Now,
+                NoOfFloors = productCategoryModel.NoOfFloors ?? "",
+                FlatSizeSpecification = productCategoryModel.FlatSizeSpecification ?? "",
+                IsActive = true,
+
+
+            };
+            _db.ProductCategories.Add(productCategory);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+
+
+
+                var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
+                VMHeadIntegration integration = new VMHeadIntegration
+                {
+                    AccName = catetegory.Name,
+                    LayerNo = 6,
+                    Remarks = "GL Layer",
+                    IsIncomeHead = false,
+                    ProductType = catetegory.ProductType,
+                    CompanyFK = productCategory.CompanyId,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                };
+                int head5Id = AccHeadGlPushSeed(integration, productCategory.ProductCategoryId);
+
+                result = productCategory.ProductCategoryId;
+            }
+            return result;
+        }
+
         public async Task<int> ProductFinishCategoryEdit(VMCommonProductCategory vmCommonProductCategory)
         {
             var result = -1;
@@ -4433,33 +4356,11 @@ namespace KGERP.Service.Implementation
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = commonCustomer.VendorId;
-
-                if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited && commonCustomer.VendorTypeId == (int)Provider.Customer)
-                {
-                    //Setting up Customer Offer
-                    _db.Database.ExecuteSqlCommand("exec spSetCustomerCommission {0},{1},{2}", commonCustomer.CompanyId, commonCustomer.VendorId, commonCustomer.CreatedBy);
-
-                }
                 //Accounts Receivable Seed Head4 Id = 38116
                 int ParentId = 0;
 
-                if (commonCustomer.CompanyId == (int)CompanyName.KrishibidSeedLimited
-                              || commonCustomer.CompanyId == (int)CompanyName.GloriousCropCareLimited)
-                {
                     var subZones = _db.SubZones.Find(commonCustomer.SubZoneId);
                     ParentId = subZones.AccountHeadId;
-                }
-                else if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited)
-                {
-                    var zone = _db.Zones.Find(commonCustomer.ZoneId);
-                    ParentId = zone.HeadGLId;
-
-                }
-                else if (commonCustomer.CompanyId == (int)CompanyName.KrishibidSecurityAndServicesLimited)
-                {
-
-                    ParentId = 45510;
-                }
 
                 VMHeadIntegration integration = new VMHeadIntegration
                 {
@@ -4474,57 +4375,16 @@ namespace KGERP.Service.Implementation
                     CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                     CreatedDate = DateTime.Now,
                 };
-                if (commonCustomer.CompanyId == (int)CompanyName.KrishibidSeedLimited
-                                || commonCustomer.CompanyId == (int)CompanyName.GloriousCropCareLimited
-                                || commonCustomer.CompanyId == (int)CompanyName.KrishibidSecurityAndServicesLimited)
-                {
+               
                     HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
 
                     if (headGlId != null)
                     {
                         await VendorsCodeAndHeadGLIdEdit(commonCustomer.VendorId, headGlId);
                     }
-                }
+                
 
-                if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited)
-                {
-
-                    VMHeadIntegration integration3 = new VMHeadIntegration
-                    {
-                        AccName = commonCustomer.Name,
-                        LayerNo = 5,
-                        Remarks = "5th Layer",
-                        IsIncomeHead = false,
-                        ParentId = ParentId,
-                        IsActive = true,
-
-                        CompanyFK = commonCustomer.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    Head5 head5Id = await HEad5PayableHeadIntegrationAdd(integration3);
-                    VMHeadIntegration integration2 = new VMHeadIntegration
-                    {
-                        AccName = commonCustomer.Name,
-                        LayerNo = 6,
-                        Remarks = "GL Layer",
-                        IsIncomeHead = false,
-                        ParentId = head5Id.Id,
-                        IsActive = true,
-
-                        CompanyFK = commonCustomer.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    HeadGL headGlId2 = await PayableHeadIntegrationAdd(integration2);
-
-
-
-                    if (headGlId2 != null)
-                    {
-                        await VendorsCodeAndHeadGLIdEdit(commonCustomer.VendorId, headGlId2);
-                    }
-                }
+    
 
             }
             return result;
@@ -5489,7 +5349,7 @@ namespace KGERP.Service.Implementation
         public List<object> CommonBanksDropDownList(int companyId)
         {
             var list = new List<object>();
-            var v = _db.Banks.Where(x => x.CompanyId == companyId).ToList();
+            var v = _db.Banks.Where(x => x.CompanyId == companyId && x.IsActive==true).ToList();
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.BankId });
@@ -5645,8 +5505,9 @@ namespace KGERP.Service.Implementation
             _db.BankBranches.Add(bankBranch);
             if (await _db.SaveChangesAsync() > 0)
             {
-                if (vMCommonBankBranch.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
+                
+                var Head5 = await _db.Head5.Where(x=>x.AccCode=="1301001002" && x.CompanyId== vMCommonBankBranch.CompanyFK && x.IsActive==true).FirstOrDefaultAsync();
+
                     var bankBranchVm = _db.BankBranches.Find(bankBranch.BankBranchId);
                     var bankvm = _db.Banks.Find(bankBranch.BankId);
                     VMHeadIntegration integration = new VMHeadIntegration
@@ -5654,7 +5515,7 @@ namespace KGERP.Service.Implementation
                         AccName = bankvm.Name + "-" + bankBranch.Name + " (" + bankvm.ShortName + "-A/C: " + bankBranchVm.AccountNumber + ")",
                         LayerNo = 6,
                         Remarks = "GL Layer",
-                        ParentId = 50602758,
+                        ParentId = Head5.Id,
                         IsIncomeHead = false,
                         CompanyFK = bankBranch.CompanyId,
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
@@ -5662,26 +5523,9 @@ namespace KGERP.Service.Implementation
                     };
                     int head5Id = AccHeadGlBank(integration, bankBranchVm.BankBranchId);
 
-                }
+                
 
-                if (vMCommonBankBranch.CompanyFK == (int)CompanyName.KrishibidPackagingLimited)
-                {
-                    var bankBranchVm = _db.BankBranches.Find(bankBranch.BankBranchId);
-                    var bankvm = _db.Banks.Find(bankBranch.BankId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = bankvm.Name + "-" + bankBranch.Name + " (" + bankvm.ShortName + "-A/C: " + bankBranchVm.AccountNumber + ")",
-                        LayerNo = 6,
-                        Remarks = "GL Layer",
-                        IsIncomeHead = false,
-                        CompanyFK = bankBranch.CompanyId,
-                        ParentId = 40450,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    int head5Id = AccHeadGlBank(integration, bankBranchVm.BankBranchId);
-
-                }
+                
                 result = bankBranch.BankBranchId;
             }
             return result;
@@ -6312,7 +6156,7 @@ namespace KGERP.Service.Implementation
         }
 
 
-        private int KfmalZoneHead4Push(VMHeadIntegration vmModel, int zoneId)
+        private int ISSZoneHead4Push(VMHeadIntegration vmModel, int zoneId)
         {
             int result = -1;
             Head4 head4 = new Head4
@@ -6339,7 +6183,7 @@ namespace KGERP.Service.Implementation
 
         }
 
-        private int KfmalSubZoneHead5Push(VMHeadIntegration vmModel, int subzoneId)
+        private int ISSSubZoneHead5Push(VMHeadIntegration vmModel, int subzoneId)
         {
             int result = -1;
             Head5 head5 = new Head5
@@ -6567,15 +6411,18 @@ namespace KGERP.Service.Implementation
         private int AccHeadGlPushSeed(VMHeadIntegration vmModel, int productCategoryId)
         {
             int result = -1;
-            //ProductCategory productCategory = _db.ProductCategories.Find(productSubCategory.ProductCategoryId);
-            //List<Head5> head5s = new List<Head5>();
+            var head5idStock = _db.Head5.Where(x => x.AccCode == "1305001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idIncome = _db.Head5.Where(x => x.AccCode == "3101001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idExpanse = _db.Head5.Where(x => x.AccCode == "4101001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+
+
             HeadGL headGl_1 = new HeadGL
             {
                 Id = _db.Database.SqlQuery<int>("spGetNewId").FirstOrDefault(),
-                AccCode = GenerateHeadGlAccCode(38059),
+                AccCode = GenerateHeadGlAccCode(head5idStock.Id),
 
                 AccName = vmModel.AccName,
-                ParentId = 38059,
+                ParentId = head5idStock.Id,
                 CompanyId = vmModel.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 LayerNo = 6,
@@ -6595,9 +6442,9 @@ namespace KGERP.Service.Implementation
             HeadGL headGl_2 = new HeadGL
             {
                 Id = _db.Database.SqlQuery<int>("spGetNewId").FirstOrDefault(),
-                AccCode = GenerateHeadGlAccCode(38018), // 
+                AccCode = GenerateHeadGlAccCode(head5idIncome.Id), // 
                 AccName = vmModel.AccName,
-                ParentId = 38018,
+                ParentId = head5idIncome.Id,
                 CompanyId = vmModel.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 LayerNo = 6,
@@ -6618,9 +6465,9 @@ namespace KGERP.Service.Implementation
             HeadGL headGl_3 = new HeadGL
             {
                 Id = _db.Database.SqlQuery<int>("spGetNewId").FirstOrDefault(),
-                AccCode = GenerateHeadGlAccCode(38015), // 
+                AccCode = GenerateHeadGlAccCode(head5idExpanse.Id), // 
                 AccName = vmModel.AccName,
-                ParentId = 38015,
+                ParentId = head5idExpanse.Id,
                 CompanyId = vmModel.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 LayerNo = 6,
@@ -6994,7 +6841,7 @@ namespace KGERP.Service.Implementation
             }
             return newAccountCode;
         }
-        private string GenerateHeadGlAccCode(int Head5Id)
+        private string GenerateHeadGlAccCode(int? Head5Id)
         {
             var Head5 = _db.Head5.Where(x => x.Id == Head5Id).FirstOrDefault();
 
