@@ -2005,7 +2005,7 @@ namespace KGERP.Service.Implementation
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
                     };
-                    int head5Id = AccHeadGlPushSeed(integration, productCategory.ProductCategoryId);
+                    int head5Id = FinishAccHeadGlPushSeed(integration, productCategory.ProductCategoryId);
 
                 result = productCategory.ProductCategoryId;
             }
@@ -6414,6 +6414,85 @@ namespace KGERP.Service.Implementation
             var head5idStock = _db.Head5.Where(x => x.AccCode == "1305001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
             var head5idIncome = _db.Head5.Where(x => x.AccCode == "3101001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
             var head5idExpanse = _db.Head5.Where(x => x.AccCode == "4101001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+
+
+            HeadGL headGl_1 = new HeadGL
+            {
+                Id = _db.Database.SqlQuery<int>("spGetNewId").FirstOrDefault(),
+                AccCode = GenerateHeadGlAccCode(head5idStock.Id),
+
+                AccName = vmModel.AccName,
+                ParentId = head5idStock.Id,
+                CompanyId = vmModel.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                LayerNo = 6,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+
+                OrderNo = 0,
+                Remarks = "GL Layer"
+            };
+
+
+            _db.HeadGLs.Add(headGl_1);
+            var catagoryForAssets = _db.ProductCategories.SingleOrDefault(x => x.ProductCategoryId == productCategoryId);
+            catagoryForAssets.AccountingHeadId = headGl_1.Id;
+            _db.SaveChanges();
+
+            HeadGL headGl_2 = new HeadGL
+            {
+                Id = _db.Database.SqlQuery<int>("spGetNewId").FirstOrDefault(),
+                AccCode = GenerateHeadGlAccCode(head5idIncome.Id), // 
+                AccName = vmModel.AccName,
+                ParentId = head5idIncome.Id,
+                CompanyId = vmModel.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                LayerNo = 6,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+
+                OrderNo = 0,
+                Remarks = "GL Layer"
+            };
+
+
+            _db.HeadGLs.Add(headGl_2);
+            var catagoryForIncome = _db.ProductCategories.SingleOrDefault(x => x.ProductCategoryId == productCategoryId);
+            catagoryForIncome.AccountingIncomeHeadId = headGl_2.Id;
+            _db.SaveChanges();
+
+
+            HeadGL headGl_3 = new HeadGL
+            {
+                Id = _db.Database.SqlQuery<int>("spGetNewId").FirstOrDefault(),
+                AccCode = GenerateHeadGlAccCode(head5idExpanse.Id), // 
+                AccName = vmModel.AccName,
+                ParentId = head5idExpanse.Id,
+                CompanyId = vmModel.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                LayerNo = 6,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                OrderNo = 0,
+                Remarks = "GL Layer"
+            };
+
+
+            _db.HeadGLs.Add(headGl_3);
+            var catagoryForExpanse = _db.ProductCategories.SingleOrDefault(x => x.ProductCategoryId == productCategoryId);
+            catagoryForExpanse.AccountingExpenseHeadId = headGl_3.Id;
+            _db.SaveChanges();
+
+
+            return result;
+
+        }
+        private int FinishAccHeadGlPushSeed(VMHeadIntegration vmModel, int productCategoryId)
+        {
+            int result = -1;
+            var head5idStock = _db.Head5.Where(x => x.AccCode == "1305001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idIncome = _db.Head5.Where(x => x.AccCode == "3101001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idExpanse = _db.Head5.Where(x => x.AccCode == "4101001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
 
 
             HeadGL headGl_1 = new HeadGL
