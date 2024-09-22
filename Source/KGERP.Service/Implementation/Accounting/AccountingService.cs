@@ -2422,7 +2422,7 @@ namespace KGERP.Service.Implementation
                     result = voucher.VoucherId;
 
                 }
-                int erpSM = await SMSPush(voucher);
+                //int erpSM = await SMSPush(voucher);
             }
             else
             {
@@ -2459,7 +2459,7 @@ namespace KGERP.Service.Implementation
                     result = voucher.VoucherId;
 
                 }
-                int erpSM = await SMSPush(voucher);
+                //int erpSM = await SMSPush(voucher);
             }
             else
             {
@@ -4646,7 +4646,7 @@ namespace KGERP.Service.Implementation
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
             {
-                await SMSPush(resultData);
+                //await SMSPush(resultData);
             }
             return resultData.VoucherId;
         }
