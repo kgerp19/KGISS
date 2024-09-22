@@ -223,7 +223,7 @@ namespace KGERP.Services.Production
                 CompanyId = vmProdReferenceSlave.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                // Remarks = vmProdReferenceSlave.Remarks,
+                 Remarks = vmProdReferenceSlave.Remarks,
 
 
                 IsActive = true
@@ -389,7 +389,7 @@ namespace KGERP.Services.Production
                                                              CompanyAddress = t3.Address,
                                                              CompanyEmail = t3.Email,
                                                              CompanyPhone = t3.Phone,
-                                                             // Remarks = t1.Remarks
+                                                              Remarks = t1.Remarks
                                                          }).FirstOrDefault());
 
             vmProdReferenceSlave.DataListSlave = await Task.Run(() => (from t1 in _db.Prod_ReferenceSlave.Where(x => x.IsActive && x.ProdReferenceId == prodReferenceId && x.CompanyId == companyId)

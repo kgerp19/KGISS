@@ -19,6 +19,7 @@ namespace KGERP.Data.Models
         public System.DateTime ReferenceDate { get; set; }
         public long OrderMasterId { get; set; }
         public Nullable<int> CompanyId { get; set; }
+        public string Remarks { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
@@ -30,6 +31,5 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> AuthorizedDate { get; set; }
         public long OrderDetailId { get; set; }
         public bool IsAuthorized { get; set; }
-        public string Remarks { get; set; }
     }
 }
