@@ -907,7 +907,10 @@ namespace KGERP.Service.Implementation
                      select new
                      {
                          label = (t1.Name + "-" + t2.Name + "( " + t1.EmployeeId + " )"),
-                         val = t1.Id
+                         val = t1.Id,
+                         mob = t1.MobileNo,
+                         Email=t1.Email,
+                         Designation=t2.Name
                      }).OrderBy(x => x.label).Take(100).ToList();
 
             return v;
