@@ -6411,9 +6411,9 @@ namespace KGERP.Service.Implementation
         private int AccHeadGlPushSeed(VMHeadIntegration vmModel, int productCategoryId)
         {
             int result = -1;
-            var head5idStock = _db.Head5.Where(x => x.AccCode == "1305001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
-            var head5idIncome = _db.Head5.Where(x => x.AccCode == "3101001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
-            var head5idExpanse = _db.Head5.Where(x => x.AccCode == "4101001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idStock = _db.Head5.Where(x => x.AccCode == "1305001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idIncome = _db.Head5.Where(x => x.AccCode == "3101001002" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
+            var head5idExpanse = _db.Head5.Where(x => x.AccCode == "4101001001" && x.IsActive == true && x.CompanyId == vmModel.CompanyFK).FirstOrDefault();
 
 
             HeadGL headGl_1 = new HeadGL
