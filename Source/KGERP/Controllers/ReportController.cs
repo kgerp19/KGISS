@@ -8769,7 +8769,7 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult StockReportFinishedPackaging(int companyId)
+        public ActionResult StockReportFinishedISS(int companyId)
         {
             string title = string.Empty;
             List<SelectModel> stockSelectModels = new List<SelectModel>();
@@ -8791,9 +8791,9 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult StockReportFinishedPackagingView(ReportCustomModel model)
+        public ActionResult StockReportFinishedISSView(ReportCustomModel model)
         {
-            model.ReportName = "PackagingFinishedGoodsStockReport";
+            model.ReportName = "ISSFinishedGoodsStockReport";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
