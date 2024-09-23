@@ -134,24 +134,30 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                  IsSumitted = t1.IsSubmitted
                              }).OrderBy(x => x.SeedProcessDate).FirstOrDefaultAsync();
 
-            var resultList = await (from l1 in _db.SeedProcessingDetails
+            vmModel.DataList  = await (from l1 in _db.SeedProcessingDetails
                                     join l3 in _db.MaterialReceiveDetails on l1.MaterialReceiveDetailId equals l3.MaterialReceiveDetailId
                                     join l2 in _db.Products on l1.ProductId equals l2.ProductId
+                                    join t3 in _db.ProductSubCategories on l2.ProductSubCategoryId equals t3.ProductSubCategoryId
+                                    join t4 in _db.ProductCategories on t3.ProductCategoryId equals t4.ProductCategoryId
                                     where l1.SeedProcessingId == seedProcessingId && l1.IsActive && l2.IsActive
                                     select new SeedProcessingDetailsVM
                                     {
+                                        
                                         ProductId = l1.ProductId.Value,
-                                        ProductName = l2.ProductName,
+                                        ProductName = t4.Name + " " + t3.Name + " " + l2.ProductName,
                                         SeedProcessingDetailsId = l1.SeedProcessingDetailId,
-                                        Amount = l1.Amount,
-                                        ReceiveQty = l3.ReceiveQty,
                                         StockInQty = l3.StockInQty,
-                                        UnitPrice = l3.UnitPrice
-                                    }).ToListAsync();
-            if (resultList.Count > 0)
-            {
-                vmModel.DataList = resultList;
-            }
+                                        UnitPrice = l3.StockInRate.Value,
+                                        StockInAmount = l3.StockInQty.Value * l3.StockInRate.Value,
+                                        Amount = l1.Amount,
+                                        PreviousAmount = _db.SeedProcessingDetails
+                                                        .Where(x => x.MaterialReceiveDetailId == l3.MaterialReceiveDetailId
+                                                                    && x.SeedProcessingId != seedProcessingId
+                                                                    && x.IsActive).Select(x => x.Amount).DefaultIfEmpty(0).Sum(),
+                                         
+
+                                    }).OrderByDescending(x => x.SeedProcessingDetailsId).ToListAsync();
+             
 
 
             return vmModel;
@@ -175,7 +181,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                           SeedProcessDate = t1.SeedProcessDate,
                                           SeedProcessBy = t4.Name,
                                           CreatedDate = t1.CreatedDate
-                                      }).OrderBy(x => x.SeedProcessDate).ToListAsync();
+                                      }).OrderByDescending(x => x.SeedProcessingId).ToListAsync();
             return vmModel;
         }
 

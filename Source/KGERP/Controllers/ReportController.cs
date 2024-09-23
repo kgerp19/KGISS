@@ -4854,7 +4854,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            reportURL = url + "PurchaseReturn&rs:Command=Render&rs:Format=PDF&PurchaseReturnId=" + purchaseReturnId;
+            reportURL = url + "ISSPurchaseReturn&rs:Command=Render&rs:Format=PDF&PurchaseReturnId=" + purchaseReturnId;
             return File(client.DownloadData(reportURL), "application/pdf");
         }
 
