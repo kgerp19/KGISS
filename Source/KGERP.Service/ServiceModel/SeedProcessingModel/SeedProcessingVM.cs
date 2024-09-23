@@ -22,11 +22,15 @@ namespace KGERP.Service.ServiceModel.SeedProcessingModel
         public int ProductId { get; set; }
         public long MaterialReceiveDetailId { get; set; }
         public decimal Amount { get; set; }
+        public decimal PreviousAmount { get; set; }
         public string MaterialReceiveNo { get; set; }
         public virtual string ProductName { get; set; }
         public virtual decimal ReceiveQty { get; set; }
         public virtual decimal UnitPrice { get; set; }
+        public virtual decimal StockInAmount { get; set; }
         public virtual decimal? StockInQty { get; set; }
+        public virtual decimal? CurrentStockInRate { get; set; }
+
 
 
         public List<SeedProcessingDetailsVM> DataList { get; set; }
