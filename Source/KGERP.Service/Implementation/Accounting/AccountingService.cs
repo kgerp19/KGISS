@@ -7157,14 +7157,14 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
-            var vatAccount = _db.HeadGLs.Where(x => x.CompanyId == CompanyFK && x.AccCode == "1306001001001" && x.IsActive).FirstOrDefault();
+            var storeStockAccHead = _db.HeadGLs.Where(x => x.CompanyId == CompanyFK && x.AccCode == "4701001001001" && x.IsActive).FirstOrDefault();
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Adjust",
                 Debit = model.DataListSlave.Any() ? Convert.ToDouble(model.DataListSlave.Sum(x => x.ReturnQuantity * x.COGS)) : 0,
                 Credit = 0,
                 /*Accounting_HeadFK = 50605003*/ //Packaging Stock Adjust With Erp Cr
-                Accounting_HeadFK = vatAccount.Id
+                Accounting_HeadFK = storeStockAccHead.Id
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
