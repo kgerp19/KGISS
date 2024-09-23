@@ -48,6 +48,7 @@
                                         <th>ProcessDate</th>
                                         <th>ProcessBy</th>
                                         <th>Created Date</th>
+                                        <th>Status</th>
                                         <th>Action</th>
 
                                     </tr>
@@ -65,9 +66,23 @@
                                             <td>@item.SeedProcessBy</td>
                                             <td>@(item.CreatedDate==null?"N/A":item.CreatedDate.ToString("dd-MMM-yyyy"))</td>
                                             <td>
-                                                <a onclick="makeEditble('@item.SeedProcessingId','@item.SeedProcessDate.Value','@item.CompanyFK')" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
-                                                &nbsp;
-                                                <a onclick="makeDeletale('@item.SeedProcessingId','@item.CompanyFK')" class="linkPointer"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                @if (item.IsSumitted)
+                                                {
+                                                    <span class="btn btn-success btn-xs">Submited</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="btn btn-warning btn-xs">Draft</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!item.IsSumitted)
+                                                {
+                                                    <a onclick="makeEditble('@item.SeedProcessingId','@item.SeedProcessDate.Value','@item.CompanyFK','@item.Accounting_HeadFK')" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                    <a onclick="makeDeletale('@item.SeedProcessingId','@item.CompanyFK')" class="linkPointer"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                }
+
                                                 &nbsp;
                                                 <a target="_blank" href="~/SeedProcessing/SeedProcessingCreate?companyId=21&SeedProcessingId=@item.SeedProcessingId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
 
@@ -92,7 +107,7 @@
 @using (Html.BeginForm("SeedProcessingUpdate", "SeedProcessing", FormMethod.Post, new { id = "frmSeedProcessingUpdate" }))
 {
     <div class="modal fade" id="modalDiv" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-sm ui-front" role="document">
+        <div class="modal-dialog modal-md ui-front" role="document">
             <div class="modal-content">
                 <div class="modal-header" style="margin-bottom:0%;padding-bottom:0%">
                     <h5 class="modal-title">Seed Process</h5>
@@ -111,6 +126,16 @@
                                         @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForUpdate" })
                                         @Html.EditorFor(model => model.SeedProcessDate, new { htmlAttributes = new { id = "modalSeedProcessDate", @class = "datepicker", @style = "width:95%", @placeholder = "dd/mm/yyyy", @autocomplete = "off", value = DateTime.Today } })
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group" style="padding:0px">
+                                    <label for="message-text" class="col-form-label">Accounting Head:</label>
+
+                                    @Html.EditorFor(model => model.AccountingHeadName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtAccountingHeadName", required = "required" } })
+
+                                    @Html.HiddenFor(model => model.Accounting_HeadFK, new { id = "ddlAccounting_HeadFK" })
+                                    @Html.ValidationMessageFor(model => model.Accounting_HeadFK, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
@@ -157,21 +182,65 @@
 
 
         $(document).ready(function () {
+            $("#txtAccountingHeadName").autocomplete({
+                source: function (request, response) {
+                $.ajax({
+                    url:"@Url.Action("GetAutoCompleteHeadGLForSeedProcessingGet", "Vouchers")",
+                    data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                       response($.map(data, function (item) {
+                           return item;
+                       }))
+                    },
+                    error: function (response) {
+
+                     },
+                    failure: function (response) {
+
+                    }
+                 });
+                },
+                select: function (e, i) {
+                  $("#ddlAccounting_HeadFK").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true,
+                open: function () {
+                    var menu = $(this).data("ui-autocomplete").menu.element;
+                    menu.css({
+                        'z-index': 10000, // Ensure it's above the modal
+                        'position': 'absolute'
+                    }).appendTo("body"); // Append to body to avoid clipping
+                }
+
+                }).focus(function () {
+                   $(this).autocomplete("search");
+                });
         })
 
 
-        const makeDeletale = (seedProcessingId,companyId) => {
+        const makeDeletale = (seedProcessingId, companyId) => {
             $('#hdnSeedProcessingId').val(seedProcessingId);
             $('#hdnCompanyForDelete').val(companyId);
             $("#deleteSeedProcessingDeleteModal").modal('toggle');
         }
 
 
-        const makeEditble = (seedProcessId, seedProcessDate, companyIdFK) => {
-            $('#hdnModalSeedProcessingId').val(seedProcessId);
-            $('#hdnCompanyForUpdate').val(companyIdFK);
-            $('#modalSeedProcessDate').val(seedProcessDate);
-            $("#modalDiv").modal('toggle');
+        const makeEditble = (seedProcessId, seedProcessDate, companyIdFK, AccHeadId) => {
+            debugger
+            if (AccHeadId>0) {
+                var AccHeadName = HttpRequest.AjaxData('GET', '/Vouchers/GetAccountHeadNameByAccountHeadId', { 'headGLId': AccHeadId })
+            }
+             $('#hdnModalSeedProcessingId').val(seedProcessId);
+            $('#txtAccountingHeadName').val(AccHeadName.label);
+            $('#ddlAccounting_HeadFK').val(AccHeadName.val);
+             $('#hdnCompanyForUpdate').val(companyIdFK);
+             $('#modalSeedProcessDate').val(seedProcessDate);
+             $("#modalDiv").modal('toggle');
 
         }
 
