@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +31,10 @@ namespace KGERP.Service.ServiceModel.SeedProcessingModel
         public virtual decimal StockInAmount { get; set; }
         public virtual decimal? StockInQty { get; set; }
         public virtual decimal? CurrentStockInRate { get; set; }
-
+        [Required(ErrorMessage = "The Accounts Head Field Is Required")]
+        public int Accounting_HeadFK { get; set; }
+        [Required]
+        public string AccountingHeadName { get; set; }
 
 
         public List<SeedProcessingDetailsVM> DataList { get; set; }

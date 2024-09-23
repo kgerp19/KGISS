@@ -53,7 +53,19 @@
 
                                             @Html.HiddenFor(model => model.MaterialReceiveDetailId, new { id = "ddlMaterialReceiveDetailId" })
                                         </div>
+                                    </div> 
+                                    <div class="col-md-4">
+                                        <div class="form-group" style="padding:0px">
+                                            <label for="message-text" class="col-form-label">Accounting Head:</label>
+
+                                            @Html.EditorFor(model => model.AccountingHeadName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @id = "txtAccountingHeadName", required = "required" } })
+
+                                            @Html.HiddenFor(model => model.Accounting_HeadFK, new { id = "ddlAccounting_HeadFK" })
+                                            @Html.ValidationMessageFor(model => model.Accounting_HeadFK, "", new { @class = "text-danger" })
+                                        </div>
                                     </div>
+
+
                                 </div>
                                 <div class="box-footer">
 
@@ -117,7 +129,7 @@
                                                         <tr>
                                                             <th>SL</th>
                                                             <th>Raw Material</th>
-                                                          
+
                                                             <th>StockIn Qty.</th>
                                                             <th>Stockin Rate</th>
                                                             <th>Processing</th>
@@ -134,7 +146,7 @@
                                                             <tr>
                                                                 <td style="padding:5px">@(++sl)</td>
                                                                 <td style="padding:5px">@item.ProductName</td>
-                                                               
+
                                                                 <td style="padding:5px">@item.StockInQty</td>
                                                                 <td style="padding:5px">@item.UnitPrice</td>
                                                                 <td style="padding:5px">@item.Amount</td>
@@ -242,11 +254,16 @@
                     @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForSubmitted" })
                     @Html.HiddenFor(model => model.IsSumitted, new { @id = "hdnIsSubmitted" })
                     @Html.HiddenFor(model => model.SeedProcessingId, new { @id = "hdnSubmittedSeedProcessingId" })
+                    
                     <h3 class="text-center" id="txtSubmitted"></h3>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-warning">Submit</button>
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave1" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -300,6 +317,13 @@
 
             let textWillbe = isSubmitted == true ? 'Undo Submited' : 'Submited'
             let textWillbeLebel = isSubmitted == true ? 'Are you sure to Undo Submitted this?' : ' Are you sure to Submitted this?'
+            if (isSubmitted == 0) {
+                $('.submitOrDraftText').text("Make Submit");
+            }
+            else {
+                $('.submitOrDraftText').text("Make Draft");
+
+            }
             $('#hdnSubmittedSeedProcessingId').val(seedProcessingId);
             $('#hdnIsSubmitted').val('@Model.IsSumitted');
             $('#SubmittedModalLabel').text(textWillbe);
@@ -357,6 +381,45 @@
 
             }).focus(function () {
                 $(this).autocomplete("search");
+            });
+
+        $("#txtAccountingHeadName").autocomplete({
+            source: function (request, response) {
+            $.ajax({
+                url:"@Url.Action("GetAutoCompleteHeadGLForSeedProcessingGet", "Vouchers")",
+                data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                dataType: "json",
+                type: "get",
+                cache: true,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                   response($.map(data, function (item) {
+                       return item;
+                   }))
+                },
+                error: function (response) {
+
+                 },
+                failure: function (response) {
+
+                }
+             });
+            },
+            select: function (e, i) {
+              $("#ddlAccounting_HeadFK").val(i.item.val);
+            },
+            minLength: 1,
+            cache: true,
+            open: function () {
+                var menu = $(this).data("ui-autocomplete").menu.element;
+                menu.css({
+                    'z-index': 10000, // Ensure it's above the modal
+                    'position': 'absolute'
+                }).appendTo("body"); // Append to body to avoid clipping
+            }
+
+            }).focus(function () {
+               $(this).autocomplete("search");
             });
         });
 

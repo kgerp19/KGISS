@@ -17,6 +17,12 @@ namespace KGERP.Utility
         Approved,
         Denied
     }
+    public enum FormulaCalculationEnum
+    {
+        gm = 1,
+        KG,
+        Pcs,
+    }
 
     //public enum AnnualPerformanceCategory
     //{
