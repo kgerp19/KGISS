@@ -26,6 +26,5 @@ namespace KGERP.Data.Models
         public Nullable<int> ProductId { get; set; }
     
         public virtual MaterialReceiveDetail MaterialReceiveDetail { get; set; }
-        public virtual SeedProcessing SeedProcessing { get; set; }
     }
 }

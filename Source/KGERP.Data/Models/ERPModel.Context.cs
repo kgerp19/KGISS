@@ -360,7 +360,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Prod_Reference> Prod_Reference { get; set; }
         public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
         public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
-        public virtual DbSet<SeedProcessing> SeedProcessings { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
