@@ -829,7 +829,7 @@ namespace KGERP.Controllers
         {
             string accCode = model.AccName.Substring(1, 13);
             string reportName = "";
-            reportName = "KGGeneralLedger";
+            reportName = "ISSGeneralLedger";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -1221,7 +1221,7 @@ namespace KGERP.Controllers
 
         public ActionResult AccountingMovementReports(ReportCustomModel model)
         {
-            string reportName = "KGAccountingMovement";
+            string reportName = "ISSAccountingMovement";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -1402,7 +1402,7 @@ namespace KGERP.Controllers
         [HttpGet]
         public ActionResult AccountingMovementInternal(int HeadGLId, int LayerNo, string StrFromDate, string StrToDate, int CompanyId)
         {
-            string reportName = "KGAccountingMovement";
+            string reportName = "ISSAccountingMovement";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -7155,7 +7155,7 @@ namespace KGERP.Controllers
             cm.ReportType = "PDF";
             cm.StrToDate = DateTime.Now.ToString();
             string reportName = "";
-            reportName = "KGGeneralLedger";
+            reportName = "ISSGeneralLedger";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -8494,7 +8494,7 @@ namespace KGERP.Controllers
         {
             string accCode = model.AccName.Substring(1, 13);
             string reportName = "";
-            reportName = "KGGeneralLedger";
+            reportName = "ISSGeneralLedger";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
