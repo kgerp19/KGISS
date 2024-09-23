@@ -132,7 +132,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Challan Date</label>
+                                        <label class="required">Challan Date</label>
 
                                         <input name="DeliveryDate" asp-for="DeliveryDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtDeliveryDate" placeholder="Challan Date" autocomplete="off">
 
@@ -141,19 +141,19 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group" style="padding:0px">
-                                        <label for="message-text" class="col-form-label">Warehouse:</label>
+                                        <label for="message-text" class="col-form-label required">Warehouse:</label>
                                         @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
                                         @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
 
 
-                                
+
                             </div>
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group" style="padding:0px">
-                                        <label>Order Number</label>
+                                        <label class="required">Order Number</label>
                                         @Html.EditorFor(model => model.OrderNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Order No", @id = "txtOrderNo" } })
 
                                         @Html.HiddenFor(model => model.OrderMasterId, new { id = "ddlOrderMasterId" })
@@ -176,9 +176,9 @@
                                         </tr>
                                     </table>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <div class="form-group">
-                                        <label for="message-text" class="col-form-label">Transport Type</label>
+                                        <label for="message-text" class="col-form-label required">Transport Type</label>
                                         @Html.DropDownListFor(model => model.TransportTypeId, new SelectList(Model.TransportTypeList, "Value", "Text"), "==Select Transport==", new { id = "ddlTransportTypeId", @class = " form-control input-sm searchingDropdown" })
                                         @Html.ValidationMessageFor(model => model.TransportTypeId, "", new { @class = "text-danger" })
                                     </div>
@@ -203,7 +203,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group" style="padding:0px">
                                                 <label for="message-text" class="col-form-label">Courier Charge</label>
-                                                @Html.EditorFor(model => model.CourierCharge, new { htmlAttributes = new { @class = "form-control", @id = "txtCourierCharge" } })
+                                                @Html.EditorFor(model => model.CourierCharge, new { htmlAttributes = new { @class = "form-control", @id = "txtCourierCharge", type = "number" } })
                                                 @Html.ValidationMessageFor(model => model.CourierCharge, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
@@ -212,8 +212,8 @@
                                         <div class="col-md-3">
                                             <div class="form-group" style="padding:0px">
                                                 <label for="message-text" class="col-form-label">Driver Name</label>
-                                                @Html.EditorFor(model => model.DriverName, new { htmlAttributes = new { @class = "form-control", @id = "txtDriverName" } })
-                                                @Html.ValidationMessageFor(model => model.DriverName, "", new { @class = "text-danger" })
+                                                @Html.EditorFor(model => model.DriverNameForDelivery, new { htmlAttributes = new { @class = "form-control", @id = "txtDriverName" } })
+                                                @Html.ValidationMessageFor(model => model.DriverNameForDelivery, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -233,7 +233,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group" style="padding:0px">
                                                 <label for="message-text" class="col-form-label">Truck Fair</label>
-                                                @Html.EditorFor(model => model.TruckFair, new { htmlAttributes = new { @class = "form-control", @id = "txtTruckFair" } })
+                                                @Html.EditorFor(model => model.TruckFair, new { htmlAttributes = new { @class = "form-control", @id = "txtTruckFair", type = "number" } })
                                                 @Html.ValidationMessageFor(model => model.TruckFair, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
@@ -272,6 +272,7 @@
                                                 <th class="center">Order Quantity</th>
                                                 <th class="center">Delivered Quantity</th>
                                                 <th class="center">Total Delivered</th>
+                                                <th class="center">Action</th>
                                             </tr>
                                         </thead>
                                         @{
@@ -286,6 +287,14 @@
                                                     <td>@item.OrderQty @item.UnitName</td>
                                                     <th>@item.DeliveredQty @item.UnitName</th>
                                                     <th>@item.TotalDelivered  @item.UnitName</th>
+                                                    @if (!Model.IsSubmitted)
+                                                    {
+                                                        <td class="text-center">
+                                                            <button class="btn btn-primary btn-sm" type="button" onclick="UpdateOrderDeliveryDetails('@item.OrderDeliverDetailId','@item.DeliveredQty');">Update</button>
+                                                            &nbsp;
+                                                            <button class="btn btn-danger btn-sm" type="button" onclick="DeleteOrderDeliveryDetails('@item.OrderDeliverDetailId');">Delete</button>
+                                                        </td>
+                                                    }
                                                 </tr>
                                             }
                                         </tbody>
@@ -396,10 +405,87 @@
     </div>
 }
 
+@using (Html.BeginForm("OrderDeliverDetailIdDelete", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OrderDeliverDetailIdDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Delete</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForDelete" })
+                    @Html.HiddenFor(model => model.OrderDeliverId, new { @id = "hdnOrderDeliverIdDelete" })
+                    @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailId" })
+                    <h3 class="text-center">Are You Delete This?</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@using (Html.BeginForm("OrderDeliverDetailUpdate", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OrderDeliverDetailIdUpdateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Update</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK)
+                    @Html.HiddenFor(model => model.OrderDeliverId)
+                    @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailIdUpdate" })
+                    <div class="col-md-12">
+                        <div class="form-group" style="padding:0px">
+                            @Html.LabelFor(model => model.DeliveredQty, new { htmlAttributes=new { @class= "col-form-label required" } })
+                            @Html.EditorFor(model => model.DeliveredQty, new { htmlAttributes = new { @class = "form-control", @id = "txtDeliveredQtyModal",type="number" } })
+                            @Html.ValidationMessageFor(model => model.DriverNameForDelivery, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
 
 @section scripts {
 
     <script type="text/javascript">
+        const DeleteOrderDeliveryDetails = (orderDeliverDetailId) => {
+            $('#hdnOrderDeliverDetailId').val(orderDeliverDetailId);
+            $("#OrderDeliverDetailIdDeleteModal").modal('toggle');
+        }
+        const UpdateOrderDeliveryDetails = (orderDeliverDetailId,DeliveryQty) => {
+            $('#hdnOrderDeliverDetailIdUpdate').val(orderDeliverDetailId);
+            $('#txtDeliveredQtyModal').val(DeliveryQty);
+            $("#OrderDeliverDetailIdUpdateModal").modal('toggle');
+        }
+
+        const SeedProcessingSubmited = (seedProcessingId, isSubmitted) => {
+
+            let textWillbe = isSubmitted == true ? 'Undo Submited' : 'Submited'
+            let textWillbeLebel = isSubmitted == true ? 'Are you sure to Undo Submitted this?' : ' Are you sure to Submitted this?'
+            $('#hdnSubmittedSeedProcessingId').val(seedProcessingId);
+            $('#hdnIsSubmitted').val('@Model.IsSubmitted');
+            $('#SubmittedModalLabel').text(textWillbe);
+            $('#txtSubmitted').text(textWillbeLebel);
+            $("#SeedProcessingSubmittedModal").modal('toggle');
+        }
         function getTranportTypeInputDiv(param) {
             debugger
             if (Number(param) ==@((int)TransportTypeEnum.Courier)) {
@@ -469,11 +555,8 @@
 
             $("#txtOrderNo").autocomplete({
                 source: function (request, response) {
-                    //console.log(request);
-                    //console.log(response);
-
                     $.ajax({
-                        url:"@Url.Action("AutoCompleteOrderMastersGet", "WareHouse")",// '/AccountHeads/AutoComplete/',
+                        url:"@Url.Action("AutoCompleteOrderMastersGet", "WareHouse")",
                         //data: "{ 'prefix': '" + request.term + "'}",
                         data: { companyId: "@Model.CompanyFK", prefix: request.term },
                         dataType: "json",
