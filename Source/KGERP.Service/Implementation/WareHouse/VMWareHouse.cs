@@ -474,6 +474,7 @@ namespace KGERP.Services.WareHouse
         public double? TruckFair { get; set; }
         public string DriverMobileNo { get; set; }
         public string DriverName { get; set; }
+        public string DriverNameForDelivery { get; set; }
         public decimal? TotalAmount { get; set; }
         public decimal? Commission { get; set; }
         public decimal? Carrying { get; set; }
