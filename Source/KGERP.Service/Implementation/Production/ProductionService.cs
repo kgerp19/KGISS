@@ -375,20 +375,17 @@ namespace KGERP.Services.Production
         {
             VMProdReferenceSlave vmProdReferenceSlave = new VMProdReferenceSlave();
             vmProdReferenceSlave = await Task.Run(() => (from t1 in _db.Prod_Reference.Where(x => x.IsActive && x.ProdReferenceId == prodReferenceId && x.CompanyId == companyId)
-
-                                                         join t3 in _db.Companies on t1.CompanyId equals t3.CompanyId
-
+                                                          
                                                          select new VMProdReferenceSlave
                                                          {
                                                              ProdReferenceId = t1.ProdReferenceId,
                                                              ReferenceNo = t1.ReferenceNo,
                                                              ReferenceDate = t1.ReferenceDate,
                                                              CompanyFK = t1.CompanyId,
+                                                             CreatedBy = t1.CreatedBy,
+                                                             CreatedDate = t1.CreatedDate,
                                                              IsSubmitted = t1.IsSubmitted,
-                                                             CompanyName = t3.Name,
-                                                             CompanyAddress = t3.Address,
-                                                             CompanyEmail = t3.Email,
-                                                             CompanyPhone = t3.Phone,
+                                                             
                                                               Remarks = t1.Remarks
                                                          }).FirstOrDefault());
 
