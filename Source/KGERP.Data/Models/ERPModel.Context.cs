@@ -207,7 +207,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Expens> Expenses { get; set; }
         public virtual DbSet<FacingInfo> FacingInfoes { get; set; }
         public virtual DbSet<Farmer> Farmers { get; set; }
-        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<GeneralRequisitionProductCategory> GeneralRequisitionProductCategories { get; set; }
         public virtual DbSet<Incentive> Incentives { get; set; }
         public virtual DbSet<IncentiveDetail> IncentiveDetails { get; set; }
@@ -361,6 +360,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<SeedProcessingDetail> SeedProcessingDetails { get; set; }
         public virtual DbSet<Prod_Reference> Prod_Reference { get; set; }
         public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
+        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

@@ -25,6 +25,7 @@ namespace KGERP.Data.Models
         public string Remarks { get; set; }
         public int CompanyId { get; set; }
         public int FProductFK { get; set; }
+        public Nullable<int> CalculationUnit { get; set; }
         public bool IsActive { get; set; }
         public decimal Consumption { get; set; }
         public Nullable<int> SupplierId { get; set; }
