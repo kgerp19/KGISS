@@ -15,6 +15,7 @@ using KGERP.Service.Implementation.RealStateMoneyReceipt;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
 using KGERP.Services.Procurement;
+using KGERP.Services.WareHouse;
 using KGERP.Utility;
 using KGERP.Utility.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -936,8 +937,7 @@ namespace KG.App.Controllers
             }
             vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
             vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownList(companyId), "Value", "Text");
-
-
+            vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
 
             return View(vmSalesOrderSlave);
         }
