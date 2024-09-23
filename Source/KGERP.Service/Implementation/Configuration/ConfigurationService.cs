@@ -3286,6 +3286,7 @@ namespace KGERP.Service.Implementation
                      select new VMFinishProductBOM
                      {
                          ID = t1.ID,
+                         FCEnumId=t1.CalculationUnit??0,
                          RequiredQuantity = t1.RequiredQuantity,
                          RProductFK = t1.RProductFK,
                          FProductFK = t1.FProductFK,
@@ -3315,7 +3316,6 @@ namespace KGERP.Service.Implementation
                                                            SubCategoryName = t2.Name,
                                                            CategoryName = t3.Name,
                                                            UnitName = t4.Name,
-
                                                            Common_ProductSubCategoryFk = t1.ProductSubCategoryId,
                                                            Common_UnitFk = t1.UnitId,
                                                            Common_ProductCategoryFk = t2.ProductCategoryId,
@@ -3334,7 +3334,8 @@ namespace KGERP.Service.Implementation
                                                                               ID = t1.ID,
                                                                               RProductFK = t1.RProductFK,
                                                                               FProductFK = t1.FProductFK,
-
+                                                                              FCEnumId=t1.CalculationUnit!=null? t1.CalculationUnit.Value:0,
+                                                                              FCEnumName= t1.CalculationUnit != null ? ((FormulaCalculationEnum)t1.CalculationUnit).ToString():"N/A",
                                                                               CategoryName = t4.Name,
                                                                               SubCategoryName = t3.Name,
                                                                               Name = t2.ProductName,
@@ -3439,8 +3440,7 @@ namespace KGERP.Service.Implementation
                 RequiredQuantity = vmFinishProductBOM.RequiredQuantity,
                 RProductFK = vmFinishProductBOM.RProductFK,
                 RProcessLoss = vmFinishProductBOM.RProcessLoss,
-
-
+                CalculationUnit=vmFinishProductBOM.FCEnumId,
                 CompanyId = vmFinishProductBOM.CompanyFK.Value,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
@@ -3463,7 +3463,7 @@ namespace KGERP.Service.Implementation
             finishProductBOM.RequiredQuantity = vmFinishProductBOM.RequiredQuantity;
             finishProductBOM.RProductFK = vmFinishProductBOM.RProductFK;
             finishProductBOM.RProcessLoss = vmFinishProductBOM.RProcessLoss;
-
+            finishProductBOM.CalculationUnit = vmFinishProductBOM.FCEnumId;
             finishProductBOM.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             finishProductBOM.ModifiedDate = DateTime.Now;
 

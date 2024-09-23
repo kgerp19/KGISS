@@ -686,6 +686,12 @@ namespace KGERP.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetAutoCompleteHeadGLForSeedProcessingGet(string prefix, int companyId)
+        {
+            var products = _accountingService.GetAutoCompleteHeadGLForCustomer(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult AutoCompleteVendorHeadGet(string prefix, int companyId, int vendorTypeId)
         {
             var products = _accountingService.GetAutoCompleteVendorHeadGL(prefix, companyId, vendorTypeId);
