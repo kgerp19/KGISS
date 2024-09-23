@@ -3561,14 +3561,19 @@ namespace KGERP.Controllers
         // GET: Monthly Return Item Wise
         [HttpGet]
 
-        public ActionResult MonthlyAdjustmentItemWise(int companyId)
+        public ActionResult ISSAdjustmentReport(int companyId)
         {
+            DateTime fromDate;
+            DateTime toDate;
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            fromDate = firstDayOfMonth;
+            toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
             ReportCustomModel cm = new ReportCustomModel()
             {
                 CompanyId = companyId,
-                FromDate = DateTime.Now,
-                ToDate = DateTime.Now,
-                ProductCategoryList = voucherTypeService.EnumerableYearRange()
+                FromDate = fromDate,
+                ToDate = toDate,
+                ProductCategoryList = voucherTypeService.GetProductCategory(companyId),
 
 
             };
@@ -3577,13 +3582,13 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult GetMonthlyAdjustmentItemWiseReport(ReportCustomModel model)
+        public ActionResult GetISSAdjustmentItemWiseReport(ReportCustomModel model)
         {
-            string reportName = "MonthlyAdjustmentItemWise";
+            string reportName = "ISSAdjustmentReport";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&year={3}&month={4}", reportName, model.ReportType, model.CompanyId, model.Year, model.Month);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&StrFromDate={3}&StrToDate={4}", reportName, model.ReportType, model.CompanyId, model.StrFromDate, model.StrToDate);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -8737,7 +8742,7 @@ namespace KGERP.Controllers
         public ActionResult GetPackagingRMStockReport(ReportCustomModel model)
         {
 
-            
+
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -8777,7 +8782,7 @@ namespace KGERP.Controllers
                 ToDate = DateTime.Now,
                 StrFromDate = DateTime.Now.ToShortDateString(),
                 StrToDate = DateTime.Now.ToShortDateString(),
-                 
+
                 Title = "Finish Product Stock Report",
                 Stocks = stockSelectModels
             };

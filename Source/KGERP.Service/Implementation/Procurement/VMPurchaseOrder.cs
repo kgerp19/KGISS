@@ -406,6 +406,7 @@ namespace KGERP.Services.Procurement
         public SelectList ProductList { get; set; } = new SelectList(new List<object>());
         public SelectList SubZoneList { get; set; } = new SelectList(new List<object>());
         public SelectList ZoneList { get; set; } = new SelectList(new List<object>());
+        public SelectList StockInfoList { get; set; } = new SelectList(new List<object>());
 
         public IEnumerable<VMSalesOrderSlave> DataListSlave { get; set; }
         public int ProductSubCategoryId { get; set; }

@@ -231,6 +231,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                 SeedProdessingData.ModifedBy = System.Web.HttpContext.Current.User.Identity.Name;
                 SeedProdessingData.ModifiedDate = DateTime.Today;
                 _db.Entry(SeedProdessingData).State = EntityState.Modified;
+
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = SeedProdessingData.SeedProcessingId;

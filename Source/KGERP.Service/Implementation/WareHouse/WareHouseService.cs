@@ -1195,13 +1195,11 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.PurchaseReturnId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReturnSlave AccData = await WareHousePOReturnSlaveGet(vmModel.CompanyFK.Value, vmModel.PurchaseReturnId);
-                await _accountingService.AccountingPurchaseReturnPushPackaging(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.PurchaseReturnVoucher);
-                #endregion
-            }
+            
+            #region Ready To Account Integration
+            VMWareHousePOReturnSlave AccData = await WareHousePOReturnSlaveGet(vmModel.CompanyFK.Value, vmModel.PurchaseReturnId);
+            await _accountingService.AccountingPurchaseReturnPushISS(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.PurchaseReturnVoucher);
+            #endregion
 
 
             return result;
