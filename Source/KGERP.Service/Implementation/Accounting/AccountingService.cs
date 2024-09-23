@@ -8,6 +8,7 @@ using KGERP.Service.Implementation.RealStateMoneyReceipt;
 using KGERP.Service.Implementation.Short__CreditService;
 using KGERP.Service.ServiceModel;
 using KGERP.Service.ServiceModel.RealState;
+using KGERP.Service.ServiceModel.SeedProcessingModel;
 using KGERP.Service.ServiceModel.Vendor;
 using KGERP.Services.Procurement;
 using KGERP.Services.WareHouse;
@@ -1493,6 +1494,25 @@ namespace KGERP.Service.Implementation
                          label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
                          val = hgl.Id
                      }).OrderBy(x => x.label).Take(200).ToList();
+
+            return v;
+        }
+
+        public object GetAccountHeadNameByAccountHeadId(int headGLId)
+        {
+            var v = (from hgl in _db.HeadGLs
+                     join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                     join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                     join h3 in _db.Head3 on h4.ParentId equals h3.Id
+                     where hgl.Id==headGLId
+                     && hgl.IsActive
+                     && h5.IsActive
+                     && h4.IsActive
+                     select new
+                     {
+                         label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
+                         val = hgl.Id
+                     }).FirstOrDefault();
 
             return v;
         }
@@ -7025,6 +7045,55 @@ namespace KGERP.Service.Implementation
 
 
             return 1;
+        }
+        public async Task<long> AccountingProcessingPushISS(SeedProcessingDetailsVM vmReferenceSlave)
+        {
+            var journalType = _db.VoucherTypes.Where(x => x.CompanyId == vmReferenceSlave.CompanyFK && x.Code == "ADJV" && x.IsActive == true).FirstOrDefault();
+            VMJournalSlave vMJournalSlave = new VMJournalSlave
+            {
+                JournalType = journalType.VoucherTypeId,
+                Title = vmReferenceSlave.SeedProcessNo + " Date: " + vmReferenceSlave.SeedProcessDate,
+                Narration = vmReferenceSlave.CreatedBy + " " + vmReferenceSlave.CreatedDate,
+                CompanyFK = vmReferenceSlave.CompanyFK,
+                Date = vmReferenceSlave.SeedProcessDate,
+                IsSubmit = true
+            };
+
+            vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+
+            #region Integration Cr Finish Item Dr
+
+
+            foreach (var item in vmReferenceSlave.DataList)
+            {
+
+
+                vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+                {
+                    Particular = item.ProductName +  " Processing Cost: " + item.Amount,
+                    Debit = Convert.ToDouble(item.Amount),
+                    Credit = 0,
+                    Accounting_HeadFK = item.AccountingHeadId.Value
+                });
+            }
+
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = "Seed Processing Cost",
+                Debit = 0,
+                Credit = Convert.ToDouble(vmReferenceSlave.DataList.Select(x => x.Amount).DefaultIfEmpty(0).Sum()),
+                Accounting_HeadFK = vmReferenceSlave.BankOrCasgAccHeahId.Value
+            });
+
+            #endregion
+
+            var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            if (resultData.VoucherId > 0)
+            {
+                var voucherMap = VoucherMapping(resultData.VoucherId, vmReferenceSlave.CompanyFK, vmReferenceSlave.SeedProcessingId, "SeedProcessing");
+            }
+            return resultData.VoucherId;
         }
 
 
