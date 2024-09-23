@@ -2611,7 +2611,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "PackagingProductionReport";
+            model.ReportName = "ISSProductionReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -7289,15 +7289,15 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult KPLProdReferenceReport(int prodReferenceId)
+        public ActionResult KPLProdReferenceReport(int prodReferenceId, int companyId)
         {
             ReportCustomModel model = new ReportCustomModel();
             model.ReportType = "PDF";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "KPLProdReferenceReport";
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&prodReferenceId={2}", model.ReportName, model.ReportType, prodReferenceId);
+            model.ReportName = "ISSProdReferenceReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&prodReferenceId={2}&CompanyId={3}", model.ReportName, model.ReportType, prodReferenceId, companyId);
 
             if (model.ReportType.Equals(ReportType.PDF))
             {
@@ -8724,8 +8724,8 @@ namespace KGERP.Controllers
                 ToDate = DateTime.Now,
                 StrFromDate = DateTime.Now.ToShortDateString(),
                 StrToDate = DateTime.Now.ToShortDateString(),
-                ReportName = "PackagingRMStockReport",
-                NoteReportName = "PackagingRMStockSummeryReport",
+                ReportName = "ISSRMStockReport",
+                NoteReportName = "ISSRMStockSummeryReport",
 
                 Title = title
             };

@@ -765,7 +765,8 @@ as SupplierName,
                 .Select(t1 => new
                 {
                     t1.MaterialReceiveId,
-                    t1.ReceiveNo,
+                    t1.ReceiveNo  ,
+                    t1.ChallanDate,
                     t1.CompanyId
                 });
 
@@ -778,7 +779,7 @@ as SupplierName,
                 .Select(x => new
                 {
                     val = x.MaterialReceiveId.ToString(),
-                    label = x.ReceiveNo
+                    label = x.ReceiveNo + " Received Date: " + x.ChallanDate
                 })
                 .OrderBy(x => x.label)
                 .Take(50) // Consider adjusting or testing this  

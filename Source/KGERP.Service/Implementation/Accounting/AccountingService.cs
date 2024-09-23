@@ -4291,16 +4291,16 @@ namespace KGERP.Service.Implementation
             }
 
         }
-        public async Task<long> AccountingStockAdjustPushSEED(int CompanyFK, VMStockAdjustDetail vmStockAdjust, int journalType)
+        public async Task<long> StockAdjustPushIss(int CompanyFK, VMStockAdjustDetail vmStockAdjust)
         {
             long result = -1;
 
-
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == CompanyFK && x.Code == "ADJV" && x.IsActive == true).FirstOrDefault();
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
-                JournalType = journalType,
+                JournalType = voucherType.VoucherTypeId,
                 Title = vmStockAdjust.InvoiceNo + " Date: " + vmStockAdjust.AdjustDate.ToString(),
-                Narration = vmStockAdjust.InvoiceNo + " Date: " + vmStockAdjust.AdjustDate.ToString(),
+                Narration = vmStockAdjust.Remarks,
                 CompanyFK = CompanyFK,
                 Date = vmStockAdjust.AdjustDate,
                 IsSubmit = true
@@ -4321,6 +4321,8 @@ namespace KGERP.Service.Implementation
                 });
 
             }
+            var IssStockAdjust = _db.HeadGLs.Where(x => x.CompanyId == CompanyFK && x.AccCode == "4701001001001" && x.IsActive).FirstOrDefault();
+
             foreach (var item in vmStockAdjust.DataListSlave)
             {
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
@@ -4328,7 +4330,7 @@ namespace KGERP.Service.Implementation
                     Particular = item.LessQty > 0 ? "Less Qty " + item.LessQty + " Unit Price: " + item.UnitPrice + " Total Price: " + item.LessQty * item.UnitPrice : item.ExcessQty > 0 ? "Excess Qty " + item.ExcessQty + " Unit Price: " + item.UnitPrice + " Total Price: " + item.ExcessQty * item.UnitPrice : "",
                     Debit = Convert.ToDouble(item.LessQty > 0 ? item.LessQty * item.UnitPrice : 0),
                     Credit = Convert.ToDouble(item.ExcessQty > 0 ? item.ExcessQty * item.UnitPrice : 0),
-                    Accounting_HeadFK = 43576
+                    Accounting_HeadFK = IssStockAdjust.Id
                 });
             }
 
@@ -6672,13 +6674,15 @@ namespace KGERP.Service.Implementation
             return resultData.VoucherId;
         }
 
-        public async Task<long> PackagingMRPush(int CompanyFK, VMWareHousePOReceivingSlave vmPOReceiving, int journalType)
+        public async Task<long> ISSMRPush(int CompanyFK, VMWareHousePOReceivingSlave vmPOReceiving)
         {
             long result = -1;
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == CompanyFK && x.Code == "MRV" && x.IsActive == true).FirstOrDefault();
+
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
-                JournalType = journalType,
-                Title = "<a href='" + _urlInfo + "Report/PackagingPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
+                JournalType = voucherType.VoucherTypeId,
+                Title = "<a href='" + _urlInfo + "Report/ISSPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
                 Narration = vmPOReceiving.ChallanCID + " " + vmPOReceiving.Challan + " Date: " + vmPOReceiving.ChallanDate.ToString(),
                 CompanyFK = CompanyFK,
                 Date = vmPOReceiving.ChallanDate,
@@ -6717,44 +6721,26 @@ namespace KGERP.Service.Implementation
                 });
             }
 
-
+            var vatAccount = _db.HeadGLs.Where(x => x.CompanyId == vmPOReceiving.CompanyFK && x.AccCode == "1306001001001" && x.IsActive).FirstOrDefault();
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "VAT of " + vmPOReceiving.POCID,
                 Debit = Math.Round(Convert.ToDouble(vmPOReceiving.DataListSlave.Sum(x => x.VATAddition)), 2),
                 Credit = 0,
-                Accounting_HeadFK = 40536  // VAT Current A/C (KPL) July-19
+                Accounting_HeadFK = vatAccount.Id  //  1306001001001-Value Added Tax (VAT)
             });
 
+            var purchaseOverHeadAccount = _db.HeadGLs.Where(x => x.CompanyId == vmPOReceiving.CompanyFK && x.AccCode == "4101001003001" && x.IsActive).FirstOrDefault();
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
-                Particular = "Truck Fare   " + vmPOReceiving.TruckFare,
-                Debit = Convert.ToDouble(vmPOReceiving.TruckFare),
+                Particular = "Truck Fare: " + vmPOReceiving.TruckFare + " Truck Fare: " + vmPOReceiving.LabourBill,
+                Debit = Convert.ToDouble(vmPOReceiving.TruckFare + vmPOReceiving.LabourBill),
                 Credit = 0,
-                Accounting_HeadFK = 50624172  // Truck Fare
+                Accounting_HeadFK = purchaseOverHeadAccount.Id  // 4101001003001-Purchase Overhead Expenses
             });
+             
 
-            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
-            {
-                Particular = "Labour Bill: " + vmPOReceiving.LabourBill,
-                Debit = Convert.ToDouble(vmPOReceiving.LabourBill),
-                Credit = 0,
-                Accounting_HeadFK = 50624173  // Labour Bill
-            });
-
-            //if (vmPOReceiving.TDSDeduction > 0)
-            //{
-            //    vMJournalSlave.DataListSlave.Add(new VMJournalSlave
-            //    {
-            //        Particular = "TDS Payable Against " + vmPOReceiving.POCID,
-            //        Debit = 0,
-            //        Credit = Convert.ToDouble(vmPOReceiving.TDSDeductionAmount),
-            //        Accounting_HeadFK = 50623218, //TDS Payable Against Supplier (Packaging)
-
-            //    });
-
-            //}
 
             foreach (var item in vmPOReceiving.DataListSlave)
             {
@@ -6766,13 +6752,15 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
+            var storeStockAccHead = _db.HeadGLs.Where(x => x.CompanyId == vmPOReceiving.CompanyFK && x.AccCode == "4701001001001" && x.IsActive).FirstOrDefault();
+
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
                 Debit = 0,
                 Credit = vmPOReceiving.DataListSlave.Any() ? Convert.ToDouble(vmPOReceiving.DataListSlave.Sum(x => x.StockInQty * x.StockInRate)) : 0,
-                Accounting_HeadFK = 50605003 //Packaging Stock Adjust
+                Accounting_HeadFK = storeStockAccHead.Id //4701001001001 - Store & Stock Adjustment
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
@@ -7019,24 +7007,19 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public async Task<long> AccountingProductionPushPackaging(DateTime journalDate, int CompanyFK, VMProdReferenceSlave vmReferenceSlave, int journalType)
+        public async Task<long> AccountingPackagingPushISS(DateTime journalDate, int CompanyFK, VMProdReferenceSlave vmReferenceSlave, int journalType)
         {
-            long result = -1;
+            
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
                 JournalType = journalType,
                 Title = vmReferenceSlave.ReferenceNo + " Date: " + vmReferenceSlave.ReferenceDate,
-                Narration = vmReferenceSlave.OrderMasterNo + " " + vmReferenceSlave.CustomerName,
+                Narration = vmReferenceSlave.CreatedBy + " " + vmReferenceSlave.CreatedDate,
                 CompanyFK = CompanyFK,
                 Date = journalDate,
                 IsSubmit = true
             };
-            List<string> strList = new List<string>();
-            foreach (var item in vmReferenceSlave.DataListSlave)
-            {
-                strList.Add(item.ProductName + " Quantity: " + item.Quantity + " Costing Price: " + item.CostingPrice + " Total: " + item.Quantity * item.CostingPrice);
-            }
-            string perticular = String.Join(", ", strList.ToArray());
+             
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
 
             #region Integration Cr Finish Item Dr
@@ -7044,30 +7027,37 @@ namespace KGERP.Service.Implementation
 
             foreach (var item in vmReferenceSlave.DataListSlave)
             {
-                double CostingPrice = item.IsVATInclude == true ? (item.UnitPrice - (item.UnitPrice / 100d * Convert.ToDouble(item.VATPercent))) : item.UnitPrice;
-
-
+              
 
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                 {
                     Particular = item.ProductName + " Quantity: " + item.Quantity + " Costing Price: " + item.CostingPrice + " Total: " + item.Quantity * item.CostingPrice,
-                    Debit = Convert.ToDouble(item.Quantity) * CostingPrice,
+                    Debit = Convert.ToDouble(item.Quantity * item.CostingPrice) ,
                     Credit = 0,
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
-            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+
+            foreach (var item in vmReferenceSlave.RowProductConsumeList)
             {
-                Particular = perticular,
-                Debit = 0,
-                Credit = vmReferenceSlave.DataListSlave.Any() ? vmReferenceSlave.DataListSlave.Sum(x => Convert.ToDouble(x.Quantity) * (x.IsVATInclude == true ? (x.UnitPrice - (x.UnitPrice / 100d * Convert.ToDouble(x.VATPercent))) : x.UnitPrice)) : 0,
-                Accounting_HeadFK = 50605003 // Packaging ERP Integration
-            });
 
 
+                vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+                {
+                    Particular = item.RProductName + " Quantity: " + item.TotalConsumeQuantity + " Costing Price: " + item.COGS + " Total: " + item.TotalConsumeQuantity * item.COGS,
+                    Debit = 0,
+                    Credit = Convert.ToDouble(item.TotalConsumeQuantity * item.COGS),
+                    Accounting_HeadFK = item.AccountingHeadId.Value
+                });
+            }
+             
             #endregion
 
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            if (resultData.VoucherId > 0)
+            {
+                var voucherMap = VoucherMapping(resultData.VoucherId, CompanyFK, vmReferenceSlave.ProdReferenceId, "Prod_Reference");
+            }
             return resultData.VoucherId;
         }
 

@@ -121,6 +121,7 @@ namespace KGERP.Service.Implementation.Production
         public decimal COGS { get; set; }
         public decimal TotalCOGS { get; set; }
 
+        public int? AccountingHeadId { get; set; }
 
     }
 

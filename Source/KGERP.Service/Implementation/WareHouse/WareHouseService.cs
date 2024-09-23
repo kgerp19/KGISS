@@ -12,6 +12,7 @@ using KGERP.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Threading.Tasks;
@@ -23,13 +24,14 @@ namespace KGERP.Services.WareHouse
         private readonly ERPEntities _db;
         private readonly AccountingService _accountingService;
         private readonly IOrderDeliverService _orderDeliverService;
+        private readonly IUnitOfWork _unitOfWork;
 
-
-        public WareHouseService(ERPEntities db, IOrderDeliverService orderDeliverService)
+        public WareHouseService(ERPEntities db, IOrderDeliverService orderDeliverService, IUnitOfWork unitOfWork)
         {
             _db = db;
             _accountingService = new AccountingService(db);
             _orderDeliverService = orderDeliverService;
+            _unitOfWork = unitOfWork;
         }
         public async Task<long> WareHousePOReceivingAdd(VMWareHousePOReceivingSlave vmWareHousePOReceivingSlave)
         {
@@ -1142,71 +1144,12 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.MaterialReceiveId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await GCCLPOReceivingSlaveACPushGet(vmModel.CompanyFK.Value, vmModel.MaterialReceiveId);
-                await _accountingService.AccountingPurchasePushGCCL(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await SEEDPOReceivingACPushGet(vmModel.CompanyFK.Value, vmModel.MaterialReceiveId);
-                await _accountingService.AccountingPurchasePushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.PurchaseVoucher);
-                #endregion
-            }
-            //Genarel PO
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await FeedGeneralPOReceivingACPushGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-                await _accountingService.AccountiingPurchasePushFeed(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                //await _accountingService.FeedMaterialsRecivedSMSPush(AccData);
+            #region Ready To Account Integration
+            VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
+            await _accountingService.ISSMRPush(vmModel.CompanyFK.Value, AccData);
+             
 
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-
-                if (vmModel.SupplierPaymentMethodEnumFK == (int)VendorsPaymentMethodEnum.LC)
-                {
-                    VMWareHousePOReceivingSlave AccData = await KFMALLCPOReceivingSlaveGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-
-                    await _accountingService.MaterialReceivedViaLCPushKFMAL(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                    //await KFMALProductGRNEdit(AccData);
-                }
-                else
-                {
-                    VMWareHousePOReceivingSlave AccData = await KFMALReceivingSlaveGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-
-                    await _accountingService.MaterialReceivedPushKFMAL(vmModel.CompanyFK.Value, AccData, (int)JournalEnum.PurchaseVoucher);
-                    await KFMALProductGRNEdit(AccData);
-
-                }
-
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReceivingSlave AccData = await PackagingPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-                await _accountingService.PackagingMRPush(vmModel.CompanyFK.Value, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
-                //await KFMALProductGRNEdit(AccData);
-                //if (vmModel.SupplierPaymentMethodEnumFK == (int)VendorsPaymentMethodEnum.LC)
-                //{
-                //    await _accountingService.PackagingMRLCPush(vmModel.CompanyFK.Value, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
-                //    //await KFMALProductGRNEdit(AccData);
-                //}
-                //else
-                //{
-
-
-                //}
-
-                #endregion
-            }
+            #endregion
             return result;
         }
         public async Task<long> SubmitMaterialReturn(VMWareHousePOReturnSlave vmModel)
@@ -1849,7 +1792,7 @@ namespace KGERP.Services.WareHouse
                         join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
                         join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
                         join t8 in _db.Units on t5.UnitId equals t8.UnitId
-                        where t1.IsActive && t5.IsActive && t6.IsActive && t7.IsActive && t8.IsActive &&
+                        where t1.IsActive && t5.IsActive && t6.IsActive && t8.IsActive &&
                                  t1.OrderMasterId == orderMasterId
                         select new VMOrderDeliverDetailPartial
                         {
@@ -1899,7 +1842,7 @@ namespace KGERP.Services.WareHouse
                             ProductId = t1.ProductId,
                             OrderQty = t1.Qty,
                             UnitPrice = t1.UnitPrice,
-                            
+
                             DeliveredQty = _db.OrderDeliverDetails.Where(x => x.OrderDetailId == t1.OrderDetailId && x.IsActive).Select(x => x.DeliveredQty).DefaultIfEmpty(0).Sum(),
                             OrderDetailId = t1.OrderDetailId,
                             UnitPriceDisplay = t1.IsVATInclude == true ? t1.UnitPrice / (((double)t1.VATPercent + 100) / 100) : t1.UnitPrice,
@@ -2290,7 +2233,7 @@ namespace KGERP.Services.WareHouse
         }
 
 
-        public async Task<VMWareHousePOReceivingSlave> PackagingPOReceivingGet(int companyId, int materialReceiveId)
+        public async Task<VMWareHousePOReceivingSlave> ISSPOReceivingGet(int companyId, int materialReceiveId)
         {
             VMWareHousePOReceivingSlave vmWareHousePOReceivingSlave = new VMWareHousePOReceivingSlave();
             vmWareHousePOReceivingSlave = await Task.Run(() => (from t1 in _db.MaterialReceives
@@ -2318,12 +2261,13 @@ namespace KGERP.Services.WareHouse
                                                                     IsSubmitted = t1.IsSubmitted,
                                                                     ReceiverName = t5.Name,
                                                                     stockname = t6.Name,
+
                                                                     WareHouseRentBill = t1.WareHouseRentBill,
                                                                     FinancialCharge = t1.FinancialCharge,
                                                                     LabourBill = t1.LabourBill, //Load Unload Cost
                                                                     TruckFare = t1.TruckFare,   //Transport 
                                                                     CandFBill = t1.CandFBill,
-                                                                    TDSDeduction = t1.TDSDiduction,
+                                                                     
                                                                     AccountingHeadId = t3.HeadGLId,
 
                                                                     IntegratedFrom = "MaterialReceive"
@@ -3576,6 +3520,7 @@ namespace KGERP.Services.WareHouse
         public async Task<long> WareHouseOrderDeliversAdd(VMOrderDeliverDetail vmOrderDeliverDetail)
         {
             long result = -1;
+
             #region Genarate Store-In ID
             int deliverDetailCount = _db.OrderDelivers.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK).Count();
 
@@ -3593,6 +3538,9 @@ namespace KGERP.Services.WareHouse
                                 DateTime.Now.ToString("dd") +
                                 DateTime.Now.ToString("MM") +
                                 DateTime.Now.ToString("yy") + deliverDetailCount.ToString().PadLeft(5, '0');
+
+
+
             #endregion
             OrderDeliver orderDeliver = new OrderDeliver
             {
@@ -3602,10 +3550,9 @@ namespace KGERP.Services.WareHouse
                 InvoiceNo = vmOrderDeliverDetail.InvoiceNo,
                 DeliveryDate = vmOrderDeliverDetail.DeliveryDate,
                 ProductType = "F",
-                DriverName = vmOrderDeliverDetail.DriverName,
-                VehicleNo = vmOrderDeliverDetail.VehicleNo,
                 DepoInvoiceNo = vmOrderDeliverDetail.Remarks,
                 StockInfoId = vmOrderDeliverDetail.StockInfoId,
+                TransportTypeId = vmOrderDeliverDetail.TransportTypeId,
                 TotalAmount = 0,
                 Discount = 0,
                 SpecialDiscount = 0,
@@ -3615,22 +3562,45 @@ namespace KGERP.Services.WareHouse
                 CreatedDate = DateTime.Now,
                 IsActive = true
             };
+
+            if (vmOrderDeliverDetail.TransportTypeId == (int)TransportTypeEnum.Truck)
+            {
+                orderDeliver.DriverName = vmOrderDeliverDetail.DriverNameForDelivery;
+                orderDeliver.VehicleNo = vmOrderDeliverDetail.VehicleNo;
+                orderDeliver.MobileNo = vmOrderDeliverDetail.DriverMobileNo;
+                orderDeliver.Carrying = Convert.ToDecimal(vmOrderDeliverDetail.TruckFair);
+            }
+            else if (vmOrderDeliverDetail.TransportTypeId == (int)TransportTypeEnum.Courier)
+            {
+                orderDeliver.DriverName = vmOrderDeliverDetail.CourierName;
+                orderDeliver.VehicleNo = vmOrderDeliverDetail.CourierNo;
+                orderDeliver.Carrying = Convert.ToDecimal(vmOrderDeliverDetail.CourierCharge);
+                orderDeliver.MobileNo = "";
+            }
+            //var repository = _unitOfWork.GeneralRepository<OrderDeliver>();
+            //await repository.AddAsync(orderDeliver);
             _db.OrderDelivers.Add(orderDeliver);
+            //await _unitOfWork.CompleteAsync();
+            //result = orderDeliver.OrderDeliverId;
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = orderDeliver.OrderDeliverId;
             }
+
             return result;
         }
         public async Task<long> WareHouseOrderDeliverDetailAdd(VMOrderDeliverDetail vmModel, VMOrderDeliverDetailPartial vmModelList)
         {
             long result = -1;
             var dataListSlavePartial = vmModelList.DataToList.Where(x => x.Flag && x.DeliverQty > 0).ToList();
+            bool IsOrderDeliveryCompleted = vmModelList.DataToList.Sum(x => x.OrderQty) >= vmModelList.DataToList.Sum(x => x.DeliveredQty);
+            var orderDeliverDetails = new List<OrderDeliverDetail>();
+
             if (dataListSlavePartial.Any())
             {
                 for (int i = 0; i < dataListSlavePartial.Count(); i++)
                 {
-                    OrderDeliverDetail orderDeliverDetail = new OrderDeliverDetail
+                    var orderDeliverDetail = new OrderDeliverDetail
                     {
                         OrderDetailId = dataListSlavePartial[i].OrderDetailId,
                         DeliveredQty = dataListSlavePartial[i].DeliverQty,
@@ -3638,7 +3608,7 @@ namespace KGERP.Services.WareHouse
                         ProductId = dataListSlavePartial[i].ProductId,
                         OrderDeliverId = vmModel.OrderDeliverId,
                         COGSPrice = dataListSlavePartial[i].ClosingRate,
-                         
+
                         BaseCommission = 0,      // Unit Discount
                         CashCommission = 0,       // Cash Discount
                         SpecialDiscount = 0,   // Special Discount
@@ -3655,14 +3625,30 @@ namespace KGERP.Services.WareHouse
                         CreateDate = DateTime.Now,
                         IsActive = true
                     };
-                    _db.OrderDeliverDetails.Add(orderDeliverDetail);
-                    if (await _db.SaveChangesAsync() > 0)
-                    {
-
-                        result = orderDeliverDetail.OrderDeliverDetailId;
-                    }
-
+                    orderDeliverDetails.Add(orderDeliverDetail);
                 }
+
+                //_db.OrderDeliverDetails.AddRange(orderDeliverDetails);
+
+                if (IsOrderDeliveryCompleted)
+                {
+                    var OrderMaster = await _db.OrderMasters.FirstAsync(x => x.OrderMasterId == vmModel.OrderMasterId);
+                    OrderMaster.OrderStatus = "D";
+                    _db.Entry(OrderMaster).State = EntityState.Modified;
+                }
+
+                var repository = _unitOfWork.GeneralRepository<OrderDeliverDetail>();
+                await repository.AddRangeListAsync(orderDeliverDetails);
+
+                int ComResult= await _unitOfWork.CompleteAsync();
+                if (ComResult>0)
+                {
+                    result = orderDeliverDetails.Last().OrderDeliverDetailId;
+                }
+                //if (await _db.SaveChangesAsync() > 0)
+                //{
+                //    result = orderDeliverDetails.Last().OrderDeliverDetailId;
+                //}
             }
 
             return result;
@@ -4053,7 +4039,7 @@ namespace KGERP.Services.WareHouse
                                                                         join t8 in _db.Units on t5.UnitId equals t8.UnitId
 
                                                                         where t1.OrderDeliverId == orderDeliverId && t1.IsActive && t2.IsActive
-                                                                        && t3.IsActive  
+                                                                        && t3.IsActive
 
                                                                         select new VMOrderDeliverDetail
                                                                         {
@@ -4420,25 +4406,20 @@ namespace KGERP.Services.WareHouse
 
 
         //Feed Raw Material AdJustement Details Get Starts - Hridoy 17May2022
-        public async Task<VMStockAdjustDetail> FeedRMAdjustmentDetailGet(int companyId, int stockAdjustId)
+        public async Task<VMStockAdjustDetail> ISSRMAdjustmentDetailGet(int companyId, int stockAdjustId)
         {
             VMStockAdjustDetail vmStockAdjustDetail = new VMStockAdjustDetail();
-            vmStockAdjustDetail = await Task.Run(() => (from t1 in _db.StockAdjusts
-                                                        join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
-                                                        where t1.CompanyId == companyId && t1.StockAdjustId == stockAdjustId
+            vmStockAdjustDetail = await Task.Run(() => (from t1 in _db.StockAdjusts                                                        
+                                                        where t1.StockAdjustId == stockAdjustId
                                                         select new VMStockAdjustDetail
                                                         {
 
                                                             StockAdjustId = t1.StockAdjustId,
                                                             AdjustDate = t1.AdjustDate,
                                                             InvoiceNo = t1.InvoiceNo,
-                                                            Remarks = t1.Remarks,
-                                                            CompanyEmail = t2.Email,
-                                                            CompanyPhone = t2.Phone,
-                                                            CompanyAddress = t2.Address,
+                                                            Remarks = t1.Remarks,                                                             
                                                             CompanyFK = t1.CompanyId,
-                                                            IsFinalized = t1.IsFinalized,
-                                                            ComImage = t2.CompanyLogo,
+                                                            IsFinalized = t1.IsFinalized,                                                          
                                                             CreatedBy = t1.CreatedBy,
                                                             IntegratedFrom = "StockAdjust"
 
@@ -4467,7 +4448,7 @@ namespace KGERP.Services.WareHouse
                                                                           ExcessQty = t1.ExcessQty,
                                                                           Amount = (t1.LessQty * t1.UnitPrice),
                                                                           OverAmount = (t1.ExcessQty * t1.UnitPrice),
-                                                                          AccountingHeadId = t5.AccountingHeadId,
+                                                                          AccountingHeadId = t7.AccountingHeadId,
                                                                           UnitName = t8.Name
                                                                       }).OrderByDescending(x => x.StockAdjustDetailId).AsEnumerable());
 
@@ -5343,7 +5324,39 @@ namespace KGERP.Services.WareHouse
 
 
 
+        public async Task<long> OrderDeliveryDelete(long OrderDeliveryDetailsId)
+        {
+            long result = -1;
+            var EntityModel = await _db.OrderDeliverDetails.FirstAsync(x => x.OrderDeliverDetailId == OrderDeliveryDetailsId);
+            if (EntityModel != null)
+            {
+                EntityModel.IsActive = false;
+                EntityModel.ModifedDate = DateTime.Now;
+                EntityModel.ModifiedBy = Common.GetUserId();
+                _db.Entry(EntityModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync()>0)
+                {
+                    result = (long)((EntityModel.OrderDeliverId.HasValue && EntityModel.OrderDeliverId!=null)? EntityModel.OrderDeliverId:0);
+                }
+            }
+            return result;
+        }
 
+        public async Task<long> OrderDeliveryUpdate(long OrderDeliveryDetailsId,double deliveryQty)
+        {
+            long result = -1;
+            var EntityModel = await _db.OrderDeliverDetails.FirstAsync(x => x.OrderDeliverDetailId == OrderDeliveryDetailsId);
+            if (EntityModel != null)
+            {
+                EntityModel.DeliveredQty = deliveryQty;
+                _db.Entry(EntityModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = (long)((EntityModel.OrderDeliverId.HasValue && EntityModel.OrderDeliverId != null) ? EntityModel.OrderDeliverId : 0);
+                }
+            }
+            return result;
+        }
 
         public async Task<long> PackagingSubmitOrderDeliver(VMOrderDeliverDetail vmModel)
         {
@@ -5401,7 +5414,7 @@ namespace KGERP.Services.WareHouse
         }
 
 
-        //Feed SubmitRMAdjusts Starts Hridoy 17 May 2022
+         
         public async Task<long> SubmitRMAdjusts(VMStockAdjustDetail vmModel)
         {
             long result = -1;
@@ -5414,23 +5427,12 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.StockAdjustId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                #region Ready To Account Integration
-                VMStockAdjustDetail AccData = await FeedRMAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushFeed(vmModel.CompanyFK.Value, AccData, (int)FeedJournalEnum.RMAdjustmentEntry);
 
-                #endregion
-            }
+            #region Ready To Account Integration
+            VMStockAdjustDetail AccData = await ISSRMAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
+            await _accountingService.StockAdjustPushIss(vmModel.CompanyFK.Value, AccData);
 
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-            {
-                #region Ready To Account Integration
-                VMStockAdjustDetail AccData = await WareHouseOrderItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.AdjustmentEntry);
-
-                #endregion
-            }
+            #endregion
 
             return result;
         }
@@ -5454,7 +5456,7 @@ namespace KGERP.Services.WareHouse
             {
                 #region Ready To Account Integration
                 VMStockAdjustDetail AccData = await WareHouseOrderItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.AdjustmentEntry);
+                await _accountingService.StockAdjustPushIss(vmModel.CompanyFK.Value, AccData);
 
                 #endregion
             }
@@ -6046,7 +6048,7 @@ namespace KGERP.Services.WareHouse
             return model;
         }
 
-        public async Task<long> SubmitMultiMRPackaging()
+        public async Task<long> SubmitMultiMRISS()
         {
 
             var firstDayOfMonth = new DateTime(2024, 08, 1);
@@ -6067,8 +6069,8 @@ namespace KGERP.Services.WareHouse
                 model.ModifiedDate = DateTime.Now;
                 await _db.SaveChangesAsync();
 
-                VMWareHousePOReceivingSlave AccData = await PackagingPOReceivingGet(item.CompanyId, (int)item.MaterialReceiveId);
-                await _accountingService.PackagingMRPush(item.CompanyId, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
+                VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(item.CompanyId, (int)item.MaterialReceiveId);
+                await _accountingService.ISSMRPush(item.CompanyId, AccData);
             }
             return 0;
         }
