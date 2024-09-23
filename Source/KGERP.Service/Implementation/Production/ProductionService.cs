@@ -384,7 +384,7 @@ namespace KGERP.Services.Production
                                                              ReferenceNo = t1.ReferenceNo,
                                                              ReferenceDate = t1.ReferenceDate,
                                                              CompanyFK = t1.CompanyId,
-
+                                                             IsSubmitted = t1.IsSubmitted,
                                                              CompanyName = t3.Name,
                                                              CompanyAddress = t3.Address,
                                                              CompanyEmail = t3.Email,
@@ -408,6 +408,7 @@ namespace KGERP.Services.Production
                                                                            CompanyFK = t1.CompanyId,
                                                                            CostingPrice = t1.CostingPrice,
                                                                            TotalPrice = t1.Quantity * t1.CostingPrice,
+                                                                           AccountingHeadId = t5.AccountingHeadId
 
 
                                                                        }).OrderByDescending(x => x.ProdReferenceSlaveID).AsEnumerable());
@@ -439,7 +440,9 @@ namespace KGERP.Services.Production
 
                                                               TotalConsumeQuantity = aaa.TotalConsumeQuantity,
                                                               COGS = aaa.COGS,
-                                                              TotalCOGS = aaa.TotalConsumeQuantity * aaa.COGS
+                                                              TotalCOGS = aaa.TotalConsumeQuantity * aaa.COGS,
+                                                              AccountingHeadId = fddd.AccountingHeadId
+
                                                           }).OrderBy(x => x.ProdReferenceSlaveConsumptionID).ToList();
 
 
@@ -1655,7 +1658,7 @@ namespace KGERP.Services.Production
             return result;
         }
 
-        public async Task<int> SubmitProdReferenceforKpl(int id)
+        public async Task<int> SubmitProdReferenceforISS(int id)
         {
             int result = -1;
             Prod_Reference prodReference = await _db.Prod_Reference.FindAsync(id);
@@ -1673,9 +1676,9 @@ namespace KGERP.Services.Production
                 }
                 if (result > 0)
                 {
-                    var productionVm = await Task.Run(() => KPLProdReferenceSlaveGet(prodReference.CompanyId.Value, prodReference.ProdReferenceId));
+                    var productionVm = await Task.Run(() => ProdReferenceSlaveGet(prodReference.CompanyId.Value, prodReference.ProdReferenceId));
 
-                    await _accountingService.AccountingProductionPushPackaging(prodReference.ReferenceDate, prodReference.CompanyId.Value, productionVm, (int)PackagingJournalEnum.ProductionVoucher);
+                    await _accountingService.AccountingPackagingPushISS(prodReference.ReferenceDate, prodReference.CompanyId.Value, productionVm, (int)PackagingJournalEnum.ProductionVoucher);
 
                 }
 
@@ -1687,7 +1690,7 @@ namespace KGERP.Services.Production
 
 
 
-        public async Task<long> SubmitMultiReferenceforKpl()
+        public async Task<long> SubmitMultiReferenceforISS()
         {
 
             var firstDayOfMonth = new DateTime(2024, 08, 1);
@@ -1710,9 +1713,9 @@ namespace KGERP.Services.Production
                     prodReference.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
                     prodReference.ModifiedDate = DateTime.Now;
                     await _db.SaveChangesAsync();
-                    var productionVm = await Task.Run(() => KPLProdReferenceSlaveGet(prodReference.CompanyId.Value, prodReference.ProdReferenceId));
+                    var productionVm = await Task.Run(() => ProdReferenceSlaveGet(prodReference.CompanyId.Value, prodReference.ProdReferenceId));
 
-                    await _accountingService.AccountingProductionPushPackaging(prodReference.ReferenceDate, prodReference.CompanyId.Value, productionVm, (int)PackagingJournalEnum.ProductionVoucher);
+                    await _accountingService.AccountingPackagingPushISS(prodReference.ReferenceDate, prodReference.CompanyId.Value, productionVm, (int)PackagingJournalEnum.ProductionVoucher);
 
                 }
 

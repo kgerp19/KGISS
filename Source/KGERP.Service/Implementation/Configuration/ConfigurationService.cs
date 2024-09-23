@@ -770,7 +770,7 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-         
+
 
 
         public object GetAutoCompleteRawPackingMaterials(int companyId, string prefix)
@@ -810,7 +810,7 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-       
+
 
         public object GetAutoCompleteFinishedGoods(int companyId, string prefix)
         {
@@ -839,7 +839,7 @@ namespace KGERP.Service.Implementation
         {
             var v = (from t1 in _db.OfficerAssigns
                      join t2 in _db.Employees on t1.EmpId equals t2.Id
-                    
+
 
                      where t1.CompanyId == companyId
 
@@ -1224,22 +1224,22 @@ namespace KGERP.Service.Implementation
                 result = commonSupplier.VendorId;
                 var head5id = await _db.Head5.Where(x => x.AccCode == "2401001001" && x.IsActive == true && x.CompanyId == vmCommonSupplier.CompanyFK).FirstOrDefaultAsync();
                 VMHeadIntegration vmHeadIntegration = new VMHeadIntegration();
-                    vmHeadIntegration = new VMHeadIntegration
-                    {
-                        AccName = commonSupplier.Name,
-                        LayerNo = 6,
-                        Remarks = "GL Layer",
-                        IsIncomeHead = false,
-                        ParentId = head5id.Id, // General Payable // Head5 Kfmal
-                        IsActive = true,
+                vmHeadIntegration = new VMHeadIntegration
+                {
+                    AccName = commonSupplier.Name,
+                    LayerNo = 6,
+                    Remarks = "GL Layer",
+                    IsIncomeHead = false,
+                    ParentId = head5id.Id, // General Payable // Head5 Kfmal
+                    IsActive = true,
 
-                        CompanyFK = commonSupplier.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
+                    CompanyFK = commonSupplier.CompanyId,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                };
 
-                    HeadGL headGl = await SEEDSupplierHeadAdd(vmHeadIntegration, commonSupplier.VendorId);
-                
+                HeadGL headGl = await SEEDSupplierHeadAdd(vmHeadIntegration, commonSupplier.VendorId);
+
 
 
             }
@@ -1744,22 +1744,22 @@ namespace KGERP.Service.Implementation
 
                 var zone3id = await _db.Head3.Where(x => x.AccCode == "1304" && x.IsActive == true && x.CompanyId == vmCommonZone.CompanyFK).FirstOrDefaultAsync(); // Account Recevable / Head 3
 
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = zone.Name,
-                        LayerNo = 4,
-                        Remarks = "4 Layer",
-                        IsIncomeHead = false,
-                        ParentId = zone3id.Id,
-                        IsActive = true,
+                VMHeadIntegration integration = new VMHeadIntegration
+                {
+                    AccName = zone.Name,
+                    LayerNo = 4,
+                    Remarks = "4 Layer",
+                    IsIncomeHead = false,
+                    ParentId = zone3id.Id,
+                    IsActive = true,
 
-                        CompanyFK = zone.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    int head4Id = ISSZoneHead4Push(integration, zone.ZoneId);
+                    CompanyFK = zone.CompanyId,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                };
+                int head4Id = ISSZoneHead4Push(integration, zone.ZoneId);
 
-                
+
             }
             return result;
         }
@@ -1858,26 +1858,26 @@ namespace KGERP.Service.Implementation
             {
                 result = subZone.SubZoneId;
 
-                
 
-                    int ParentId = _db.Zones.Find(subZone.ZoneId).HeadGLId;
 
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = subZone.Name,
-                        LayerNo = 5,
-                        Remarks = "5 Layer",
-                        IsIncomeHead = false,
-                        ParentId = ParentId,
-                        IsActive = true,
+                int ParentId = _db.Zones.Find(subZone.ZoneId).HeadGLId;
 
-                        CompanyFK = subZone.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    int head4Id = ISSSubZoneHead5Push(integration, subZone.SubZoneId);
+                VMHeadIntegration integration = new VMHeadIntegration
+                {
+                    AccName = subZone.Name,
+                    LayerNo = 5,
+                    Remarks = "5 Layer",
+                    IsIncomeHead = false,
+                    ParentId = ParentId,
+                    IsActive = true,
 
-                
+                    CompanyFK = subZone.CompanyId,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                };
+                int head4Id = ISSSubZoneHead5Push(integration, subZone.SubZoneId);
+
+
 
             }
             return result;
@@ -1963,31 +1963,31 @@ namespace KGERP.Service.Implementation
                 CompanyId = productCategoryModel.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                NoOfFloors= productCategoryModel.NoOfFloors??"",
-                FlatSizeSpecification=productCategoryModel.FlatSizeSpecification??"",
+                NoOfFloors = productCategoryModel.NoOfFloors ?? "",
+                FlatSizeSpecification = productCategoryModel.FlatSizeSpecification ?? "",
                 IsActive = true,
-            
+
 
             };
             _db.ProductCategories.Add(productCategory);
             if (await _db.SaveChangesAsync() > 0)
             {
 
-                
 
-                    var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = catetegory.Name,
-                        LayerNo = 6,
-                        Remarks = "GL Layer",
-                        IsIncomeHead = false,
-                        ProductType = catetegory.ProductType,
-                        CompanyFK = productCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    int head5Id = FinishAccHeadGlPushSeed(integration, productCategory.ProductCategoryId);
+
+                var catetegory = _db.ProductCategories.Find(productCategory.ProductCategoryId);
+                VMHeadIntegration integration = new VMHeadIntegration
+                {
+                    AccName = catetegory.Name,
+                    LayerNo = 6,
+                    Remarks = "GL Layer",
+                    IsIncomeHead = false,
+                    ProductType = catetegory.ProductType,
+                    CompanyFK = productCategory.CompanyId,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                };
+                int head5Id = FinishAccHeadGlPushSeed(integration, productCategory.ProductCategoryId);
 
                 result = productCategory.ProductCategoryId;
             }
@@ -2592,7 +2592,7 @@ namespace KGERP.Service.Implementation
                                                   ID = t1.ProductId,
                                                   Name = t1.ProductName,
                                                   ShortName = t1.ShortName,
-                                                  UnitPrice =   t1.UnitPrice??0,
+                                                  UnitPrice = t1.UnitPrice ?? 0,
                                                   TPPrice = t1.TPPrice,
                                                   CreditSalePrice = t1.CreditSalePrice,
                                                   SubCategoryName = t2.Name,
@@ -2600,7 +2600,7 @@ namespace KGERP.Service.Implementation
                                                   UnitName = t4.Name,
                                                   ProductType = t1.ProductType,
                                                   Code = t1.ProductCode,
-                                                  
+
                                                   DieSize = t1.DieSize,
                                                   PackSize = t1.PackSize,
                                                   ProcessLoss = t1.ProcessLoss,
@@ -3129,11 +3129,11 @@ namespace KGERP.Service.Implementation
             commonProduct.TPPrice = vmCommonProduct.TPPrice;
             commonProduct.ShortName = vmCommonProduct.ShortName;
             commonProduct.CreditSalePrice = vmCommonProduct.CreditSalePrice;
-            
+
             commonProduct.Remarks = vmCommonProduct.Remarks;
             commonProduct.DieSize = vmCommonProduct.DieSize;
             commonProduct.PackId = vmCommonProduct.PackId;
-           
+
             commonProduct.ProcessLoss = vmCommonProduct.ProcessLoss;
 
             if (await _db.SaveChangesAsync() > 0)
@@ -3162,7 +3162,7 @@ namespace KGERP.Service.Implementation
                 vmCommonProduct.Common_ProductFk = result;
                 vmCommonProduct.Common_ProductSubCategoryFk = commonProduct.ProductSubCategoryId;
                 vmCommonProduct.Common_ProductCategoryFk = commonProduct.ProductCategoryId;
-            }       
+            }
             return vmCommonProduct;
         }
         public async Task<int> kfmalProductDelete(int id)
@@ -3224,23 +3224,35 @@ namespace KGERP.Service.Implementation
             }
             return UnitList;
         }
+        public VMCommonProduct GetRMUnitAndClosingRateByProductId(int productId)
+        {
+            var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
+                            join t4 in _db.Units on t1.UnitId equals t4.UnitId
+                            select new VMCommonProduct
+                            {
+                                ID = t1.ProductId,
+                                Name = t1.ProductName,
+                                UnitName = t4.Name,
+                                CompanyFK = t1.CompanyId
+                            }).FirstOrDefault();
+            VMProductStock vMProductStock = new VMProductStock();
+            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", products.ID, products.CompanyFK).FirstOrDefault();
+            products.CostingPrice = vMProductStock.ClosingRate;
 
+            return products;
+        }
         public VMRealStateProduct GetCommonProductByID(int id)
         {
             var v = (from t1 in _db.Products.Where(x => x.ProductId == id)
                      join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
                      join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
                      join t4 in _db.Units on t1.UnitId equals t4.UnitId
-                     join t5 in _db.Products on t1.PackId equals t5.ProductId into t5_Join
-                     from t5 in t5_Join.DefaultIfEmpty()
-                     join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId into t6_Join
-                     from t6 in t6_Join.DefaultIfEmpty()
 
                      select new VMRealStateProduct
                      {
                          ID = t1.ProductId,
                          Name = t1.ProductName,
-                         UnitPrice = t1.UnitPrice??0,
+                         UnitPrice = t1.UnitPrice ?? 0,
                          TPPrice = t1.TPPrice,
                          ShortName = t1.ShortName,
                          SubCategoryName = t2.Name,
@@ -3252,22 +3264,12 @@ namespace KGERP.Service.Implementation
                          CompanyFK = t1.CompanyId,
                          CostingPrice = t1.CostingPrice,
                          PackId = t1.PackId,
-                         PackName = t5 != null ? t6.Name + " " + t5.ProductName : "",
+
                          DieSize = t1.DieSize,
                          PackSize = t1.PackSize,
                          ProcessLoss = t1.ProcessLoss,
-                         FormulaQty = t1.FormulaQty,
-                         CreditSalePrice = t1.CreditSalePrice,
-                         Model = t1.Model,
-                         HcCode = t1.HcCode,
-                         Color = t1.Color,
-                         HorsePower = t1.HorsePower,
-                         NoOfCylinder = t1.NoOfCylinder,
-                         EngineNo = t1.EngineNo,
-                         ChassisNo = t1.ChassisNo,
-                         FuelPumpSlNo = t1.FuelPumpSlNo,
-                         BatteryNo = t1.BatteryNo,
-                         ReanType = t1.ReanType
+                         FormulaQty = t1.FormulaQty
+
                      }).FirstOrDefault();
             return v;
         }
@@ -3315,7 +3317,7 @@ namespace KGERP.Service.Implementation
                                                            Common_UnitFk = t1.UnitId,
                                                            Common_ProductCategoryFk = t2.ProductCategoryId,
                                                            CompanyFK = t1.CompanyId,
-                                                          
+
                                                        }).FirstOrDefault());
 
             vmFinishProductBOM.DataListProductBOM = await Task.Run(() => (from t1 in _db.FinishProductBOMs.Where(x => x.CompanyId == companyId && x.FProductFK == productId)
@@ -4341,8 +4343,8 @@ namespace KGERP.Service.Implementation
                 //Accounts Receivable Seed Head4 Id = 38116
                 int ParentId = 0;
 
-                    var subZones = _db.SubZones.Find(commonCustomer.SubZoneId);
-                    ParentId = subZones.AccountHeadId;
+                var subZones = _db.SubZones.Find(commonCustomer.SubZoneId);
+                ParentId = subZones.AccountHeadId;
 
                 VMHeadIntegration integration = new VMHeadIntegration
                 {
@@ -4357,16 +4359,16 @@ namespace KGERP.Service.Implementation
                     CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                     CreatedDate = DateTime.Now,
                 };
-               
-                    HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
 
-                    if (headGlId != null)
-                    {
-                        await VendorsCodeAndHeadGLIdEdit(commonCustomer.VendorId, headGlId);
-                    }
-                
+                HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
 
-    
+                if (headGlId != null)
+                {
+                    await VendorsCodeAndHeadGLIdEdit(commonCustomer.VendorId, headGlId);
+                }
+
+
+
 
             }
             return result;
@@ -4460,7 +4462,7 @@ namespace KGERP.Service.Implementation
         {
 
             var result = -1;
-       
+
             Vendor commonCustomer = new Vendor
             {
                 Name = vmCommonCustomer.Name,
@@ -4470,7 +4472,7 @@ namespace KGERP.Service.Implementation
                 ContactName = vmCommonCustomer.ContactPerson,
                 VendorTypeId = (int)Provider.Customer,
                 Address = vmCommonCustomer.Address,
-                
+
                 NID = vmCommonCustomer.NID,
                 CreditLimit = vmCommonCustomer.CreditLimit,
                 CustomerTypeFK = vmCommonCustomer.CustomerTypeFk,
@@ -4482,12 +4484,12 @@ namespace KGERP.Service.Implementation
                 Propietor = vmCommonCustomer.Propietor,
                 CustomerType = vmCommonCustomer.PaymentType,
                 IsActive = true,
-                
+
 
                 SalesOfficerEmpId = vmCommonCustomer.SalesOfficerEmpId,
                 IsForeign = false,
                 NomineeName = vmCommonCustomer.NomineeName,
-                NomineePhone = vmCommonCustomer.NomineePhone,                
+                NomineePhone = vmCommonCustomer.NomineePhone,
                 NomineeRelation = vmCommonCustomer.NomineeRelation,
                 NomineeNID = vmCommonCustomer.NomineeNID,
                 BusinessAddress = vmCommonCustomer.BusinessAddress,
@@ -4502,15 +4504,15 @@ namespace KGERP.Service.Implementation
                 GuarantorName = vmCommonCustomer.GuarantorName,
                 GurantorAddress = vmCommonCustomer.GurantorAddress,
                 GurantorMobileNo = vmCommonCustomer.GurantorMobileNo
-                
+
 
             };
             _db.Vendors.Add(commonCustomer);
             if (await _db.SaveChangesAsync() > 0)
             {
-                result = commonCustomer.VendorId;               
-                int ParentId = 40481;                 
-                
+                result = commonCustomer.VendorId;
+                int ParentId = 40481;
+
                 VMHeadIntegration integration = new VMHeadIntegration
                 {
                     AccName = commonCustomer.Name,
@@ -4522,13 +4524,13 @@ namespace KGERP.Service.Implementation
                     CompanyFK = commonCustomer.CompanyId,
                     CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                     CreatedDate = DateTime.Now,
-                };              
-                    HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
-                    if (headGlId != null)
-                    {
-                        await VendorsCodeAndHeadGLIdEdit(commonCustomer.VendorId, headGlId);
-                    }
-                 
+                };
+                HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
+                if (headGlId != null)
+                {
+                    await VendorsCodeAndHeadGLIdEdit(commonCustomer.VendorId, headGlId);
+                }
+
             }
             return result;
         }
@@ -5331,7 +5333,7 @@ namespace KGERP.Service.Implementation
         public List<object> CommonBanksDropDownList(int companyId)
         {
             var list = new List<object>();
-            var v = _db.Banks.Where(x => x.CompanyId == companyId && x.IsActive==true).ToList();
+            var v = _db.Banks.Where(x => x.CompanyId == companyId && x.IsActive == true).ToList();
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.BankId });
@@ -5487,27 +5489,27 @@ namespace KGERP.Service.Implementation
             _db.BankBranches.Add(bankBranch);
             if (await _db.SaveChangesAsync() > 0)
             {
-                
-                var Head5 = await _db.Head5.Where(x=>x.AccCode=="1301001002" && x.CompanyId== vMCommonBankBranch.CompanyFK && x.IsActive==true).FirstOrDefaultAsync();
 
-                    var bankBranchVm = _db.BankBranches.Find(bankBranch.BankBranchId);
-                    var bankvm = _db.Banks.Find(bankBranch.BankId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = bankvm.Name + "-" + bankBranch.Name + " (" + bankvm.ShortName + "-A/C: " + bankBranchVm.AccountNumber + ")",
-                        LayerNo = 6,
-                        Remarks = "GL Layer",
-                        ParentId = Head5.Id,
-                        IsIncomeHead = false,
-                        CompanyFK = bankBranch.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    int head5Id = AccHeadGlBank(integration, bankBranchVm.BankBranchId);
+                var Head5 = await _db.Head5.Where(x => x.AccCode == "1301001002" && x.CompanyId == vMCommonBankBranch.CompanyFK && x.IsActive == true).FirstOrDefaultAsync();
 
-                
+                var bankBranchVm = _db.BankBranches.Find(bankBranch.BankBranchId);
+                var bankvm = _db.Banks.Find(bankBranch.BankId);
+                VMHeadIntegration integration = new VMHeadIntegration
+                {
+                    AccName = bankvm.Name + "-" + bankBranch.Name + " (" + bankvm.ShortName + "-A/C: " + bankBranchVm.AccountNumber + ")",
+                    LayerNo = 6,
+                    Remarks = "GL Layer",
+                    ParentId = Head5.Id,
+                    IsIncomeHead = false,
+                    CompanyFK = bankBranch.CompanyId,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                };
+                int head5Id = AccHeadGlBank(integration, bankBranchVm.BankBranchId);
 
-                
+
+
+
                 result = bankBranch.BankBranchId;
             }
             return result;

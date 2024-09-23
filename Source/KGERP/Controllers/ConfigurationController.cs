@@ -934,12 +934,17 @@ namespace Pos.App.Controllers
 
 
         #endregion
-
+        public JsonResult RMUnitAndClosingRateByProductId(int productId)
+        {
+            var model = _service.GetRMUnitAndClosingRateByProductId(productId);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult CommonProductByIDGet(int id)
         {
             var model = _service.GetCommonProductByID(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+
         public JsonResult FinishProductBOMsByIDGet(int id)
         {
             var model = _service.GetFinishProductBOMsByID(id);

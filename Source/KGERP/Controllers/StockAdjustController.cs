@@ -217,7 +217,7 @@ namespace KGERP.Controllers
             }
             else if (stockAdjustId > 0)
             {
-                vmStockAdjustDetail = await _service.FeedRMAdjustmentDetailGet(companyId, stockAdjustId);
+                vmStockAdjustDetail = await _service.ISSRMAdjustmentDetailGet(companyId, stockAdjustId);
             }
             return View(vmStockAdjustDetail);
         }

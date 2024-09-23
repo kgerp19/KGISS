@@ -1681,23 +1681,14 @@ namespace KGERP.Controllers
                 }
 
                 await _service.PackagingPOReceivingSlaveAdd(vmModel, vmModelList);
-                //if (vmModel.SupplierPaymentMethodEnumFK == (int)VendorsPaymentMethodEnum.LC)
-                //{
-                //    await _service.PackagingLCPODetailAdd(vmModel, vmModelList);
-
-                //}
-                //else
-                //{
-                   
-
-                //}
+                
 
             }
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
                 await _service.SubmitMaterialReceive(vmModel);
 
-                //vmModel.MaterialReceiveId = await _service.SubmitMultiMRPackaging();
+                //vmModel.MaterialReceiveId = await _service.SubmitMultiMRISS();
             }
             else
             {

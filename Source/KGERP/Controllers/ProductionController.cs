@@ -533,18 +533,18 @@ namespace KG.App.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> KpLProdReferenceSubmit(int hdnprodReferenceId,int companyid)
+        public async Task<ActionResult> ISSProdReferenceSubmit(VMProdReferenceSlave vmProdReferenceSlave)
         {
             var prodReferenceId = 0; 
-            if (hdnprodReferenceId > 0)
+            if (vmProdReferenceSlave.ProdReferenceId > 0)
             {
-                 prodReferenceId = await _service.SubmitProdReferenceforKpl(hdnprodReferenceId);
+                 prodReferenceId = await _service.SubmitProdReferenceforISS(vmProdReferenceSlave.ProdReferenceId);
 
-                // await _service.SubmitMultiReferenceforKpl();
+                // await _service.SubmitMultiReferenceforISS();
 
 
-            }            
-            return RedirectToAction(nameof(KPLProdReference), new { companyId = companyid, prodReferenceId = prodReferenceId });
+            }
+            return RedirectToAction(nameof(ProdReferenceSlave), new { companyId = vmProdReferenceSlave.CompanyFK, prodReferenceId = vmProdReferenceSlave.ProdReferenceId });
         }
 
         [HttpPost]

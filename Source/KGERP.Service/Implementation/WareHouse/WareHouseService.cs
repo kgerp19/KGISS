@@ -1144,7 +1144,7 @@ namespace KGERP.Services.WareHouse
             }
             #region Ready To Account Integration
             VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-            await _accountingService.PackagingMRPush(vmModel.CompanyFK.Value, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
+            await _accountingService.ISSMRPush(vmModel.CompanyFK.Value, AccData);
              
 
             #endregion
@@ -4364,25 +4364,20 @@ namespace KGERP.Services.WareHouse
 
 
         //Feed Raw Material AdJustement Details Get Starts - Hridoy 17May2022
-        public async Task<VMStockAdjustDetail> FeedRMAdjustmentDetailGet(int companyId, int stockAdjustId)
+        public async Task<VMStockAdjustDetail> ISSRMAdjustmentDetailGet(int companyId, int stockAdjustId)
         {
             VMStockAdjustDetail vmStockAdjustDetail = new VMStockAdjustDetail();
-            vmStockAdjustDetail = await Task.Run(() => (from t1 in _db.StockAdjusts
-                                                        join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
-                                                        where t1.CompanyId == companyId && t1.StockAdjustId == stockAdjustId
+            vmStockAdjustDetail = await Task.Run(() => (from t1 in _db.StockAdjusts                                                        
+                                                        where t1.StockAdjustId == stockAdjustId
                                                         select new VMStockAdjustDetail
                                                         {
 
                                                             StockAdjustId = t1.StockAdjustId,
                                                             AdjustDate = t1.AdjustDate,
                                                             InvoiceNo = t1.InvoiceNo,
-                                                            Remarks = t1.Remarks,
-                                                            CompanyEmail = t2.Email,
-                                                            CompanyPhone = t2.Phone,
-                                                            CompanyAddress = t2.Address,
+                                                            Remarks = t1.Remarks,                                                             
                                                             CompanyFK = t1.CompanyId,
-                                                            IsFinalized = t1.IsFinalized,
-                                                            ComImage = t2.CompanyLogo,
+                                                            IsFinalized = t1.IsFinalized,                                                          
                                                             CreatedBy = t1.CreatedBy,
                                                             IntegratedFrom = "StockAdjust"
 
@@ -4411,7 +4406,7 @@ namespace KGERP.Services.WareHouse
                                                                           ExcessQty = t1.ExcessQty,
                                                                           Amount = (t1.LessQty * t1.UnitPrice),
                                                                           OverAmount = (t1.ExcessQty * t1.UnitPrice),
-                                                                          AccountingHeadId = t5.AccountingHeadId,
+                                                                          AccountingHeadId = t7.AccountingHeadId,
                                                                           UnitName = t8.Name
                                                                       }).OrderByDescending(x => x.StockAdjustDetailId).AsEnumerable());
 
@@ -5345,7 +5340,7 @@ namespace KGERP.Services.WareHouse
         }
 
 
-        //Feed SubmitRMAdjusts Starts Hridoy 17 May 2022
+         
         public async Task<long> SubmitRMAdjusts(VMStockAdjustDetail vmModel)
         {
             long result = -1;
@@ -5358,23 +5353,12 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.StockAdjustId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                #region Ready To Account Integration
-                VMStockAdjustDetail AccData = await FeedRMAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushFeed(vmModel.CompanyFK.Value, AccData, (int)FeedJournalEnum.RMAdjustmentEntry);
 
-                #endregion
-            }
+            #region Ready To Account Integration
+            VMStockAdjustDetail AccData = await ISSRMAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
+            await _accountingService.StockAdjustPushIss(vmModel.CompanyFK.Value, AccData);
 
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-            {
-                #region Ready To Account Integration
-                VMStockAdjustDetail AccData = await WareHouseOrderItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.AdjustmentEntry);
-
-                #endregion
-            }
+            #endregion
 
             return result;
         }
@@ -5398,7 +5382,7 @@ namespace KGERP.Services.WareHouse
             {
                 #region Ready To Account Integration
                 VMStockAdjustDetail AccData = await WareHouseOrderItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.AdjustmentEntry);
+                await _accountingService.StockAdjustPushIss(vmModel.CompanyFK.Value, AccData);
 
                 #endregion
             }
@@ -5990,7 +5974,7 @@ namespace KGERP.Services.WareHouse
             return model;
         }
 
-        public async Task<long> SubmitMultiMRPackaging()
+        public async Task<long> SubmitMultiMRISS()
         {
 
             var firstDayOfMonth = new DateTime(2024, 08, 1);
@@ -6012,7 +5996,7 @@ namespace KGERP.Services.WareHouse
                 await _db.SaveChangesAsync();
 
                 VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(item.CompanyId, (int)item.MaterialReceiveId);
-                await _accountingService.PackagingMRPush(item.CompanyId, AccData, (int)PackagingJournalEnum.PurchaseVoucher);
+                await _accountingService.ISSMRPush(item.CompanyId, AccData);
             }
             return 0;
         }
