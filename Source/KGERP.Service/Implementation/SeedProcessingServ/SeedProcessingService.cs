@@ -134,7 +134,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                  IsSumitted = t1.IsSubmitted
                              }).OrderBy(x => x.SeedProcessDate).FirstOrDefaultAsync();
 
-            var resultList = await (from l1 in _db.SeedProcessingDetails
+            vmModel.DataList  = await (from l1 in _db.SeedProcessingDetails
                                     join l3 in _db.MaterialReceiveDetails on l1.MaterialReceiveDetailId equals l3.MaterialReceiveDetailId
                                     join l2 in _db.Products on l1.ProductId equals l2.ProductId
                                     join t3 in _db.ProductSubCategories on l2.ProductSubCategoryId equals t3.ProductSubCategoryId
@@ -142,6 +142,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                     where l1.SeedProcessingId == seedProcessingId && l1.IsActive && l2.IsActive
                                     select new SeedProcessingDetailsVM
                                     {
+                                        
                                         ProductId = l1.ProductId.Value,
                                         ProductName = t4.Name + " " + t3.Name + " " + l2.ProductName,
                                         SeedProcessingDetailsId = l1.SeedProcessingDetailId,
@@ -153,14 +154,10 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                                         .Where(x => x.MaterialReceiveDetailId == l3.MaterialReceiveDetailId
                                                                     && x.SeedProcessingId != seedProcessingId
                                                                     && x.IsActive).Select(x => x.Amount).DefaultIfEmpty(0).Sum(),
-                                        CurrentStockInRate = ((l3.StockInQty.Value * l3.StockInRate.Value) + l1.Amount)
+                                         
 
-
-                                    }).ToListAsync();
-            if (resultList.Count > 0)
-            {
-                vmModel.DataList = resultList;
-            }
+                                    }).OrderByDescending(x => x.SeedProcessingDetailsId).ToListAsync();
+             
 
 
             return vmModel;
@@ -184,7 +181,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                           SeedProcessDate = t1.SeedProcessDate,
                                           SeedProcessBy = t4.Name,
                                           CreatedDate = t1.CreatedDate
-                                      }).OrderBy(x => x.SeedProcessDate).ToListAsync();
+                                      }).OrderByDescending(x => x.SeedProcessingId).ToListAsync();
             return vmModel;
         }
 
