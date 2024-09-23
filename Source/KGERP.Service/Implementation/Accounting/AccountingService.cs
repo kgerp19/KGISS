@@ -7121,7 +7121,7 @@ namespace KGERP.Service.Implementation
 
 
 
-        public async Task<long> AccountingPurchaseReturnPushPackaging(int CompanyFK, VMWareHousePOReturnSlave model, int journalType)
+        public async Task<long> AccountingPurchaseReturnPushISS(int CompanyFK, VMWareHousePOReturnSlave model, int journalType)
         {
             long result = -1;
             VMJournalSlave vMJournalSlave = new VMJournalSlave
@@ -7167,13 +7167,14 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
-
+            var vatAccount = _db.HeadGLs.Where(x => x.CompanyId == CompanyFK && x.AccCode == "1306001001001" && x.IsActive).FirstOrDefault();
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Adjust",
                 Debit = model.DataListSlave.Any() ? Convert.ToDouble(model.DataListSlave.Sum(x => x.ReturnQuantity * x.COGS)) : 0,
                 Credit = 0,
-                Accounting_HeadFK = 50605003 //Packaging Stock Adjust With Erp Cr
+                /*Accounting_HeadFK = 50605003*/ //Packaging Stock Adjust With Erp Cr
+                Accounting_HeadFK = vatAccount.Id
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
