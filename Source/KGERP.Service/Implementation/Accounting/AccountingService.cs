@@ -1476,6 +1476,27 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
+        public object GetAutoCompleteHeadGLForSeedProcessingGet(string prefix, int companyId)
+        {
+            var v = (from hgl in _db.HeadGLs
+                     join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                     join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                     join h3 in _db.Head3 on h4.ParentId equals h3.Id
+                     where hgl.CompanyId == companyId
+                     && h4.AccCode == "1301001"
+                     && hgl.IsActive
+                     && h5.IsActive
+                     && h4.IsActive
+                     && ((hgl.AccName.Contains(prefix)) || (hgl.AccCode.Contains(prefix)))
+                     select new
+                     {
+                         label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
+                         val = hgl.Id
+                     }).OrderBy(x => x.label).Take(200).ToList();
+
+            return v;
+        }
+
         public object GetAutoCompleteVendorHeadGL(string prefix, int companyId, int vendorTypeId)
         {
             //te
