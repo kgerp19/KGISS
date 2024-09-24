@@ -3165,6 +3165,7 @@ namespace KGERP.Service.Implementation
                 vmCommonProduct.Common_ProductFk = result;
                 vmCommonProduct.Common_ProductSubCategoryFk = commonProduct.ProductSubCategoryId;
                 vmCommonProduct.Common_ProductCategoryFk = commonProduct.ProductCategoryId;
+                vmCommonProduct.CompanyFK = commonProduct.CompanyId;
             }
             return vmCommonProduct;
         }
