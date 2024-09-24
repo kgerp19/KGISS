@@ -5699,7 +5699,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "CustomerAgeingSeedReport";
+            model.ReportName = "ISSCustomerAgeingReport";
 
 
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&AsOnDate={3}&ZoneId={4}&SubZoneId={5}", model.ReportName, model.ReportType, model.CompanyFK.Value, model.AsOnDate, model.ZoneId ?? 0, model.SubZoneId ?? 0);
