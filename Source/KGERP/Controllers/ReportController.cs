@@ -675,8 +675,6 @@ namespace KGERP.Controllers
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&CompanyId={1}&DemandId={2}&CustomerId={3}&AsOnDate={4}", reportName, companyId, DemandId, CustomerId, AsOnDate);
             return File(client.DownloadData(reportURL), "application/pdf");
         }
-
-
         [HttpGet]
         public ActionResult GCCLProductionReport(int companyId, int prodReferenceId, string reportName)
         {
