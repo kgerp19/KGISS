@@ -501,6 +501,7 @@ namespace KGERP.Services.WareHouse
             List<SaleReturnDetail> saleReturnList = new List<SaleReturnDetail>();
             foreach (var item in dataList)
             {
+
                 SaleReturnDetail saleReturnDetail = new SaleReturnDetail
                 {
                     SaleReturnId = vmSaleReturnDetail.SaleReturnId,
