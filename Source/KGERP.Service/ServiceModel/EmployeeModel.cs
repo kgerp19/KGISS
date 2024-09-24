@@ -258,6 +258,11 @@ namespace KGERP.Service.ServiceModel
         public string MobileNo { get; set; }
         public string OfficeEmail { get; set; }
         public string SainatureName { get; set; }
+        public string GradeCode { get; set; }
+        public string GradeName { get; set; }
+        public string BloodGroup { get; set; }
+        public string Remarks { get; set; }
+        public string PABX { get; set; }
         public IEnumerable<EmployeeVm> DataList { get; set; }
     }
 
