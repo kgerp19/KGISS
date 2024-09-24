@@ -421,6 +421,8 @@ namespace KGERP.Service.Configuration
         public int CompanyId { get; set; }
         public int? StatusId { get; set; }
         public int RProductFK { get; set; }
+        public int FCEnumId { get; set; }
+        public string FCEnumName { get; set; }
         public decimal RequiredQuantity { get; set; }
         public double Qty { get; set; }
       
@@ -455,6 +457,7 @@ namespace KGERP.Service.Configuration
         public string FinalDestination { get; set; }
         public string CourierNo { get; set; }
         public int SupplierId { get; set; }
+        public SelectList FCEnumSelectionList { get { return new SelectList(BaseFunctionalities.GetEnumList<FormulaCalculationEnum>(), "Value", "Text"); } }
 
     }
 

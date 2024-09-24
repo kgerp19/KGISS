@@ -17,6 +17,12 @@ namespace KGERP.Utility
         Approved,
         Denied
     }
+    public enum FormulaCalculationEnum
+    {
+        gm = 1,
+        KG,
+        Pcs,
+    }
 
     //public enum AnnualPerformanceCategory
     //{
@@ -25,6 +31,11 @@ namespace KGERP.Utility
     //    GMD,
     //    HRAdmin
     //}
+    public enum TransportTypeEnum
+    {
+        Courier = 1,
+        Truck
+    }
 
     public enum LeaveStatusEnum
     {

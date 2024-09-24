@@ -28,11 +28,13 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> DeliveryDate { get; set; }
         public string ChallanNo { get; set; }
         public string InvoiceNo { get; set; }
-        public string VehicleNo { get; set; }
+        public Nullable<int> TransportTypeId { get; set; }
         public string DriverName { get; set; }
+        public string VehicleNo { get; set; }
+        public string MobileNo { get; set; }
+        public Nullable<decimal> Carrying { get; set; }
         public Nullable<decimal> TotalAmount { get; set; }
         public Nullable<decimal> Commission { get; set; }
-        public Nullable<decimal> Carrying { get; set; }
         public Nullable<decimal> SpecialDiscount { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
@@ -47,10 +49,10 @@ namespace KGERP.Data.Models
         public bool IsSeen { get; set; }
         public string Remark { get; set; }
     
+        public virtual OrderMaster OrderMaster { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderDeliverDetail> OrderDeliverDetails { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SaleReturn> SaleReturns { get; set; }
-        public virtual OrderMaster OrderMaster { get; set; }
     }
 }

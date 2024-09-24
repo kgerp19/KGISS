@@ -654,7 +654,7 @@ namespace Pos.App.Controllers
                 //Add 
                 vmCommonProductCategory.ProductType = "R";
 
-                await _service.ProductFinishCategoryAdd(vmCommonProductCategory);
+                await _service.ProductRawCategoryAdd(vmCommonProductCategory);
             }
             else if (vmCommonProductCategory.ActionEum == ActionEnum.Edit)
             {
@@ -934,12 +934,17 @@ namespace Pos.App.Controllers
 
 
         #endregion
-
+        public JsonResult RMUnitAndClosingRateByProductId(int productId)
+        {
+            var model = _service.GetRMUnitAndClosingRateByProductId(productId);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult CommonProductByIDGet(int id)
         {
             var model = _service.GetCommonProductByID(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+
         public JsonResult FinishProductBOMsByIDGet(int id)
         {
             var model = _service.GetFinishProductBOMsByID(id);
@@ -1034,11 +1039,7 @@ namespace Pos.App.Controllers
             var products = _service.GetAutoCompleteProduct(companyId, prefix, productType);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult GCCLAutoCompleteRawPackingMaterialsGet(int companyId, string prefix)
-        {
-            var products = _service.GCCLGetAutoCompleteRawPackingMaterials(companyId, prefix);
-            return Json(products, JsonRequestBehavior.AllowGet);
-        }
+        
         public JsonResult AutoCompleteRawPackingMaterialsGet(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawPackingMaterials(companyId, prefix);
@@ -1131,16 +1132,11 @@ namespace Pos.App.Controllers
             if (vmCommonSupplier.ActionEum == ActionEnum.Add)
             {
                 //Add 
-                if (vmCommonSupplier.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
-                    await _service.KfmalSupplierAdd(vmCommonSupplier);
+               
+                    await _service.SEEDSupplierAdd(vmCommonSupplier);
 
-                }
-                else
-                {
-                    await _service.SupplierAdd(vmCommonSupplier);
-
-                }
+                
+               
             }
             else if (vmCommonSupplier.ActionEum == ActionEnum.Edit)
             {

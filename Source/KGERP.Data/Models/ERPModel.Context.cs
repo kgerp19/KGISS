@@ -207,7 +207,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Expens> Expenses { get; set; }
         public virtual DbSet<FacingInfo> FacingInfoes { get; set; }
         public virtual DbSet<Farmer> Farmers { get; set; }
-        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<GeneralRequisitionProductCategory> GeneralRequisitionProductCategories { get; set; }
         public virtual DbSet<Incentive> Incentives { get; set; }
         public virtual DbSet<IncentiveDetail> IncentiveDetails { get; set; }
@@ -330,7 +329,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<OfficerAssign> OfficerAssigns { get; set; }
         public virtual DbSet<MoneyReceiptDetail> MoneyReceiptDetails { get; set; }
         public virtual DbSet<OrderDeliverDetail> OrderDeliverDetails { get; set; }
-        public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
         public virtual DbSet<QualityExceptionComplaintMap> QualityExceptionComplaintMaps { get; set; }
         public virtual DbSet<QualityExceptionComplaint> QualityExceptionComplaints { get; set; }
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
@@ -352,15 +350,17 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_SpecialAddition> PRoll_SpecialAddition { get; set; }
         public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
-        public virtual DbSet<Prod_Reference> Prod_Reference { get; set; }
         public virtual DbSet<ProductBookingInfo> ProductBookingInfoes { get; set; }
         public virtual DbSet<PurchaseReturnDetail> PurchaseReturnDetails { get; set; }
         public virtual DbSet<OrderMaster> OrderMasters { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
         public virtual DbSet<ProductCategory> ProductCategories { get; set; }
-        public virtual DbSet<SeedProcessing> SeedProcessings { get; set; }
         public virtual DbSet<SeedProcessingDetail> SeedProcessingDetails { get; set; }
+        public virtual DbSet<Prod_Reference> Prod_Reference { get; set; }
+        public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
+        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
+        public virtual DbSet<SeedProcessing> SeedProcessings { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

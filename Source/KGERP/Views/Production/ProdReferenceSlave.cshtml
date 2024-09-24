@@ -22,7 +22,7 @@
         @if (Model.ProdReferenceId > 0)
         {
             <span>
-                Packaging Detail of: <a target="_blank" href="~/Production/ProdReferenceSlaveReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.ProdReferenceId">@Model.ReferenceNo</a>
+                Packaging Detail of: <a target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@Model.ProdReferenceId&companyId=@Model.CompanyFK">@Model.ReferenceNo</a>
             </span>
         }
         else
@@ -101,9 +101,27 @@
                                             Remarks
                                         </th>
                                         <th style="width:2%">:</th>
-                                        <td colspan="4" style="width:30%">
+                                        <td style="width:30%">
                                             <label class="col-form-label">@Model.Remarks</label>
 
+                                        </td>
+                                        <th style="width:18%">
+                                            Submission
+                                        </th>
+                                        <th style="width:2%">:</th>
+                                        <td style="width:30%">
+                                            @if (Model.IsSubmitted)
+                                            {
+                                                <span class="btn btn-success btn-xs">
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-xs btn-warning">
+                                                    Submission Pending
+                                                </span>
+                                            }
 
                                         </td>
                                     </tr>
@@ -116,14 +134,14 @@
                     </div>
                     <div class="box-body">
                         @*@if (Model.ProdReferenceId == 0)
-            {
-                <div class="row">
-                    <div class="form-group" style="padding:0px">
-                        @Html.CheckBoxFor(model => model.MakeFinishInventory, new { htmlAttributes = new { @id = "txtMakeFinishInventory" } }) Is Opening Stock
+        {
+            <div class="row">
+                <div class="form-group" style="padding:0px">
+                    @Html.CheckBoxFor(model => model.MakeFinishInventory, new { htmlAttributes = new { @id = "txtMakeFinishInventory" } }) Is Opening Stock
 
-                    </div>
                 </div>
-            }*@
+            </div>
+        }*@
 
                         @if (Model.ProdReferenceId == 0)
                         {
@@ -144,66 +162,67 @@
                                 </div>
                             </div>
                         }
+                        @if (!Model.IsSubmitted)
+                        {
+                            <div class="row">
 
-                    <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Finish Item:</label>
+                                        @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @style = "width:100%;border:1px black solid", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
 
-                        <div class="col-md-6">
-                            <div class="form-group" style="padding:0px">
-                                <label for="message-text" class="col-form-label">Finish Item:</label>
-                                @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @style = "width:100%;border:1px black solid", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
-
-                                @Html.HiddenFor(model => model.FProductId, new { id = "ddlRProductFK" })
-                                @Html.ValidationMessageFor(model => model.FProductId, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Production Qty</label>
-                                <div class="input-group">
-                                    @Html.TextBoxFor(model => model.Quantity, new { id = "txtQuantity", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Quantity", required = "Required" })
-                                    @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger" })
-
-                                    <div class="input-group-addon" style="border:1px black solid">
-                                        <span class="txtUnitName"></span>
+                                        @Html.HiddenFor(model => model.FProductId, new { id = "ddlRProductFK" })
+                                        @Html.ValidationMessageFor(model => model.FProductId, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="col-md-2">
-                            <div class="form-group" style="padding:0px">
-                                <label for="message-text" class="col-form-label">Packaging Formula:</label>
-                                <a class="btn-link btn btn-default" id="linkProductFormulaId" target="_blank" href="~/Production/ProdReferenceSlave?companyId=@Model.CompanyFK">Formula & RM Stock</a>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Production Qty</label>
+                                        <div class="input-group">
+                                            @Html.TextBoxFor(model => model.Quantity, new { id = "txtQuantity", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Quantity", required = "Required" })
+                                            @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger" })
+
+                                            <div class="input-group-addon" style="border:1px black solid">
+                                                <span class="txtUnitName"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group" style="padding:0px">
+                                        <label for="message-text" class="col-form-label">Packaging Formula:</label>
+                                        <a class="btn-link btn btn-default" id="linkProductFormulaId" target="_blank" href="~/Production/ProdReferenceSlave?companyId=@Model.CompanyFK">Formula & RM Stock</a>
+
+                                    </div>
+                                </div>
+
 
                             </div>
-                        </div>
-                        
+
+                            <div class="row">
+                                <div class="col-md-4">
+
+                                </div>
+                                <div class="col-lg-8 col-md-8">
+                                    <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                        <i class='fa fa-plus'></i>
+                                        @if (Model.ProdReferenceId > 0)
+                                        {
+                                            <span>Add Finished Product</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Packaging</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        }
 
                     </div>
-                    </div>
-                    <div class="box-footer">
-
-
-                        <div class="row">
-                            <div class="col-md-4">
-
-                            </div>
-                            <div class="col-lg-8 col-md-8">
-                                <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
-                                    <i class='fa fa-plus'></i>
-                                    @if (Model.ProdReferenceId > 0)
-                                    {
-                                        <span>Add Finished Product</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Packaging</span>
-                                    }
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <!--Body Will by Start Here-->
                     @{
@@ -285,7 +304,7 @@
                                             <th style="padding:5px;text-align:center;">Consumed Qty</th>
                                             <th style="padding:5px;text-align:right;">COGS</th>
                                             <th style="padding:5px;text-align:right;">Total COGS</th>
-                                             
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -304,7 +323,7 @@
                                                 <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.COGS)</td>
                                                 <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.TotalCOGS)</td>
 
-                                                 
+
                                             </tr>
                                         }
 
@@ -331,7 +350,7 @@
 
                                 </div>
                                 <div class="col-md-4">
-                                    <a style="width:100%" class="btn btn-info" target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@Model.ProdReferenceId">Print Packaging</a>
+                                    <a style="width:100%" class="btn btn-info" target="_blank" href="~/Report/KPLProdReferenceReport?prodReferenceId=@Model.ProdReferenceId&companyId=@Model.CompanyFK">Print Packaging</a>
 
                                 </div>
                                 <div class="col-md-4">
@@ -344,7 +363,7 @@
                                     }
                                     else
                                     {
-                                        <a style="width: 100%" onclick="makeSubmit('@Model.ProdReferenceId','@Model.CompanyFK')" class="linkPointer btn btn-warning" data-toggle="modal" data-target="#SubmitModal" data-placement="top"> <i class="glyphicon glyphicon-ok" aria-hidden="true"></i> Submit Packaging </a>
+                                        <a style="width: 100%"   class="linkPointer btn btn-warning" data-toggle="modal" data-target="#SubmitModal" data-placement="top"> <i class="glyphicon glyphicon-ok" aria-hidden="true"></i> Submit Packaging </a>
 
                                     }
 
@@ -395,6 +414,45 @@
                     </div>
                     <div class="col-md-9">
                         <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginForm("ISSProdReferenceSubmit", "Production", FormMethod.Post))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="SubmitModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b id="modSubmitTitle"></b><span></span></h5>
+                </div>
+                <div class="modal-body">
+
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    @Html.HiddenFor(model => model.ProdReferenceId, new { id = "subProdReferenceId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "subCompanyFK" })
+                   
+
+
+                    <div style="text-align:center">
+                        <h3 id="modSubmitBodyText"></h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" style="width:100%" class="btn btn-danger fa fa-check"><b id="btnModSubmit"> </b></button>
                     </div>
                 </div>
             </div>
@@ -509,24 +567,7 @@
 
         function makeSubmitble(rowId) {
                 // console.log(rowId);
-                $.ajax({
-                        type: "POST",
-                        url: "@Url.Action("SingleProcurementPurchaseOrder", "Procurement")",
-                        datatype: "Json",
-                        data: { id: rowId },
-                        success: function (data) {
-                            console.log(data);
-                            $('#submitOrDraftPOCIDText').text(data.cid);
-
-                            if (data.status == 0) {
-                                $('.submitOrDraftText').text("Make Submit");
-                            }
-                            else {
-                                $('.submitOrDraftText').text("Make Draft");
-
-                            }
-                        }
-                 });
+                
                 $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
             }
     </script>

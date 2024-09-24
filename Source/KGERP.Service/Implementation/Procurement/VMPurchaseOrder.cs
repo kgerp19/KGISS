@@ -393,6 +393,7 @@ namespace KGERP.Services.Procurement
         public double UnitPrice { get; set; }
         public double? Consumption { get; set; }
         public double? PackQuantity { get; set; }
+        public decimal? QtyInPack { get; set; }
         public double? PackSize { get; set; }
 
         public double TotalPrice { get { return Qty * UnitPrice; } }
@@ -406,6 +407,7 @@ namespace KGERP.Services.Procurement
         public SelectList ProductList { get; set; } = new SelectList(new List<object>());
         public SelectList SubZoneList { get; set; } = new SelectList(new List<object>());
         public SelectList ZoneList { get; set; } = new SelectList(new List<object>());
+        public SelectList StockInfoList { get; set; } = new SelectList(new List<object>());
 
         public IEnumerable<VMSalesOrderSlave> DataListSlave { get; set; }
         public int ProductSubCategoryId { get; set; }

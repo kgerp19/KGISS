@@ -1,4 +1,5 @@
-﻿
+﻿@model KGERP.Services.WareHouse.VMOrderDeliverDetail
+@using KGERP.Utility;
 @{
     ViewData["Title"] = "Delivery Challan";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -12,13 +13,13 @@
     }
 </style>
 
-@model KGERP.Services.WareHouse.VMOrderDeliverDetail
+
 <section class="content-header">
     <h1>
         @if (Model.OrderDeliverId > 0)
         {
             <span>
-                Delivery Challan <a target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetailReport?companyId=@Model.CompanyFK&orderDeliverId=@Model.OrderDeliverId">@Model.ChallanNo</a>
+                Delivery Challan   <a href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=Model.OrderDeliverId,companyId=Model.CompanyFK})" title="Challan Copy" target="_blank"> @Model.ChallanNo </a>
             </span>
         }
         else
@@ -74,7 +75,7 @@
                                     </tr>
                                     <tr>
                                         <th>
-                                            Invoice No
+                                            Order No
                                         </th>
                                         <th>:</th>
                                         <td>
@@ -84,6 +85,19 @@
                                         <th>:</th>
                                         <td>@Model.OrderDate.ToShortDateString()</td>
                                     </tr>
+                                    <tr>
+                                        <th>
+                                            Invoice No
+                                        </th>
+                                        <th>:</th>
+                                        <td>
+                                            <label class="col-form-label">@Model.InvoiceNo</label>
+                                        </td>
+                                        <th>Invoice Date</th>
+                                        <th>:</th>
+                                        <td>@Model.DeliveryDate.Value.ToShortDateString()</td>
+                                    </tr>
+
                                     <tr>
                                         <th>Zone</th>
                                         <th>:</th>
@@ -110,13 +124,38 @@
                                         <td>@Model.CustomerAddress</td>
                                     </tr>
                                     <tr>
-                                        <th>Contact Person</th>
-                                        <th>:</th>
-                                        <td>@Model.ContactPerson</td>
                                         <th>Created By</th>
                                         <th>:</th>
                                         <td>@Model.CreatedBy</td>
+                                        <th>Create Date</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedDate</td>
+
                                     </tr>
+                                    @if (Model.TransportTypeId == (int)TransportTypeEnum.Courier)
+                                    {
+                                        <tr>
+                                            <th>Courier</th>
+                                            <th>:</th>
+                                            <td>@Model.DriverName - @Model.VehicleNo</td>
+                                            <th>Courier Charge</th>
+                                            <th>:</th>
+                                            <td>@Model.Carrying</td>
+
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <th>Truck</th>
+                                            <th>:</th>
+                                            <td>@Model.DriverName - @Model.DriverMobileNo - @Model.VehicleNo</td>
+                                            <th>Truck Fair</th>
+                                            <th>:</th>
+                                            <td>@Model.Carrying</td>
+
+                                        </tr>
+                                    }
 
                                 </table>
                             </div>
@@ -129,27 +168,30 @@
 
 
                             <div class="row">
-                                <div class="col-md-2">
+                                <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Challan Date</label>
+                                        <label class="required">Challan Date</label>
 
                                         <input name="DeliveryDate" asp-for="DeliveryDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtDeliveryDate" placeholder="Challan Date" autocomplete="off">
 
                                         @Html.ValidationMessageFor(model => model.DeliveryDate, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <div class="form-group" style="padding:0px">
-                                        <label for="message-text" class="col-form-label">Warehouse:</label>
+                                        <label for="message-text" class="col-form-label required">Warehouse:</label>
                                         @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
                                         @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
 
 
-                                <div class="col-md-6">
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
                                     <div class="form-group" style="padding:0px">
-                                        <label>Order Number</label>
+                                        <label class="required">Order Number</label>
                                         @Html.EditorFor(model => model.OrderNo, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Order No", @id = "txtOrderNo" } })
 
                                         @Html.HiddenFor(model => model.OrderMasterId, new { id = "ddlOrderMasterId" })
@@ -170,26 +212,72 @@
                                             </td>
                                             <td><span id="txtOrderDate"></span></td>
                                         </tr>
-                                        @*<tr>
-                                <td>
-                                    Delivery Address
-                                </td>
-                                <td><span id="txtDeliveryAddress"></span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Delivery Date
-                                </td>
-                                <td><span id="txtDeliveryDate"></span></td>
-                            </tr>*@
-
                                     </table>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label required">Transport Type</label>
+                                        @Html.DropDownListFor(model => model.TransportTypeId, new SelectList(Model.TransportTypeList, "Value", "Text"), "==Select Transport==", new { id = "ddlTransportTypeId", @class = " form-control input-sm searchingDropdown" })
+                                        @Html.ValidationMessageFor(model => model.TransportTypeId, "", new { @class = "text-danger" })
+                                    </div>
 
+                                    <div id="CourierSectionDiv" style="display:none;">
+                                        <div class="col-md-6">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Courier Name</label>
+                                                @Html.EditorFor(model => model.CourierName, new { htmlAttributes = new { @class = "form-control", @id = "txtCourierName" } })
+                                                @Html.ValidationMessageFor(model => model.CourierName, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Courier No</label>
+                                                @Html.EditorFor(model => model.CourierNo, new { htmlAttributes = new { @class = "form-control", @id = "txtCourierNo" } })
+                                                @Html.ValidationMessageFor(model => model.CourierNo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Courier Charge</label>
+                                                @Html.EditorFor(model => model.CourierCharge, new { htmlAttributes = new { @class = "form-control", @id = "txtCourierCharge", type = "number" } })
+                                                @Html.ValidationMessageFor(model => model.CourierCharge, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="TruckSectionDiv" style="display:none;">
+                                        <div class="col-md-3">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Driver Name</label>
+                                                @Html.EditorFor(model => model.DriverNameForDelivery, new { htmlAttributes = new { @class = "form-control", @id = "txtDriverName" } })
+                                                @Html.ValidationMessageFor(model => model.DriverNameForDelivery, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Driver Mobile No</label>
+                                                @Html.EditorFor(model => model.DriverMobileNo, new { htmlAttributes = new { @class = "form-control", @id = "txtDriverMobileNo" } })
+                                                @Html.ValidationMessageFor(model => model.DriverMobileNo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Vehicle No</label>
+                                                @Html.EditorFor(model => model.VehicleNo, new { htmlAttributes = new { @class = "form-control", @id = "txtVehicleNo" } })
+                                                @Html.ValidationMessageFor(model => model.VehicleNo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group" style="padding:0px">
+                                                <label for="message-text" class="col-form-label">Truck Fair</label>
+                                                @Html.EditorFor(model => model.TruckFair, new { htmlAttributes = new { @class = "form-control", @id = "txtTruckFair", type = "number" } })
+                                                @Html.ValidationMessageFor(model => model.TruckFair, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
                             <br />
                             <div class="col-md-12">
                                 <div class="box">
@@ -221,7 +309,12 @@
                                                 <th class="center">Product Name </th>
                                                 <th class="center">Order Quantity</th>
                                                 <th class="center">Delivered Quantity</th>
-                                                <th class="center">Total Delivered</th>
+                                                <th class="center">Pack Size</th>
+                                                <th class="center">Quantity (KG)</th>
+                                                <th class="center">Qty in Pack</th>
+                                                <th class="center">Unit Price</th>
+                                                <th class="center">Total Price</th>
+                                                <th class="center">Action</th>
                                             </tr>
                                         </thead>
                                         @{
@@ -235,7 +328,50 @@
                                                     <td>@item.ProductSubCategory @item.ProductName</td>
                                                     <td>@item.OrderQty @item.UnitName</td>
                                                     <th>@item.DeliveredQty @item.UnitName</th>
-                                                    <th>@item.TotalDelivered  @item.UnitName</th>
+                                                    <td>@item.PackSize</td>
+                                                    <td>
+                                                        @{
+                                                            var totalGm = item.DeliveredQty * item.PackSize;
+                                                            double divisor = 1000;
+
+                                                            if (totalGm < divisor)
+                                                            {
+                                                                <span>
+                                                                    @totalGm gm
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                double dividend = totalGm ?? 0;
+                                                                double remainder = dividend % divisor;
+                                                                if (remainder == 0)
+                                                                {
+                                                                    totalGm = totalGm / divisor;
+                                                                    <span>
+                                                                        @totalGm KG
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    totalGm = (totalGm - remainder) / divisor;
+                                                                    <span>
+                                                                        @totalGm KG @remainder gm
+                                                                    </span>
+                                                                }
+                                                            }
+                                                        }
+                                                    </td>
+                                                    <td>@String.Format("{0:0.00}", item.FormulaQty)</td>
+                                                    <td>@String.Format("{0:0.00}", item.UnitPrice)</td>
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Amount)</td>
+                                                    @if (!Model.IsSubmitted)
+                                                    {
+                                                        <td class="text-center">
+                                                            <button class="btn btn-primary btn-sm" type="button" onclick="UpdateOrderDeliveryDetails('@item.OrderDeliverDetailId','@item.DeliveredQty');">Update</button>
+                                                            &nbsp;
+                                                            <button class="btn btn-danger btn-sm" type="button" onclick="DeleteOrderDeliveryDetails('@item.OrderDeliverDetailId');">Delete</button>
+                                                        </td>
+                                                    }
                                                 </tr>
                                             }
                                         </tbody>
@@ -346,12 +482,125 @@
     </div>
 }
 
+@using (Html.BeginForm("OrderDeliverDetailIdDelete", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OrderDeliverDetailIdDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Delete</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForDelete" })
+                    @Html.HiddenFor(model => model.OrderDeliverId, new { @id = "hdnOrderDeliverIdDelete" })
+                    @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailId" })
+                    <h3 class="text-center">Are You Delete This?</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@using (Html.BeginForm("OrderDeliverDetailUpdate", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OrderDeliverDetailIdUpdateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Update</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK)
+                    @Html.HiddenFor(model => model.OrderDeliverId)
+                    @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailIdUpdate" })
+                    <div class="col-md-12">
+                        <div class="form-group" style="padding:0px">
+                            @Html.LabelFor(model => model.DeliveredQty, new { htmlAttributes = new { @class = "col-form-label required" } })
+                            @Html.EditorFor(model => model.DeliveredQty, new { htmlAttributes = new { @class = "form-control", @id = "txtDeliveredQtyModal", type = "number" } })
+                            @Html.ValidationMessageFor(model => model.DriverNameForDelivery, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
 
 @section scripts {
 
     <script type="text/javascript">
+        const DeleteOrderDeliveryDetails = (orderDeliverDetailId) => {
+            $('#hdnOrderDeliverDetailId').val(orderDeliverDetailId);
+            $("#OrderDeliverDetailIdDeleteModal").modal('toggle');
+        }
+        const UpdateOrderDeliveryDetails = (orderDeliverDetailId,DeliveryQty) => {
+            $('#hdnOrderDeliverDetailIdUpdate').val(orderDeliverDetailId);
+            $('#txtDeliveredQtyModal').val(DeliveryQty);
+            $("#OrderDeliverDetailIdUpdateModal").modal('toggle');
+        }
 
-         function makeOrderDeliverSubmitable(rowId) {
+        const SeedProcessingSubmited = (seedProcessingId, isSubmitted) => {
+
+            let textWillbe = isSubmitted == true ? 'Undo Submited' : 'Submited'
+            let textWillbeLebel = isSubmitted == true ? 'Are you sure to Undo Submitted this?' : ' Are you sure to Submitted this?'
+            $('#hdnSubmittedSeedProcessingId').val(seedProcessingId);
+            $('#hdnIsSubmitted').val('@Model.IsSubmitted');
+            $('#SubmittedModalLabel').text(textWillbe);
+            $('#txtSubmitted').text(textWillbeLebel);
+            $("#SeedProcessingSubmittedModal").modal('toggle');
+        }
+        function getTranportTypeInputDiv(param) {
+            debugger
+            if (Number(param) ==@((int)TransportTypeEnum.Courier)) {
+                $("#CourierSectionDiv").show();
+                $("#TruckSectionDiv").hide();
+
+                $("#txtDriverName").val("");
+                $("#txtDriverMobileNo").val("");
+                $("#txtVehicleNo").val("");
+                $("#txtTruckFair").val(0);
+            }
+
+            if (Number(param) ==@((int)TransportTypeEnum.Truck)) {
+                $("#CourierSectionDiv").hide();
+                $("#TruckSectionDiv").show();
+
+                $("#txtCourierName").val("");
+                $("#txtCourierNo").val("");
+                $("#txtCourierCharge").val(0);
+            }
+
+            if (Number(param) <= 0) {
+                $("#CourierSectionDiv").hide();
+                $("#TruckSectionDiv").hide();
+
+                $("#txtDriverName").val("");
+                $("#txtDriverMobileNo").val("");
+                $("#txtVehicleNo").val("");
+                $("#txtTruckFair").val(0);
+
+                $("#txtCourierName").val("");
+                $("#txtCourierNo").val("");
+                $("#txtCourierCharge").val(0);
+            }
+
+        }
+
+        function makeOrderDeliverSubmitable(rowId) {
             $("#submitOrderDeliverId").val(rowId)
             $('#submitCompanyFK').val("@Model.CompanyFK");
             $('#submitActionId').val(10);
@@ -359,7 +608,15 @@
 
         $(document).ready(function () {
             $('.formValidator').bootstrapValidator();
+            $('#ddlTransportTypeId').select2();
             //$("#poDetailsTable").hide();
+
+            $("#ddlTransportTypeId").change(function () {
+                var transportTypeId = $("#ddlTransportTypeId").val();
+                getTranportTypeInputDiv(transportTypeId);
+
+            });
+
             $("#chkIsDefineBin input:checkbox").change(function () {
                 var ischecked = $(this).is(':checked');
                 if (ischecked) {
@@ -375,11 +632,8 @@
 
             $("#txtOrderNo").autocomplete({
                 source: function (request, response) {
-                    //console.log(request);
-                    //console.log(response);
-
                     $.ajax({
-                        url:"@Url.Action("AutoCompleteOrderMastersGet", "WareHouse")",// '/AccountHeads/AutoComplete/',
+                        url:"@Url.Action("AutoCompleteOrderMastersGet", "WareHouse")",
                         //data: "{ 'prefix': '" + request.term + "'}",
                         data: { companyId: "@Model.CompanyFK", prefix: request.term },
                         dataType: "json",

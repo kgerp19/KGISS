@@ -4,6 +4,7 @@ using KGERP.Service.Implementation;
 using KGERP.Service.Implementation.Accounting;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
+using KGERP.Services.WareHouse;
 using KGERP.Utility;
 using KGERP.ViewModel;
 using System;
@@ -12,6 +13,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 
 namespace KGERP.Controllers
 {
@@ -672,6 +674,30 @@ namespace KGERP.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetAutoCompleteHeadGLForSupplierGet(string prefix, int companyId)
+        {
+            var products = _accountingService.GetAutoCompleteHeadGLForSupplier(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetAutoCompleteHeadGLForCustomerGet(string prefix, int companyId)
+        {
+            var products = _accountingService.GetAutoCompleteHeadGLForCustomer(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetAutoCompleteHeadGLForSeedProcessingGet(string prefix, int companyId)
+        {
+            var products = _accountingService.GetAutoCompleteHeadGLForSeedProcessingGet(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+        [HttpGet]
+        public JsonResult GetAccountHeadNameByAccountHeadId(int headGLId)
+        {
+            var products = _accountingService.GetAccountHeadNameByAccountHeadId(headGLId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult AutoCompleteVendorHeadGet(string prefix, int companyId, int vendorTypeId)
         {
             var products = _accountingService.GetAutoCompleteVendorHeadGL(prefix, companyId, vendorTypeId);
@@ -717,8 +743,13 @@ namespace KGERP.Controllers
                 vmJournalSlave = await Task.Run(() => _accountingService.GetVoucherDetails(companyId, voucherId));
             }
             vmJournalSlave.CostCenterList = new SelectList(_accountingService.CostCenterDropDownList(companyId), "Value", "Text");
-            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
- 
+            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.DRVVoucherTypesDownList(companyId), "Value", "Text");
+
+
+            var voucherTypes = _accountingService.DRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            vmJournalSlave.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            vmJournalSlave.VoucherTypeId = (int)selectedVoucherTypeId;
 
             return View(vmJournalSlave);
         }
@@ -773,8 +804,12 @@ namespace KGERP.Controllers
                 vmJournalSlave = await Task.Run(() => _accountingService.GetVoucherDetails(companyId, voucherId));
             }
             vmJournalSlave.CostCenterList = new SelectList(_accountingService.CostCenterDropDownList(companyId), "Value", "Text");
-            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
+            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.CRVVoucherTypesDownList(companyId), "Value", "Text");
 
+            var voucherTypes = _accountingService.CRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            vmJournalSlave.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            vmJournalSlave.VoucherTypeId = (int)selectedVoucherTypeId;
 
             return View(vmJournalSlave);
         }
@@ -810,6 +845,147 @@ namespace KGERP.Controllers
             }
 
             return RedirectToAction(nameof(CustomerCollectionVoucher), new { companyId = vmJournalSlave.CompanyFK, voucherId = vmJournalSlave.VoucherId });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> CollectionVoucherList(int companyId, DateTime? fromDate, DateTime? toDate, bool? vStatus, int? voucherTypeId)
+        {
+            if (companyId > 0)
+            {
+                Session["CompanyId"] = companyId;
+            }
+            if (fromDate == null)
+            {
+                fromDate = DateTime.Now.AddMonths(-2);
+            }
+
+            if (toDate == null)
+            {
+                toDate = DateTime.Now;
+            }
+            if (vStatus == null)
+            {
+                vStatus = true;
+            }
+
+            VoucherModel voucherModel = new VoucherModel();
+
+            var voucherTypes = _accountingService.CRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            voucherModel = await _accountingService.GetVouchersList(companyId, fromDate, toDate, vStatus, (int)selectedVoucherTypeId);
+            voucherModel.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
+            voucherModel.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            voucherModel.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+            voucherModel.IsSubmit = vStatus;
+
+            voucherModel.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            voucherModel.VoucherTypeId = (int)selectedVoucherTypeId;
+
+            return View(voucherModel);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> CollectionVoucherList(VoucherModel voucherModel)
+        {
+            if (voucherModel.CompanyId > 0)
+            {
+                Session["CompanyId"] = voucherModel.CompanyId;
+            }
+
+            voucherModel.FromDate = Convert.ToDateTime(voucherModel.StrFromDate);
+            voucherModel.ToDate = Convert.ToDateTime(voucherModel.StrToDate);
+
+            return RedirectToAction(nameof(CollectionVoucherList), new { companyId = voucherModel.CompanyId, fromDate = voucherModel.FromDate, toDate = voucherModel.ToDate, vStatus = voucherModel.IsSubmit, voucherTypeId = voucherModel.VmVoucherTypeId ?? 0 });
+        }
+        [HttpGet]
+        public async Task<ActionResult> PaymentVoucherList(int companyId, DateTime? fromDate, DateTime? toDate, bool? vStatus, int? voucherTypeId)
+        {
+            if (companyId > 0)
+            {
+                Session["CompanyId"] = companyId;
+            }
+            if (fromDate == null)
+            {
+                fromDate = DateTime.Now.AddMonths(-2);
+            }
+
+            if (toDate == null)
+            {
+                toDate = DateTime.Now;
+            }
+            if (vStatus == null)
+            {
+                vStatus = true;
+            }
+
+            VoucherModel voucherModel = new VoucherModel();
+
+            var voucherTypes = _accountingService.DRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            voucherModel = await _accountingService.GetVouchersList(companyId, fromDate, toDate, vStatus, (int)selectedVoucherTypeId);
+            voucherModel.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
+            voucherModel.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            voucherModel.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+            voucherModel.IsSubmit = vStatus;
+
+            voucherModel.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            voucherModel.VoucherTypeId = (int)selectedVoucherTypeId;
+
+            return View(voucherModel);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PaymentVoucherList(VoucherModel voucherModel)
+        {
+            if (voucherModel.CompanyId > 0)
+            {
+                Session["CompanyId"] = voucherModel.CompanyId;
+            }
+
+            voucherModel.FromDate = Convert.ToDateTime(voucherModel.StrFromDate);
+            voucherModel.ToDate = Convert.ToDateTime(voucherModel.StrToDate);
+
+            return RedirectToAction(nameof(PaymentVoucherList), new { companyId = voucherModel.CompanyId, fromDate = voucherModel.FromDate, toDate = voucherModel.ToDate, vStatus = voucherModel.IsSubmit, voucherTypeId = voucherModel.VmVoucherTypeId ?? 0 });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UndoSubmitCollectionVoucher(VoucherModel voucherModel)
+        {
+            if (voucherModel.VoucherId > 0)
+            {
+                await _accountingService.VoucherUndoSubmit(voucherModel);
+            }
+            return RedirectToAction(nameof(CollectionVoucherList), new { companyId = voucherModel.CompanyId });
+        }
+        [HttpPost]
+        public async Task<ActionResult> UndoSubmitPaymentVoucher(VoucherModel voucherModel)
+        {
+            if (voucherModel.VoucherId > 0)
+            {
+                await _accountingService.VoucherUndoSubmit(voucherModel);
+            }
+            return RedirectToAction(nameof(PaymentVoucherList), new { companyId = voucherModel.CompanyId });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> DeleteCollectionVoucher(VoucherModel voucherModel)
+        {
+            if (voucherModel.VoucherId > 0)
+            {
+                await _accountingService.VoucherDelete(voucherModel);
+
+            }
+            return RedirectToAction(nameof(CollectionVoucherList), new { companyId = voucherModel.CompanyId });
+        }
+        [HttpPost]
+        public async Task<ActionResult> DeletePaymentVoucher(VoucherModel voucherModel)
+        {
+            if (voucherModel.VoucherId > 0)
+            {
+                await _accountingService.VoucherDelete(voucherModel);
+
+            }
+            return RedirectToAction(nameof(PaymentVoucherList), new { companyId = voucherModel.CompanyId });
         }
     }
 }

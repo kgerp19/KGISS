@@ -1,4 +1,5 @@
-﻿using KGERP.Service.Configuration;
+﻿using KGERP.Data.Models;
+using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
 using KGERP.Service.Implementation.Marketing;
 using KGERP.Service.ServiceModel;
@@ -232,7 +233,7 @@ namespace KGERP.Controllers
 
             vmModel.FromDate = Convert.ToDateTime(vmModel.StrFromDate);
             vmModel.ToDate = Convert.ToDateTime(vmModel.StrToDate);
-            return RedirectToAction(nameof(PackagingPurchaseReturnList), new { companyId= vmModel.CompanyFK, fromDate = vmModel.FromDate, toDate = vmModel.ToDate });
+            return RedirectToAction(nameof(PackagingPurchaseReturnList), new { companyId = vmModel.CompanyFK, fromDate = vmModel.FromDate, toDate = vmModel.ToDate });
         }
 
         [HttpPost]
@@ -798,7 +799,11 @@ namespace KGERP.Controllers
                 {
                     vmModel.OrderDeliverId = await _service.WareHouseOrderDeliversAdd(vmModel);
                 }
-                await _service.WareHouseOrderDeliverDetailAdd(vmModel, vmModelList);
+                if (vmModel.OrderDeliverId > 0)
+                {
+                    await _service.WareHouseOrderDeliverDetailAdd(vmModel, vmModelList);
+                }
+
             }
             //else if (model.ActionEum == ActionEnum.Edit)
             //{
@@ -822,6 +827,20 @@ namespace KGERP.Controllers
             return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId });
         }
 
+        [HttpPost]
+        public async Task<ActionResult> OrderDeliverDetailIdDelete(VMOrderDeliverDetail vMOrderDeliverDetail)
+        {
+            vMOrderDeliverDetail.OrderDeliverId = await _service.OrderDeliveryDelete(vMOrderDeliverDetail.OrderDeliverDetailId);
+            return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vMOrderDeliverDetail.CompanyFK, orderDeliverId = vMOrderDeliverDetail.OrderDeliverId });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> OrderDeliverDetailUpdate(VMOrderDeliverDetail vMOrderDeliverDetail)
+        {
+            vMOrderDeliverDetail.OrderDeliverId = await _service.OrderDeliveryUpdate(vMOrderDeliverDetail.OrderDeliverDetailId, vMOrderDeliverDetail.DeliveredQty);
+            return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vMOrderDeliverDetail.CompanyFK, orderDeliverId = vMOrderDeliverDetail.OrderDeliverId });
+        }
+
         [HttpGet]
         public async Task<ActionResult> WareHousSaleReturnSlaveReport(int companyId = 0, int saleReturnId = 0)
         {
@@ -829,6 +848,8 @@ namespace KGERP.Controllers
             vmSaleReturnDetail = await _service.WareHouseSalesReturnSlaveGet(companyId, saleReturnId);
             return View(vmSaleReturnDetail);
         }
+
+       
 
 
         [HttpGet]
@@ -884,9 +905,9 @@ namespace KGERP.Controllers
         [HttpGet]
         public async Task<ActionResult> WareHouseOrderDeliverList(int companyId, DateTime? fromDate, DateTime? toDate)
         {
-            if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-2); ;
-
-            if (!toDate.HasValue) toDate = DateTime.Now;
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
             VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
             vmOrderDeliver = await _service.WareHouseOrderDeliverGet(companyId, fromDate, toDate);
 
@@ -918,11 +939,11 @@ namespace KGERP.Controllers
         public async Task<ActionResult> PackagingOrderDeliverList(int companyId, DateTime? fromDate, DateTime? toDate)
         {
             VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
-           
+
             DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             if (!fromDate.HasValue) fromDate = firstDayOfMonth;
             if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
-            
+
             vmOrderDeliver = await _service.PackagingOrderDeliverGet(companyId, fromDate, toDate);
             vmOrderDeliver.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
             vmOrderDeliver.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
@@ -940,7 +961,7 @@ namespace KGERP.Controllers
             vmOrderDeliver.FromDate = Convert.ToDateTime(vmOrderDeliver.StrFromDate);
             vmOrderDeliver.ToDate = Convert.ToDateTime(vmOrderDeliver.StrToDate);
             return RedirectToAction(nameof(PackagingOrderDeliverList), new { companyId = vmOrderDeliver.CompanyFK, fromDate = vmOrderDeliver.FromDate, toDate = vmOrderDeliver.ToDate });
-            
+
 
 
         }
@@ -1418,11 +1439,11 @@ namespace KGERP.Controllers
                 {
                     vmModel.OrderDeliverId = await _service.FeedOrderDeliversAdd(vmModel);
                 }
-                if (vmModel.OrderDeliverId>0)
+                if (vmModel.OrderDeliverId > 0)
                 {
                     await _service.FeedOrderDeliverDetailAdd(vmModel, vmModelList);
                 }
-                
+
             }
 
             else if (vmModel.ActionEum == ActionEnum.Finalize)
@@ -1663,7 +1684,7 @@ namespace KGERP.Controllers
             }
             else if (materialReceiveId > 0)
             {
-                vmReceiving = await _service.PackagingPOReceivingGet(companyId, materialReceiveId);
+                vmReceiving = await _service.ISSPOReceivingGet(companyId, materialReceiveId);
             }
             return View(vmReceiving);
         }
@@ -1681,23 +1702,14 @@ namespace KGERP.Controllers
                 }
 
                 await _service.PackagingPOReceivingSlaveAdd(vmModel, vmModelList);
-                //if (vmModel.SupplierPaymentMethodEnumFK == (int)VendorsPaymentMethodEnum.LC)
-                //{
-                //    await _service.PackagingLCPODetailAdd(vmModel, vmModelList);
-
-                //}
-                //else
-                //{
-                   
-
-                //}
+                
 
             }
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
                 await _service.SubmitMaterialReceive(vmModel);
 
-                //vmModel.MaterialReceiveId = await _service.SubmitMultiMRPackaging();
+                //vmModel.MaterialReceiveId = await _service.SubmitMultiMRISS();
             }
             else
             {
@@ -1707,7 +1719,7 @@ namespace KGERP.Controllers
         }
 
 
-         
+
         [HttpPost]
         public ActionResult GetPackagingOrderDetailsDataPartial(int poId)
         {
@@ -1719,7 +1731,7 @@ namespace KGERP.Controllers
             }
             return PartialView("_PackagingOrderDetailsDataPartial", model);
         }
-  
+
         [HttpGet]
         public async Task<ActionResult> PackagingWareHouseOrderDeliverDetail(int companyId, int orderDeliverId = 0)
         {

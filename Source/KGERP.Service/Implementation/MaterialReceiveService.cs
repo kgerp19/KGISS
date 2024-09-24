@@ -765,7 +765,8 @@ as SupplierName,
                 .Select(t1 => new
                 {
                     t1.MaterialReceiveId,
-                    t1.ReceiveNo,
+                    t1.ReceiveNo  ,
+                    t1.ChallanDate,
                     t1.CompanyId
                 });
 
@@ -778,7 +779,7 @@ as SupplierName,
                 .Select(x => new
                 {
                     val = x.MaterialReceiveId.ToString(),
-                    label = x.ReceiveNo
+                    label = x.ReceiveNo + " Received Date: " + x.ChallanDate
                 })
                 .OrderBy(x => x.label)
                 .Take(50) // Consider adjusting or testing this  
@@ -792,13 +793,14 @@ as SupplierName,
             MaterialReceiveDetailsWithProductVM model = new MaterialReceiveDetailsWithProductVM();
             model.DataListPro = await (from t1 in context.MaterialReceiveDetails
                                        join t2 in context.Products on t1.ProductId equals t2.ProductId
+                                       join t3 in context.ProductSubCategories on t2.ProductSubCategoryId equals t3.ProductSubCategoryId
+                                       join t4 in context.ProductCategories on t3.ProductCategoryId equals t4.ProductCategoryId
                                        where t1.IsActive && t1.MaterialReceiveId == materialReceiveId
                                        select new MaterialReceiveDetailsWithProductVM
                                        {
                                            MaterialReceiveDetailId = t1.MaterialReceiveDetailId,
-                                           ProductName = t2.ProductName,
-                                           ReceiveQty = t1.ReceiveQty,
-                                           UnitPrice = t1.UnitPrice,
+                                           ProductName = t4.Name + " " + t3.Name + " "+ t2.ProductName,                                            
+                                           UnitPrice = t1.StockInRate.Value,
                                            StockInQty = t1.StockInQty,
                                            ProductId = t1.ProductId.Value
                                        }).ToListAsync();
