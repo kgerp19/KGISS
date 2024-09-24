@@ -3521,7 +3521,7 @@ namespace KGERP.Services.WareHouse
         {
             long result = -1;
 
-            #region Genarate Store-In ID
+            #region Genarate Delivery No
             int deliverDetailCount = _db.OrderDelivers.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK).Count();
 
             if (deliverDetailCount == 0)
@@ -3539,6 +3539,10 @@ namespace KGERP.Services.WareHouse
                                 DateTime.Now.ToString("MM") +
                                 DateTime.Now.ToString("yy") + deliverDetailCount.ToString().PadLeft(5, '0');
 
+            string deliverBill = "INV-" +
+                             vmOrderDeliverDetail.DeliveryDate.Value.ToString("dd") +
+                             vmOrderDeliverDetail.DeliveryDate.Value.ToString("MM") +
+                             vmOrderDeliverDetail.DeliveryDate.Value.ToString("yy") + "-" + deliverDetailCount.ToString().PadLeft(5, '0');
 
 
             #endregion
@@ -3547,7 +3551,7 @@ namespace KGERP.Services.WareHouse
 
                 ChallanNo = deliverDetailCID,
                 OrderMasterId = vmOrderDeliverDetail.OrderMasterId,
-                InvoiceNo = vmOrderDeliverDetail.InvoiceNo,
+                InvoiceNo = deliverBill,
                 DeliveryDate = vmOrderDeliverDetail.DeliveryDate,
                 ProductType = "F",
                 DepoInvoiceNo = vmOrderDeliverDetail.Remarks,
