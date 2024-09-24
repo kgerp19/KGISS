@@ -443,16 +443,7 @@ namespace KGERP.Controllers
         //
         public ActionResult GetVoucherReport(int companyId, long voucherId, string reportName)
         {
-            if (companyId == (int)CompanyName.KrishibidSeedLimited)
-            {
-                reportName = "KGVoucherReportSeed";
-
-            }
-            else
-            {
-                reportName = "KGVoucherReport";
-
-            }
+            reportName = "ISSVoucherReport";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -1439,7 +1430,7 @@ namespace KGERP.Controllers
 
         public ActionResult AccountingAdvancedLedgerReportsInternal(int AccHeadId, int LayerNo, string StrFromDate, string StrToDate, int CompanyId)
         {
-            string reportName = "AccountingAdvancedLedger";
+            string reportName = "ISSAccountingAdvancedLedger";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
