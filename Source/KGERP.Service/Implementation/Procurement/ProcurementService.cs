@@ -3147,7 +3147,7 @@ namespace KGERP.Services.Procurement
                                                                         UnitPrice = t1.UnitPrice,                                                                       
                                                                         PackSize = t3.PackSize,
                                                                         TotalAmount = t1.Qty + t1.UnitPrice,
-
+                                                                        QtyInPack = t3.FormulaQty,
 
                                                                         FProductId = t3.ProductId
 
@@ -3563,7 +3563,7 @@ namespace KGERP.Services.Procurement
 
             VMProductStock vmProductStock = new VMProductStock();
             vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", productId, companyId).FirstOrDefault();
-            vmProduct.CurrentStock = vmProductStock.ClosingRate;
+            vmProduct.CurrentStock = vmProductStock.ClosingQty;
              
 
             return vmProduct;

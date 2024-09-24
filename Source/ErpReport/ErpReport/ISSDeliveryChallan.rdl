@@ -4,7 +4,7 @@
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="DeliveryChallanDS">
-      <DataSourceReference>ErpDataSource</DataSourceReference>
+      <DataSourceReference>ISSDataSource</DataSourceReference>
       <rd:SecurityType>None</rd:SecurityType>
       <rd:DataSourceID>4442711e-d65e-403a-9bc4-c05f1b78e256</rd:DataSourceID>
     </DataSource>
@@ -28,33 +28,58 @@
 		   v.[Address]  as VendorAddress, 
            v.Phone  as VendorPhone,
 		   v.Email As VendorEmail,
+		   z.Name ZoneName,
+		   sz.Name SubZoneName,
 
+		    om.OrderNo, 
+		   om.OrderDate,	
 
-		   creat.Name  as PreparedBy, 
-		    od.ChallanNo,
+		     od.ChallanNo,
 		    od.DeliveryDate,
+			
 			od.InvoiceNo,
-           CONCAT ( psc.Name , ' ', p.ProductName ) as ProductName,
-           odd.DeliveredQty, 
-			odd.NoofReels,
-			odd.NoofBags,
-         odd.GrossWeight,
-		   om.OrderNo, 
-		   om.OrderDate,		  
+
+			
 		   od.VehicleNo,
            od.DriverName,
-		   omd.JobOrderNo,
-		   om.CustomerPONo
+		   od.MobileNo,
+		   od.Carrying,
+		   od.TransportTypeId,
+
+		   creat.Name  as PreparedBy, 
+
+
+		  
+           CONCAT (pc.Name , ' ', psc.Name , ' ', p.ProductName ) as ProductName,
+		   omd.Qty OrderQty,
+           odd.DeliveredQty, 
+			p.PackSize,
+			p.FormulaQty,
+			u.Name UnitName,
+			(case when (odd.DeliveredQty * p.PackSize) &lt; 1000
+			Then  Concat(cast((odd.DeliveredQty * p.PackSize) as nvarchar(50)) ,' gm')
+			When cast( (odd.DeliveredQty * p.PackSize) as decimal(18,9)) % 1000 = 0
+			then Concat(cast(( odd.DeliveredQty * p.PackSize / 1000) as nvarchar(50)), ' KG')
+        Else Concat( 
+				cast( (odd.DeliveredQty * p.PackSize) -  (cast( (odd.DeliveredQty * p.PackSize) as decimal(18,9)) % 1000) as nvarchar(50)) ,  ' KG ', cast((cast( (odd.DeliveredQty * p.PackSize) as decimal(18,9)) % 1000) as nvarchar(50)), ' gm')
+		End) QuantityInKG
+			 
           
 from       Erp.OrderDeliverDetail odd
 join Erp.OrderDeliver od on od.OrderDeliverId=odd.OrderDeliverId 
 join Erp.OrderDetail omd on odd.OrderDetailId=omd.OrderDetailId
 join Erp.OrderMaster om on om.OrderMasterId=od.OrderMasterId
 join Erp.Vendor v on om.CustomerId = v.VendorId
+join Erp.SubZone sz on v.SubZoneId = sz.SubZoneId
+join Erp.Zone z on sz.ZoneId = z.ZoneId
+
 join Company c on od.CompanyId = c.CompanyId
 Join Erp.Product p on odd.ProductId = p.ProductId
 Join Erp.ProductSubCategory psc on p.ProductSubCategoryId = psc.ProductSubCategoryId 
-join Employee creat on od.CreatedBy = creat.EmployeeId
+Join Erp.ProductCategory pc on psc.ProductCategoryId = pc.ProductCategoryId 
+Join Erp.Unit u on p.UnitId = u.UnitId 
+
+left join Employee creat on od.CreatedBy = creat.EmployeeId
 where od.OrderDeliverId= @orderDeliverId</CommandText>
       </Query>
       <Fields>
@@ -98,17 +123,17 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
           <DataField>VendorEmail</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="ZoneName">
+          <DataField>ZoneName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="SubZoneName">
+          <DataField>SubZoneName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="CompanyPhone">
           <DataField>CompanyPhone</DataField>
           <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="NoofReels">
-          <DataField>NoofReels</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="NoofBags">
-          <DataField>NoofBags</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="InvoiceNo">
           <DataField>InvoiceNo</DataField>
@@ -130,13 +155,21 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
           <DataField>CompanyEmail</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="GrossWeight">
-          <DataField>GrossWeight</DataField>
+        <Field Name="MobileNo">
+          <DataField>MobileNo</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Carrying">
+          <DataField>Carrying</DataField>
           <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="OrderNo">
           <DataField>OrderNo</DataField>
           <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TransportTypeId">
+          <DataField>TransportTypeId</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="DeliveryDate">
           <DataField>DeliveryDate</DataField>
@@ -146,12 +179,24 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
           <DataField>DriverName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="JobOrderNo">
-          <DataField>JobOrderNo</DataField>
+        <Field Name="OrderQty">
+          <DataField>OrderQty</DataField>
+          <rd:TypeName>System.Double</rd:TypeName>
+        </Field>
+        <Field Name="PackSize">
+          <DataField>PackSize</DataField>
+          <rd:TypeName>System.Double</rd:TypeName>
+        </Field>
+        <Field Name="FormulaQty">
+          <DataField>FormulaQty</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="UnitName">
+          <DataField>UnitName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="CustomerPONo">
-          <DataField>CustomerPONo</DataField>
+        <Field Name="QuantityInKG">
+          <DataField>QuantityInKG</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -165,25 +210,25 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>0.35595in</Width>
+                  <Width>0.35499in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.27375in</Width>
+                  <Width>2.43139in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.03621in</Width>
+                  <Width>1.01407in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.83135in</Width>
+                  <Width>0.64162in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.11439in</Width>
+                  <Width>0.97747in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.98314in</Width>
+                  <Width>1.11468in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.00397in</Width>
+                  <Width>1.12926in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -271,17 +316,56 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Job No</Value>
+                                  <Value>Deliverd Qty</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox85</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>DimGray</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>Silver</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox40">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Unit </Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox40</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -306,10 +390,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Gross (KG)</Value>
+                                  <Value>Pack Size</Value>
                                   <Style>
+                                    <FontStyle>Normal</FontStyle>
                                     <FontFamily>Times New Roman</FontFamily>
-                                    <FontWeight>Bold</FontWeight>
+                                    <FontSize>12pt</FontSize>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                    <Color>#000000</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -343,10 +431,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Net (KG)</Value>
+                                  <Value>Quantity(KG)</Value>
                                   <Style>
+                                    <FontStyle>Normal</FontStyle>
                                     <FontFamily>Times New Roman</FontFamily>
-                                    <FontWeight>Bold</FontWeight>
+                                    <FontSize>12pt</FontSize>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                    <Color>#000000</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -380,10 +472,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Noof Reels</Value>
+                                  <Value>Qty In Pack</Value>
                                   <Style>
+                                    <FontStyle>Normal</FontStyle>
                                     <FontFamily>Times New Roman</FontFamily>
-                                    <FontWeight>Bold</FontWeight>
+                                    <FontSize>12pt</FontSize>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                    <Color>#000000</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -393,43 +489,6 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox4</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>DimGray</Color>
-                              <Style>Solid</Style>
-                            </Border>
-                            <BackgroundColor>Silver</BackgroundColor>
-                            <VerticalAlign>Middle</VerticalAlign>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>1pt</PaddingTop>
-                            <PaddingBottom>1pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox16">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Noof Bags</Value>
-                                  <Style>
-                                    <FontFamily>Times New Roman</FontFamily>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style>
-                                <TextAlign>Center</TextAlign>
-                              </Style>
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox16</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -520,75 +579,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="JobOrderNo">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!JobOrderNo.Value</Value>
-                                  <Style>
-                                    <FontFamily>Times New Roman</FontFamily>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>JobOrderNo</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>DimGray</Color>
-                              <Style>Solid</Style>
-                            </Border>
-                            <VerticalAlign>Middle</VerticalAlign>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>1pt</PaddingTop>
-                            <PaddingBottom>1pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="GrossWeight">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!GrossWeight.Value</Value>
-                                  <Style>
-                                    <FontFamily>Times New Roman</FontFamily>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style>
-                                <TextAlign>Center</TextAlign>
-                              </Style>
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>GrossWeight</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>DimGray</Color>
-                              <Style>Solid</Style>
-                            </Border>
-                            <VerticalAlign>Middle</VerticalAlign>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>1pt</PaddingTop>
-                            <PaddingBottom>1pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="DeliveredQty">
+                        <Textbox Name="DeliveredQty1">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -606,7 +597,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>DeliveredQty</rd:DefaultName>
+                          <rd:DefaultName>DeliveredQty1</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -623,14 +614,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="NoofReels">
+                        <Textbox Name="UnitName">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!NoofReels.Value</Value>
+                                  <Value>=Fields!UnitName.Value</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                   </Style>
@@ -641,7 +632,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>NoofReels</rd:DefaultName>
+                          <rd:DefaultName>UnitName</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -658,14 +649,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="NoofBags">
+                        <Textbox Name="PackSize">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!NoofBags.Value</Value>
+                                  <Value>=Fields!PackSize.Value</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                   </Style>
@@ -676,7 +667,77 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>NoofBags</rd:DefaultName>
+                          <rd:DefaultName>PackSize</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>DimGray</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="QuantityInKG">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!QuantityInKG.Value</Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>QuantityInKG</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>DimGray</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="FormulaQty">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!FormulaQty.Value</Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>FormulaQty</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -736,14 +797,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     <TablixCell />
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox87">
+                        <Textbox Name="Textbox30">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Sum(Fields!DeliveredQty.Value)</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -751,11 +812,11 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                                 </TextRun>
                               </TextRuns>
                               <Style>
-                                <TextAlign>Right</TextAlign>
+                                <TextAlign>Center</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox87</rd:DefaultName>
+                          <rd:DefaultName>Textbox30</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -779,7 +840,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!GrossWeight.Value)</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -808,14 +869,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox15">
+                        <Textbox Name="Textbox36">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!DeliveredQty.Value)</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -827,7 +888,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox15</rd:DefaultName>
+                          <rd:DefaultName>Textbox36</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -844,14 +905,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox8">
+                        <Textbox Name="Textbox38">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!NoofReels.Value)</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -863,7 +924,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox8</rd:DefaultName>
+                          <rd:DefaultName>Textbox38</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -880,14 +941,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox18">
+                        <Textbox Name="Textbox39">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!NoofBags.Value)</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -899,7 +960,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox18</rd:DefaultName>
+                          <rd:DefaultName>Textbox39</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -945,7 +1006,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
             <DataSetName>DeliveryChallanDSet</DataSetName>
             <Top>1.6675in</Top>
             <Height>0.72501in</Height>
-            <Width>7.59876in</Width>
+            <Width>7.66348in</Width>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -956,22 +1017,22 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>0.917in</Width>
+                  <Width>0.87019in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.06701in</Width>
+                  <Width>0.16564in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.57119in</Width>
+                  <Width>2.52438in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.98592in</Width>
+                  <Width>1.11619in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.07118in</Width>
+                  <Width>0.15979in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.82118in</Width>
+                  <Width>2.77437in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -1520,28 +1581,25 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox88">
+                        <Textbox Name="Textbox72">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>PO No</Value>
+                                  <Value>Phone</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
-                                    <TextDecoration>None</TextDecoration>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Left</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox88</rd:DefaultName>
+                          <rd:DefaultName>Textbox70</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1558,26 +1616,25 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox89">
+                        <Textbox Name="Textbox32">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>:</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Left</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox89</rd:DefaultName>
+                          <rd:DefaultName>Textbox24</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1594,14 +1651,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="CustomerPONo">
+                        <Textbox Name="CompanyPhone2">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!CustomerPONo.Value</Value>
+                                  <Value>=Fields!CompanyPhone.Value</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
@@ -1613,7 +1670,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>CustomerPONo</rd:DefaultName>
+                          <rd:DefaultName>CompanyPhone</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1670,14 +1727,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox20">
+                        <Textbox Name="Textbox31">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>:</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
@@ -1688,7 +1745,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox20</rd:DefaultName>
+                          <rd:DefaultName>Textbox24</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1755,14 +1812,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox70">
+                        <Textbox Name="Textbox77">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Phone</Value>
+                                  <Value>Email</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
@@ -1773,7 +1830,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox70</rd:DefaultName>
+                          <rd:DefaultName>Textbox77</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1825,14 +1882,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="CompanyPhone">
+                        <Textbox Name="VendorEmail">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!CompanyPhone.Value</Value>
+                                  <Value>=Fields!VendorEmail.Value</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
@@ -1844,7 +1901,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>CompanyPhone</rd:DefaultName>
+                          <rd:DefaultName>VendorEmail</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1861,14 +1918,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox77">
+                        <Textbox Name="TransportTypeId">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Email</Value>
+                                  <Value>=IIF( First(Fields!TransportTypeId.Value, "DeliveryChallanDSet") = 1,"Courier Name","Driver Name")</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
@@ -1879,7 +1936,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox77</rd:DefaultName>
+                          <rd:DefaultName>TransportTypeId</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -1931,14 +1988,14 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="VendorEmail">
+                        <Textbox Name="DriverName1">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!VendorEmail.Value</Value>
+                                  <Value>=Fields!DriverName.Value</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
@@ -1950,7 +2007,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>VendorEmail</rd:DefaultName>
+                          <rd:DefaultName>DriverName1</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -2110,16 +2167,17 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox31">
+                        <Textbox Name="Textbox25">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>:</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>11pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
@@ -2127,7 +2185,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox31</rd:DefaultName>
+                          <rd:DefaultName>Textbox24</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>White</Color>
@@ -2205,8 +2263,8 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
             <DataSetName>DeliveryChallanDSet</DataSetName>
             <Top>0.05083in</Top>
             <Left>0.05292in</Left>
-            <Height>1.37707in</Height>
-            <Width>7.43348in</Width>
+            <Height>1.37706in</Height>
+            <Width>7.61056in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
@@ -2218,13 +2276,13 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>2.44584in</Width>
+                  <Width>2.46741in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.45625in</Width>
+                  <Width>2.47782in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.65417in</Width>
+                  <Width>2.67574in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -2471,7 +2529,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
             <Top>2.78833in</Top>
             <Left>0.0425in</Left>
             <Height>0.71875in</Height>
-            <Width>7.55626in</Width>
+            <Width>7.62097in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -2483,7 +2541,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
         <Height>3.50708in</Height>
         <Style />
       </Body>
-      <Width>7.59876in</Width>
+      <Width>7.66348in</Width>
       <Page>
         <PageHeader>
           <Height>0.96389in</Height>
@@ -2498,7 +2556,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
                   <TextRuns>
                     <TextRun>
                       <Label>Company</Label>
-                      <Value>=First(Fields!Company.Value, "DeliveryChallanDSet")</Value>
+                      <Value />
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
                         <FontSize>16pt</FontSize>
@@ -2591,7 +2649,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
               </Paragraphs>
               <rd:DefaultName>Textbox82</rd:DefaultName>
               <Height>0.90833in</Height>
-              <Width>7.59876in</Width>
+              <Width>7.66348in</Width>
               <Style>
                 <Border>
                   <Style>None</Style>
@@ -2646,7 +2704,7 @@ where od.OrderDeliverId= @orderDeliverId</CommandText>
               <Top>0.76389in</Top>
               <Left>4.49727in</Left>
               <Height>0.2in</Height>
-              <Width>3.10149in</Width>
+              <Width>3.16621in</Width>
               <ZIndex>2</ZIndex>
               <Style>
                 <Border>

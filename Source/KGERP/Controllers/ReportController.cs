@@ -404,22 +404,9 @@ namespace KGERP.Controllers
         {
             string reportName = string.Empty;
 
-            if (companyId == 8)
-            {
-                reportName = "DeliveryChallan";
-            }
-            else if (companyId == 29)
-            {
-                reportName = "GloryFeedDeliveryInvoice";
-            }
-            else if (companyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                reportName = "KFMALDeliveryChallan";
-            }
-            else if (companyId == (int)CompanyName.KrishibidPackagingLimited)
-            {
-                reportName = "PackagingDeliveryChallan";
-            }
+            
+                reportName = "ISSDeliveryChallan";
+             
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -555,7 +542,7 @@ namespace KGERP.Controllers
         public ActionResult PackagingDeliverInvoiceReport(int companyId, int orderDeliverId)
         {
 
-            string reportName = "PackagingDeliverInvoiceReports";
+            string reportName = "ISSDeliverInvoiceReports";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -575,7 +562,6 @@ namespace KGERP.Controllers
         }
 
         [HttpGet]
-
         public ActionResult PackagingSalesInvoiceReport(int companyId, int orderMasterId, string reportName)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
@@ -585,7 +571,6 @@ namespace KGERP.Controllers
             return File(client.DownloadData(reportURL), "application/pdf");
         }
         [HttpGet]
-
         public ActionResult SalarySheetCompanyWiseReport(int CompanyId, long PayRollId, string reportType)
         {
 
@@ -630,11 +615,8 @@ namespace KGERP.Controllers
             return View();
         }
         [HttpGet]
-
         public ActionResult BankAdviceSheetReport(int companyId, long payRollId, int bankBranchId, string reportType, string salaryDate, string employeeIds)
         {
-
-
             string reportName = "SalaryAdviceSheetReport";
             if (string.IsNullOrEmpty(employeeIds))
             {
@@ -683,10 +665,7 @@ namespace KGERP.Controllers
             return View();
         }
 
-
-
         [HttpGet]
-
         public ActionResult GCCLPRFInvoiceReport(int companyId, int DemandId, string reportName, int CustomerId, string AsOnDate)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
@@ -696,10 +675,7 @@ namespace KGERP.Controllers
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&CompanyId={1}&DemandId={2}&CustomerId={3}&AsOnDate={4}", reportName, companyId, DemandId, CustomerId, AsOnDate);
             return File(client.DownloadData(reportURL), "application/pdf");
         }
-
-
         [HttpGet]
-
         public ActionResult GCCLProductionReport(int companyId, int prodReferenceId, string reportName)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
@@ -829,7 +805,7 @@ namespace KGERP.Controllers
         {
             string accCode = model.AccName.Substring(1, 13);
             string reportName = "";
-            reportName = "KGGeneralLedger";
+            reportName = "ISSGeneralLedger";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -1221,7 +1197,7 @@ namespace KGERP.Controllers
 
         public ActionResult AccountingMovementReports(ReportCustomModel model)
         {
-            string reportName = "KGAccountingMovement";
+            string reportName = "ISSAccountingMovement";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -1371,6 +1347,8 @@ namespace KGERP.Controllers
         }
 
 
+
+
         [HttpGet]
 
         public ActionResult GcclTerritoryReports(ReportCustomModel model)
@@ -1402,7 +1380,7 @@ namespace KGERP.Controllers
         [HttpGet]
         public ActionResult AccountingMovementInternal(int HeadGLId, int LayerNo, string StrFromDate, string StrToDate, int CompanyId)
         {
-            string reportName = "KGAccountingMovement";
+            string reportName = "ISSAccountingMovement";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -3561,14 +3539,19 @@ namespace KGERP.Controllers
         // GET: Monthly Return Item Wise
         [HttpGet]
 
-        public ActionResult MonthlyAdjustmentItemWise(int companyId)
+        public ActionResult ISSAdjustmentReport(int companyId)
         {
+            DateTime fromDate;
+            DateTime toDate;
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            fromDate = firstDayOfMonth;
+            toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
             ReportCustomModel cm = new ReportCustomModel()
             {
                 CompanyId = companyId,
-                FromDate = DateTime.Now,
-                ToDate = DateTime.Now,
-                ProductCategoryList = voucherTypeService.EnumerableYearRange()
+                FromDate = fromDate,
+                ToDate = toDate,
+                ProductCategoryList = voucherTypeService.GetProductCategory(companyId),
 
 
             };
@@ -3577,13 +3560,13 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult GetMonthlyAdjustmentItemWiseReport(ReportCustomModel model)
+        public ActionResult GetISSAdjustmentItemWiseReport(ReportCustomModel model)
         {
-            string reportName = "MonthlyAdjustmentItemWise";
+            string reportName = "ISSAdjustmentReport";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&year={3}&month={4}", reportName, model.ReportType, model.CompanyId, model.Year, model.Month);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&StrFromDate={3}&StrToDate={4}", reportName, model.ReportType, model.CompanyId, model.StrFromDate, model.StrToDate);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -7150,7 +7133,7 @@ namespace KGERP.Controllers
             cm.ReportType = "PDF";
             cm.StrToDate = DateTime.Now.ToString();
             string reportName = "";
-            reportName = "KGGeneralLedger";
+            reportName = "ISSGeneralLedger";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -8489,7 +8472,7 @@ namespace KGERP.Controllers
         {
             string accCode = model.AccName.Substring(1, 13);
             string reportName = "";
-            reportName = "KGGeneralLedger";
+            reportName = "ISSGeneralLedger";
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
@@ -8737,7 +8720,7 @@ namespace KGERP.Controllers
         public ActionResult GetPackagingRMStockReport(ReportCustomModel model)
         {
 
-            
+
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -8764,7 +8747,7 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult StockReportFinishedPackaging(int companyId)
+        public ActionResult StockReportFinishedISS(int companyId)
         {
             string title = string.Empty;
             List<SelectModel> stockSelectModels = new List<SelectModel>();
@@ -8777,7 +8760,7 @@ namespace KGERP.Controllers
                 ToDate = DateTime.Now,
                 StrFromDate = DateTime.Now.ToShortDateString(),
                 StrToDate = DateTime.Now.ToShortDateString(),
-                 
+
                 Title = "Finish Product Stock Report",
                 Stocks = stockSelectModels
             };
@@ -8786,9 +8769,9 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
-        public ActionResult StockReportFinishedPackagingView(ReportCustomModel model)
+        public ActionResult StockReportFinishedISSView(ReportCustomModel model)
         {
-            model.ReportName = "PackagingFinishedGoodsStockReport";
+            model.ReportName = "ISSFinishedGoodsStockReport";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();

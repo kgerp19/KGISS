@@ -1195,13 +1195,11 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.PurchaseReturnId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited)
-            {
-                #region Ready To Account Integration
-                VMWareHousePOReturnSlave AccData = await WareHousePOReturnSlaveGet(vmModel.CompanyFK.Value, vmModel.PurchaseReturnId);
-                await _accountingService.AccountingPurchaseReturnPushPackaging(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.PurchaseReturnVoucher);
-                #endregion
-            }
+            
+            #region Ready To Account Integration
+            VMWareHousePOReturnSlave AccData = await WareHousePOReturnSlaveGet(vmModel.CompanyFK.Value, vmModel.PurchaseReturnId);
+            await _accountingService.AccountingPurchaseReturnPushISS(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.PurchaseReturnVoucher);
+            #endregion
 
 
             return result;
@@ -1794,7 +1792,7 @@ namespace KGERP.Services.WareHouse
                         join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
                         join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
                         join t8 in _db.Units on t5.UnitId equals t8.UnitId
-                        where t1.IsActive && t5.IsActive && t6.IsActive && t8.IsActive &&
+                        where t1.IsActive && t2.IsActive &&
                                  t1.OrderMasterId == orderMasterId
                         select new VMOrderDeliverDetailPartial
                         {
@@ -1805,9 +1803,9 @@ namespace KGERP.Services.WareHouse
                             OrderDetailId = t1.OrderDetailId,
                             UnitPrice = t1.UnitPrice,
                             UnitName = t8.Name,
-                            DiscountUnit = t1.DiscountUnit,
-                            DiscountRate = t1.DiscountRate,
-                            SpecialDiscount = t1.SpecialBaseCommission,
+                            //DiscountUnit = t1.DiscountUnit,
+                            //DiscountRate = t1.DiscountRate,
+                            //SpecialDiscount = t1.SpecialBaseCommission,
                             CompanyFK = t1.CompanyId
                         }).ToList();
 
@@ -3523,7 +3521,7 @@ namespace KGERP.Services.WareHouse
         {
             long result = -1;
 
-            #region Genarate Store-In ID
+            #region Genarate Delivery No
             int deliverDetailCount = _db.OrderDelivers.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK).Count();
 
             if (deliverDetailCount == 0)
@@ -3541,6 +3539,10 @@ namespace KGERP.Services.WareHouse
                                 DateTime.Now.ToString("MM") +
                                 DateTime.Now.ToString("yy") + deliverDetailCount.ToString().PadLeft(5, '0');
 
+            string deliverBill = "INV-" +
+                             vmOrderDeliverDetail.DeliveryDate.Value.ToString("dd") +
+                             vmOrderDeliverDetail.DeliveryDate.Value.ToString("MM") +
+                             vmOrderDeliverDetail.DeliveryDate.Value.ToString("yy") + "-" + deliverDetailCount.ToString().PadLeft(5, '0');
 
 
             #endregion
@@ -3549,7 +3551,7 @@ namespace KGERP.Services.WareHouse
 
                 ChallanNo = deliverDetailCID,
                 OrderMasterId = vmOrderDeliverDetail.OrderMasterId,
-                InvoiceNo = vmOrderDeliverDetail.InvoiceNo,
+                InvoiceNo = deliverBill,
                 DeliveryDate = vmOrderDeliverDetail.DeliveryDate,
                 ProductType = "F",
                 DepoInvoiceNo = vmOrderDeliverDetail.Remarks,
@@ -3912,8 +3914,7 @@ namespace KGERP.Services.WareHouse
             VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
             vmOrderDeliverDetail = await Task.Run(() => (from t1 in _db.OrderDelivers
                                                          join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
-                                                         join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
-                                                         join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                                                         join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId                                                          
                                                          join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
                                                          join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
                                                          join t7 in _db.StockInfoes on t2.StockInfoId equals t7.StockInfoId into t7_Join
@@ -3921,40 +3922,46 @@ namespace KGERP.Services.WareHouse
                                                          where t1.CompanyId == companyId && t1.OrderDeliverId == orderDeliverId
                                                          select new VMOrderDeliverDetail
                                                          {
+                                                             OrderNo = t2.OrderNo,
+                                                             OrderDate = t2.OrderDate,
 
+                                                             ChallanNo = t1.ChallanNo,
+                                                             DeliveryDate = t1.DeliveryDate,
+                                                             InvoiceNo = t1.InvoiceNo,
+
+                                                             CustomerName = t3.Name,
                                                              CustomerPhone = t3.Phone,
                                                              CustomerAddress = t3.Address,
                                                              CustomerEmail = t3.Email,
+
                                                              ContactPerson = t3.ContactName,
                                                              ZoneName = t5.Name,
                                                              ZoneIncharge = t5.ZoneIncharge,
-                                                             DeliveryDate = t1.DeliveryDate,
-                                                             ChallanNo = t1.ChallanNo,
+
+                                                             TransportTypeId = t1.TransportTypeId,
+
                                                              DriverName = t1.DriverName,
                                                              VehicleNo = t1.VehicleNo,
-                                                             OrderNo = t2.OrderNo,
-                                                             CustomerName = t3.Name,
+                                                             DriverMobileNo = t1.MobileNo,                                                              
+                                                             Carrying = t1.Carrying,
+
+
                                                              OrderDeliverId = t1.OrderDeliverId,
                                                              CompanyFK = t1.CompanyId,
                                                              OrderMasterId = t2.OrderMasterId,
-                                                             CompanyName = t4.Name,
-                                                             CompanyAddress = t4.Address,
-                                                             CompanyPhone = t4.Phone,
-                                                             CompanyEmail = t4.Email,
-                                                             OrderDate = t2.OrderDate,
+                                                             
+                                                            
                                                              CreatedBy = t1.CreatedBy,
+                                                             CreatedDate = t1.CreatedDate,
                                                              IsSubmitted = t1.IsSubmitted,
                                                              PaymentMethod = t2.PaymentMethod,
 
-                                                             CourierNo = t2.CourierNo,
-                                                             CourierCharge = t2.CourierCharge,
-                                                             InvoiceDate = t2.OrderDate.ToString(),
+                                                                                                                         
                                                              Warehouse = (t7 == null ? "" : t7.Name),
                                                              SubZoneMobilePersonal = t5.MobilePersonal,
                                                              ZoneMobileOffice = t5.MobileOffice,
                                                              TerritoryIncharge = t6.SalesOfficerName,
-                                                             Territory = t6.Name,
-                                                             CompanyLogo = t4.CompanyLogo,
+                                                             Territory = t6.Name,                                                            
                                                              Remarks = t2.Remarks
 
                                                          }).FirstOrDefault());
@@ -3979,12 +3986,12 @@ namespace KGERP.Services.WareHouse
                                                                             ProductName = t5.ProductName,
                                                                             ProductCategory = t7.Name,
                                                                             OrderQty = t3.Qty,
+                                                                            PackSize = t5.PackSize,
+                                                                            FormulaQty = t5.FormulaQty,
                                                                             DeliveredQty = t1.DeliveredQty,
-                                                                            TotalDelivered = _db.OrderDeliverDetails.Where(x => x.OrderDetailId == t3.OrderDetailId && x.IsActive).Select(x => x.DeliveredQty).DefaultIfEmpty(0).Sum(),
                                                                             UnitName = t8.Name,
-                                                                            PackQuantity = t3.PackQuantity,
-                                                                            Consumption = t3.Comsumption,
-
+                                                                            UnitPrice = t1.UnitPrice,
+                                                                            Amount = t1.DeliveredQty * t1.UnitPrice
                                                                         }).OrderByDescending(x => x.OrderDeliverDetailId).AsEnumerable());
 
 
@@ -4713,6 +4720,7 @@ namespace KGERP.Services.WareHouse
                                                                 ChallanNo = t1.ChallanNo,
                                                                 DriverName = t1.DriverName,
                                                                 VehicleNo = t1.VehicleNo,
+                                                                InvoiceNo = t1.InvoiceNo,
                                                                 OrderNo = t2.OrderNo,
                                                                 CustomerName = t3.Name,
                                                                 CompanyName = t4.Name,

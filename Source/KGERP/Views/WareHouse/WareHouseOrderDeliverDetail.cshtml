@@ -19,7 +19,7 @@
         @if (Model.OrderDeliverId > 0)
         {
             <span>
-                Delivery Challan <a target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetailReport?companyId=@Model.CompanyFK&orderDeliverId=@Model.OrderDeliverId">@Model.ChallanNo</a>
+                Delivery Challan   <a href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=Model.OrderDeliverId,companyId=Model.CompanyFK})" title="Challan Copy" target="_blank"> @Model.ChallanNo </a>
             </span>
         }
         else
@@ -75,7 +75,7 @@
                                     </tr>
                                     <tr>
                                         <th>
-                                            Invoice No
+                                            Order No
                                         </th>
                                         <th>:</th>
                                         <td>
@@ -85,6 +85,19 @@
                                         <th>:</th>
                                         <td>@Model.OrderDate.ToShortDateString()</td>
                                     </tr>
+                                    <tr>
+                                        <th>
+                                            Invoice No
+                                        </th>
+                                        <th>:</th>
+                                        <td>
+                                            <label class="col-form-label">@Model.InvoiceNo</label>
+                                        </td>
+                                        <th>Invoice Date</th>
+                                        <th>:</th>
+                                        <td>@Model.DeliveryDate.Value.ToShortDateString()</td>
+                                    </tr>
+
                                     <tr>
                                         <th>Zone</th>
                                         <th>:</th>
@@ -111,13 +124,38 @@
                                         <td>@Model.CustomerAddress</td>
                                     </tr>
                                     <tr>
-                                        <th>Contact Person</th>
-                                        <th>:</th>
-                                        <td>@Model.ContactPerson</td>
                                         <th>Created By</th>
                                         <th>:</th>
                                         <td>@Model.CreatedBy</td>
+                                        <th>Create Date</th>
+                                        <th>:</th>
+                                        <td>@Model.CreatedDate</td>
+
                                     </tr>
+                                    @if (Model.TransportTypeId == (int)TransportTypeEnum.Courier)
+                                    {
+                                        <tr>
+                                            <th>Courier</th>
+                                            <th>:</th>
+                                            <td>@Model.DriverName - @Model.VehicleNo</td>
+                                            <th>Courier Charge</th>
+                                            <th>:</th>
+                                            <td>@Model.Carrying</td>
+
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <th>Truck</th>
+                                            <th>:</th>
+                                            <td>@Model.DriverName - @Model.DriverMobileNo - @Model.VehicleNo</td>
+                                            <th>Truck Fair</th>
+                                            <th>:</th>
+                                            <td>@Model.Carrying</td>
+
+                                        </tr>
+                                    }
 
                                 </table>
                             </div>
@@ -271,7 +309,11 @@
                                                 <th class="center">Product Name </th>
                                                 <th class="center">Order Quantity</th>
                                                 <th class="center">Delivered Quantity</th>
-                                                <th class="center">Total Delivered</th>
+                                                <th class="center">Pack Size</th>
+                                                <th class="center">Quantity (KG)</th>
+                                                <th class="center">Qty in Pack</th>
+                                                <th class="center">Unit Price</th>
+                                                <th class="center">Total Price</th>
                                                 <th class="center">Action</th>
                                             </tr>
                                         </thead>
@@ -286,7 +328,42 @@
                                                     <td>@item.ProductSubCategory @item.ProductName</td>
                                                     <td>@item.OrderQty @item.UnitName</td>
                                                     <th>@item.DeliveredQty @item.UnitName</th>
-                                                    <th>@item.TotalDelivered  @item.UnitName</th>
+                                                    <td>@item.PackSize</td>
+                                                    <td>
+                                                        @{
+                                                            var totalGm = item.DeliveredQty * item.PackSize;
+                                                            double divisor = 1000;
+
+                                                            if (totalGm < divisor)
+                                                            {
+                                                                <span>
+                                                                    @totalGm gm
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                double dividend = totalGm ?? 0;
+                                                                double remainder = dividend % divisor;
+                                                                if (remainder == 0)
+                                                                {
+                                                                    totalGm = totalGm / divisor;
+                                                                    <span>
+                                                                        @totalGm KG
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    totalGm = (totalGm - remainder) / divisor;
+                                                                    <span>
+                                                                        @totalGm KG @remainder gm
+                                                                    </span>
+                                                                }
+                                                            }
+                                                        }
+                                                    </td>
+                                                    <td>@String.Format("{0:0.00}", item.FormulaQty)</td>
+                                                    <td>@String.Format("{0:0.00}", item.UnitPrice)</td>
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Amount)</td>
                                                     @if (!Model.IsSubmitted)
                                                     {
                                                         <td class="text-center">
@@ -447,8 +524,8 @@
                     @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailIdUpdate" })
                     <div class="col-md-12">
                         <div class="form-group" style="padding:0px">
-                            @Html.LabelFor(model => model.DeliveredQty, new { htmlAttributes=new { @class= "col-form-label required" } })
-                            @Html.EditorFor(model => model.DeliveredQty, new { htmlAttributes = new { @class = "form-control", @id = "txtDeliveredQtyModal",type="number" } })
+                            @Html.LabelFor(model => model.DeliveredQty, new { htmlAttributes = new { @class = "col-form-label required" } })
+                            @Html.EditorFor(model => model.DeliveredQty, new { htmlAttributes = new { @class = "form-control", @id = "txtDeliveredQtyModal", type = "number" } })
                             @Html.ValidationMessageFor(model => model.DriverNameForDelivery, "", new { @class = "text-danger" })
                         </div>
                     </div>

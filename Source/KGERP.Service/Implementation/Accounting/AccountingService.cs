@@ -7060,7 +7060,12 @@ namespace KGERP.Service.Implementation
             };
 
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
-
+            List<string> strList = new List<string>();
+            foreach (var item in vmReferenceSlave.DataList)
+            {
+                strList.Add(item.ProductName + " Processing Cost: " + item.Amount);
+            }
+            string perticular = String.Join(", ", strList.ToArray());
             #region Integration Cr Finish Item Dr
 
 
@@ -7080,7 +7085,7 @@ namespace KGERP.Service.Implementation
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
-                Particular = "Seed Processing Cost",
+                Particular = perticular,
                 Debit = 0,
                 Credit = Convert.ToDouble(vmReferenceSlave.DataList.Select(x => x.Amount).DefaultIfEmpty(0).Sum()),
                 Accounting_HeadFK = vmReferenceSlave.BankOrCasgAccHeahId.Value
@@ -7201,7 +7206,7 @@ namespace KGERP.Service.Implementation
 
 
 
-        public async Task<long> AccountingPurchaseReturnPushPackaging(int CompanyFK, VMWareHousePOReturnSlave model, int journalType)
+        public async Task<long> AccountingPurchaseReturnPushISS(int CompanyFK, VMWareHousePOReturnSlave model, int journalType)
         {
             long result = -1;
             VMJournalSlave vMJournalSlave = new VMJournalSlave
@@ -7247,13 +7252,14 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
-
+            var storeStockAccHead = _db.HeadGLs.Where(x => x.CompanyId == CompanyFK && x.AccCode == "4701001001001" && x.IsActive).FirstOrDefault();
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Adjust",
                 Debit = model.DataListSlave.Any() ? Convert.ToDouble(model.DataListSlave.Sum(x => x.ReturnQuantity * x.COGS)) : 0,
                 Credit = 0,
-                Accounting_HeadFK = 50605003 //Packaging Stock Adjust With Erp Cr
+                /*Accounting_HeadFK = 50605003*/ //Packaging Stock Adjust With Erp Cr
+                Accounting_HeadFK = storeStockAccHead.Id
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)

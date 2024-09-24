@@ -9,13 +9,13 @@
       <am:Name>SSDTRS</am:Name>
       <am:Version>17.6.33723.286</am:Version>
     </am:UpdatedBy>
-    <am:LastModifiedTimestamp>2023-11-07T05:45:43.1858543Z</am:LastModifiedTimestamp>
+    <am:LastModifiedTimestamp>2024-09-24T03:13:38.1515398Z</am:LastModifiedTimestamp>
   </am:AuthoringMetadata>
   <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="ProfitLossNotDS">
-      <DataSourceReference>ErpDataSource</DataSourceReference>
+      <DataSourceReference>ISSDataSource</DataSourceReference>
       <rd:SecurityType>None</rd:SecurityType>
       <rd:DataSourceID>1fbdaa41-ff3f-4276-8af5-acd03a5e82b7</rd:DataSourceID>
     </DataSource>
@@ -28,59 +28,29 @@
           <QueryParameter Name="@StrFromDate">
             <Value>=Parameters!StrFromDate.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@StrToDate">
-            <Value>=Parameters!StrToDate.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@CompanyId">
             <Value>=Parameters!CompanyId.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@CostCenterId">
-            <Value>=Parameters!CostCenterId.Value</Value>
-          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
-        <CommandText>AccountingProfitLossNoteForSeed</CommandText>
+        <CommandText>Accounting_BalanceSheetNoteSeed</CommandText>
       </Query>
       <Fields>
-        <Field Name="Company">
-          <DataField>Company</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Address">
-          <DataField>Address</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="CompanyLogo">
-          <DataField>CompanyLogo</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="CostCenter">
-          <DataField>CostCenter</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="OrderNo">
-          <DataField>OrderNo</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="ParantAccCode">
-          <DataField>ParantAccCode</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Balance">
-          <DataField>Balance</DataField>
-          <rd:TypeName>System.Double</rd:TypeName>
-        </Field>
         <Field Name="ParantAccName">
           <DataField>ParantAccName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ChildAccCode">
-          <DataField>ChildAccCode</DataField>
+        <Field Name="OrderId">
+          <DataField>OrderId</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="ChildAccName">
           <DataField>ChildAccName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Balance">
+          <DataField>Balance</DataField>
+          <rd:TypeName>System.Double</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -94,16 +64,12 @@
           <QueryParameter Name="@CompanyId">
             <Value>=Parameters!CompanyId.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@StrToDate">
-            <Value>=Parameters!StrToDate.Value</Value>
-          </QueryParameter>
         </QueryParameters>
         <CommandText>
- DECLARE @FromDate DATE, @ToDate DATE
+ DECLARE @FromDate DATE
     SELECT @FromDate = CONVERT(VARCHAR, CONVERT(DATE, @StrFromDate, 105))
-    SELECT @ToDate = CONVERT(VARCHAR, CONVERT(DATE, @StrToDate, 105))
 
-SELECT     @FromDate as FromDate,@ToDate as ToDate,   Name, Address,
+SELECT     @FromDate as FromDate,   Name, Address,
                              (SELECT        Url
                                FROM            UrlInfo
                                WHERE        (UrlType = 1)) + 'Images/Logo/' + CompanyLogo AS CompanyLogo
@@ -118,10 +84,6 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
         <Field Name="Name">
           <DataField>Name</DataField>
           <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="ToDate">
-          <DataField>ToDate</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
         <Field Name="CompanyLogo">
           <DataField>CompanyLogo</DataField>
@@ -190,23 +152,22 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>2.89271in</Width>
+                  <Width>2.57407in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.07604in</Width>
+                  <Width>2.40741in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.24271in</Width>
+                  <Width>1.24074in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
                 <TablixRow>
-                  <Height>0.23611in</Height>
+                  <Height>0.25in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
                         <Textbox Name="ParantAccName1">
-                          <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -217,7 +178,6 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>12pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
-                                    <TextDecoration>Underline</TextDecoration>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -235,20 +195,53 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <ColSpan>3</ColSpan>
+                        <ColSpan>2</ColSpan>
                       </CellContents>
                     </TablixCell>
                     <TablixCell />
-                    <TablixCell />
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox17">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>12pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox17</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
                   </TablixCells>
                 </TablixRow>
                 <TablixRow>
-                  <Height>0.20278in</Height>
+                  <Height>0.25in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
                         <Textbox Name="ChildAccName">
-                          <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -279,16 +272,16 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox47">
+                        <Textbox Name="Textbox9">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>-----------------</Value>
+                                  <Value>----------------------</Value>
                                   <Style>
-                                    <FontFamily>Arial</FontFamily>
+                                    <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
                                   </Style>
                                 </TextRun>
@@ -298,7 +291,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox47</rd:DefaultName>
+                          <rd:DefaultName>Textbox9</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>None</Style>
@@ -320,12 +313,10 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Label>Balance</Label>
                                   <Value>=Code.SetBDCurrency(Fields!Balance.Value.ToString())</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontSize>11pt</FontSize>
-                                    <Format>n2</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -350,31 +341,28 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                   </TablixCells>
                 </TablixRow>
                 <TablixRow>
-                  <Height>0.25278in</Height>
+                  <Height>0.25in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox1">
-                          <CanGrow>true</CanGrow>
+                        <Textbox Name="Textbox20">
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Total = </Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
-                                    <FontSize>12pt</FontSize>
+                                    <FontSize>11pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox1</rd:DefaultName>
+                          <rd:DefaultName>Textbox20</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>None</Style>
@@ -401,9 +389,8 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                                   <Value>=Code.SetBDCurrency(Sum(Fields!Balance.Value).ToString())</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
-                                    <FontSize>12pt</FontSize>
+                                    <FontSize>11pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
-                                    <Format>n2</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -456,7 +443,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                   </Group>
                   <SortExpressions>
                     <SortExpression>
-                      <Value>=Fields!OrderNo.Value</Value>
+                      <Value>=Fields!OrderId.Value</Value>
                     </SortExpression>
                   </SortExpressions>
                   <TablixMembers>
@@ -474,16 +461,17 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>ProfitLossNoteDSet</DataSetName>
-            <Left>1.02187in</Left>
-            <Height>0.69167in</Height>
-            <Width>6.21146in</Width>
+            <Top>0.01389in</Top>
+            <Left>1.03195in</Left>
+            <Height>0.75in</Height>
+            <Width>6.22222in</Width>
             <Style>
               <Border>
                 <Style>None</Style>
               </Border>
             </Style>
           </Tablix>
-          <Textbox Name="Textbox60">
+          <Textbox Name="Textbox23">
             <CanGrow>true</CanGrow>
             <KeepTogether>true</KeepTogether>
             <Paragraphs>
@@ -503,10 +491,10 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <rd:DefaultName>Textbox60</rd:DefaultName>
-            <Left>5.78229in</Left>
-            <Height>0.23611in</Height>
-            <Width>1.45104in</Width>
+            <rd:DefaultName>Textbox23</rd:DefaultName>
+            <Left>5.04584in</Left>
+            <Height>0.25in</Height>
+            <Width>2.20833in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
@@ -524,10 +512,10 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 <TablixBody>
                   <TablixColumns>
                     <TablixColumn>
-                      <Width>1.275in</Width>
+                      <Width>1.4091in</Width>
                     </TablixColumn>
                     <TablixColumn>
-                      <Width>0.25in</Width>
+                      <Width>0.1341in</Width>
                     </TablixColumn>
                   </TablixColumns>
                   <TablixRows>
@@ -588,7 +576,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                         </TablixCell>
                         <TablixCell>
                           <CellContents>
-                            <Textbox Name="Textbox13">
+                            <Textbox Name="Textbox16">
                               <CanGrow>true</CanGrow>
                               <KeepTogether>true</KeepTogether>
                               <Paragraphs>
@@ -759,7 +747,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                               <TablixHeader>
                                 <Size>0.25in</Size>
                                 <CellContents>
-                                  <Textbox Name="Textbox12">
+                                  <Textbox Name="Textbox14">
                                     <CanGrow>true</CanGrow>
                                     <KeepTogether>true</KeepTogether>
                                     <Paragraphs>
@@ -805,9 +793,9 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                   </TablixMembers>
                 </TablixRowHierarchy>
                 <DataSetName>SignatoryDataSet</DataSetName>
-                <Left>0.1in</Left>
+                <Left>0.125in</Left>
                 <Height>0.86in</Height>
-                <Width>1.525in</Width>
+                <Width>1.5432in</Width>
                 <Style>
                   <Border>
                     <Style>None</Style>
@@ -816,9 +804,9 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
               </Tablix>
             </ReportItems>
             <KeepTogether>true</KeepTogether>
-            <Top>1.23875in</Top>
-            <Left>0.22084in</Left>
-            <Height>0.86in</Height>
+            <Top>1.57834in</Top>
+            <Left>0.2375in</Left>
+            <Height>0.86833in</Height>
             <Width>7.51666in</Width>
             <ZIndex>2</ZIndex>
             <Style>
@@ -828,13 +816,13 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
             </Style>
           </Rectangle>
         </ReportItems>
-        <Height>2.09875in</Height>
+        <Height>2.44667in</Height>
         <Style />
       </Body>
-      <Width>7.95833in</Width>
+      <Width>7.99166in</Width>
       <Page>
         <PageHeader>
-          <Height>1.45985in</Height>
+          <Height>1.19833in</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
@@ -842,16 +830,17 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
               <Source>External</Source>
               <Value>=First(Fields!CompanyLogo.Value, "CompanyDSet")</Value>
               <Sizing>FitProportional</Sizing>
-              <Left>1in</Left>
-              <Height>0.66889in</Height>
-              <Width>0.88854in</Width>
+              <Top>0.01389in</Top>
+              <Left>1.03195in</Left>
+              <Height>0.655in</Height>
+              <Width>1in</Width>
               <Style>
                 <Border>
                   <Style>None</Style>
                 </Border>
               </Style>
             </Image>
-            <Textbox Name="Textbox2">
+            <Textbox Name="Textbox1">
               <CanGrow>true</CanGrow>
               <KeepTogether>true</KeepTogether>
               <Paragraphs>
@@ -860,6 +849,14 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                     <TextRun>
                       <Label>Company</Label>
                       <Value>=First(Fields!Name.Value, "CompanyDSet")</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>24pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value> jj</Value>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
                         <FontSize>24pt</FontSize>
@@ -899,7 +896,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                       <Value>=First(Fields!Address.Value, "CompanyDSet")</Value>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>12pt</FontSize>
+                        <FontSize>14pt</FontSize>
                       </Style>
                     </TextRun>
                   </TextRuns>
@@ -909,9 +906,9 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 </Paragraph>
               </Paragraphs>
               <rd:DefaultName>Textbox1</rd:DefaultName>
-              <Left>1.93021in</Left>
+              <Left>2.07361in</Left>
               <Height>0.66889in</Height>
-              <Width>5.30312in</Width>
+              <Width>5.18055in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -923,18 +920,6 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 <PaddingBottom>2pt</PaddingBottom>
               </Style>
             </Textbox>
-            <Line Name="Line1">
-              <Top>0.69667in</Top>
-              <Left>1in</Left>
-              <Height>0in</Height>
-              <Width>6.23333in</Width>
-              <ZIndex>2</ZIndex>
-              <Style>
-                <Border>
-                  <Style>Solid</Style>
-                </Border>
-              </Style>
-            </Line>
             <Textbox Name="Textbox3">
               <CanGrow>true</CanGrow>
               <KeepTogether>true</KeepTogether>
@@ -942,10 +927,10 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>                    Notes on Income Statement</Value>
+                      <Value>                       NOTES ON STATEMENT OF FINANCIAL POSITION</Value>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>14pt</FontSize>
+                        <FontSize>12pt</FontSize>
                         <FontWeight>Bold</FontWeight>
                       </Style>
                     </TextRun>
@@ -957,26 +942,9 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value />
+                      <Value>                                    As on </Value>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>3pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
-                        <TextDecoration>None</TextDecoration>
-                      </Style>
-                    </TextRun>
-                  </TextRuns>
-                  <Style>
-                    <TextAlign>Center</TextAlign>
-                  </Style>
-                </Paragraph>
-                <Paragraph>
-                  <TextRuns>
-                    <TextRun>
-                      <Value>                         For the period from </Value>
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>11pt</FontSize>
                         <FontWeight>Bold</FontWeight>
                         <TextDecoration>None</TextDecoration>
                       </Style>
@@ -985,77 +953,9 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                       <Value>=First(Fields!FromDate.Value, "CompanyDSet")</Value>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>11pt</FontSize>
                         <FontWeight>Bold</FontWeight>
                         <Format>d MMM yyyy</Format>
                         <TextDecoration>None</TextDecoration>
-                      </Style>
-                    </TextRun>
-                    <TextRun>
-                      <Value xml:space="preserve"> </Value>
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>11pt</FontSize>
-                        <FontWeight>Normal</FontWeight>
-                        <TextDecoration>None</TextDecoration>
-                      </Style>
-                    </TextRun>
-                    <TextRun>
-                      <Value>to </Value>
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>11pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
-                        <TextDecoration>None</TextDecoration>
-                      </Style>
-                    </TextRun>
-                    <TextRun>
-                      <Value>=First(Fields!ToDate.Value, "CompanyDSet")</Value>
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>11pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
-                        <Format>d MMM yyyy</Format>
-                        <TextDecoration>None</TextDecoration>
-                      </Style>
-                    </TextRun>
-                  </TextRuns>
-                  <Style>
-                    <TextAlign>Center</TextAlign>
-                  </Style>
-                </Paragraph>
-                <Paragraph>
-                  <TextRuns>
-                    <TextRun>
-                      <Value />
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>4pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
-                        <TextDecoration>None</TextDecoration>
-                      </Style>
-                    </TextRun>
-                  </TextRuns>
-                  <Style>
-                    <TextAlign>Center</TextAlign>
-                  </Style>
-                </Paragraph>
-                <Paragraph>
-                  <TextRuns>
-                    <TextRun>
-                      <Value xml:space="preserve">                           </Value>
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>12pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
-                      </Style>
-                    </TextRun>
-                    <TextRun>
-                      <Value>=First(Fields!CostCenter.Value, "ProfitLossNoteDSet")</Value>
-                      <Style>
-                        <FontFamily>Times New Roman</FontFamily>
-                        <FontSize>12pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
                       </Style>
                     </TextRun>
                   </TextRuns>
@@ -1065,10 +965,10 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 </Paragraph>
               </Paragraphs>
               <rd:DefaultName>Textbox3</rd:DefaultName>
-              <Top>0.73833in</Top>
-              <Height>0.72152in</Height>
-              <Width>7.95833in</Width>
-              <ZIndex>3</ZIndex>
+              <Top>0.72445in</Top>
+              <Height>0.44333in</Height>
+              <Width>7.99166in</Width>
+              <ZIndex>2</ZIndex>
               <Style>
                 <Border>
                   <Style>None</Style>
@@ -1079,6 +979,18 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 <PaddingBottom>2pt</PaddingBottom>
               </Style>
             </Textbox>
+            <Line Name="Line1">
+              <Top>0.66889in</Top>
+              <Left>1.04584in</Left>
+              <Height>0in</Height>
+              <Width>6.20833in</Width>
+              <ZIndex>3</ZIndex>
+              <Style>
+                <Border>
+                  <Style>Solid</Style>
+                </Border>
+              </Style>
+            </Line>
           </ReportItems>
           <Style>
             <Border>
@@ -1087,7 +999,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
           </Style>
         </PageHeader>
         <PageFooter>
-          <Height>0.35in</Height>
+          <Height>0.27972in</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
@@ -1102,7 +1014,6 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
                         <FontSize>8pt</FontSize>
-                        <FontWeight>Normal</FontWeight>
                         <Format>f</Format>
                       </Style>
                     </TextRun>
@@ -1111,7 +1022,6 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                       <Style>
                         <FontFamily>Times New Roman</FontFamily>
                         <FontSize>8pt</FontSize>
-                        <FontWeight>Normal</FontWeight>
                         <Format>f</Format>
                       </Style>
                     </TextRun>
@@ -1122,10 +1032,44 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
                 </Paragraph>
               </Paragraphs>
               <rd:DefaultName>Textbox54</rd:DefaultName>
-              <Top>0.04167in</Top>
-              <Left>5.2132in</Left>
-              <Height>0.25618in</Height>
-              <Width>2.5243in</Width>
+              <Left>5.22222in</Left>
+              <Height>0.27972in</Height>
+              <Width>2.53194in</Width>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+            <Textbox Name="Textbox4">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>="Page No " &amp; Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>9pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox2</rd:DefaultName>
+              <Left>3.95688in</Left>
+              <Height>0.24723in</Height>
+              <Width>1.07791in</Width>
+              <ZIndex>1</ZIndex>
               <Style>
                 <Border>
                   <Style>None</Style>
@@ -1145,7 +1089,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
         </PageFooter>
         <PageHeight>11.69in</PageHeight>
         <PageWidth>8.27in</PageWidth>
-        <TopMargin>0.75in</TopMargin>
+        <TopMargin>0.5in</TopMargin>
         <BottomMargin>0.25in</BottomMargin>
         <Style />
       </Page>
@@ -1156,18 +1100,13 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
       <DataType>String</DataType>
       <Prompt>Str From Date</Prompt>
     </ReportParameter>
-    <ReportParameter Name="StrToDate">
-      <DataType>String</DataType>
-      <Prompt>Str To Date</Prompt>
-    </ReportParameter>
     <ReportParameter Name="CompanyId">
-      <DataType>String</DataType>
+      <DataType>Integer</DataType>
       <Prompt>Company Id</Prompt>
     </ReportParameter>
     <ReportParameter Name="CostCenterId">
       <DataType>Integer</DataType>
-      <Nullable>true</Nullable>
-      <Prompt>Cost Center</Prompt>
+      <Prompt>Cost Center Id</Prompt>
     </ReportParameter>
     <ReportParameter Name="ReportCategoryId">
       <DataType>Integer</DataType>
@@ -1187,21 +1126,16 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>StrToDate</ParameterName>
+          <ParameterName>CompanyId</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>CompanyId</ParameterName>
+          <ParameterName>CostCenterId</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>CostCenterId</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>1</RowIndex>
           <ParameterName>ReportCategoryId</ParameterName>
         </CellDefinition>
       </CellDefinitions>
