@@ -665,8 +665,6 @@ namespace KGERP.Controllers
             return View();
         }
 
-
-
         [HttpGet]
         public ActionResult GCCLPRFInvoiceReport(int companyId, int DemandId, string reportName, int CustomerId, string AsOnDate)
         {
