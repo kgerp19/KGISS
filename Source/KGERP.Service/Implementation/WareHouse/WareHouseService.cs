@@ -501,6 +501,7 @@ namespace KGERP.Services.WareHouse
             List<SaleReturnDetail> saleReturnList = new List<SaleReturnDetail>();
             foreach (var item in dataList)
             {
+
                 SaleReturnDetail saleReturnDetail = new SaleReturnDetail
                 {
                     SaleReturnId = vmSaleReturnDetail.SaleReturnId,
@@ -5572,6 +5573,7 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.SaleReturnId;
             }
+
             if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
             {
                 #region Ready To Account Integration
