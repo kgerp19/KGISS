@@ -16,6 +16,7 @@ using System.Data.Entity.Validation;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace KGERP.Services.WareHouse
 {
@@ -370,23 +371,42 @@ namespace KGERP.Services.WareHouse
         public async Task<long> WareHouseSaleReturnByProductAdd(VMSaleReturnDetail vmSaleReturnDetail)
         {
             long result = -1;
+            //SaleReturnDetail saleReturnDetail = new SaleReturnDetail
+            //{
+            //    SaleReturnId = vmSaleReturnDetail.SaleReturnId,
+            //    ProductId = vmSaleReturnDetail.ProductId,
+            //    Qty = vmSaleReturnDetail.Qty,
+            //    COGSRate = vmSaleReturnDetail.COGSRate,
+            //    Rate = Convert.ToDecimal(vmSaleReturnDetail.Rate),
+            //    BaseCommission = 0,
+            //    AdditionPrice = 0,
+            //    CarryingCommission = 0,
+            //    CashCommission = 0,
+            //    SpecialDiscount = 0,
+            //    IsActive = true,
+            //};
+
+            var vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", vmSaleReturnDetail.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
             SaleReturnDetail saleReturnDetail = new SaleReturnDetail
             {
                 SaleReturnId = vmSaleReturnDetail.SaleReturnId,
                 ProductId = vmSaleReturnDetail.ProductId,
                 Qty = vmSaleReturnDetail.Qty,
-                COGSRate = vmSaleReturnDetail.COGSRate,
-                Rate = Convert.ToDecimal(vmSaleReturnDetail.Rate),
-                BaseCommission = 0,
+                COGSRate = vMProductStock.CostingPrice,
+                Rate = 0,
+                OrderDeliverDetailsId = vmSaleReturnDetail.OrderDeliverDetailsId,
+
+                BaseCommission = vmSaleReturnDetail.DiscountUnit,
+                CashCommission = vmSaleReturnDetail.DiscountRate,
+                SpecialDiscount = vmSaleReturnDetail.Qty < Convert.ToDecimal(vmSaleReturnDetail.DeliveredQty) ? vmSaleReturnDetail.SpecialDiscount / Convert.ToDecimal(vmSaleReturnDetail.DeliveredQty) * vmSaleReturnDetail.Qty : vmSaleReturnDetail.SpecialDiscount,
+
                 AdditionPrice = 0,
                 CarryingCommission = 0,
-                CashCommission = 0,
-                SpecialDiscount = 0,
-                IsActive = true,
 
-
+                IsActive = true
 
             };
+
             _db.SaleReturnDetails.Add(saleReturnDetail);
 
             if (await _db.SaveChangesAsync() > 0)
@@ -501,13 +521,13 @@ namespace KGERP.Services.WareHouse
             List<SaleReturnDetail> saleReturnList = new List<SaleReturnDetail>();
             foreach (var item in dataList)
             {
-
+                var vMProductStock =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", item.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
                 SaleReturnDetail saleReturnDetail = new SaleReturnDetail
                 {
                     SaleReturnId = vmSaleReturnDetail.SaleReturnId,
                     ProductId = item.ProductId,
                     Qty = item.Qty,
-                    COGSRate = item.COGSRate,
+                    COGSRate = vMProductStock.CostingPrice,
                     Rate = Convert.ToDecimal(item.UnitPrice),
                     OrderDeliverDetailsId = item.OrderDeliverDetailsId,
 
@@ -2907,6 +2927,7 @@ namespace KGERP.Services.WareHouse
                                                                       && t1.SaleReturnId == saleReturnId
                                                                       select new VMSaleReturnDetail
                                                                       {
+                                                                          
                                                                           AccountingIncomeHeadId = t2.CompanyId == (int)CompanyName.KrishibidSeedLimited ? t7.AccountingIncomeHeadId : t6.AccountingIncomeHeadId,
                                                                           AccountingHeadId = t2.CompanyId == (int)CompanyName.KrishibidSeedLimited ? t7.AccountingHeadId : t6.AccountingHeadId,
                                                                           SaleReturnDetailId = t1.SaleReturnDetailId,
