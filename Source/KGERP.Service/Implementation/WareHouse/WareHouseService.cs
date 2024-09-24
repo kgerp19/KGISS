@@ -5572,30 +5572,12 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.SaleReturnId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
+
+            if (result > 0)
             {
                 #region Ready To Account Integration
                 VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
                 await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.SalesReturnVoucher);
-
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
-                UpdateProductCostingPrice(AccData);
-                await _accountingService.AccountingSalesReturnPushGCCL(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.SalesReturnVoucher);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-                VMSaleReturnDetail AccData = await KfmalSalesReturnGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
-                //UpdateKfmalProductCostingPrice(AccData);
-                await _accountingService.AccountingSalesReturnPushKfmal(vmModel.CompanyFK.Value, AccData, (int)KfmalJournalEnum.SalesReturnVoucher);
 
                 #endregion
             }
