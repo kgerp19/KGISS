@@ -1430,7 +1430,7 @@ namespace KGERP.Controllers
 
         public ActionResult AccountingAdvancedLedgerReportsInternal(int AccHeadId, int LayerNo, string StrFromDate, string StrToDate, int CompanyId)
         {
-            string reportName = "AccountingAdvancedLedger";
+            string reportName = "ISSAccountingAdvancedLedger";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
