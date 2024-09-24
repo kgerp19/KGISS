@@ -443,16 +443,7 @@ namespace KGERP.Controllers
         //
         public ActionResult GetVoucherReport(int companyId, long voucherId, string reportName)
         {
-            if (companyId == (int)CompanyName.KrishibidSeedLimited)
-            {
-                reportName = "KGVoucherReportSeed";
-
-            }
-            else
-            {
-                reportName = "KGVoucherReport";
-
-            }
+            reportName = "ISSVoucherReport";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
