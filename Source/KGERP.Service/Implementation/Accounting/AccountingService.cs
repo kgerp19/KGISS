@@ -7060,7 +7060,12 @@ namespace KGERP.Service.Implementation
             };
 
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
-
+            List<string> strList = new List<string>();
+            foreach (var item in vmReferenceSlave.DataList)
+            {
+                strList.Add(item.ProductName + " Processing Cost: " + item.Amount);
+            }
+            string perticular = String.Join(", ", strList.ToArray());
             #region Integration Cr Finish Item Dr
 
 
@@ -7080,7 +7085,7 @@ namespace KGERP.Service.Implementation
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
-                Particular = "Seed Processing Cost",
+                Particular = perticular,
                 Debit = 0,
                 Credit = Convert.ToDouble(vmReferenceSlave.DataList.Select(x => x.Amount).DefaultIfEmpty(0).Sum()),
                 Accounting_HeadFK = vmReferenceSlave.BankOrCasgAccHeahId.Value
