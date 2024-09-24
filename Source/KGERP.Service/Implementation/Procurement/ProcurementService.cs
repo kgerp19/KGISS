@@ -3146,7 +3146,7 @@ namespace KGERP.Services.Procurement
                                                                         UnitName = t6.Name,
                                                                         UnitPrice = t1.UnitPrice,                                                                       
                                                                         PackSize = t3.PackSize,
-                                                                        TotalAmount = t1.Qty + t1.UnitPrice,
+                                                                        TotalAmount = t1.Qty * t1.UnitPrice,
                                                                         QtyInPack = t3.FormulaQty,
 
                                                                         FProductId = t3.ProductId
