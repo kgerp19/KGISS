@@ -3967,7 +3967,7 @@ namespace KGERP.Services.WareHouse
 
                                                          }).FirstOrDefault());
 
-
+            /// hggfgfhf
 
             vmOrderDeliverDetail.DataListDetail = await Task.Run(() => (from t1 in _db.OrderDeliverDetails
                                                                         join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId
