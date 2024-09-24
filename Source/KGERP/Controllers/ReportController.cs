@@ -668,7 +668,6 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-
         public ActionResult GCCLPRFInvoiceReport(int companyId, int DemandId, string reportName, int CustomerId, string AsOnDate)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
@@ -681,7 +680,6 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-
         public ActionResult GCCLProductionReport(int companyId, int prodReferenceId, string reportName)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
