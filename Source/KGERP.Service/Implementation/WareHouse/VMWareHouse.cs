@@ -560,6 +560,7 @@ namespace KGERP.Services.WareHouse
         //public List<SelectVm> Stockinfolist { get; set; }
 
         public double OrderQty { get; set; }
+        public double? PackSize { get; set; }
         public string ProductSubCategory { get; set; }
         public string ProductCategory { get; set; }
 
@@ -587,6 +588,7 @@ namespace KGERP.Services.WareHouse
 
         public string IntegratedFrom { get; set; }
         public decimal DiscountUnit { get; set; }
+        public decimal? FormulaQty { get; set; }
 
         public VendorsPaymentMethodEnum POPaymentMethod { get { return (VendorsPaymentMethodEnum)this.PaymentMethod; } }// = SupplierPaymentMethodEnum.Cash;
         public string POPaymentMethodName { get { return BaseFunctionalities.GetEnumDescription(POPaymentMethod); } }

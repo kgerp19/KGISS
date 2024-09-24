@@ -905,9 +905,9 @@ namespace KGERP.Controllers
         [HttpGet]
         public async Task<ActionResult> WareHouseOrderDeliverList(int companyId, DateTime? fromDate, DateTime? toDate)
         {
-            if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-2); ;
-
-            if (!toDate.HasValue) toDate = DateTime.Now;
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
             VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
             vmOrderDeliver = await _service.WareHouseOrderDeliverGet(companyId, fromDate, toDate);
 
