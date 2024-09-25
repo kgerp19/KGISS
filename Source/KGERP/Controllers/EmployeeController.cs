@@ -289,7 +289,7 @@ namespace KGERP.Controllers
             vm.Employee = employeeService.GetEmployee(id);
 
 
-            var companies = companyService.GetCompanySelectModelsISS(Common.GetCompanyId());
+            var companies = companyService.GetCompanySelectModelsISS(companyId);
             var selectedCompaniesID = companies.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(companies.FirstOrDefault()) ?? 0;
 
             var request = HttpContext.Request;
