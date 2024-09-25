@@ -445,6 +445,13 @@ namespace KGERP.Controllers
         {
             reportName = "ISSVoucherReport";
 
+            
+                reportName = "ISSVoucherReport";
+
+            
+         
+            
+
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
