@@ -7106,16 +7106,19 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public async Task<long> AccountingPackagingPushISS(DateTime journalDate, int CompanyFK, VMProdReferenceSlave vmReferenceSlave, int journalType)
+        public async Task<long> AccountingPackagingPushISS(VMProdReferenceSlave vmReferenceSlave)
         {
-            
+
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == vmReferenceSlave.CompanyFK && x.Code == "PACV" && x.IsActive == true).FirstOrDefault();
+
+        
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
-                JournalType = journalType,
+                JournalType = voucherType.VoucherTypeId,
                 Title = vmReferenceSlave.ReferenceNo + " Date: " + vmReferenceSlave.ReferenceDate,
                 Narration = vmReferenceSlave.CreatedBy + " " + vmReferenceSlave.CreatedDate,
-                CompanyFK = CompanyFK,
-                Date = journalDate,
+                CompanyFK = vmReferenceSlave.CompanyFK,
+                Date = vmReferenceSlave.ReferenceDate,
                 IsSubmit = true
             };
              
@@ -7155,7 +7158,7 @@ namespace KGERP.Service.Implementation
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
             {
-                var voucherMap = VoucherMapping(resultData.VoucherId, CompanyFK, vmReferenceSlave.ProdReferenceId, "Prod_Reference");
+                var voucherMap = VoucherMapping(resultData.VoucherId, vmReferenceSlave.CompanyFK.Value, vmReferenceSlave.ProdReferenceId, "Prod_Reference");
             }
             return resultData.VoucherId;
         }

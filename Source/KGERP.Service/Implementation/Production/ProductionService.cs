@@ -1675,7 +1675,7 @@ namespace KGERP.Services.Production
                 {
                     var productionVm = await Task.Run(() => ProdReferenceSlaveGet(prodReference.CompanyId.Value, prodReference.ProdReferenceId));
 
-                    await _accountingService.AccountingPackagingPushISS(prodReference.ReferenceDate, prodReference.CompanyId.Value, productionVm, (int)PackagingJournalEnum.ProductionVoucher);
+                    await _accountingService.AccountingPackagingPushISS(productionVm);
 
                 }
 
@@ -1712,7 +1712,7 @@ namespace KGERP.Services.Production
                     await _db.SaveChangesAsync();
                     var productionVm = await Task.Run(() => ProdReferenceSlaveGet(prodReference.CompanyId.Value, prodReference.ProdReferenceId));
 
-                    await _accountingService.AccountingPackagingPushISS(prodReference.ReferenceDate, prodReference.CompanyId.Value, productionVm, (int)PackagingJournalEnum.ProductionVoucher);
+                    await _accountingService.AccountingPackagingPushISS( productionVm );
 
                 }
 

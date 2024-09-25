@@ -5307,53 +5307,8 @@ namespace KGERP.Services.WareHouse
             model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             model.ModifedDate = DateTime.Now;
 
-
-
-
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                result = model.OrderDeliverId;
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await KfmalOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
-                await _accountingService.AccSalesPushKfmal(vmModel.CompanyFK.Value, AccData, (int)KfmalJournalEnum.SalesVoucher);
-                //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
-                await _accountingService.AccountingSalesPushISS( AccData);
-                //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await SEEDAccountingPushOrderDeliverGet(vmModel.CompanyFK.Value, vmModel.OrderDeliverId);
-                await _accountingService.AccountingSalesPushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.SalesVoucher);
-                await _accountingService.OrderDeliverySMSPush(AccData);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await FeedOrderDeliverDetailGet(vmModel.CompanyFK.Value, vmModel.OrderDeliverId);
-
-                await _accountingService.AccountingSalesPushFeed(vmModel.CompanyFK.Value, AccData, (int)FeedJournalEnum.SalesVoucher);
-                /// await _accountingService.OrderDeliverySMSPush(AccData);
-                #endregion
-            }
-
+            VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
+            await _accountingService.AccountingSalesPushISS(AccData);
             return result;
         }
 
