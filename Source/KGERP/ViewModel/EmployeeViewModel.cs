@@ -35,5 +35,6 @@ namespace KGERP.ViewModel
         public List<SelectModel> RegionDistricts { get; set; }
 
         public List<SelectListItem> DDLVendor { get; set; }
+        public SelectList CompanyList { get; set; } = new SelectList(new List<object>());
     }
 }

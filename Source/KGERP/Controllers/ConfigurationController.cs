@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using KGERP;
+using KGERP.Data.CustomModel;
 using KGERP.Data.Models;
 using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
@@ -63,6 +64,47 @@ namespace Pos.App.Controllers
             _dropDownItemService = dropDownItemService;
             _dropdownService = dropdownService;
         }
+        #region URLInfo
+        public ActionResult Index(int? id)
+        {
+            UrlInfo urlInfo;
+            if (id.HasValue)
+            {
+                urlInfo = _service.GetUrlById(id.Value);
+            }
+            else
+            {
+                urlInfo = new UrlInfo();  // New URL entry
+            }
+
+            var model = new UrlViewModel
+            {
+                DataList = _service.GetAllUrls(),
+                UrlInfo = urlInfo,
+                CompanyList = new SelectList(_service.CompaniesDropDownList(), "Value", "Text")
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public ActionResult SaveUrl(UrlInfo urlInfo)
+        {
+            if (ModelState.IsValid)
+            {
+                _service.SaveUrl(urlInfo);
+                return RedirectToAction("Index");
+            }
+            return View("Index", new UrlViewModel { DataList = _service.GetAllUrls(), UrlInfo = urlInfo });
+        }
+
+        public ActionResult DeleteUrl(int id)
+        {
+            _service.DeleteUrl(id);
+            return RedirectToAction("Index");
+        }
+        #endregion
 
         #region User Role Menuitem
         public async Task<ActionResult> UserMenuAssignment(int companyId)

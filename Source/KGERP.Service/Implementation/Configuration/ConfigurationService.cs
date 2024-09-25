@@ -23,7 +23,9 @@ using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
+using Unit = KGERP.Data.Models.Unit;
 
 namespace KGERP.Service.Implementation
 
@@ -7647,7 +7649,6 @@ namespace KGERP.Service.Implementation
         {
             var obj = _db.PortOfCountries.Where(t => t.PortOfCountryId == Id).SingleOrDefault();
             obj.IsActive = false;
-
             if (_db.SaveChanges() > 0)
             {
                 return true;
@@ -7808,6 +7809,66 @@ namespace KGERP.Service.Implementation
                 }
             }
             return result;
+        }
+        #endregion
+
+        #region URLInfo
+        public void SaveUrl(UrlInfo urlInfo)
+        {
+            if (urlInfo.UrlId == 0)
+            {
+                UrlInfo urldb = new UrlInfo
+                {
+
+                    Url = urlInfo.Url,
+                    CompanyId = urlInfo.CompanyId,
+                    UrlType = urlInfo.UrlType,
+                    IsActive = true
+                };
+                _db.UrlInfoes.Add(urldb);
+            }
+            else
+            {
+                var existingUrl = _db.UrlInfoes.Find(urlInfo.UrlId);
+                if (existingUrl != null)
+                {
+                    existingUrl.Url = urlInfo.Url;
+                    existingUrl.UrlType = urlInfo.UrlType;
+                    existingUrl.CompanyId = urlInfo.CompanyId;
+                }
+            }
+            _db.SaveChanges();
+        }
+        public List<UrlViewModel> GetAllUrls()
+        {
+            var result = (from url in _db.UrlInfoes
+                          join company in _db.Companies on url.CompanyId equals company.CompanyId
+                          where url.IsActive == true
+                          select new UrlViewModel
+                          {
+                              UrlId = url.UrlId,
+                              Url = url.Url,
+                              UrlType = url.UrlType,
+                              CompanyId = url.CompanyId,
+                              CompanyName = company.Name
+                          }).ToList();
+
+            return result;
+        }
+
+        public UrlInfo GetUrlById(int urlId)
+        {
+            return _db.UrlInfoes.Find(urlId);
+        }
+
+        public void DeleteUrl(int urlId)
+        {
+            var url = _db.UrlInfoes.Find(urlId);
+            if (url != null)
+            {
+                url.IsActive = false;
+                _db.SaveChanges();
+            }
         }
         #endregion
 

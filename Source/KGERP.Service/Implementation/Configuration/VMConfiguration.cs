@@ -93,6 +93,18 @@ namespace KGERP.Service.Configuration
         public SelectList CompanyList { get; set; } = new SelectList(new List<object>());
 
     }
+    public class UrlViewModel
+    {
+        public UrlInfo UrlInfo { get; set; }
+        public List<UrlInfo> Urls { get; set; }
+        public SelectList CompanyList { get; set; } = new SelectList(new List<object>());
+        public string CompanyName { get; set; }
+        public int UrlId { get; set; }
+        public string Url { get; set; }
+        public int? UrlType { get; set; }
+        public int CompanyId { get; set; }
+        public List<UrlViewModel> DataList { get; set; }
+    }
 
     public class VMGrade : BaseVM
     {
