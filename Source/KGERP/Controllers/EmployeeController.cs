@@ -288,6 +288,10 @@ namespace KGERP.Controllers
             EmployeeViewModel vm = new EmployeeViewModel();
             vm.Employee = employeeService.GetEmployee(id);
 
+
+            var companies = companyService.GetCompanySelectModelsISS(Common.GetCompanyId());
+            var selectedCompaniesID = companies.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(companies.FirstOrDefault()) ?? 0;
+
             var request = HttpContext.Request;
             var baseUrl = string.Format("{0}://{1}", request.Url.Scheme, request.Url.Authority);
             if (string.IsNullOrEmpty(vm.Employee.ImageFileName))
@@ -323,6 +327,8 @@ namespace KGERP.Controllers
             vm.JobTypes = dropDownItemService.GetDropDownItemSelectModels(10);
             vm.Banks = bankService.GetBankSelectModels();
             vm.BankBranches = new List<SelectModel>();
+            vm.CompanyList = new SelectList(companies, "Value", "Text", selectedCompaniesID);
+            vm.Employee.CompanyId = (int)selectedCompaniesID;
             if (vm.Employee.BankId > 0)
             {
                 vm.BankBranches = bankBranchService.GetBankBranchByBank(vm.Employee.BankId ?? 0);
