@@ -16,6 +16,7 @@ using System.Data.Entity.Validation;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace KGERP.Services.WareHouse
 {
@@ -370,23 +371,42 @@ namespace KGERP.Services.WareHouse
         public async Task<long> WareHouseSaleReturnByProductAdd(VMSaleReturnDetail vmSaleReturnDetail)
         {
             long result = -1;
+            //SaleReturnDetail saleReturnDetail = new SaleReturnDetail
+            //{
+            //    SaleReturnId = vmSaleReturnDetail.SaleReturnId,
+            //    ProductId = vmSaleReturnDetail.ProductId,
+            //    Qty = vmSaleReturnDetail.Qty,
+            //    COGSRate = vmSaleReturnDetail.COGSRate,
+            //    Rate = Convert.ToDecimal(vmSaleReturnDetail.Rate),
+            //    BaseCommission = 0,
+            //    AdditionPrice = 0,
+            //    CarryingCommission = 0,
+            //    CashCommission = 0,
+            //    SpecialDiscount = 0,
+            //    IsActive = true,
+            //};
+
+            var vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", vmSaleReturnDetail.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
             SaleReturnDetail saleReturnDetail = new SaleReturnDetail
             {
                 SaleReturnId = vmSaleReturnDetail.SaleReturnId,
                 ProductId = vmSaleReturnDetail.ProductId,
                 Qty = vmSaleReturnDetail.Qty,
-                COGSRate = vmSaleReturnDetail.COGSRate,
-                Rate = Convert.ToDecimal(vmSaleReturnDetail.Rate),
-                BaseCommission = 0,
+                COGSRate = vMProductStock.CostingPrice,
+                Rate = 0,
+                OrderDeliverDetailsId = vmSaleReturnDetail.OrderDeliverDetailsId,
+
+                BaseCommission = vmSaleReturnDetail.DiscountUnit,
+                CashCommission = vmSaleReturnDetail.DiscountRate,
+                SpecialDiscount = vmSaleReturnDetail.Qty < Convert.ToDecimal(vmSaleReturnDetail.DeliveredQty) ? vmSaleReturnDetail.SpecialDiscount / Convert.ToDecimal(vmSaleReturnDetail.DeliveredQty) * vmSaleReturnDetail.Qty : vmSaleReturnDetail.SpecialDiscount,
+
                 AdditionPrice = 0,
                 CarryingCommission = 0,
-                CashCommission = 0,
-                SpecialDiscount = 0,
-                IsActive = true,
 
-
+                IsActive = true
 
             };
+
             _db.SaleReturnDetails.Add(saleReturnDetail);
 
             if (await _db.SaveChangesAsync() > 0)
@@ -501,13 +521,13 @@ namespace KGERP.Services.WareHouse
             List<SaleReturnDetail> saleReturnList = new List<SaleReturnDetail>();
             foreach (var item in dataList)
             {
-
+                var vMProductStock =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", item.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
                 SaleReturnDetail saleReturnDetail = new SaleReturnDetail
                 {
                     SaleReturnId = vmSaleReturnDetail.SaleReturnId,
                     ProductId = item.ProductId,
                     Qty = item.Qty,
-                    COGSRate = item.COGSRate,
+                    COGSRate = vMProductStock.CostingPrice,
                     Rate = Convert.ToDecimal(item.UnitPrice),
                     OrderDeliverDetailsId = item.OrderDeliverDetailsId,
 
@@ -1148,7 +1168,7 @@ namespace KGERP.Services.WareHouse
             #region Ready To Account Integration
             VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
             await _accountingService.ISSMRPush(vmModel.CompanyFK.Value, AccData);
-             
+
 
             #endregion
             return result;
@@ -1196,7 +1216,7 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.PurchaseReturnId;
             }
-            
+
             #region Ready To Account Integration
             VMWareHousePOReturnSlave AccData = await WareHousePOReturnSlaveGet(vmModel.CompanyFK.Value, vmModel.PurchaseReturnId);
             await _accountingService.AccountingPurchaseReturnPushISS(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.PurchaseReturnVoucher);
@@ -1729,7 +1749,6 @@ namespace KGERP.Services.WareHouse
                             UnitPrice = t1.UnitPrice,
                             UnitName = t8.Name,
                             DiscountUnit = t1.DiscountUnit,
-                            DiscountRate = t1.DiscountRate,
                             SpecialDiscount = t1.SpecialBaseCommission
                         }).ToList();
 
@@ -2268,7 +2287,7 @@ namespace KGERP.Services.WareHouse
                                                                     LabourBill = t1.LabourBill, //Load Unload Cost
                                                                     TruckFare = t1.TruckFare,   //Transport 
                                                                     CandFBill = t1.CandFBill,
-                                                                     
+
                                                                     AccountingHeadId = t3.HeadGLId,
 
                                                                     IntegratedFrom = "MaterialReceive"
@@ -2907,6 +2926,7 @@ namespace KGERP.Services.WareHouse
                                                                       && t1.SaleReturnId == saleReturnId
                                                                       select new VMSaleReturnDetail
                                                                       {
+                                                                          
                                                                           AccountingIncomeHeadId = t2.CompanyId == (int)CompanyName.KrishibidSeedLimited ? t7.AccountingIncomeHeadId : t6.AccountingIncomeHeadId,
                                                                           AccountingHeadId = t2.CompanyId == (int)CompanyName.KrishibidSeedLimited ? t7.AccountingHeadId : t6.AccountingHeadId,
                                                                           SaleReturnDetailId = t1.SaleReturnDetailId,
@@ -3614,9 +3634,10 @@ namespace KGERP.Services.WareHouse
                         OrderDeliverId = vmModel.OrderDeliverId,
                         COGSPrice = dataListSlavePartial[i].ClosingRate,
 
-                        BaseCommission = 0,      // Unit Discount
+                        BaseCommission = dataListSlavePartial[i].DiscountUnit,   // Unit Discount
+                        SpecialDiscount = dataListSlavePartial[i].SpecialDiscount,   // Special Discount
+
                         CashCommission = 0,       // Cash Discount
-                        SpecialDiscount = 0,   // Special Discount
 
                         EBaseCommission = 0,
                         ECashCommission = 0,
@@ -3645,8 +3666,8 @@ namespace KGERP.Services.WareHouse
                 var repository = _unitOfWork.GeneralRepository<OrderDeliverDetail>();
                 await repository.AddRangeListAsync(orderDeliverDetails);
 
-                int ComResult= await _unitOfWork.CompleteAsync();
-                if (ComResult>0)
+                int ComResult = await _unitOfWork.CompleteAsync();
+                if (ComResult > 0)
                 {
                     result = orderDeliverDetails.Last().OrderDeliverDetailId;
                 }
@@ -3915,7 +3936,7 @@ namespace KGERP.Services.WareHouse
             VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
             vmOrderDeliverDetail = await Task.Run(() => (from t1 in _db.OrderDelivers
                                                          join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
-                                                         join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId                                                          
+                                                         join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
                                                          join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
                                                          join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
                                                          join t7 in _db.StockInfoes on t2.StockInfoId equals t7.StockInfoId into t7_Join
@@ -3943,26 +3964,26 @@ namespace KGERP.Services.WareHouse
 
                                                              DriverName = t1.DriverName,
                                                              VehicleNo = t1.VehicleNo,
-                                                             DriverMobileNo = t1.MobileNo,                                                              
+                                                             DriverMobileNo = t1.MobileNo,
                                                              Carrying = t1.Carrying,
 
 
                                                              OrderDeliverId = t1.OrderDeliverId,
                                                              CompanyFK = t1.CompanyId,
                                                              OrderMasterId = t2.OrderMasterId,
-                                                             
-                                                            
+
+
                                                              CreatedBy = t1.CreatedBy,
                                                              CreatedDate = t1.CreatedDate,
                                                              IsSubmitted = t1.IsSubmitted,
                                                              PaymentMethod = t2.PaymentMethod,
 
-                                                                                                                         
+
                                                              Warehouse = (t7 == null ? "" : t7.Name),
                                                              SubZoneMobilePersonal = t5.MobilePersonal,
                                                              ZoneMobileOffice = t5.MobileOffice,
                                                              TerritoryIncharge = t6.SalesOfficerName,
-                                                             Territory = t6.Name,                                                            
+                                                             Territory = t6.Name,
                                                              Remarks = t2.Remarks
 
                                                          }).FirstOrDefault());
@@ -3990,6 +4011,11 @@ namespace KGERP.Services.WareHouse
                                                                             PackSize = t5.PackSize,
                                                                             FormulaQty = t5.FormulaQty,
                                                                             DeliveredQty = t1.DeliveredQty,
+
+                                                                            DiscountUnit = t1.BaseCommission,
+                                                                            SpecialDiscount = t1.SpecialDiscount,
+
+
                                                                             UnitName = t8.Name,
                                                                             UnitPrice = t1.UnitPrice,
                                                                             Amount = t1.DeliveredQty * t1.UnitPrice
@@ -4419,7 +4445,7 @@ namespace KGERP.Services.WareHouse
         public async Task<VMStockAdjustDetail> ISSRMAdjustmentDetailGet(int companyId, int stockAdjustId)
         {
             VMStockAdjustDetail vmStockAdjustDetail = new VMStockAdjustDetail();
-            vmStockAdjustDetail = await Task.Run(() => (from t1 in _db.StockAdjusts                                                        
+            vmStockAdjustDetail = await Task.Run(() => (from t1 in _db.StockAdjusts
                                                         where t1.StockAdjustId == stockAdjustId
                                                         select new VMStockAdjustDetail
                                                         {
@@ -4427,9 +4453,9 @@ namespace KGERP.Services.WareHouse
                                                             StockAdjustId = t1.StockAdjustId,
                                                             AdjustDate = t1.AdjustDate,
                                                             InvoiceNo = t1.InvoiceNo,
-                                                            Remarks = t1.Remarks,                                                             
+                                                            Remarks = t1.Remarks,
                                                             CompanyFK = t1.CompanyId,
-                                                            IsFinalized = t1.IsFinalized,                                                          
+                                                            IsFinalized = t1.IsFinalized,
                                                             CreatedBy = t1.CreatedBy,
                                                             IntegratedFrom = "StockAdjust"
 
@@ -5345,15 +5371,15 @@ namespace KGERP.Services.WareHouse
                 EntityModel.ModifedDate = DateTime.Now;
                 EntityModel.ModifiedBy = Common.GetUserId();
                 _db.Entry(EntityModel).State = EntityState.Modified;
-                if (await _db.SaveChangesAsync()>0)
+                if (await _db.SaveChangesAsync() > 0)
                 {
-                    result = (long)((EntityModel.OrderDeliverId.HasValue && EntityModel.OrderDeliverId!=null)? EntityModel.OrderDeliverId:0);
+                    result = (long)((EntityModel.OrderDeliverId.HasValue && EntityModel.OrderDeliverId != null) ? EntityModel.OrderDeliverId : 0);
                 }
             }
             return result;
         }
 
-        public async Task<long> OrderDeliveryUpdate(long OrderDeliveryDetailsId,double deliveryQty)
+        public async Task<long> OrderDeliveryUpdate(long OrderDeliveryDetailsId, double deliveryQty)
         {
             long result = -1;
             var EntityModel = await _db.OrderDeliverDetails.FirstAsync(x => x.OrderDeliverDetailId == OrderDeliveryDetailsId);
@@ -5425,7 +5451,7 @@ namespace KGERP.Services.WareHouse
         }
 
 
-         
+
         public async Task<long> SubmitRMAdjusts(VMStockAdjustDetail vmModel)
         {
             long result = -1;
@@ -5574,30 +5600,11 @@ namespace KGERP.Services.WareHouse
                 result = model.SaleReturnId;
             }
 
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
+            if (result > 0)
             {
                 #region Ready To Account Integration
                 VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
                 await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.SalesReturnVoucher);
-
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
-                UpdateProductCostingPrice(AccData);
-                await _accountingService.AccountingSalesReturnPushGCCL(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.SalesReturnVoucher);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-                VMSaleReturnDetail AccData = await KfmalSalesReturnGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
-                //UpdateKfmalProductCostingPrice(AccData);
-                await _accountingService.AccountingSalesReturnPushKfmal(vmModel.CompanyFK.Value, AccData, (int)KfmalJournalEnum.SalesReturnVoucher);
 
                 #endregion
             }
