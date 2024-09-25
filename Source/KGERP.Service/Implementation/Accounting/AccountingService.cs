@@ -3898,21 +3898,22 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public async Task<long> AccountingSalesPushGCCL(int CompanyFK, VMOrderDeliverDetail vmOrderDeliverDetail, int journalType)
+        public async Task<long> AccountingSalesPushISS( VMOrderDeliverDetail vmOrderDeliverDetail)
         {
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK && x.Code == "SDV" && x.IsActive == true).FirstOrDefault();
+
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
-                JournalType = journalType,
+                JournalType = voucherType.VoucherTypeId,
                 Title = vmOrderDeliverDetail.OrderNo + " Date: " + vmOrderDeliverDetail.OrderDate.ToString("MM/dd/yyyy"),
                 Narration = vmOrderDeliverDetail.ChallanNo + " Date: " + vmOrderDeliverDetail.DeliveryDate.Value.ToString("MM/dd/yyyy") + " Payment Method: " + ((VendorsPaymentMethodEnum)vmOrderDeliverDetail.PaymentMethod).ToString(),
-                CompanyFK = CompanyFK,
+                CompanyFK = vmOrderDeliverDetail.CompanyFK,
                 Date = vmOrderDeliverDetail.DeliveryDate,
                 IsSubmit = true,
             };
 
             double unitDiscount = vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * Convert.ToDouble(x.DiscountUnit));
-            double cashDiscount = vmOrderDeliverDetail.DataListDetail.Sum(item => item.DiscountUnit > 0 ? (((item.DeliveredQty * item.UnitPrice) - (item.DeliveredQty * Convert.ToDouble(item.DiscountUnit))) / 100 * Convert.ToDouble(item.DiscountRate ?? 0)) : ((item.DeliveredQty * item.UnitPrice) / 100 * Convert.ToDouble(item.DiscountRate ?? 0)));
-            double spetialDiscount = vmOrderDeliverDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
+             double spetialDiscount = vmOrderDeliverDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
 
             List<string> strList = new List<string>();
             foreach (var item in vmOrderDeliverDetail.DataListDetail)
@@ -3920,13 +3921,13 @@ namespace KGERP.Service.Implementation
                 string s = "Product: " + item.ProductCategory + " " + item.ProductSubCategory + " " + item.ProductName + "Delivered Qty: " + item.DeliveredQty + " Unit Price: " + item.UnitPrice;
                 strList.Add(s);
             }
-            string perticular = (String.Join(", ", strList.ToArray())) + " Unit Discount: " + unitDiscount + " Cash Discount: " + cashDiscount + " Spetial Discount: " + spetialDiscount;
+            string perticular = (String.Join(", ", strList.ToArray())) + " Unit Discount: " + unitDiscount +   " Spetial Discount: " + spetialDiscount;
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
-                Debit = vmOrderDeliverDetail.DataListDetail.Any() ? ((vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * x.UnitPrice)) - (unitDiscount + cashDiscount + spetialDiscount)) : 0,
+                Debit = vmOrderDeliverDetail.DataListDetail.Any() ? ((vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * x.UnitPrice)) - (unitDiscount  + spetialDiscount)) : 0,
                 Credit = 0,
                 Accounting_HeadFK = vmOrderDeliverDetail.AccountingHeadId.Value //Customer/ LC
             });
@@ -3941,13 +3942,15 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingIncomeHeadId.Value
                 });
             }
+            var salesCommition = _db.HeadGLs.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK && x.AccCode == "4501001001001" && x.IsActive).FirstOrDefault();
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
-                Particular = "Unit Discount: " + unitDiscount + " Cash Discount: " + cashDiscount + " Spetial Discount: " + spetialDiscount,
-                Debit = unitDiscount + cashDiscount + spetialDiscount,
+                Particular = "Unit Discount: " + unitDiscount + " Spetial Discount: " + spetialDiscount,
+                Debit = unitDiscount  + spetialDiscount,
                 Credit = 0,
-                Accounting_HeadFK = 50616626 //Gccl new Head id is 50616626 ; Old id was 39513 // Sales Commission & Discount
+                Accounting_HeadFK = salesCommition.Id //Sales Commissiom
+
             });
             foreach (var item in vmOrderDeliverDetail.DataListDetail)
             {
@@ -3960,13 +3963,14 @@ namespace KGERP.Service.Implementation
                     IsVirtual = true
                 });
             }
+            var storeStockAccHead = _db.HeadGLs.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK && x.AccCode == "4701001001001" && x.IsActive).FirstOrDefault();
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Adjust",
                 Debit = vmOrderDeliverDetail.DataListDetail.Any() ? vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * Convert.ToDouble(x.COGSPrice)) : 0,
                 Credit = 0,
-                Accounting_HeadFK = 50606113, //GCCL Stock Adjust With Erp Cr
+                Accounting_HeadFK = storeStockAccHead.Id, // Stock Adjust With Erp Cr
                 IsVirtual = true
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);

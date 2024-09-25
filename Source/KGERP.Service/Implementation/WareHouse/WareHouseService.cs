@@ -3633,9 +3633,8 @@ namespace KGERP.Services.WareHouse
                         ProductId = dataListSlavePartial[i].ProductId,
                         OrderDeliverId = vmModel.OrderDeliverId,
                         COGSPrice = dataListSlavePartial[i].ClosingRate,
-
                         BaseCommission = dataListSlavePartial[i].DiscountUnit,   // Unit Discount
-                        SpecialDiscount = dataListSlavePartial[i].SpecialDiscount,   // Special Discount
+                        SpecialDiscount = (dataListSlavePartial[i].SpecialDiscount / Convert.ToDecimal( dataListSlavePartial[i].OrderQty ))* Convert.ToDecimal( dataListSlavePartial[i].DeliverQty),   // Special Discount
 
                         CashCommission = 0,       // Cash Discount
 
@@ -3946,7 +3945,7 @@ namespace KGERP.Services.WareHouse
                                                          {
                                                              OrderNo = t2.OrderNo,
                                                              OrderDate = t2.OrderDate,
-
+                                                             
                                                              ChallanNo = t1.ChallanNo,
                                                              DeliveryDate = t1.DeliveryDate,
                                                              InvoiceNo = t1.InvoiceNo,
@@ -4014,7 +4013,7 @@ namespace KGERP.Services.WareHouse
 
                                                                             DiscountUnit = t1.BaseCommission,
                                                                             SpecialDiscount = t1.SpecialDiscount,
-
+                                                                            
 
                                                                             UnitName = t8.Name,
                                                                             UnitPrice = t1.UnitPrice,
@@ -5328,8 +5327,8 @@ namespace KGERP.Services.WareHouse
             if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
             {
                 #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await GcclOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
-                await _accountingService.AccountingSalesPushGCCL(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.SalesVoucher);
+                VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
+                await _accountingService.AccountingSalesPushISS( AccData);
                 //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
 
                 #endregion
