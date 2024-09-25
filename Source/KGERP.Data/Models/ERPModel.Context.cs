@@ -176,7 +176,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Territory> Territories { get; set; }
         public virtual DbSet<Ticketing> Ticketings { get; set; }
         public virtual DbSet<Upazila> Upazilas { get; set; }
-        public virtual DbSet<UrlInfo> UrlInfoes { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserPermission> UserPermissions { get; set; }
         public virtual DbSet<VehicleRequisition> VehicleRequisitions { get; set; }
@@ -361,6 +360,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
         public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<SeedProcessing> SeedProcessings { get; set; }
+        public virtual DbSet<UrlInfo> UrlInfoes { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

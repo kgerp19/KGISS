@@ -3955,9 +3955,11 @@ warning 6002: The table/view 'KGISSDB.dbo.ServerConfig' does not have a primary 
           <Key>
             <PropertyRef Name="UrlId" />
           </Key>
-          <Property Name="UrlId" Type="int" Nullable="false" />
+          <Property Name="UrlId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Url" Type="varchar" MaxLength="200" />
           <Property Name="UrlType" Type="int" />
+          <Property Name="CompanyId" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="User">
           <Key>
@@ -6067,7 +6069,7 @@ warning 6002: The table/view 'KGISSDB.Erp.RequisitionItemDetail' does not have a
           <Property Name="CreatedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
           <Property Name="ModifedBy" Type="varchar" MaxLength="50" />
-          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="ModifiedDate" Type="datetime" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="SeedProcessingDetail">
@@ -10269,7 +10271,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="Territories" EntityType="ERPModel.Territory" />
           <EntitySet Name="Ticketings" EntityType="ERPModel.Ticketing" />
           <EntitySet Name="Upazilas" EntityType="ERPModel.Upazila" />
-          <EntitySet Name="UrlInfoes" EntityType="ERPModel.UrlInfo" />
           <EntitySet Name="Users" EntityType="ERPModel.User" />
           <EntitySet Name="UserPermissions" EntityType="ERPModel.UserPermission" />
           <EntitySet Name="VehicleRequisitions" EntityType="ERPModel.VehicleRequisition" />
@@ -11162,6 +11163,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="SeedProcessing" EntitySet="SeedProcessings" />
             <End Role="SeedProcessingDetail" EntitySet="SeedProcessingDetails" />
           </AssociationSet>
+          <EntitySet Name="UrlInfoes" EntityType="ERPModel.UrlInfo" />
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
           <Property Type="Int64" Name="Id" Nullable="false" />
@@ -14060,14 +14062,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Upazila" FromRole="Upazila" ToRole="Employee" />
           <NavigationProperty Name="Employee" Relationship="ERPModel.FK_Upazila_Upazila" FromRole="Upazila" ToRole="Employee" />
           </EntityType>
-        <EntityType Name="UrlInfo">
-          <Key>
-            <PropertyRef Name="UrlId" />
-          </Key>
-          <Property Name="UrlId" Type="Int32" Nullable="false" />
-          <Property Name="Url" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="UrlType" Type="Int32" />
-        </EntityType>
         <EntityType Name="User">
           <Key>
             <PropertyRef Name="UserId" />
@@ -20276,7 +20270,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="ModifedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="SeedProcessingDetails" Relationship="ERPModel.FK__SeedProce__SeedP__2DE23FD8" FromRole="SeedProcessing" ToRole="SeedProcessingDetail" />
         </EntityType>
@@ -20292,6 +20286,16 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="UrlInfo">
+          <Key>
+            <PropertyRef Name="UrlId" />
+          </Key>
+          <Property Name="UrlId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Url" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="UrlType" Type="Int32" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -23184,15 +23188,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="UpazilaId" ColumnName="UpazilaId" />
                 <ScalarProperty Name="DistrictId" ColumnName="DistrictId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="UrlInfoes">
-            <EntityTypeMapping TypeName="ERPModel.UrlInfo">
-              <MappingFragment StoreEntitySet="UrlInfo">
-                <ScalarProperty Name="UrlType" ColumnName="UrlType" />
-                <ScalarProperty Name="Url" ColumnName="Url" />
-                <ScalarProperty Name="UrlId" ColumnName="UrlId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -27189,6 +27184,17 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="SeedProcessDate" ColumnName="SeedProcessDate" />
                 <ScalarProperty Name="SeedProcessNo" ColumnName="SeedProcessNo" />
                 <ScalarProperty Name="SeedProcessingId" ColumnName="SeedProcessingId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UrlInfoes">
+            <EntityTypeMapping TypeName="ERPModel.UrlInfo">
+              <MappingFragment StoreEntitySet="UrlInfo">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="UrlType" ColumnName="UrlType" />
+                <ScalarProperty Name="Url" ColumnName="Url" />
+                <ScalarProperty Name="UrlId" ColumnName="UrlId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
