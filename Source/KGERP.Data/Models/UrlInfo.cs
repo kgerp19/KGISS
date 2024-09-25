@@ -17,5 +17,7 @@ namespace KGERP.Data.Models
         public int UrlId { get; set; }
         public string Url { get; set; }
         public Nullable<int> UrlType { get; set; }
+        public int CompanyId { get; set; }
+        public bool IsActive { get; set; }
     }
 }
