@@ -1631,6 +1631,18 @@ namespace KGERP.Controllers
             return File(client.DownloadData(reportURL), "application/pdf");
         }
 
+        [HttpGet]
+
+        public ActionResult GetIISSalesReturnReport(int saleReturnId)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportName = "ISSSalesReturn";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&SaleReturnId={1}", reportName, saleReturnId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+
         // GET: Sales Return Report
         [HttpGet]
 

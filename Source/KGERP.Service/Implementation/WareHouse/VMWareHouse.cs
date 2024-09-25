@@ -684,8 +684,6 @@ namespace KGERP.Services.WareHouse
         public SelectList StockInfoList { get; set; } = new SelectList(new List<object>());
         public SelectList CustomerList { get; set; } = new SelectList(new List<object>());
         public IEnumerable<VMSaleReturn> DataList { get; set; }
-
-
     }
 
     public class SupplierVm
@@ -703,6 +701,7 @@ namespace KGERP.Services.WareHouse
 
     public partial class VMSaleReturnDetail : VMSaleReturn
     {
+        public long OrderDeliverDetailsId { get; set; }
         public long SaleReturnDetailId { get; set; }
         public double DeliveredQty { get; set; }
         public double OrderQty { get; set; }
