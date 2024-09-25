@@ -2917,7 +2917,16 @@ namespace KGERP.Controllers
 
         public ActionResult GetProductListReport(ReportCustomModel model)
         {
-            string reportName = "ISSProductList";
+            string reportName = "";
+            if (model.ProductType == "F")
+            {
+                reportName = "ISSFinishedProductList";
+            }
+            else
+            {
+                reportName = "ISSRawMaterialList";
+            }
+          
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
