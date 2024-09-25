@@ -1,4 +1,5 @@
 ﻿using KGERP.Data.Models;
+using KGERP.Service.Implementation;
 using KGERP.Service.ServiceModel;
 using KGERP.Utility;
 using Newtonsoft.Json;
@@ -27,7 +28,12 @@ namespace KGERP.Controllers
     {
         ERPEntities context = new ERPEntities();
         readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly DashboardService _dashboardService;
 
+        public HomeController(DashboardService dashboardService)
+        {
+            _dashboardService = dashboardService;
+        }
         [CheckSession]
         public ActionResult Index()
         {
@@ -36,18 +42,20 @@ namespace KGERP.Controllers
                 return RedirectToAction("Login", "User");
 
             }
-            var disableBroIns = ConfigurationManager.AppSettings["DisableBrowserInspectKey"];
+
+
+            //var disableBroIns = ConfigurationManager.AppSettings["DisableBrowserInspectKey"];
             //string connectionString = ConfigurationManager.ConnectionStrings["DBConnectionString"].ConnectionString;
 
             //// Parse the connection string to extract the database name
             //string databaseName = GetDatabaseNameFromConnectionString(connectionString);
 
             // Set database name in ViewBag or ViewData
-            ViewBag.DisableBrowserInspect = disableBroIns;
+            //ViewBag.DisableBrowserInspect = disableBroIns;
+            var vendor = _dashboardService.AllCount(Common.GetCompanyId());
 
-            return View();
+            return View(vendor);
         }
-
         private string GetDatabaseNameFromConnectionString(string connectionString)
         {
             try
