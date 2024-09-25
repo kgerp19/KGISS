@@ -957,17 +957,7 @@ namespace KGERP.Services.WareHouse
 
                         result = materialReceiveDetail.MaterialReceiveDetailId;
                     }
-                    if (dataListSlavePartial[i].PurchasingPrice > 0)
-                    {
-                        #region Ready To GRN
-                        vmModel.MaterialReceiveDetailId = materialReceiveDetail.MaterialReceiveDetailId;
-                        vmModel.Common_ProductFk = materialReceiveDetail.ProductId.Value;
-                        vmModel.ReceivedQuantity = materialReceiveDetail.ReceiveQty;
-                        vmModel.PurchasingPrice = materialReceiveDetail.UnitPrice;
-                        #endregion
-
-                        await ProductGRNEdit(vmModel);
-                    }
+                    
 
                 }
             }
@@ -1713,7 +1703,7 @@ namespace KGERP.Services.WareHouse
                             PurchasingPrice = t1.PurchaseRate,
                             TotalPrice = t1.PurchaseQty * t1.PurchaseRate,
                             Procurement_PurchaseOrderSlaveFk = t1.PurchaseOrderDetailId,
-                            PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive && !x.IsReturn).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
+                            PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive ).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
                             UnitName = t8.Name,
                             PODate = (DateTime)t2.PurchaseDate,
                             //ProductDiscount = t1.ProductDiscount,

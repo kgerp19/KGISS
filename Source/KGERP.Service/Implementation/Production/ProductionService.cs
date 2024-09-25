@@ -438,7 +438,7 @@ namespace KGERP.Services.Production
                                                               TotalConsumeQuantity = aaa.TotalConsumeQuantity,
                                                               COGS = aaa.COGS,
                                                               TotalCOGS = aaa.TotalConsumeQuantity * aaa.COGS,
-                                                              AccountingHeadId = fddd.AccountingHeadId
+                                                              AccountingHeadId = ddd.AccountingHeadId
 
                                                           }).OrderBy(x => x.ProdReferenceSlaveConsumptionID).ToList();
 
