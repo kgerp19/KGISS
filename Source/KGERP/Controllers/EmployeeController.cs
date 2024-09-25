@@ -282,7 +282,7 @@ namespace KGERP.Controllers
 
         
         [HttpGet]
-        public ActionResult CreateOrEdit(long id)
+        public ActionResult CreateOrEdit(int companyId, long id)
         {
            
             EmployeeViewModel vm = new EmployeeViewModel();
@@ -309,8 +309,8 @@ namespace KGERP.Controllers
             var signatureUrl = baseUrl + "/Images/Signature/" + vm.Employee.SignatureFileName;
             vm.Employee.SignaturePath = signatureUrl;
 
-            vm.Managers = employeeService.GetEmployeeSelectModelsISS(Common.GetCompanyId());
-            vm.Companies = companyService.GetCompanySelectModelsISS(Common.GetCompanyId());
+            vm.Managers = employeeService.GetEmployeeSelectModelsISS(companyId);
+            vm.Companies = companyService.GetCompanySelectModelsISS(companyId);
             vm.Religions = dropDownItemService.GetDropDownItemSelectModels(9);
             vm.BloodGroups = dropDownItemService.GetDropDownItemSelectModels(5);
             vm.Countries = dropDownItemService.GetDropDownItemSelectModels(14);
