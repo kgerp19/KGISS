@@ -18,7 +18,6 @@ namespace KGERP.Data.Models
         public Upazila()
         {
             this.Assets = new HashSet<Asset>();
-            this.Employees = new HashSet<Employee>();
         }
     
         public int DistrictId { get; set; }
@@ -34,8 +33,6 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Asset> Assets { get; set; }
         public virtual District District { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Employee> Employees { get; set; }
         public virtual Employee Employee { get; set; }
     }
 }
