@@ -11,6 +11,7 @@ namespace KGERP.Service.Interface
     {
         List<CompanyModel> GetCompanies(string searchText);
         List<SelectModel> GetCompanySelectModels();
+        List<SelectModel> GetCompanySelectModelsISS(int companyId);
         List<SelectModel> GetCompanySelectModelsForKSSl(int CompanyId);
         List<SelectModel> GetKGRECompnay();
         List<SelectModel> GetFilterCompanySelectModels();

@@ -10,7 +10,7 @@ namespace KGERP.Service.Interface
 {
     public interface IEmployeeService : IDisposable
     {
-        Task<EmployeeVm> GetEmployees();
+        Task<EmployeeVm> GetEmployees(int companyId);
         Task<EmployeeVm> GetKSSLEmployees(int CompanyId);
         Task<EmployeeVm> GetEmployeesCompanyWise(int CompanyId);
         Task<EmployeeVm> GetAllEmployeesWise();
@@ -23,6 +23,7 @@ namespace KGERP.Service.Interface
         bool SaveEmployee(long id, EmployeeModel employee);
         bool DeleteEmployee(long id);
         List<SelectModel> GetEmployeeSelectModels();
+        List<SelectModel> GetEmployeeSelectModelsISS(int companyId);
         List<EmployeeModel> EmployeeSearch(string searchText);
         //EmployeeViewModel GetSignatureByID(long Id);
         List<EmployeeModel> EmployeeSearch();
