@@ -430,7 +430,7 @@ namespace KGERP.Controllers
                 result = employeeService.SaveEmployee(0, vm.Employee);
                 if (result)
                 {
-                    return RedirectToAction("CreateOrEdit", new { id = 0 });
+                    return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId,  id = 0 });
                 }
             }
             else
@@ -438,7 +438,7 @@ namespace KGERP.Controllers
                 result = employeeService.SaveEmployee(vm.Employee.Id, vm.Employee);
                 if (result)
                 {
-                    return RedirectToAction("CreateOrEdit", new { id = vm.Employee.Id });
+                    return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId, id = vm.Employee.Id });
                 }
 
             }
@@ -446,7 +446,7 @@ namespace KGERP.Controllers
             //{
             //    return RedirectToAction("CreateOrEdit", new { id = 0 });
             //}
-            return RedirectToAction("CreateOrEdit", new { id = vm.Employee.Id });
+            return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId, id = vm.Employee.Id });
         }
 
 
