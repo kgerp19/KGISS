@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report MustUnderstand="df" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:df="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition/defaultfontfamily">
+  <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="ProfitLossNotDS">
+      <DataSourceReference>ErpDataSource</DataSourceReference>
+      <rd:SecurityType>None</rd:SecurityType>
+      <rd:DataSourceID>1fbdaa41-ff3f-4276-8af5-acd03a5e82b7</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="ProfitLossNoteDSet">
+      <Query>
+        <DataSourceName>ProfitLossNotDS</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@StrFromDate">
+            <Value>=Parameters!StrFromDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@StrToDate">
+            <Value>=Parameters!StrToDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@CompanyId">
+            <Value>=Parameters!CompanyId.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>
+DECLARE @FromDate date,@ToDate date
+
+SELECT @FromDate = convert(varchar, convert(date, @StrFromDate, 105))
+SELECT @ToDate = convert(varchar, convert(date, @StrToDate, 105))
+
+SELECT OrderNo,ParentName,AccName,Balance 
+FROM
+(
+--Sales
+SELECT 1 AS OrderNo,
+       h2.AccName AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(CreditAmount) - SUM(DebitAmount)),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+INNER JOIN Head2 h2 ON h3.ParentId = h2.Id
+WHERE v.VoucherDate &gt;= @FromDate AND v.VoucherDate &lt;= @ToDate 
+	  AND h2.AccCode = '31' 
+	  AND h2.AccCode LIKE '3%'
+GROUP BY h2.AccName,h4.AccName
+
+UNION ALL
+
+--Other Income
+SELECT 2 AS OrderNo,
+       h2.AccName AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(CreditAmount) - SUM(DebitAmount)),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+INNER JOIN Head2 h2 ON h3.ParentId = h2.Id
+WHERE v.VoucherDate &gt;= @FromDate AND v.VoucherDate &lt;= @ToDate 
+	  AND h2.AccCode = '32' 
+	  AND h2.AccCode LIKE '3%'
+GROUP BY h2.AccName,h4.AccName
+
+UNION ALL
+
+
+--Stock &amp; Stores (Opening)
+SELECT 3 AS OrderNo,
+       h3.AccName + ' (Opening Balance)' AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(DebitAmount) - SUM(CreditAmount) ),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+WHERE v.VoucherDate &lt; @FromDate 
+	  AND h3.AccCode = '1305' 
+	  AND h3.AccCode LIKE '13%'
+GROUP BY h3.AccName,h4.AccName
+
+UNION ALL
+
+--Stock &amp; Stores (Closing)
+SELECT 4 AS OrderNo,
+       h3.AccName + ' (Closing Balance)' AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(DebitAmount) - SUM(CreditAmount) ),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+WHERE v.VoucherDate &lt;= @ToDate 
+	  AND h3.AccCode = '1305' 
+	  AND h3.AccCode LIKE '13%'
+GROUP BY h3.AccName,h4.AccName
+
+UNION ALL
+
+--Purchase
+SELECT 5 AS OrderNo,
+       h2.AccName AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(DebitAmount) - SUM(CreditAmount) ),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+INNER JOIN Head2 h2 ON h3.ParentId = h2.Id
+WHERE v.VoucherDate &gt;= @FromDate AND v.VoucherDate &lt;= @ToDate 
+	  AND h2.AccCode = '41' 
+	  AND h3.AccCode LIKE '4%'
+GROUP BY h2.AccName,h4.AccName
+
+UNION ALL
+
+--General &amp; Administrative Expenses
+SELECT 6 AS OrderNo,
+       h2.AccName AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(DebitAmount) - SUM(CreditAmount) ),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+INNER JOIN Head2 h2 ON h3.ParentId = h2.Id
+WHERE v.VoucherDate &gt;= @FromDate 
+      AND v.VoucherDate &lt;= @ToDate 
+	  AND h2.AccCode = '43' 
+	  AND h3.AccCode LIKE '4%'
+GROUP BY h2.AccName,h4.AccName
+
+UNION ALL
+
+--Sales &amp; Marketing
+SELECT 7 AS OrderNo,
+       h2.AccName AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(DebitAmount) - SUM(CreditAmount) ),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+INNER JOIN Head2 h2 ON h3.ParentId = h2.Id
+WHERE v.VoucherDate &gt;= @FromDate 
+      AND v.VoucherDate &lt;= @ToDate
+	  AND h2.AccCode = '44' 
+	  AND h3.AccCode LIKE '4%'
+GROUP BY h2.AccName,h4.AccName
+
+UNION ALL
+
+--IT Project Payments
+SELECT 8 AS OrderNo,
+       h2.AccName AS ParentName,
+       h4.AccName, 
+	   ROUND((SUM(DebitAmount) - SUM(CreditAmount) ),0) AS Balance
+FROM VoucherDetail vd
+INNER JOIN Voucher v ON vd.VoucherId = v.VoucherId ANd v.CompanyId = @CompanyId
+INNER JOIN HeadGL gl ON vd.AccountHeadId = gl.Id
+INNER JOIN Head5 h5 ON gl.ParentId = h5.Id
+INNER JOIN Head4 h4 ON h5.ParentId = h4.Id
+INNER JOIN Head3 h3 ON h4.ParentId = h3.Id
+INNER JOIN Head2 h2 ON h3.ParentId = h2.Id
+WHERE v.VoucherDate &gt;= @FromDate 
+      AND v.VoucherDate &lt;= @ToDate 
+	  AND h2.AccCode = '45' 
+	  AND h3.AccCode LIKE '4%'
+GROUP BY h2.AccName,h4.AccName
+
+) AS Note
+WHERE Balance &lt;&gt; 0 </CommandText>
+      </Query>
+      <Fields>
+        <Field Name="OrderNo">
+          <DataField>OrderNo</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="ParentName">
+          <DataField>ParentName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="AccName">
+          <DataField>AccName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Balance">
+          <DataField>Balance</DataField>
+          <rd:TypeName>System.Double</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="CompanyDSet">
+      <Query>
+        <DataSourceName>ProfitLossNotDS</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@CompanyId">
+            <Value>=Parameters!CompanyId.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>SELECT Name,
+       (select Url from UrlInfo where UrlType = 1) + 'Images/Logo/' + CompanyLogo AS CompanyLogo,
+       Address,
+	   Phone 
+FROM  Company 
+WHERE CompanyId = @CompanyId </CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Name">
+          <DataField>Name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="CompanyLogo">
+          <DataField>CompanyLogo</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Address">
+          <DataField>Address</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Phone">
+          <DataField>Phone</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Tablix Name="Tablix1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>4.58333in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.11458in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.23333in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox17">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ParentName.Value</Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>12pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox17</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox24">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>12pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox24</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.23333in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="AccName">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!AccName.Value</Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>11pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>AccName</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox25">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Label>Balance</Label>
+                                  <Value>=format(Fields!Balance.Value,"#,##")</Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>11pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox25</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.23333in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox19">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Total = </Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox19</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox26">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Label>SumBalance</Label>
+                                  <Value>=format(Sum(Fields!Balance.Value),"#,##")</Value>
+                                  <Style>
+                                    <FontFamily>Times New Roman</FontFamily>
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox26</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="ParentName">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!ParentName.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!OrderNo.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <TablixMembers>
+                    <TablixMember>
+                      <KeepWithGroup>After</KeepWithGroup>
+                    </TablixMember>
+                    <TablixMember>
+                      <Group Name="Details" />
+                    </TablixMember>
+                    <TablixMember>
+                      <KeepWithGroup>Before</KeepWithGroup>
+                    </TablixMember>
+                  </TablixMembers>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>ProfitLossNoteDSet</DataSetName>
+            <Top>0.05292in</Top>
+            <Left>0.02167in</Left>
+            <Height>0.69999in</Height>
+            <Width>5.69791in</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+        </ReportItems>
+        <Height>0.75291in</Height>
+        <Style />
+      </Body>
+      <Width>5.71959in</Width>
+      <Page>
+        <PageHeader>
+          <Height>1.04861in</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="Textbox28">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Label>Company</Label>
+                      <Value>=First(Fields!Name.Value, "CompanyDSet")</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>16pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value xml:space="preserve"> </Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Label>Address</Label>
+                      <Value>=First(Fields!Address.Value, "CompanyDSet")</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>14pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Notes on TPL</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>14pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Period : </Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>11pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=Parameters!StrFromDate.Value</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>11pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value> To </Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>11pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=Parameters!StrToDate.Value</Value>
+                      <Style>
+                        <FontFamily>Times New Roman</FontFamily>
+                        <FontSize>11pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox28</rd:DefaultName>
+              <Top>0.03208in</Top>
+              <Left>1.20083in</Left>
+              <Height>0.99986in</Height>
+              <Width>4.46458in</Width>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+            <Image Name="Image1">
+              <Source>External</Source>
+              <Value>=First(Fields!CompanyLogo.Value, "CompanyDSet")</Value>
+              <Sizing>FitProportional</Sizing>
+              <Left>0.03417in</Left>
+              <Height>1.02556in</Height>
+              <Width>1.06458in</Width>
+              <ZIndex>1</ZIndex>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+              </Style>
+            </Image>
+          </ReportItems>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </PageHeader>
+        <LeftMargin>1.5in</LeftMargin>
+        <RightMargin>0.75in</RightMargin>
+        <TopMargin>0.25in</TopMargin>
+        <BottomMargin>0.5in</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="StrFromDate">
+      <DataType>String</DataType>
+      <Prompt>Str From Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="StrToDate">
+      <DataType>String</DataType>
+      <Prompt>Str To Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CompanyId">
+      <DataType>String</DataType>
+      <Prompt>Company Id</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CostCenterId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Cost Center</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>4</NumberOfColumns>
+      <NumberOfRows>2</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>StrFromDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>StrToDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>CompanyId</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>CostCenterId</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>17774cd1-6a44-40e0-a482-bb6c337749a3</rd:ReportID>
+</Report>
