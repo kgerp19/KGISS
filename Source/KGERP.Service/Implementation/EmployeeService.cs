@@ -29,7 +29,7 @@ namespace KGERP.Service.Implementation
         }
         readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public async Task<EmployeeVm> GetEmployees()
+        public async Task<EmployeeVm> GetEmployees(int companyId)
         {
             EmployeeVm model = new EmployeeVm();
 
@@ -38,7 +38,8 @@ namespace KGERP.Service.Implementation
                                                    from t2 in x.DefaultIfEmpty()
                                                    join t3 in context.Designations on t1.DesignationId equals t3.DesignationId into y
                                                    from t3 in y.DefaultIfEmpty()
-                                                   where t1.Active
+                                                   join t4 in context.Grades on t1.GradeId equals t4.GradeId
+                                                   where t1.Active && t1.CompanyId == companyId
                                                    select new EmployeeVm
                                                    {
                                                        Id = t1.Id,
@@ -48,7 +49,12 @@ namespace KGERP.Service.Implementation
                                                        DesignationName = t3 != null ? t3.Name : "",
                                                        JoiningDate = t1.JoiningDate.Value,
                                                        MobileNo = t1.MobileNo,
-                                                       OfficeEmail = t1.OfficeEmail
+                                                       OfficeEmail = t1.OfficeEmail,
+                                                       GradeCode = t4.GradeCode,
+                                                       GradeName = t4.Name,
+                                                       PABX = t1.PABX,
+                                                       Remarks = t1.Remarks
+
                                                    }).OrderBy(o => o.EmployeeId)
                                                    .AsEnumerable());
 
@@ -811,6 +817,18 @@ namespace KGERP.Service.Implementation
             var data = (from e in context.Employees
                         join ds in context.Designations on e.DesignationId equals ds.DesignationId
                         where e.Active
+                        select new SelectModel
+                        {
+                            Text = "[" + e.EmployeeId.ToString() + "] " + e.Name + " (" + ds.Name + ")",
+                            Value = e.Id.ToString()
+                        }).AsNoTracking().ToList();
+            return data;
+        }
+        public List<SelectModel> GetEmployeeSelectModelsISS(int companyId)
+        {
+            var data = (from e in context.Employees
+                        join ds in context.Designations on e.DesignationId equals ds.DesignationId
+                        where e.Active && e.CompanyId == companyId
                         select new SelectModel
                         {
                             Text = "[" + e.EmployeeId.ToString() + "] " + e.Name + " (" + ds.Name + ")",

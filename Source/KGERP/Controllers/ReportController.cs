@@ -443,6 +443,8 @@ namespace KGERP.Controllers
         //
         public ActionResult GetVoucherReport(int companyId, long voucherId, string reportName)
         {
+            reportName = "ISSVoucherReport";
+
             
                 reportName = "ISSVoucherReport";
 
@@ -1435,7 +1437,7 @@ namespace KGERP.Controllers
 
         public ActionResult AccountingAdvancedLedgerReportsInternal(int AccHeadId, int LayerNo, string StrFromDate, string StrToDate, int CompanyId)
         {
-            string reportName = "AccountingAdvancedLedger";
+            string reportName = "ISSAccountingAdvancedLedger";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -1632,6 +1634,18 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&SaleReturnId={1}", reportName, saleReturnId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+
+        [HttpGet]
+
+        public ActionResult GetIISSalesReturnReport(int saleReturnId)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportName = "ISSSalesReturn";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&SaleReturnId={1}", reportName, saleReturnId);
             return File(client.DownloadData(reportURL), "application/pdf");
         }
@@ -2922,7 +2936,16 @@ namespace KGERP.Controllers
 
         public ActionResult GetProductListReport(ReportCustomModel model)
         {
-            string reportName = "ProductList";
+            string reportName = "";
+            if (model.ProductType == "F")
+            {
+                reportName = "ISSFinishedProductList";
+            }
+            else
+            {
+                reportName = "ISSRawMaterialList";
+            }
+          
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;

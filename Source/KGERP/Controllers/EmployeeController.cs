@@ -63,10 +63,10 @@ namespace KGERP.Controllers
 
         
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(int companyId)
         {
             EmployeeVm model = new EmployeeVm();
-            model = await employeeService.GetEmployees();
+            model = await employeeService.GetEmployees(companyId);
             return View(model);
         }
         
@@ -117,9 +117,11 @@ namespace KGERP.Controllers
 
         
         [HttpGet]
-        public ActionResult EmployeeSearchIndexByCompanyId()
+        public async Task<ActionResult> EmployeeSearchIndexByCompanyId(int companyId)
         {
-            return View();
+            EmployeeVm model = new EmployeeVm();
+            model = await employeeService.GetEmployees(companyId);
+            return View(model);
         }
 
         
@@ -282,6 +284,7 @@ namespace KGERP.Controllers
         [HttpGet]
         public ActionResult CreateOrEdit(long id)
         {
+           
             EmployeeViewModel vm = new EmployeeViewModel();
             vm.Employee = employeeService.GetEmployee(id);
 
@@ -302,8 +305,8 @@ namespace KGERP.Controllers
             var signatureUrl = baseUrl + "/Images/Signature/" + vm.Employee.SignatureFileName;
             vm.Employee.SignaturePath = signatureUrl;
 
-            vm.Managers = employeeService.GetEmployeeSelectModels();
-            vm.Companies = companyService.GetCompanySelectModels();
+            vm.Managers = employeeService.GetEmployeeSelectModelsISS(Common.GetCompanyId());
+            vm.Companies = companyService.GetCompanySelectModelsISS(Common.GetCompanyId());
             vm.Religions = dropDownItemService.GetDropDownItemSelectModels(9);
             vm.BloodGroups = dropDownItemService.GetDropDownItemSelectModels(5);
             vm.Countries = dropDownItemService.GetDropDownItemSelectModels(14);

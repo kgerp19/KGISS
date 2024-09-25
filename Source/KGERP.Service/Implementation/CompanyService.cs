@@ -52,6 +52,14 @@ namespace KGERP.Service.Implementation
                 Value = x.CompanyId
             }).ToList();
         }
+        public List<SelectModel> GetCompanySelectModelsISS(int companyId)
+        {
+            return context.Companies.Where(x => x.IsCompany && x.CompanyId == companyId && x.IsActive).OrderBy(x => x.Name).ToList().Select(x => new SelectModel()
+            {
+                Text = x.Name.ToString(),
+                Value = x.CompanyId
+            }).ToList();
+        }
 
         public List<SelectModel> GetCompanySelectModelsForKSSl(int CompanyId)
         {

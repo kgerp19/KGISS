@@ -756,7 +756,7 @@ namespace KGERP.Service.Implementation
                      join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
                      join t4 in _db.Units on t1.UnitId equals t4.UnitId
 
-                     where t1.CompanyId == companyId && t1.IsActive && ((t1.ProductType == "R") || (t1.ProductType == "F")) &&
+                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType &&
                      ((t1.ProductName.StartsWith(prefix)) || (t2.Name.StartsWith(prefix)) || (t3.Name.StartsWith(prefix)) || (t1.ShortName.StartsWith(prefix)))
 
                      select new
@@ -3165,6 +3165,7 @@ namespace KGERP.Service.Implementation
                 vmCommonProduct.Common_ProductFk = result;
                 vmCommonProduct.Common_ProductSubCategoryFk = commonProduct.ProductSubCategoryId;
                 vmCommonProduct.Common_ProductCategoryFk = commonProduct.ProductCategoryId;
+                vmCommonProduct.CompanyFK = commonProduct.CompanyId;
             }
             return vmCommonProduct;
         }

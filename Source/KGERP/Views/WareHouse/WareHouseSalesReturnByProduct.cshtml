@@ -24,7 +24,7 @@
         @if (Model.SaleReturnId > 0)
         {
             <span>
-                Sales Return By Product: <a target="_blank" href="~/Procurement/ProcurementSalesOrderDetailsReport?companyId=@Model.CompanyFK&orderMasterId=@Model.OrderMasterId">@Model.OrderNo</a>
+                Sales Return By Product: <a target="_blank" href="~/Report/GetIISSalesReturnReport?saleReturnId=@Model.SaleReturnId">@Model.SaleReturnNo</a>
             </span>
         }
         else
@@ -88,100 +88,109 @@
                             </div>
                             <div class="col-md-1"> </div>
                         }
-                    <div class="box-body">
+                        <div class="box-body">
 
-                        @if (Model.SaleReturnId == 0)
-                        {
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Return Date</label>
-                                    <input name="ReturnDate" asp-for="ReturnDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtReturnDate" placeholder="Return Date" autocomplete="off">
-                                    @Html.ValidationMessageFor(model => model.ReturnDate, "", new { @class = "text-danger" })
+                            @if (Model.SaleReturnId == 0)
+                            {
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Return Date</label>
+                                            <input name="ReturnDate" asp-for="ReturnDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" required="required" class="datePicker form-control" id="txtReturnDate" placeholder="Return Date" autocomplete="off">
+                                            @Html.ValidationMessageFor(model => model.ReturnDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Territory</label>
+                                            @Html.DropDownListFor(model => model.SubZoneFk, Model.SubZoneList as SelectList, "==Select Territory==", new { id = "ddlSubZoneFk", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Customer</label>
+                                            @Html.DropDownListFor(model => model.CustomerId, Model.CustomerList as SelectList, "==Select Customer==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="message-text" class="col-form-label">Warehouse:</label>
+                                            @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Territory</label>
-                                    @Html.DropDownListFor(model => model.SubZoneFk, Model.SubZoneList as SelectList, "==Select Territory==", new { id = "ddlSubZoneFk", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
-                                    @Html.ValidationMessageFor(model => model.SubZoneFk, "", new { @class = "text-danger" })
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Reason</label>
+                                            @Html.TextAreaFor(model => model.Reason, new { id = "txtReason", @class = "form-control", @style = "width:100%;border:1px black solid" })
+                                            @Html.ValidationMessageFor(model => model.Reason, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Customer</label>
-                                    @Html.DropDownListFor(model => model.CustomerId, Model.CustomerList as SelectList, "==Select Customer==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
-                                    @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                            }
+                            @if (!Model.IsFinalized)
+                            {
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group" style="padding:0px">
+                                            <label for="message-text" class="col-form-label">Finish Item:</label>
+                                            @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
+                                            @Html.HiddenFor(model => model.ProductId, new { id = "ddlRProductFK" })
+                                            @Html.HiddenFor(model => model.COGSRate, new { id = "hidCOGSRate" })
+                                            @Html.HiddenFor(model => model.COGSRate, new { id = "hidCOGSRate" })
+
+                                            @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Return Qty</label>
+                                            <div class="input-group">
+                                                @Html.TextBoxFor(model => model.Qty, new { id = "txtReturnQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Return Quantity" })
+                                                @Html.ValidationMessageFor(model => model.Qty, "", new { @class = "text-danger" })
+
+                                                <div class="input-group-addon">
+                                                    <span class="txtUnitName"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>MRP Price</label>
+                                            @Html.TextBoxFor(model => model.Rate, new { id = "txtUnitPrice", type = "number", step = "0.01", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "MRP Price", required = "Required" })
+                                            @Html.ValidationMessageFor(model => model.Rate, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="message-text" class="col-form-label">Warehouse:</label>
-                                    @Html.DropDownListFor(model => model.StockInfoId, Model.StockInfoList as SelectList, "==Warehouse==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
-                                    @Html.ValidationMessageFor(model => model.StockInfoId, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
+                            }
+
+
                         </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>Reason</label>
-                                        @Html.TextAreaFor(model => model.Reason, new { id = "txtReason", @class = "form-control", @style = "width:100%;border:1px black solid" })
-                                        @Html.ValidationMessageFor(model => model.Reason, "", new { @class = "text-danger" })
+                        @if (!Model.IsFinalized)
+                        {
+                            <div class="box-footer">
+                                <div class="row">
+                                    <div class="col-md-8">
 
+                                    </div>
+                                    <div class="col-lg-4 col-md-4">
+                                        <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                            <i class='fa fa-plus'></i>
+                                            <span>Return</span>
+
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         }
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group" style="padding:0px">
-                                    <label for="message-text" class="col-form-label">Finish Item:</label>
-                                    @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
-                                    @Html.HiddenFor(model => model.ProductId, new { id = "ddlRProductFK" })
-                                    @Html.HiddenFor(model => model.COGSRate, new { id = "hidCOGSRate" })
 
-                                    @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Return Qty</label>
-                                    <div class="input-group">
-                                        @Html.TextBoxFor(model => model.Qty, new { id = "txtReturnQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Return Quantity" })
-                                        @Html.ValidationMessageFor(model => model.Qty, "", new { @class = "text-danger" })
-
-                                        <div class="input-group-addon">
-                                            <span class="txtUnitName"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>MRP Price</label>
-                                    @Html.TextBoxFor(model => model.Rate, new { id = "txtUnitPrice", type = "number", step = "0.01", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "MRP Price", required = "Required" })
-                                    @Html.ValidationMessageFor(model => model.Rate, "", new { @class = "text-danger" })
-
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                        <div class="box-footer">
-                            <div class="row">
-                                <div class="col-md-8">
-
-                                </div>
-                                <div class="col-lg-4 col-md-4">
-                                    <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
-                                        <i class='fa fa-plus'></i>
-                                        <span>Return</span>
-
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
 
                         <!--Body Will by Start Here-->
                         @{
@@ -224,17 +233,13 @@
                                                         <td>@item.OrderQty</td>
                                                         <td>@item.DeliveredQty</td>
                                                     }
-                                                    <td>@item.Qty</td>
+                                                    <td>@String.Format("{0:F2}", item.Qty)</td>
 
-                                                    <td>@item.Rate</td>
-                                                    <td>@item.MRPPrice</td>
+                                                    <td>@String.Format("{0:F2}", item.Rate) </td>
+                                                    <td>@String.Format("{0:F2}", item.MRPPrice) </td>
 
-                                                    <td>@item.COGSRate</td>
-                                                    <td>@item.CostingPrice</td>
-
-
-
-
+                                                    <td>@String.Format("{0:F2}", item.COGSRate)</td>
+                                                    <td>@String.Format("{0:F2}", item.CostingPrice)</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -251,9 +256,9 @@
                                                     <th colspan="3">Total </th>
                                                 }
 
-                                                <th class="center">@totalRate </th>
+                                                <th class="center">@totalRate.ToString("F2")</th>
                                                 <th></th>
-                                                <th class="center">@totalGrossRate </th>
+                                                <th class="center">@totalGrossRate.ToString("F2") </th>
 
 
                                             </tr>
@@ -272,8 +277,7 @@
 
                                 </div>
                                 <div class="col-md-5">
-                                    @*<a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/WareHouse/WareHousSaleReturnSlaveReport?companyId=@Model.CompanyFK&materialReceiveId=@Model.SaleReturnId">Challan Report of @Model.SaleReturnNo</a>*@
-                                    <a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/WareHouse/WareHousSaleReturnSlaveReport?companyId=@Model.CompanyFK&saleReturnId=@Model.SaleReturnId">Challan Report of @Model.SaleReturnNo</a>
+                                    <a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/Report/GetIISSalesReturnReport?saleReturnId=@Model.SaleReturnId">Challan Report of @Model.SaleReturnNo</a>
 
                                 </div>
                                 <div class="col-md-5">
@@ -426,7 +430,7 @@
                       var productType = '';
                       var companyid = "@Model.CompanyFK";
                       if (companyid == '21') {
-                          productType = "R"
+                          productType = "F"
                       }
                       if (companyid == '24') {
                           productType = "F"

@@ -486,14 +486,14 @@ namespace KGERP.Controllers
             }
         }
 
-        public async Task<ActionResult> GetEmployeePassword()
+        public async Task<ActionResult> GetEmployeePassword(int companyId)
         {
             GetEmployeePasswordVM model = new GetEmployeePasswordVM();
             using (ERPEntities context = new ERPEntities())
             {
                 model.EmployeePasswordList = await (from e in context.Employees
                                                     join a in context.AdminSetUps on e.EmployeeId equals a.EmployeeId
-                                                    where e.Active
+                                                    where e.Active && e.CompanyId == companyId
                                                     select new GetEmployeePasswordVM
                                                     {
                                                         EmployeeName=e.Name,

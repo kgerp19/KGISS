@@ -3146,15 +3146,15 @@ namespace KGERP.Services.Procurement
                                                                         UnitName = t6.Name,
                                                                         UnitPrice = t1.UnitPrice,                                                                       
                                                                         PackSize = t3.PackSize,
-                                                                        TotalAmount = t1.Qty + t1.UnitPrice,
+                                                                        TotalAmount = t1.Qty * t1.UnitPrice,
                                                                         QtyInPack = t3.FormulaQty,
 
-                                                                        FProductId = t3.ProductId
+                                                                        FProductId = t3.ProductId,
 
+                                                                        ProductDiscountUnit = t1.DiscountUnit,//Unit Discount                                                             
+                                                                                                                                      
+                                                                        SpecialDiscount = t1.SpecialBaseCommission, // SpecialDiscount   
 
-                                                                        //DiscountRate = t1.DiscountRate,
-                                                                        //ProductDiscountUnit = t1.DiscountUnit,
-                                                                        //ProductDiscountTotal = t1.DiscountAmount
                                                                     }).OrderByDescending(x => x.OrderDetailId).AsEnumerable());
 
 
@@ -3581,7 +3581,12 @@ namespace KGERP.Services.Procurement
                 Amount = (vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice),
                 Comsumption = vmSalesOrderSlave.Consumption,
                 PackQuantity = vmSalesOrderSlave.PackQuantity,
-                DiscountUnit = 0,
+
+                DiscountUnit = vmSalesOrderSlave.ProductDiscountUnit,
+                SpecialBaseCommission = vmSalesOrderSlave.SpecialDiscount,
+
+
+
                 DiscountAmount = 0,
                 DiscountRate = 0,
 
@@ -3859,6 +3864,9 @@ namespace KGERP.Services.Procurement
             model.Amount = (vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice);
             model.Comsumption = vmSalesOrderSlave.Consumption;
             model.PackQuantity = vmSalesOrderSlave.PackQuantity;
+            model.DiscountUnit = vmSalesOrderSlave.ProductDiscountUnit;
+            model.SpecialBaseCommission = vmSalesOrderSlave.SpecialDiscount;
+
 
 
             model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
