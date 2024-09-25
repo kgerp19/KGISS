@@ -3,15 +3,17 @@
     Layout = null;
     var app = HttpContext.Current.ApplicationInstance as MvcApplication;
 
-    var currentDTag = ViewBag.DisableBrowserInspect==null?"1":"2";
+    var currentDTag = ViewBag.DisableBrowserInspect == null ? "1" : "2";
 }
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width" />
     <link href="~/Images/Logo/kg_logo-150x150.ico" rel="shortcut icon" type="image/x-icon" />
     <title>
-        KG-ERP | @ViewData["Title"]
+        KG-ISS # @ViewData["Title"]
 
     </title>
 
@@ -59,13 +61,14 @@
     <link href="~/Content/bootstrap-select.css" rel="stylesheet" />
     <link href="~/Content/Site.css" rel="stylesheet" />
     <!-- Font Awesome -->
-    <link href="~/Content/dist/css/AdminLTE.css" rel="stylesheet" />
+    @*<link href="~/Content/dist/css/AdminLTE.css" rel="stylesheet" />*@
     <link href="~/Content/font awesome/font-awesome.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
 
-    <link href="~/Content/dist/css/skins/_all-skins.css" rel="stylesheet" />
+    @*<link href="~/Content/dist/css/skins/_all-skins.css" rel="stylesheet" />*@
+    <link href="~/Content/dist/css/skins/_all-skins.min.css" rel="stylesheet" />
     @*<link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />*@
     <link href="~/Content/Login.css" rel="stylesheet" />
 
@@ -110,28 +113,27 @@
     <script src="~/Content/CustomContent/Js/customScripts/GenericHTTPRequest.js"></script>
     <script src="~/Content/CustomContent/Js/customScripts/generalizedFunctions.js"></script>
     <script src="~/Content/lib/jquery-numbersinwords.js"></script>
-
-    @RenderSection("Head", false)
-    @RenderSection("Styles", false)
+    <script src="~/Scripts/jquery.jclock.js"></script>
+    @*@RenderSection("Head", false)
+        @RenderSection("Styles", false)*@
 </head>
-<body class="hold-transition skin-blue sidebar-mini prevent-context-menu" style="font-family:Arial, Helvetica, sans-serif">
-    <div id="kgLoader"></div>
+<body class="hold-transition skin-blue sidebar-mini">
+
     <div class="wrapper">
-        <header class="main-header" style="background:#007f3d">
-            <a href="#" class="logo" style="background:#4CAF50">
-                <span class="logo-mini "><span><b>E</b>RP</span></span>
-                @*<span class="logo-lg "><span><b>KG-</b>ERP</span></span>*@
+        <header class="main-header">
+            <a href="#" class="logo">
+                <span class="logo-mini "><span><b>I</b>SS</span></span>
+
             </a>
-            <nav class="navbar navbar-static-top" style="background:#4CAF50">
-                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <nav class="navbar navbar-static-top">
+                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
                     <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
                 </a>
 
                 <a href="@Url.Action("Index","Home",null)" style="position: absolute;font:bold;font-size:20px;color:#ffffff;top:8px">
-                    <b> KRISHIBID GROUP</b> | For Green Bangladesh
+                    <b> KG ISS</b> | Integrated Seed Software
+                    &nbsp;&nbsp; &nbsp;&nbsp;
+                    <span style="color:darkred" id="clockId"></span>
                 </a>
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
@@ -200,7 +202,7 @@
                                             }
                                         </li>
 
-                                        <li class="user-footer" style="background-color:#4CAF50;">
+                                        <li class="user-footer">
                                             <div class="pull-left">
                                                 <a href="@Url.Action("ChangePassword","User")" class="btn btn-default btn-flat">Change Password <i class="fa fa-key" aria-hidden="true"></i></a>
                                             </div>
@@ -227,7 +229,69 @@
                 {
                     if (app.IsReleased == true)
                     {
-                        Html.RenderAction("MenuPartial", "Home");
+
+
+                        var MenuC1 = @Session["Menu1"].ToString();
+                        var MenuC2 = @Session["Menu2"].ToString();
+                        var MenuC3 = @Session["Menu3"].ToString();
+                        var MenuC4 = @Session["Menu4"].ToString();
+                        var MenuC5 = @Session["Menu5"].ToString();
+                        var MenuC6 = @Session["Menu6"].ToString();
+                        var MenuC7 = @Session["Menu7"].ToString();
+                        var MenuC8 = @Session["Menu8"].ToString();
+                        var MenuC9 = @Session["Menu9"].ToString();
+                        var MenuC10 = @Session["Menu10"].ToString();
+
+                        string Menu = MenuC1.ToString() + MenuC2.ToString() + MenuC3.ToString() + MenuC4.ToString() + MenuC5.ToString() + MenuC6.ToString() + MenuC7.ToString() + MenuC8.ToString() + MenuC9.ToString() + MenuC10.ToString();
+                        string MainMenu = "", SubMenu = "", Menuitem = "", Method = "";
+                        <ul class="sidebar-menu" data-widget="tree">
+                            @while (Menu.Substring(0, 1) == "]")
+                            {
+                                MainMenu = Menu.Substring(1, Menu.IndexOf("$") - 1);
+                                Menu = Menu.Substring(@MainMenu.Length + 1, Menu.Length - @MainMenu.Length - 1);
+
+                                <li class="header">@MainMenu</li>
+
+                                // while (Menu.Length > 1)
+                                while (Menu.Substring(0, 1) == "$")
+                                {
+                                    SubMenu = Menu.Substring(1, Menu.IndexOf("#") - 1);
+                                    Menu = Menu.Substring(@SubMenu.Length + 1, Menu.Length - @SubMenu.Length - 1);
+
+                                    <li class="treeview">
+                                        <a href="#">
+                                            <i class="fa fa fa-th"></i> <span>@SubMenu</span>
+                                            <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                            </span>
+                                        </a>
+                                        <ul class="treeview-menu">
+                                            @while (Menu.Substring(0, 1) == "#")
+                                            {
+                                                Menuitem = Menu.Substring(1, Menu.IndexOf("|") - 1);
+                                                Menu = Menu.Substring(@Menuitem.Length + 1, Menu.Length - @Menuitem.Length - 1);
+
+                                                Method = Menu.Substring(1, Menu.IndexOf("^") - 1);
+                                                Menu = Menu.Substring(@Method.Length + 2, Menu.Length - @Method.Length - 2);
+
+                                                <li><a href="~/@Method"><i class="fa fa-share"></i>@Menuitem</a></li>
+                                            }
+                                        </ul>
+                                    </li>
+
+                                }
+
+
+
+                            }
+
+
+
+                        </ul>
+
+
+
+                        //Html.RenderAction("MenuPartial", "Home");
                     }
                     else
                     {
@@ -402,13 +466,19 @@
                 }
             </section>
         </aside>
-        <div class="content-wrapper" style="background:#ffffff;overflow-x:scroll;">
-            <div class="padd-cust" style="padding:20px;">
-                @RenderBody()
-            </div>
+        <div class="content-wrapper">
+            @RenderBody()
         </div>
-        <footer class="page-footer text-center">
-            <strong>Copyright &copy; IT Department, Krishibid Group</strong> All rights reserved.
+        <footer class="main-footer">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> 1.0.0
+            </div>
+            <strong>
+                Copyright &copy; 2020 <a target="_blank" href="https://kgecom.com/">
+
+                    KGeCom Limited
+                </a>.
+            </strong> All rights reserved.
         </footer>
     </div>
 
@@ -484,6 +554,10 @@
                     e.preventDefault();
                 });
             }*@
+            var optionsjclock = {
+                format: '%I:%M:%S %p', // 12-hour with am/pm
+            }
+            $('#clockId').jclock(optionsjclock);
 
             $(".draggable").draggable({
 
@@ -496,8 +570,8 @@
             });
             $(".droppable").droppable({
                 drop: function (event, ui) {
-                    var selectedValue = $(this).find('.ststusId').val();                  
-                    var draggedElement = ui.draggable;                  
+                    var selectedValue = $(this).find('.ststusId').val();
+                    var draggedElement = ui.draggable;
                     var draggedWorkIdValue = draggedElement.find('.dragedWorkId').val();
                     $.ajax({
                          url: '@Url.Action("ChangeState", "TaskManagementEvolution")',
@@ -787,5 +861,11 @@
 
     </script>
     @RenderSection("Scripts", false)
+
+
+
+
+
+
 </body>
 </html>
