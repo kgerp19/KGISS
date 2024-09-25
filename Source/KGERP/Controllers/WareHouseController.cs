@@ -735,12 +735,12 @@ namespace KGERP.Controllers
 
             return Json(list);
         }
-        public ActionResult GetOrderDetailsDataPartial(int poId)
+        public ActionResult GetOrderDetailsDataPartial(int orderMasterId)
         {
             var model = new VMOrderDeliverDetailPartial();
-            if (poId > 0)
+            if (orderMasterId > 0)
             {
-                model.DataToList = _service.GetOrderDetails(poId);
+                model.DataToList = _service.GetOrderDetails(orderMasterId);
             }
             return PartialView("_OrderDetailsDataPartial", model);
         }
