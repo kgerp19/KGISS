@@ -28,10 +28,10 @@ namespace KGERP.Data.Models
             this.LeaveApplications2 = new HashSet<LeaveApplication>();
             this.SaleReturns = new HashSet<SaleReturn>();
             this.TeamInfoes = new HashSet<TeamInfo>();
-            this.Upazilas = new HashSet<Upazila>();
             this.UpazilaAssigns = new HashSet<UpazilaAssign>();
             this.Works = new HashSet<Work>();
             this.OfficerAssigns = new HashSet<OfficerAssign>();
+            this.Upazilas = new HashSet<Upazila>();
         }
     
         public long Id { get; set; }
@@ -131,7 +131,6 @@ namespace KGERP.Data.Models
         public virtual ICollection<Employee> Employee11 { get; set; }
         public virtual Employee Employee3 { get; set; }
         public virtual Shift Shift { get; set; }
-        public virtual Upazila Upazila { get; set; }
         public virtual Vendor Vendor { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmployeeAttendance> EmployeeAttendances { get; set; }
@@ -148,12 +147,12 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<TeamInfo> TeamInfoes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Upazila> Upazilas { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UpazilaAssign> UpazilaAssigns { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Work> Works { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OfficerAssign> OfficerAssigns { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Upazila> Upazilas { get; set; }
     }
 }

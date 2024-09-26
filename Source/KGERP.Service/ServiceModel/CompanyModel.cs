@@ -57,4 +57,30 @@ namespace KGERP.Service.ServiceModel
         public int Id { get; set; }
 
     }
+
+
+
+    public class CompanyMenuVM
+    {
+       
+        public string Name { get; set; }
+        [DisplayName("Short Name")]
+        public string CompanyShortName { get; set; }
+        [DisplayName("Short Name")]
+        public string MenuShortName { get; set; }
+        [DisplayName("Short Name")]
+        public string SubmenuShortName { get; set; }
+        [DisplayName("Order No")]
+        public int MenuOrderNo { get; set; }
+        public int SubMenuOrderNo { get; set; }
+        public int CompanyId { get; set; }
+        public string Controller { get; set; }
+        public string Action { get; set; }  
+        public string Parameter { get; set; }  
+
+   
+        public IEnumerable<CompanyMenuVM> DataList { get; set; }
+         
+    }
 }
+

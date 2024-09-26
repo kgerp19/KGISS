@@ -18,9 +18,9 @@ namespace KGERP.Data.Models
         public District()
         {
             this.Assets = new HashSet<Asset>();
-            this.Upazilas = new HashSet<Upazila>();
             this.Employees = new HashSet<Employee>();
             this.Employees1 = new HashSet<Employee>();
+            this.Upazilas = new HashSet<Upazila>();
         }
     
         public int DistrictId { get; set; }
@@ -33,10 +33,10 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Asset> Assets { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Upazila> Upazilas { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Employee> Employees { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Employee> Employees1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Upazila> Upazilas { get; set; }
     }
 }

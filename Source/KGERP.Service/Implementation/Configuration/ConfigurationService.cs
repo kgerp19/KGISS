@@ -23,7 +23,9 @@ using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
+using Unit = KGERP.Data.Models.Unit;
 
 namespace KGERP.Service.Implementation
 
@@ -312,12 +314,36 @@ namespace KGERP.Service.Implementation
             vmUserMenu.DataList = await Task.Run(() => UserMenuDataLoad());
             return vmUserMenu;
         }
+        public async Task<VMUserMenu> UserMenuGetISS(int companyId)
+        {
+            VMUserMenu vmUserMenu = new VMUserMenu();
+            vmUserMenu.DataList = await Task.Run(() => UserMenuDataLoadISS(companyId));
+            return vmUserMenu;
+        }
 
         public IEnumerable<VMUserMenu> UserMenuDataLoad()
         {
             var v = (from t1 in _db.CompanyMenus
                      join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
                      where t1.IsActive == true
+                     select new VMUserMenu
+                     {
+                         ID = t1.CompanyMenuId,
+                         Name = t1.Name,
+                         CompanyName = t2.Name,
+                         LayerNo = t1.LayerNo,
+                         ShortName = t1.ShortName,
+                         Priority = t1.OrderNo,
+                         IsActive = t1.IsActive,
+                         CompanyFK = t1.CompanyId
+                     }).OrderByDescending(x => x.ID).AsEnumerable();
+            return v;
+        }
+        public IEnumerable<VMUserMenu> UserMenuDataLoadISS(int companyId)
+        {
+            var v = (from t1 in _db.CompanyMenus
+                     join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
+                     where t1.IsActive == true && t1.CompanyId == companyId
                      select new VMUserMenu
                      {
                          ID = t1.CompanyMenuId,
@@ -434,6 +460,14 @@ namespace KGERP.Service.Implementation
 
             return vmUserSubMenu;
         }
+        public async Task<VMUserSubMenu> UserSubMenuGetISS(int companyId)
+        {
+            VMUserSubMenu vmUserSubMenu = new VMUserSubMenu();
+
+            vmUserSubMenu.DataList = await Task.Run(() => UserSubMenuDataLoadISS(companyId));
+
+            return vmUserSubMenu;
+        }
 
         public IEnumerable<VMUserSubMenu> UserSubMenuDataLoad()
         {
@@ -442,6 +476,32 @@ namespace KGERP.Service.Implementation
                      join t3 in _db.Companies on t2.CompanyId equals t3.CompanyId
 
                      where t1.IsActive == true
+                     select new VMUserSubMenu
+                     {
+                         CompanyName = t3.Name,
+                         ID = t1.CompanySubMenuId,
+                         Name = t1.Name,
+                         Param = t1.Param,
+                         CompanyFK = t1.CompanyId,
+                         Controller = t1.Controller,
+                         IsActive = t1.IsActive,
+                         LayerNo = t1.LayerNo,
+                         ShortName = t1.ShortName,
+                         Action = t1.Action,
+                         UserMenuName = t2.Name,
+                         User_MenuFk = t2.CompanyMenuId,
+                         Priority = t1.OrderNo
+
+                     }).OrderByDescending(x => x.ID).AsEnumerable();
+            return v;
+        }
+        public IEnumerable<VMUserSubMenu> UserSubMenuDataLoadISS(int companyId)
+        {
+            var v = (from t1 in _db.CompanySubMenus
+                     join t2 in _db.CompanyMenus on t1.CompanyMenuId equals t2.CompanyMenuId
+                     join t3 in _db.Companies on t2.CompanyId equals t3.CompanyId
+
+                     where t1.IsActive == true && t1.CompanyId == companyId
                      select new VMUserSubMenu
                      {
                          CompanyName = t3.Name,
@@ -2438,10 +2498,31 @@ namespace KGERP.Service.Implementation
             }
             return list;
         }
+        public List<object> CompaniesDropDownListISS(int companyId)
+        {
+            var list = new List<object>();
+            var v = _db.Companies.Where(x => x.IsCompany && x.CompanyId == companyId && x.IsActive).OrderBy(x => x.Name).ToList();
+            foreach (var x in v)
+            {
+                list.Add(new { Text = x.Name, Value = x.CompanyId });
+            }
+            return list;
+        }
+        
         public List<object> CompanyMenusDropDownList()
         {
             var list = new List<object>();
             var v = _db.CompanyMenus.ToList();
+            foreach (var x in v)
+            {
+                list.Add(new { Text = x.Name, Value = x.CompanyMenuId });
+            }
+            return list;
+        }
+        public List<object> CompanyMenusDropDownListISS(int companyId)
+        {
+            var list = new List<object>();
+            var v = _db.CompanyMenus.Where(x => x.IsActive && x.CompanyId == companyId).ToList();
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.CompanyMenuId });
@@ -7647,7 +7728,6 @@ namespace KGERP.Service.Implementation
         {
             var obj = _db.PortOfCountries.Where(t => t.PortOfCountryId == Id).SingleOrDefault();
             obj.IsActive = false;
-
             if (_db.SaveChanges() > 0)
             {
                 return true;
@@ -7808,6 +7888,66 @@ namespace KGERP.Service.Implementation
                 }
             }
             return result;
+        }
+        #endregion
+
+        #region URLInfo
+        public void SaveUrl(UrlInfo urlInfo)
+        {
+            if (urlInfo.UrlId == 0)
+            {
+                UrlInfo urldb = new UrlInfo
+                {
+
+                    Url = urlInfo.Url,
+                    CompanyId = urlInfo.CompanyId,
+                    UrlType = urlInfo.UrlType,
+                    IsActive = true
+                };
+                _db.UrlInfoes.Add(urldb);
+            }
+            else
+            {
+                var existingUrl = _db.UrlInfoes.Find(urlInfo.UrlId);
+                if (existingUrl != null)
+                {
+                    existingUrl.Url = urlInfo.Url;
+                    existingUrl.UrlType = urlInfo.UrlType;
+                    existingUrl.CompanyId = urlInfo.CompanyId;
+                }
+            }
+            _db.SaveChanges();
+        }
+        public List<UrlViewModel> GetAllUrls()
+        {
+            var result = (from url in _db.UrlInfoes
+                          join company in _db.Companies on url.CompanyId equals company.CompanyId
+                          where url.IsActive == true
+                          select new UrlViewModel
+                          {
+                              UrlId = url.UrlId,
+                              Url = url.Url,
+                              UrlType = url.UrlType,
+                              CompanyId = url.CompanyId,
+                              CompanyName = company.Name
+                          }).ToList();
+
+            return result;
+        }
+
+        public UrlInfo GetUrlById(int urlId)
+        {
+            return _db.UrlInfoes.Find(urlId);
+        }
+
+        public void DeleteUrl(int urlId)
+        {
+            var url = _db.UrlInfoes.Find(urlId);
+            if (url != null)
+            {
+                url.IsActive = false;
+                _db.SaveChanges();
+            }
         }
         #endregion
 

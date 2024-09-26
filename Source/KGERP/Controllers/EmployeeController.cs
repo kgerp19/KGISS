@@ -282,11 +282,15 @@ namespace KGERP.Controllers
 
         
         [HttpGet]
-        public ActionResult CreateOrEdit(long id)
+        public ActionResult CreateOrEdit(int companyId, long id)
         {
            
             EmployeeViewModel vm = new EmployeeViewModel();
             vm.Employee = employeeService.GetEmployee(id);
+
+
+            var companies = companyService.GetCompanySelectModelsISS(companyId);
+            var selectedCompaniesID = companies.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(companies.FirstOrDefault()) ?? 0;
 
             var request = HttpContext.Request;
             var baseUrl = string.Format("{0}://{1}", request.Url.Scheme, request.Url.Authority);
@@ -305,8 +309,8 @@ namespace KGERP.Controllers
             var signatureUrl = baseUrl + "/Images/Signature/" + vm.Employee.SignatureFileName;
             vm.Employee.SignaturePath = signatureUrl;
 
-            vm.Managers = employeeService.GetEmployeeSelectModelsISS(Common.GetCompanyId());
-            vm.Companies = companyService.GetCompanySelectModelsISS(Common.GetCompanyId());
+            vm.Managers = employeeService.GetEmployeeSelectModelsISS(companyId);
+            vm.Companies = companyService.GetCompanySelectModelsISS(companyId);
             vm.Religions = dropDownItemService.GetDropDownItemSelectModels(9);
             vm.BloodGroups = dropDownItemService.GetDropDownItemSelectModels(5);
             vm.Countries = dropDownItemService.GetDropDownItemSelectModels(14);
@@ -323,6 +327,8 @@ namespace KGERP.Controllers
             vm.JobTypes = dropDownItemService.GetDropDownItemSelectModels(10);
             vm.Banks = bankService.GetBankSelectModels();
             vm.BankBranches = new List<SelectModel>();
+            vm.CompanyList = new SelectList(companies, "Value", "Text", selectedCompaniesID);
+            vm.Employee.CompanyId = (int)selectedCompaniesID;
             if (vm.Employee.BankId > 0)
             {
                 vm.BankBranches = bankBranchService.GetBankBranchByBank(vm.Employee.BankId ?? 0);
@@ -424,7 +430,7 @@ namespace KGERP.Controllers
                 result = employeeService.SaveEmployee(0, vm.Employee);
                 if (result)
                 {
-                    return RedirectToAction("CreateOrEdit", new { id = 0 });
+                    return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId,  id = 0 });
                 }
             }
             else
@@ -432,7 +438,7 @@ namespace KGERP.Controllers
                 result = employeeService.SaveEmployee(vm.Employee.Id, vm.Employee);
                 if (result)
                 {
-                    return RedirectToAction("CreateOrEdit", new { id = vm.Employee.Id });
+                    return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId, id = vm.Employee.Id });
                 }
 
             }
@@ -440,7 +446,7 @@ namespace KGERP.Controllers
             //{
             //    return RedirectToAction("CreateOrEdit", new { id = 0 });
             //}
-            return RedirectToAction("CreateOrEdit", new { id = vm.Employee.Id });
+            return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId, id = vm.Employee.Id });
         }
 
 
