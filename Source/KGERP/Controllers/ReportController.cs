@@ -4310,13 +4310,6 @@ namespace KGERP.Controllers
         }
 
 
-
-
-
-
-
-
-
         [HttpGet]
 
         public ActionResult GetCustomerSearchReport(ReportCustomModel model)
@@ -4324,7 +4317,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string reportURL = string.Format("http://192.168.0.7:98/ReportServer_SQLEXPRESS/?%2fErpReport/{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}", model.ReportName, model.ReportType, model.CompanyId);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}", model.ReportName, model.ReportType, model.CompanyId);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -8129,7 +8122,7 @@ namespace KGERP.Controllers
             WebClient client = new WebClient();
             client.Credentials = nwc;
             string reportURL = "";
-            model.ReportName = "KGMultipleVoucherReport";
+            model.ReportName = "ISSMultipleVoucherReport";
 
             reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&StrFromDate={3}&StrToDate={4}&VoucherTypeId={5}", model.ReportName, model.ReportType, model.CompanyId, model.StrFromDate, model.StrToDate, model.VoucherTypeId ?? 0);
             if (model.ReportType.Equals(ReportType.EXCEL))
