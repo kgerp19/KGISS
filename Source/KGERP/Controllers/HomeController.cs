@@ -634,87 +634,89 @@ namespace KGERP.Controllers
         //[OutputCache(Duration = 120, VaryByParam = "none")]
         public PartialViewResult MenuPartial()
         {
-            try
-            {
-                List<CompanyModel> companies = new List<CompanyModel>();
+ //           try
+ //           {
+ //               List<CompanyModel> companies = new List<CompanyModel>();
                 
-                if (HttpContext.Session["UserMenu"] != null)
-                {
-                   string Menudata = HttpContext.Session["UserMenu"].ToString();
-                    companies = JsonConvert.DeserializeObject<List<CompanyModel>>(Menudata);
-                }
-                else
-                {
-                    string userId = System.Web.HttpContext.Current.User.Identity.Name;
+ //               if (HttpContext.Session["UserMenu"] != null)
+ //               {
+ //                  string Menudata = HttpContext.Session["UserMenu"].ToString();
+ //                   companies = JsonConvert.DeserializeObject<List<CompanyModel>>(Menudata);
+ //               }
+ //               else
+ //               {
+ //                   string userId = System.Web.HttpContext.Current.User.Identity.Name;
 
-                    List<CompanyModel> Menus = new List<CompanyModel>();
-                    List<CompanyModel> SubMenus = new List<CompanyModel>();
-                    companies = context.Database.
-                                                SqlQuery<CompanyModel>(@"select CompanyId as Id,CompanyId,
-                                               ParentId,Name,ShortName,Controller,[Action],[Param],1 as LayerNo
-                                               from Company
-                                               where CompanyId in (select CompanyId from CompanyUserMenu where IsActive = 1 AND UserId={0}) 
-                                                AND IsActive=1
-                                               order by OrderNo", userId).ToList();
+ //                   List<CompanyModel> Menus = new List<CompanyModel>();
+ //                   List<CompanyModel> SubMenus = new List<CompanyModel>();
+ //                   companies = context.Database.
+ //                                               SqlQuery<CompanyModel>(@"select CompanyId as Id,CompanyId,
+ //                                              ParentId,Name,ShortName,Controller,[Action],[Param],1 as LayerNo
+ //                                              from Company
+ //                                              where CompanyId in (select CompanyId from CompanyUserMenu where IsActive = 1 AND UserId={0}) 
+ //                                               AND IsActive=1
+ //                                              order by OrderNo", userId).ToList();
 
-                    Menus = context.Database.SqlQuery<CompanyModel>(@"select CompanyMenuId as Id,CompanyId,CompanyId as ParentId,Name,ShortName,Controller,[Action],[Param],2 as LayerNo
-                                             from CompanyMenu
-                                             where CompanyMenuId in (select CompanyMenuId  from CompanyUserMenu where UserId={0}  and IsActive = 1) 
- AND IsActive=1 order by OrderNo",
-                                                 userId).ToList();
-                    SubMenus = context.Database.SqlQuery<CompanyModel>(@"select CompanySubMenuId as Id,CompanyId,
-                                        CompanyMenuId as  ParentId,
-                                        Name,ShortName,Controller,[Action],[Param],3 as LayerNo 
-                                        from CompanySubMenu
-                                        where CompanySubMenuId in 
-                                        (select CompanySubMenuId from CompanyUserMenu where IsActive = 1 and UserId={0} )
-                                        AND IsActive=1 And IsSideMenu = 1
-                                        order by OrderNo", userId).ToList();
+ //                   Menus = context.Database.SqlQuery<CompanyModel>(@"select CompanyMenuId as Id,CompanyId,CompanyId as ParentId,Name,ShortName,Controller,[Action],[Param],2 as LayerNo
+ //                                            from CompanyMenu
+ //                                            where CompanyMenuId in (select CompanyMenuId  from CompanyUserMenu where UserId={0}  and IsActive = 1) 
+ //AND IsActive=1 order by OrderNo",
+ //                                                userId).ToList();
+ //                   SubMenus = context.Database.SqlQuery<CompanyModel>(@"select CompanySubMenuId as Id,CompanyId,
+ //                                       CompanyMenuId as  ParentId,
+ //                                       Name,ShortName,Controller,[Action],[Param],3 as LayerNo 
+ //                                       from CompanySubMenu
+ //                                       where CompanySubMenuId in 
+ //                                       (select CompanySubMenuId from CompanyUserMenu where IsActive = 1 and UserId={0} )
+ //                                       AND IsActive=1 And IsSideMenu = 1
+ //                                       order by OrderNo", userId).ToList();
 
-                    foreach (var company in companies)
-                    {
-                        company.Company1 = Menus.Where(e => e.ParentId == company.CompanyId).ToList();
-                        //companyRepository.Database.SqlQuery<CompanyModel>(@"select CompanyMenuId as Id,CompanyId,CompanyId as ParentId,Name,ShortName,Controller,[Action],[Param],2 as LayerNo
-                        //                     from CompanyMenu
-                        //                     where CompanyMenuId in (select CompanyMenuId  from CompanyUserMenu where UserId={0} and CompanyId={1} and IsActive = 1) order by OrderNo", userId, company.CompanyId).ToList();
+ //                   foreach (var company in companies)
+ //                   {
+ //                       company.Company1 = Menus.Where(e => e.ParentId == company.CompanyId).ToList();
+ //                       //companyRepository.Database.SqlQuery<CompanyModel>(@"select CompanyMenuId as Id,CompanyId,CompanyId as ParentId,Name,ShortName,Controller,[Action],[Param],2 as LayerNo
+ //                       //                     from CompanyMenu
+ //                       //                     where CompanyMenuId in (select CompanyMenuId  from CompanyUserMenu where UserId={0} and CompanyId={1} and IsActive = 1) order by OrderNo", userId, company.CompanyId).ToList();
 
-                        foreach (var submenu in company.Company1)
-                        {
-                            submenu.Company1 = SubMenus.Where(e => e.ParentId == submenu.Id).ToList();
+ //                       foreach (var submenu in company.Company1)
+ //                       {
+ //                           submenu.Company1 = SubMenus.Where(e => e.ParentId == submenu.Id).ToList();
 
-                            //companyRepository.Database.SqlQuery<CompanyModel>(@"select CompanySubMenuId as Id,CompanyId,CompanyMenuId as  ParentId,Name,ShortName,Controller,[Action],[Param],3 as LayerNo 
-                            //                 from CompanySubMenu
-                            //                 where CompanySubMenuId in (select CompanySubMenuId from CompanyUserMenu where IsActive = 1 and UserId={0} and CompanyMenuId={1} ) order by OrderNo", userId, submenu.Id).ToList();
+ //                           //companyRepository.Database.SqlQuery<CompanyModel>(@"select CompanySubMenuId as Id,CompanyId,CompanyMenuId as  ParentId,Name,ShortName,Controller,[Action],[Param],3 as LayerNo 
+ //                           //                 from CompanySubMenu
+ //                           //                 where CompanySubMenuId in (select CompanySubMenuId from CompanyUserMenu where IsActive = 1 and UserId={0} and CompanyMenuId={1} ) order by OrderNo", userId, submenu.Id).ToList();
 
 
-                        }
-                        company.Company1.RemoveAll(e => e.Company1.Count <= 0);
-                    }
+ //                       }
+ //                       company.Company1.RemoveAll(e => e.Company1.Count <= 0);
+ //                   }
 
-                    companies.RemoveAll(e => e.Company1.Count <= 0);
-                }
-                HttpContext.Session.Add("UserMenu", JsonConvert.SerializeObject(companies));
-                return PartialView("_MenuPartial", companies);
-            }
-            catch (DbEntityValidationException e)
-            {
-                foreach (var eve in e.EntityValidationErrors)
-                {
-                    Console.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:", eve.Entry.Entity.GetType().Name, eve.Entry.State);
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        Console.WriteLine("- Property: \"{0}\", Error: \"{1}\"", ve.PropertyName, ve.ErrorMessage);
-                    }
-                }
-                throw;
+ //                   companies.RemoveAll(e => e.Company1.Count <= 0);
+ //               }
+ //               HttpContext.Session.Add("UserMenu", JsonConvert.SerializeObject(companies));
+ //               return PartialView("_MenuPartial", companies);
+ //           }
+ //           catch (DbEntityValidationException e)
+ //           {
+ //               foreach (var eve in e.EntityValidationErrors)
+ //               {
+ //                   Console.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:", eve.Entry.Entity.GetType().Name, eve.Entry.State);
+ //                   foreach (var ve in eve.ValidationErrors)
+ //                   {
+ //                       Console.WriteLine("- Property: \"{0}\", Error: \"{1}\"", ve.PropertyName, ve.ErrorMessage);
+ //                   }
+ //               }
+ //               throw;
 
-            }
+ //           }
 
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                return PartialView(RedirectToAction("Login"));
-            }
+ //           catch (Exception ex)
+ //           {
+ //               logger.Error(ex);
+ //               return PartialView(RedirectToAction("Login"));
+ //           }
+
+            return PartialView("_MenuPartial");
         }
 
 

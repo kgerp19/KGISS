@@ -1,0 +1,124 @@
+﻿@model KGERP.Service.Configuration.UrlViewModel
+
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        ADD URLINFO
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+
+        <li class="active"> Add UrlInfo</li>
+    </ol>
+</section>
+@using (Html.BeginForm("SaveUrl", "Configuration", FormMethod.Post, new { @class = "form-inline row g-3 align-items-center" }))
+{
+    <section class="content">
+
+        <div class="box">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.UrlInfo.UrlId)
+            <div class="box-danger">
+                <div class="box-header">
+                    <h4>Add UrlInfo</h4>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="Url" class="form-label">URL</label>
+                            @Html.TextBoxFor(m => m.UrlInfo.Url, new { @class = "form-control", @style = "width: 100%", placeholder = "Enter URL" })
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="UrlType" class="form-label">URL Type</label>
+                            @Html.TextBoxFor(m => m.UrlInfo.UrlType, new { @class = "form-control", @style = "width: 100%", placeholder = "Type" })
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="ddlCompanyFK" class="form-label">Company</label>
+                            @Html.DropDownListFor(model => model.UrlInfo.CompanyId, Model.CompanyList as SelectList, "---Select Company---", new { id = "ddlCompanyFK", @class = "searchingDropdown form-control input-sm" })
+                            @Html.ValidationMessageFor(model => model.UrlInfo.CompanyId, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary" style="margin-top:25px; margin-left: 20px;">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+<div class="table-responsive">
+
+    <table id="KgErpDataTable" class="table table-striped table-hover" style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>SL</th>
+                <th>URL</th>
+                <th>URL Type</th>
+                <th>Company</th>
+                <th style="width: 150px;">Actions</th>
+            </tr>
+        </thead>
+        @{int sl = 0;
+        }
+        <tbody>
+            @foreach (var url in Model.DataList)
+            {
+                <tr>
+                    <td>@(++sl)</td>
+                    <td>@url.Url</td>
+                    <td>@url.UrlType</td>
+                    <td>@url.CompanyName</td>
+                    <td>
+                        <a href="@Url.Action("Index", new { id = url.UrlId })" class="btn btn-sm btn-warning mr-2">Edit</a>
+                        <a href="@Url.Action("DeleteUrl", new { id = url.UrlId })" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@using (Html.BeginForm("DeleteUrl", "Configuration", FormMethod.Post))
+{
+    <div class="modal fade" id="OrderDeliverDetailIdDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Delete</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(m => m.UrlInfo.UrlId)
+                    <h3 class="text-center">Are You Delete This?</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+}

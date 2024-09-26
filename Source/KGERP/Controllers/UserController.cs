@@ -148,9 +148,9 @@ namespace KGERP.Controllers
                             FormsAuthentication.SetAuthCookie(user.UserName, false);
                             EmployeeModel employeeModel = context.Database.SqlQuery<EmployeeModel>("exec sp_HRMS_GetEmployeeInfoByEmployeeId {0}", user.UserName).FirstOrDefault();
 
-                           
 
-                            Session["UserName"] = user.UserName.ToString();
+
+                            Session["UserName"] = user.UserName;
                             Session["EmployeeName"] = employeeModel.Name;
                             Session["CompanyId"] = employeeModel.CompanyId;
                             Session["Id"] = employeeModel.Id;
@@ -161,7 +161,9 @@ namespace KGERP.Controllers
                             Session["ManagerInfo"] = string.Format("[{0}] [{1}]", employeeModel.EmployeeIdOfManager, employeeModel.ManagerName);
                             Session["HrAdminId"] = employeeModel.HrAdminId;
                             Session["Picture"] = employeeModel.ImageFileName == null ? string.Format("{0}://{1}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority) + "/Images/Picture/default.png" : string.Format("{0}://{1}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority) + "/Images/Picture/" + employeeModel.ImageFileName;
-                            // MenuPartial();
+                            Parmission(user.UserName, employeeModel.CompanyId.Value);
+
+                            //MenuPartial();
 
                             var value = Session["Id"];
 
@@ -190,65 +192,59 @@ namespace KGERP.Controllers
             return View();
         }
 
-        public void Parmission() // Write by Mamun
+        public void Parmission(string userId, int companyId) // Write by Mamun
         {
             using (ERPEntities context = new ERPEntities())
             {
                 try
                 {
-                    string userId = System.Web.HttpContext.Current.User.Identity.Name;
-                    IQueryable<CompanyModel> queryable = context.Database.SqlQuery<CompanyModel>(@"select CompanyId as Id,CompanyId,ParentId,Name,ShortName,Controller,[Action],[Param],1 as LayerNo
-                                               from Company
-                                               where CompanyId in (select CompanyId from CompanyUserMenu where UserId={0}) order by OrderNo", userId).AsQueryable();
+                    CompanyMenuVM companyModel = new CompanyMenuVM();
+                    companyModel.DataList = (from t1 in context.CompanyUserMenus
+                                             join t2 in context.CompanySubMenus on t1.CompanySubMenuId equals t2.CompanySubMenuId
+                                             join t3 in context.CompanyMenus on t2.CompanyMenuId equals t3.CompanyMenuId
+                                             join t4 in context.Companies on t2.CompanyId equals t4.CompanyId
 
-                    var companies = queryable.Select(x => new CompanyModel { Id = x.Id, CompanyId = x.CompanyId, ParentId = x.ParentId, Name = x.Name, ShortName = x.ShortName, Controller = x.Controller, Action = x.Action, Param = x.Param, LayerNo = x.LayerNo, Company1 = new List<CompanyModel>() }).ToList();
+                                             where t1.UserId == userId  && t1.CompanyId == companyId
+                                             && t1.IsActive && t2.IsActive
+
+                                             select new CompanyMenuVM
+                                             {
+                                                 CompanyId = t2.CompanyId.Value,
+                                                 Name = t2.Name,
+                                                 CompanyShortName = t4.ShortName,
+                                                 MenuShortName = t3.ShortName,
+                                                 SubmenuShortName = t2.ShortName,
+                                                 Controller = t2.Controller,
+                                                 Action = t2.Action,
+                                                 MenuOrderNo = t3.OrderNo,
+                                                 SubMenuOrderNo = t2.OrderNo,
+                                                 Parameter = t2.Param
+
+                                             }).OrderBy(x => x.MenuShortName).ThenBy(x => x.SubmenuShortName).ToList();
 
 
-                    foreach (var company in companies)
-                    {
-                        queryable = context.Database.SqlQuery<CompanyModel>(@"select CompanyMenuId as Id,CompanyId,CompanyId as ParentId,Name,ShortName,Controller,[Action],[Param],2 as LayerNo
-                                             from CompanyMenu
-                                             where CompanyMenuId in (select CompanyMenuId  from CompanyUserMenu where UserId={0} and CompanyId={1}) order by OrderNo", userId, company.CompanyId).AsQueryable();
-
-                        company.Company1 = queryable.Select(x => new CompanyModel { Id = x.Id, CompanyId = x.CompanyId, ParentId = x.ParentId, Name = x.Name, ShortName = x.ShortName, Controller = x.Controller, Action = x.Action, Param = x.Param, LayerNo = x.LayerNo, Company1 = new List<CompanyModel>() }).ToList();
-
-                        foreach (var submenu in company.Company1)
-                        {
-                            queryable = context.Database.SqlQuery<CompanyModel>(@"select CompanySubMenuId as Id,CompanyId,CompanyMenuId as  ParentId,Name,ShortName,Controller,[Action],[Param],3 as LayerNo 
-                                             from CompanySubMenu
-                                             where IsActive==true and CompanySubMenuId in (select CompanySubMenuId from CompanyUserMenu where UserId={0} and CompanyMenuId={1}) order by OrderNo", userId, submenu.Id).AsQueryable();
-
-                            submenu.Company1 = queryable.Select(x => new CompanyModel { Id = x.Id, CompanyId = x.CompanyId, ParentId = x.ParentId, Name = x.Name, ShortName = x.ShortName, Controller = x.Controller, Action = x.Action, Param = x.Param, LayerNo = x.LayerNo, Company1 = new List<CompanyModel>() }).ToList();
-                        }
-                    }
                     string str = "";
                     string Menu = "", SubMenu = "", Menuitem = "", Method = "";
 
-                    foreach (var a in companies)
+                    foreach (var item in companyModel.DataList)
                     {
 
 
-                        if (Menu != a.ShortName)
+                        if (Menu != item.CompanyShortName)
                         {
-                            Menu = a.ShortName;
-                            str += "]" + a.ShortName;
+                            Menu = item.CompanyShortName;
+                            str += "]" + item.CompanyShortName;
                         }
-                        Menu = a.ShortName;
-                        foreach (var aa in a.Company1)
-                        {
-                            if (SubMenu != aa.ShortName)
-                            {
-                                SubMenu = aa.ShortName;
-                                str += "$" + aa.ShortName;
-                            }
+                        Menu = item.CompanyShortName;
 
-                            foreach (var item in aa.Company1)
-                            {
-                                Menuitem = item.ShortName;
-                                Method = item.Controller + "/" + item.Action;
-                                str += "#" + Menuitem + "|" + Method + "^";
-                            }
+                        if (SubMenu != item.MenuShortName)
+                        {
+                            SubMenu = item.MenuShortName;
+                            str += "$" + item.MenuShortName;
                         }
+                        Menuitem = item.SubmenuShortName;
+                        Method = item.Controller + "/" + item.Action + "?companyId=" + item.CompanyId + item.Parameter + "&";
+                        str += "#" + Menuitem + "|" + Method + "^";
                     }
                     string organizeStr = str + "=";
 
@@ -496,10 +492,10 @@ namespace KGERP.Controllers
                                                     where e.Active && e.CompanyId == companyId
                                                     select new GetEmployeePasswordVM
                                                     {
-                                                        EmployeeName=e.Name,
-                                                        EmployeeCode=e.EmployeeId,
-                                                        EmployeePassword=a.Remarks,
-                                                        CreateDate=a.CreatedDate
+                                                        EmployeeName = e.Name,
+                                                        EmployeeCode = e.EmployeeId,
+                                                        EmployeePassword = a.Remarks,
+                                                        CreateDate = a.CreatedDate
                                                     }).OrderBy(x => x.EmployeeCode).ToListAsync();
                 return View(model);
             }
