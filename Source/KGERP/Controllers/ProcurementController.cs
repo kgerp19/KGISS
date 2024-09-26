@@ -2474,6 +2474,17 @@ namespace KG.App.Controllers
 
         }
 
+        [HttpGet]
+
+        public async Task<ActionResult> OfficerofTerritoryName(int SubzoneId)
+        {
+
+            var model = await _service.OfficerofTerritoryName(SubzoneId);
+
+            return Json(model, JsonRequestBehavior.AllowGet);
+
+        }
+
 
 
 
