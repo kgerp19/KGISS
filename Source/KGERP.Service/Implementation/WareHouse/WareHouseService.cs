@@ -1739,10 +1739,20 @@ namespace KGERP.Services.WareHouse
                             UnitPrice = t1.UnitPrice,
                             UnitName = t8.Name,
                             DiscountUnit = t1.DiscountUnit,
-                            SpecialDiscount = t1.SpecialBaseCommission
+                            SpecialDiscount = t1.SpecialBaseCommission,
+                            CompanyFK = t2.CompanyId
                         }).ToList();
 
+            foreach (VMOrderDeliverDetailPartial item in list)
+            {
+                VMProductStock vmProductStock = new VMProductStock();
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                item.CurrentStock = vmProductStock.ClosingQty;
+                item.ClosingRate = vmProductStock.ClosingRate;
 
+            }
+
+            
 
 
             return list;
@@ -3966,7 +3976,7 @@ namespace KGERP.Services.WareHouse
                                                              CreatedDate = t1.CreatedDate,
                                                              IsSubmitted = t1.IsSubmitted,
                                                              PaymentMethod = t2.PaymentMethod,
-
+                                                             AccountingHeadId = t3.HeadGLId,
 
                                                              Warehouse = (t7 == null ? "" : t7.Name),
                                                              SubZoneMobilePersonal = t5.MobilePersonal,
@@ -4000,10 +4010,11 @@ namespace KGERP.Services.WareHouse
                                                                             PackSize = t5.PackSize,
                                                                             FormulaQty = t5.FormulaQty,
                                                                             DeliveredQty = t1.DeliveredQty,
-
+                                                                            COGSPrice = t1.COGSPrice,
                                                                             DiscountUnit = t1.BaseCommission,
                                                                             SpecialDiscount = t1.SpecialDiscount,
-                                                                            
+                                                                            AccountingHeadId = t7.AccountingHeadId,
+                                                                            AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
 
                                                                             UnitName = t8.Name,
                                                                             UnitPrice = t1.UnitPrice,
