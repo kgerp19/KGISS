@@ -8,6 +8,7 @@ namespace KGERP.Service.ServiceModel
 {
     public class DashBoardViewModel
     {
+        public int CompanyId { get; set; }
         public int Totalvendor { get; set; }
         public int Totalsupplier { get; set; }
         public int TotalPurchase { get; set; }

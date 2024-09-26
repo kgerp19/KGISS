@@ -53,7 +53,7 @@ namespace KGERP.Controllers
             // Set database name in ViewBag or ViewData
             //ViewBag.DisableBrowserInspect = disableBroIns;
             var vendor = _dashboardService.AllCount(Common.GetCompanyId());
-
+            vendor.CompanyId = Common.GetCompanyId();
             return View(vendor);
         }
         private string GetDatabaseNameFromConnectionString(string connectionString)
