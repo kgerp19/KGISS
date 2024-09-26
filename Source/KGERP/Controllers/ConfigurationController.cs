@@ -110,7 +110,7 @@ namespace Pos.App.Controllers
         public async Task<ActionResult> UserMenuAssignment(int companyId)
         {
             VMUserMenuAssignment vmUserMenuAssignment = new VMUserMenuAssignment();
-            vmUserMenuAssignment.CompanyList = new SelectList(_service.CompaniesDropDownList(), "Value", "Text");
+            vmUserMenuAssignment.CompanyList = new SelectList(_service.CompaniesDropDownListISS(companyId), "Value", "Text");
 
             return View(vmUserMenuAssignment);
         }
@@ -168,11 +168,11 @@ namespace Pos.App.Controllers
         }
 
         #region User Menu
-        public async Task<ActionResult> UserMenu()
+        public async Task<ActionResult> UserMenu(int companyId)
         {
             VMUserMenu vmUserMenu;
-            vmUserMenu = await Task.Run(() => _service.UserMenuGet());
-            vmUserMenu.CompanyList = new SelectList(_service.CompaniesDropDownList(), "Value", "Text");
+            vmUserMenu = await Task.Run(() => _service.UserMenuGetISS(companyId));
+            vmUserMenu.CompanyList = new SelectList(_service.CompaniesDropDownListISS(companyId), "Value", "Text");
 
             return View(vmUserMenu);
         }
@@ -206,12 +206,16 @@ namespace Pos.App.Controllers
         #endregion
 
         #region User Submenu
-        public async Task<ActionResult> UserSubMenu()
+        public async Task<ActionResult> UserSubMenu(int companyId)
         {
             VMUserSubMenu vmUserSubMenu;
-            vmUserSubMenu = await Task.Run(() => _service.UserSubMenuGet());
-            vmUserSubMenu.UserMenuList = new SelectList(_service.CompanyMenusDropDownList(), "Value", "Text");
-            vmUserSubMenu.CompanyList = new SelectList(_service.CompaniesDropDownList(), "Value", "Text");
+            vmUserSubMenu = await Task.Run(() => _service.UserSubMenuGetISS(companyId));
+            vmUserSubMenu.UserMenuList = new SelectList(_service.CompanyMenusDropDownListISS(companyId), "Value", "Text");
+
+            var companies = _service.CompaniesDropDownListISS(companyId);
+            var selectedCompaniesID = companies.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(companies.FirstOrDefault()) ?? 0;
+            vmUserSubMenu.CompanyList = new SelectList(companies, "Value", "Text");
+            vmUserSubMenu.CompanyFK = (int)selectedCompaniesID;
 
             return View(vmUserSubMenu);
         }
