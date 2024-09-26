@@ -220,7 +220,7 @@ namespace KGERP.Controllers
                                                  SubMenuOrderNo = t2.OrderNo,
                                                  Parameter = t2.Param
 
-                                             }).OrderBy(x => x.MenuShortName).ThenBy(x => x.SubmenuShortName).ToList();
+                                             }).OrderBy(x => x.MenuShortName).ThenBy(x => x.SubmenuShortName).ThenBy(x => x.MenuOrderNo).ToList();
 
 
                     string str = "";
