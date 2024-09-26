@@ -266,7 +266,7 @@ namespace KGERP.Controllers
             model.Customer = customer.Name;
             model.CustomerAddress = customer.Address;
             model.CustomerPhone = customer.Phone;
-            EmployeeModel employee = employeeService.GetEmployee(model.SalePersonId ?? 0);
+            EmployeeModel employee = employeeService.GetEmployee(model.SalePersonId ?? 0, Common.GetCompanyId());
 
             model.MarketingOfficers = new List<SelectModel>() { new SelectModel() { Text = employee.Name, Value = employee.Id } };
             model.OrderLocations = stockInfoService.GetStockInfoSelectModels(model.CompanyId);

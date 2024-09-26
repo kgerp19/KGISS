@@ -111,8 +111,8 @@ namespace KGERP.Controllers.Employeelog
         [HttpGet]
         public ActionResult Details(long id)
         {
-
-            EmployeeModel model = employeeService.GetEmployee(id);
+            int companyId = Common.GetCompanyId();
+            EmployeeModel model = employeeService.GetEmployee(id, companyId);
 
 
 

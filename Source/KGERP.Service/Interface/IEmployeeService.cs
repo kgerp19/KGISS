@@ -14,7 +14,7 @@ namespace KGERP.Service.Interface
         Task<EmployeeVm> GetKSSLEmployees(int CompanyId);
         Task<EmployeeVm> GetEmployeesCompanyWise(int CompanyId);
         Task<EmployeeVm> GetAllEmployeesWise();
-        EmployeeModel GetEmployee(long id);
+        EmployeeModel GetEmployee(long id, int companyId);
         EmployeeModel GetEmployeeForKSSL(long id, int CmpanyId);
         EmployeeModel GetEmployeeForAcc(long id);
         EmployeeModel GetEmployee(string employeeId);

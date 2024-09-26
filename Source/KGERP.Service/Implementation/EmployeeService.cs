@@ -256,6 +256,32 @@ namespace KGERP.Service.Implementation
             string newKgNumber = num.ToString().PadLeft(4, '0');
             return kg + newKgNumber;
         }
+        private string GetEmployeeIdISS(string employeeId)
+        {
+            if (string.IsNullOrEmpty(employeeId))
+            {
+                throw new ArgumentException("Invalid employee ID.");
+            }
+            int index = 0;
+            while (index < employeeId.Length && !char.IsDigit(employeeId[index]))
+            {
+                index++;
+            }
+            string textPart = employeeId.Substring(0, index);
+            string numericPart = employeeId.Substring(index);
+
+            if (int.TryParse(numericPart, out int number))
+            {
+                number++;
+                string incrementedNumericPart = number.ToString(new string('0', numericPart.Length)); 
+                return textPart + incrementedNumericPart;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid numeric part in employee ID.");
+            }
+        }
+
         private string GetEmployeeIdKSSL(string employeeId, int CompanyId)
         {
             string kg = employeeId.Substring(0, 4);
@@ -291,21 +317,25 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public EmployeeModel GetEmployee(long id)
+        public EmployeeModel GetEmployee(long id,int companyId)
         {
             if (id <= 0)
             {
                 //Employee lastEmployee = context.Employees.OrderByDescending(x => x.Id).FirstOrDefault();
 
                 //Employee lastEmployee = context.Employees.OrderByDescending(x => x.EmployeeId).FirstOrDefault();
-                Employee lastEmployee = context.Employees.Where(x => x.EmployeeId.StartsWith("KG")).OrderByDescending(x => x.EmployeeId).FirstOrDefault();
+                //Employee lastEmployee = context.Employees.Where(x => x.EmployeeId.StartsWith("KG")).OrderByDescending(x => x.EmployeeId).FirstOrDefault();
+                Employee lastEmployee = context.Employees.Where(x => x.CompanyId == companyId && x.Active).OrderByDescending(x => x.EmployeeId).FirstOrDefault();
+
                 if (lastEmployee == null)
                 {
-                    return new EmployeeModel() { EmployeeId = "KG0001" };
+                    int eid = 1;
+                    string formattedEid = eid.ToString("D4");
+                    return new EmployeeModel() { EmployeeId = context.Companies.Where(x => x.CompanyId == companyId).Select(x => x.ShortName).FirstOrDefault() + formattedEid };
                 }
                 return new EmployeeModel()
                 {
-                    EmployeeId = GetEmployeeId(lastEmployee.EmployeeId)
+                    EmployeeId = GetEmployeeIdISS(lastEmployee.EmployeeId)
                 };
             }
             this.context.Database.CommandTimeout = 180;
@@ -1110,7 +1140,7 @@ where e.Active = 1").ToList();
                             exitInterviewVM.CompanyName = emp.CompanyName;
                             exitInterviewVM.JoiningDate = emp.JoiningDate.Value;
                             exitInterviewVM.ResignDate = emp.EndDate ?? model.ExpectedResignDate;
-                            exitInterviewVM.ManagerName = GetEmployee((long)emp.ManagerId).Name;
+                            exitInterviewVM.ManagerName = GetEmployee((long)emp.ManagerId, emp.CompanyId ?? 0).Name;
                         }
 
                     }
@@ -1166,7 +1196,8 @@ where e.Active = 1").ToList();
             else
             {
                 long userId = Common.GetIntUserId();
-                var emp = GetEmployee(userId);
+                int companyId = Common.GetCompanyId();
+                var emp = GetEmployee(userId, companyId);
                 if (emp != null)
                 {
                     // exitInterviewVM.Id = emp.Id;
@@ -1177,7 +1208,7 @@ where e.Active = 1").ToList();
                     exitInterviewVM.CompanyName = emp.CompanyName;
                     exitInterviewVM.JoiningDate = emp.JoiningDate.Value;
                     exitInterviewVM.ResignDate = emp.EndDate;
-                    exitInterviewVM.ManagerName = GetEmployee((long)emp.ManagerId).Name;
+                    exitInterviewVM.ManagerName = GetEmployee((long)emp.ManagerId, companyId).Name;
                 }
             }
             return exitInterviewVM;

@@ -255,6 +255,7 @@ namespace KGERP.Controllers
         public ActionResult Details(long employeeId = 0)
         {
             long empId = 0;
+            int companyId = Common.GetCompanyId();
             if (employeeId > 0)
             {
                 empId = employeeId;
@@ -264,7 +265,7 @@ namespace KGERP.Controllers
                 empId = Convert.ToInt64(Session["Id"].ToString());
             }
 
-            EmployeeModel model = employeeService.GetEmployee(empId);
+            EmployeeModel model = employeeService.GetEmployee(empId, companyId);
             if (model == null)
             {
                 return HttpNotFound();
@@ -286,7 +287,7 @@ namespace KGERP.Controllers
         {
            
             EmployeeViewModel vm = new EmployeeViewModel();
-            vm.Employee = employeeService.GetEmployee(id);
+            vm.Employee = employeeService.GetEmployee(id, companyId);
 
 
             var companies = companyService.GetCompanySelectModelsISS(companyId);
@@ -689,7 +690,8 @@ namespace KGERP.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            EmployeeModel employee = employeeService.GetEmployee(id);
+            int companyId = Common.GetCompanyId();
+            EmployeeModel employee = employeeService.GetEmployee(id, companyId);
             if (employee == null)
             {
                 return HttpNotFound();
@@ -733,7 +735,8 @@ namespace KGERP.Controllers
         [HttpGet]
         public JsonResult GetEmployeeInformation(long id)
         {
-            EmployeeModel employee = employeeService.GetEmployee(id);
+            int companyId = Common.GetCompanyId();
+            EmployeeModel employee = employeeService.GetEmployee(id, companyId);
 
             var result = JsonConvert.SerializeObject(employee, Formatting.None, new JsonSerializerSettings()
             {
@@ -1141,8 +1144,9 @@ namespace KGERP.Controllers
         [HttpGet]
         public  ActionResult GetSignature(long EmpID)
         {
+            int companyId = Common.GetCompanyId();
             EmployeeModel model = new EmployeeModel();
-            model =  employeeService.GetEmployee(EmpID);
+            model =  employeeService.GetEmployee(EmpID, companyId);
             
             return View(model);
         }

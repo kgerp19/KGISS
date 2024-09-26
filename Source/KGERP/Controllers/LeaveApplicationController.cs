@@ -487,7 +487,8 @@ namespace KGERP.Controllers
             if (model.CompanyId == 0 && model.DepartmentId == 0)
             {
                 var userIdd = Common.GetIntUserId();
-                var empp = employeeService.GetEmployee(userIdd);
+                int companyId = Common.GetCompanyId();
+                var empp = employeeService.GetEmployee(userIdd, companyId);
                 model.CompanyId = (int)empp.CompanyId;
                 model.CompanyName = empp.CompanyName;
             }
