@@ -942,7 +942,7 @@ namespace KGERP.Service.Implementation
         }
         public object AllEmployeeIdByCompanyId(string prefix, int companyId)
         {
-            var v = (from t1 in _db.Employees.Where(x => x.CompanyId == companyId)
+            var v = (from t1 in _db.Employees.Where(x => x.CompanyId == companyId && x.Active)
                      join t2 in _db.Designations on t1.DesignationId equals t2.DesignationId
                      where (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
 

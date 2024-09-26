@@ -218,7 +218,8 @@ namespace KGERP.Controllers
                                                  Action = t2.Action,
                                                  MenuOrderNo = t3.OrderNo,
                                                  SubMenuOrderNo = t2.OrderNo,
-                                                 Parameter = t2.Param
+                                                 Parameter = t2.Param,
+                                                 CompanyName=t4.Name
 
                                              }).OrderBy(x => x.MenuShortName).ThenBy(x => x.SubmenuShortName).ThenBy(x => x.MenuOrderNo).ToList();
 
@@ -230,12 +231,12 @@ namespace KGERP.Controllers
                     {
 
 
-                        if (Menu != item.CompanyShortName)
+                        if (Menu != item.CompanyName)
                         {
-                            Menu = item.CompanyShortName;
-                            str += "]" + item.CompanyShortName;
+                            Menu = item.CompanyName;
+                            str += "]" + item.CompanyName;
                         }
-                        Menu = item.CompanyShortName;
+                        Menu = item.CompanyName;
 
                         if (SubMenu != item.MenuShortName)
                         {

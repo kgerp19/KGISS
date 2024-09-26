@@ -65,6 +65,8 @@ namespace KGERP.Service.ServiceModel
        
         public string Name { get; set; }
         [DisplayName("Short Name")]
+
+        public string CompanyName { get; set; }
         public string CompanyShortName { get; set; }
         [DisplayName("Short Name")]
         public string MenuShortName { get; set; }

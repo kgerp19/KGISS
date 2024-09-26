@@ -256,7 +256,7 @@ namespace KGERP.Service.Implementation
             string newKgNumber = num.ToString().PadLeft(4, '0');
             return kg + newKgNumber;
         }
-        private string GetEmployeeIdISS(string employeeId)
+        private string GetEmployeeIdISS(string employeeId,int companyId)
         {
             if (string.IsNullOrEmpty(employeeId))
             {
@@ -269,7 +269,7 @@ namespace KGERP.Service.Implementation
             }
             string textPart = employeeId.Substring(0, index);
             string numericPart = employeeId.Substring(index);
-
+            textPart = context.Companies.Where(x => x.CompanyId == companyId).Select(x => x.ShortName).FirstOrDefault();
             if (int.TryParse(numericPart, out int number))
             {
                 number++;
@@ -335,7 +335,7 @@ namespace KGERP.Service.Implementation
                 }
                 return new EmployeeModel()
                 {
-                    EmployeeId = GetEmployeeIdISS(lastEmployee.EmployeeId)
+                    EmployeeId = GetEmployeeIdISS(lastEmployee.EmployeeId,companyId)
                 };
             }
             this.context.Database.CommandTimeout = 180;
