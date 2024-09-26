@@ -957,17 +957,7 @@ namespace KGERP.Services.WareHouse
 
                         result = materialReceiveDetail.MaterialReceiveDetailId;
                     }
-                    if (dataListSlavePartial[i].PurchasingPrice > 0)
-                    {
-                        #region Ready To GRN
-                        vmModel.MaterialReceiveDetailId = materialReceiveDetail.MaterialReceiveDetailId;
-                        vmModel.Common_ProductFk = materialReceiveDetail.ProductId.Value;
-                        vmModel.ReceivedQuantity = materialReceiveDetail.ReceiveQty;
-                        vmModel.PurchasingPrice = materialReceiveDetail.UnitPrice;
-                        #endregion
-
-                        await ProductGRNEdit(vmModel);
-                    }
+                    
 
                 }
             }
@@ -1713,7 +1703,7 @@ namespace KGERP.Services.WareHouse
                             PurchasingPrice = t1.PurchaseRate,
                             TotalPrice = t1.PurchaseQty * t1.PurchaseRate,
                             Procurement_PurchaseOrderSlaveFk = t1.PurchaseOrderDetailId,
-                            PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive && !x.IsReturn).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
+                            PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive ).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
                             UnitName = t8.Name,
                             PODate = (DateTime)t2.PurchaseDate,
                             //ProductDiscount = t1.ProductDiscount,
@@ -1749,10 +1739,20 @@ namespace KGERP.Services.WareHouse
                             UnitPrice = t1.UnitPrice,
                             UnitName = t8.Name,
                             DiscountUnit = t1.DiscountUnit,
-                            SpecialDiscount = t1.SpecialBaseCommission
+                            SpecialDiscount = t1.SpecialBaseCommission,
+                            CompanyFK = t2.CompanyId
                         }).ToList();
 
+            foreach (VMOrderDeliverDetailPartial item in list)
+            {
+                VMProductStock vmProductStock = new VMProductStock();
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                item.CurrentStock = vmProductStock.ClosingQty;
+                item.ClosingRate = vmProductStock.ClosingRate;
 
+            }
+
+            
 
 
             return list;
@@ -3633,9 +3633,8 @@ namespace KGERP.Services.WareHouse
                         ProductId = dataListSlavePartial[i].ProductId,
                         OrderDeliverId = vmModel.OrderDeliverId,
                         COGSPrice = dataListSlavePartial[i].ClosingRate,
-
                         BaseCommission = dataListSlavePartial[i].DiscountUnit,   // Unit Discount
-                        SpecialDiscount = dataListSlavePartial[i].SpecialDiscount,   // Special Discount
+                        SpecialDiscount = (dataListSlavePartial[i].SpecialDiscount / Convert.ToDecimal( dataListSlavePartial[i].OrderQty ))* Convert.ToDecimal( dataListSlavePartial[i].DeliverQty),   // Special Discount
 
                         CashCommission = 0,       // Cash Discount
 
@@ -3946,7 +3945,7 @@ namespace KGERP.Services.WareHouse
                                                          {
                                                              OrderNo = t2.OrderNo,
                                                              OrderDate = t2.OrderDate,
-
+                                                             
                                                              ChallanNo = t1.ChallanNo,
                                                              DeliveryDate = t1.DeliveryDate,
                                                              InvoiceNo = t1.InvoiceNo,
@@ -3977,7 +3976,7 @@ namespace KGERP.Services.WareHouse
                                                              CreatedDate = t1.CreatedDate,
                                                              IsSubmitted = t1.IsSubmitted,
                                                              PaymentMethod = t2.PaymentMethod,
-
+                                                             AccountingHeadId = t3.HeadGLId,
 
                                                              Warehouse = (t7 == null ? "" : t7.Name),
                                                              SubZoneMobilePersonal = t5.MobilePersonal,
@@ -4011,10 +4010,11 @@ namespace KGERP.Services.WareHouse
                                                                             PackSize = t5.PackSize,
                                                                             FormulaQty = t5.FormulaQty,
                                                                             DeliveredQty = t1.DeliveredQty,
-
+                                                                            COGSPrice = t1.COGSPrice,
                                                                             DiscountUnit = t1.BaseCommission,
                                                                             SpecialDiscount = t1.SpecialDiscount,
-
+                                                                            AccountingHeadId = t7.AccountingHeadId,
+                                                                            AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
 
                                                                             UnitName = t8.Name,
                                                                             UnitPrice = t1.UnitPrice,
@@ -5308,53 +5308,8 @@ namespace KGERP.Services.WareHouse
             model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             model.ModifedDate = DateTime.Now;
 
-
-
-
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                result = model.OrderDeliverId;
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await KfmalOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
-                await _accountingService.AccSalesPushKfmal(vmModel.CompanyFK.Value, AccData, (int)KfmalJournalEnum.SalesVoucher);
-                //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await GcclOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
-                await _accountingService.AccountingSalesPushGCCL(vmModel.CompanyFK.Value, AccData, (int)GCCLJournalEnum.SalesVoucher);
-                //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await SEEDAccountingPushOrderDeliverGet(vmModel.CompanyFK.Value, vmModel.OrderDeliverId);
-                await _accountingService.AccountingSalesPushSEED(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.SalesVoucher);
-                await _accountingService.OrderDeliverySMSPush(AccData);
-
-                #endregion
-            }
-
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                #region Ready To Account Integration
-                VMOrderDeliverDetail AccData = await FeedOrderDeliverDetailGet(vmModel.CompanyFK.Value, vmModel.OrderDeliverId);
-
-                await _accountingService.AccountingSalesPushFeed(vmModel.CompanyFK.Value, AccData, (int)FeedJournalEnum.SalesVoucher);
-                /// await _accountingService.OrderDeliverySMSPush(AccData);
-                #endregion
-            }
-
+            VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
+            await _accountingService.AccountingSalesPushISS(AccData);
             return result;
         }
 

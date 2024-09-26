@@ -5704,6 +5704,19 @@ namespace KGERP.Services.Procurement
             return v;
         }
 
+        public async Task<Officervwmodel> OfficerofTerritoryName(int SubzoneId)
+        {
+            var v = await Task.Run(() => (from t1 in _db.SubZones
+                                          join t2 in _db.Employees on t1.SalesOfficerId equals t2.Id
+                                          where t1.SubZoneId == SubzoneId && t1.IsActive
+                                          select new Officervwmodel
+                                          {
+                                              EmployeeName = t2.Name,
+                                              EmpId = t1.SalesOfficerId??0
+                                          }).FirstOrDefault());
+            return v;
+        }
+
 
 
 

@@ -104,10 +104,10 @@ namespace KGERP.Data.Models
         public virtual LandReceiver LandReceiver { get; set; }
         public virtual LandUser LandUser { get; set; }
         public virtual Project Project { get; set; }
-        public virtual Upazila Upazila { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AssetFileAttach> AssetFileAttaches { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<FileAttachment> FileAttachments { get; set; }
+        public virtual Upazila Upazila { get; set; }
     }
 }

@@ -1690,6 +1690,7 @@ namespace KGERP.Controllers
             {
                 vmReceiving = await _service.ISSPOReceivingGet(companyId, materialReceiveId);
             }
+            
             return View(vmReceiving);
         }
 
