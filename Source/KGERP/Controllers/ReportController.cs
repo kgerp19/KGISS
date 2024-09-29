@@ -13,6 +13,7 @@ using KGERP.Service.Implementation.Realestate;
 using KGERP.Service.Implementation.RealStateMoneyReceipt;
 using KGERP.Service.Implementation.TaskManagment;
 using KGERP.Service.Interface;
+using KGERP.Service.ServiceModel.SeedProcessingModel;
 using KGERP.Services.Procurement;
 using KGERP.Utility;
 using System;
@@ -379,6 +380,19 @@ namespace KGERP.Controllers
             WebClient client = new WebClient();
             client.Credentials = nwc;
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&OrderMasterId={1}", reportName, orderMasterId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+        
+        [HttpGet]
+
+        public ActionResult GetSeedProcessingReport(long SeedProcessingId)
+        {
+            string reportName = string.Empty;
+            reportName = "ISSSeedProcessingReport";
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&SeedProcessingId={1}", reportName, SeedProcessingId);
             return File(client.DownloadData(reportURL), "application/pdf");
         }
 
