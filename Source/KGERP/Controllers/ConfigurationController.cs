@@ -1398,6 +1398,8 @@ namespace Pos.App.Controllers
             vmCommonCustomer.PaymentTypeList = new SelectList(_service.CommonCustomerPaymentType(), "Value", "Text");
             vmCommonCustomer.ZoneListList = new SelectList(_service.CommonZonesDropDownList(companyId), "Value", "Text");
             vmCommonCustomer.TerritoryList = new SelectList(_service.CommonSubZonesDropDownList(companyId), "Value", "Text");
+            vmCommonCustomer.Checkdetail = new SelectList(_service.ChekdetailList(), "Value", "Text");
+            vmCommonCustomer.CheckType = new SelectList(_service.ChekdTypeList(), "Value", "Text");
             return View(vmCommonCustomer);
         }
 
@@ -1603,28 +1605,56 @@ namespace Pos.App.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> CommonCustomer(VMCommonSupplier vmCommonCustomer,HttpPostedFileBase file)
+        public async Task<ActionResult> CommonCustomer(VMCommonSupplier vmCommonCustomer,HttpPostedFileBase file2)
         {
-            List<FileItem> itemlist = new List<FileItem>();
-            if (file != null)
+            if (Request.Files.Count > 0)
             {
-                FileItem item = new FileItem();
-                item.file = file;
-                item.docdesc = "Feed Vendor Photo";
-                item.docfilename = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                item.docid = 0;
-                item.FileCatagoryId = 5;
-                item.fileext = Path.GetExtension(file.FileName);
-                item.isactive = true;
-                item.RecDate = DateTime.Now;
-                item.SortOrder = 1;
-                item.userid = Convert.ToInt32(Session["Id"]);
-                itemlist.Add(item);
-                itemlist = await _ftpservice.UploadFileBulk(itemlist, "FeedVendorImage");
-                if (file != null)
+                foreach (string fileKey in Request.Files)
                 {
-                    var ress = itemlist.FirstOrDefault(f => f.SortOrder == 1);
-                    vmCommonCustomer.ImageDocId = ress.docid;
+                    var file = Request.Files[fileKey];
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        // Define the path where you want to save the uploaded files
+                        var uploadPath = Path.Combine(Server.MapPath("~/FileUpload"), Path.GetFileName(file.FileName));
+
+                        // Save the file
+                        file.SaveAs(uploadPath);
+
+                        // Generate the file URL
+                        var fileUrl = Url.Content("~/FileUpload/" + Path.GetFileName(file.FileName));
+
+                        // Match the file input field name and save the URL to the corresponding model property
+                        switch (fileKey)
+                        {
+                            case "Image":
+                                vmCommonCustomer.Imageurl = fileUrl;
+                                break;
+                            case "NidImage":
+                                vmCommonCustomer.NidImage = fileUrl;
+                                break;
+                            case "TradeLicenceUrl":
+                                vmCommonCustomer.TradeLicenceUrl = fileUrl;
+                                break;
+                            case "BSAMemUrl":
+                                vmCommonCustomer.BSAMemUrl = fileUrl;
+                                break;
+                            case "SaleLiUrl":
+                                vmCommonCustomer.SaleLiUrl = fileUrl;
+                                break;
+                            case "DelerLiUrl":
+                                vmCommonCustomer.DelerLiUrl = fileUrl;
+                                break;
+                            case "TinUrl":
+                                vmCommonCustomer.TinUrl = fileUrl;
+                                break;
+                            case "BankChkUrl":
+                                vmCommonCustomer.BankChkUrl = fileUrl;
+                                break;
+                            default:
+                                // Handle other cases if needed
+                                break;
+                        }
+                    }
                 }
             }
 

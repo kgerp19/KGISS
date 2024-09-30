@@ -42,7 +42,7 @@ namespace KGERP.Data.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmiDetail> EmiDetails { get; set; }
-        public virtual Vendor Vendor { get; set; }
         public virtual OrderMaster OrderMaster { get; set; }
+        public virtual Vendor Vendor { get; set; }
     }
 }
