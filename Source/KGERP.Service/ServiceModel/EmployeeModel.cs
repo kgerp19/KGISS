@@ -30,6 +30,7 @@ namespace KGERP.Service.ServiceModel
         public Nullable<int> CompanyId { get; set; }
 
         public string CompanyName { get; set; }
+        public string CompanyLogo { get; set; }
 
         [DisplayName("Card No")]
         public string CardId { get; set; }

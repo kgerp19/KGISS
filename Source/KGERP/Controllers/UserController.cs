@@ -148,13 +148,15 @@ namespace KGERP.Controllers
                             FormsAuthentication.SetAuthCookie(user.UserName, false);
                             EmployeeModel employeeModel = context.Database.SqlQuery<EmployeeModel>("exec sp_HRMS_GetEmployeeInfoByEmployeeId {0}", user.UserName).FirstOrDefault();
 
-
+                            var sss = Common.GetCompanyId();
 
                             Session["UserName"] = user.UserName;
                             Session["EmployeeName"] = employeeModel.Name;
                             Session["CompanyId"] = employeeModel.CompanyId;
                             Session["Id"] = employeeModel.Id;
                             Session["DesignationName"] = employeeModel.DesignationName;
+                            Session["CompanyName"] = employeeModel.CompanyName;
+                            Session["CompanyLogo"] = employeeModel.CompanyLogo;
                             Session["ManagerId"] = employeeModel.ManagerId;
                             Session["ManagerEmployeeId"] = employeeModel.EmployeeIdOfManager;
                             Session["ManagerName"] = employeeModel.ManagerName;

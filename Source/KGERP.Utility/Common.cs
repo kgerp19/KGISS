@@ -51,6 +51,15 @@ namespace KGERP.Utility
         {
             return Convert.ToInt32(System.Web.HttpContext.Current.Session["CompanyId"]);
         }
+
+        public static string GetCompanyName()
+        {
+            return Convert.ToString(System.Web.HttpContext.Current.Session["CompanyName"]);
+        }
+        public static string GetCompanyLogo()
+        {
+            return Convert.ToString(System.Web.HttpContext.Current.Session["CompanyLogo"]);
+        }
         public static long GetGroupManagingDirectorId()
         {
             return 2;
