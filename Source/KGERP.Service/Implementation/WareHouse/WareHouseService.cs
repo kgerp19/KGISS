@@ -1706,6 +1706,7 @@ namespace KGERP.Services.WareHouse
                             PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive ).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
                             UnitName = t8.Name,
                             PODate = (DateTime)t2.PurchaseDate,
+                            
                             //ProductDiscount = t1.ProductDiscount,
                             //VATAddition = t1.VATAddition,
 
@@ -2327,7 +2328,6 @@ namespace KGERP.Services.WareHouse
                                                                                   ProductDiscount = t1.ProductDiscount,
                                                                                   StockInRate = t1.StockInRate ?? 0,// BDT Unit Price
                                                                                   StockInQty = t1.StockInQty ?? 0,
-
                                                                                   AccountingHeadId = t7.AccountingHeadId,
                                                                                   AccountingExpenseHeadId = t7.AccountingExpenseHeadId,
                                                                                   SubTotalInBDT = (t1.ReceiveQty * t1.UnitPrice),
