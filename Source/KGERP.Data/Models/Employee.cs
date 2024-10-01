@@ -131,7 +131,6 @@ namespace KGERP.Data.Models
         public virtual ICollection<Employee> Employee11 { get; set; }
         public virtual Employee Employee3 { get; set; }
         public virtual Shift Shift { get; set; }
-        public virtual Vendor Vendor { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmployeeAttendance> EmployeeAttendances { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -154,5 +153,6 @@ namespace KGERP.Data.Models
         public virtual ICollection<OfficerAssign> OfficerAssigns { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Upazila> Upazilas { get; set; }
+        public virtual Vendor Vendor { get; set; }
     }
 }

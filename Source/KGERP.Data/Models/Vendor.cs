@@ -17,17 +17,17 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Vendor()
         {
+            this.Employees = new HashSet<Employee>();
             this.MonthlyTargets = new HashSet<MonthlyTarget>();
             this.EMIs = new HashSet<EMI>();
+            this.LCInfoes = new HashSet<LCInfo>();
+            this.OrderMasters = new HashSet<OrderMaster>();
+            this.Payments = new HashSet<Payment>();
+            this.PurchaseOrders = new HashSet<PurchaseOrder>();
             this.PurchaseReturns = new HashSet<PurchaseReturn>();
             this.SaleReturns = new HashSet<SaleReturn>();
             this.Stores = new HashSet<Store>();
             this.VendorOffers = new HashSet<VendorOffer>();
-            this.Payments = new HashSet<Payment>();
-            this.LCInfoes = new HashSet<LCInfo>();
-            this.Employees = new HashSet<Employee>();
-            this.PurchaseOrders = new HashSet<PurchaseOrder>();
-            this.OrderMasters = new HashSet<OrderMaster>();
         }
     
         public Nullable<int> HeadGLId { get; set; }
@@ -111,11 +111,30 @@ namespace KGERP.Data.Models
         public Nullable<decimal> FixedCommissionPoultry { get; set; }
         public Nullable<decimal> FixedCommissionFish { get; set; }
         public Nullable<decimal> FixedCommissionCattle { get; set; }
+        public string TradeLicenseImageUrl { get; set; }
+        public string NIDImageUrl { get; set; }
+        public string WLImageUrl { get; set; }
+        public string SDLImageUrl { get; set; }
+        public string TINImageUrl { get; set; }
+        public string BSAMemberImageUrl { get; set; }
+        public string CheckImageUrl { get; set; }
+        public Nullable<int> CheckDetailId { get; set; }
+        public Nullable<int> CheckTypeId { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Employee> Employees { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MonthlyTarget> MonthlyTargets { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EMI> EMIs { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<LCInfo> LCInfoes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<OrderMaster> OrderMasters { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Payment> Payments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PurchaseReturn> PurchaseReturns { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -124,15 +143,5 @@ namespace KGERP.Data.Models
         public virtual ICollection<Store> Stores { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<VendorOffer> VendorOffers { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Payment> Payments { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<LCInfo> LCInfoes { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Employee> Employees { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderMaster> OrderMasters { get; set; }
     }
 }

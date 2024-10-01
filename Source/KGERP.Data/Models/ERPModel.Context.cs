@@ -274,7 +274,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Bank> Banks { get; set; }
         public virtual DbSet<PRoll_KMCSLDeductionDetail> PRoll_KMCSLDeductionDetail { get; set; }
         public virtual DbSet<BankBranch> BankBranches { get; set; }
-        public virtual DbSet<Vendor> Vendors { get; set; }
         public virtual DbSet<PRoll_PayRollDetail> PRoll_PayRollDetail { get; set; }
         public virtual DbSet<PayRoll_Signatory> PayRoll_Signatory { get; set; }
         public virtual DbSet<PRollApprovalDetail> PRollApprovalDetails { get; set; }
@@ -361,6 +360,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<SeedProcessing> SeedProcessings { get; set; }
         public virtual DbSet<UrlInfo> UrlInfoes { get; set; }
         public virtual DbSet<Upazila> Upazilas { get; set; }
+        public virtual DbSet<Vendor> Vendors { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

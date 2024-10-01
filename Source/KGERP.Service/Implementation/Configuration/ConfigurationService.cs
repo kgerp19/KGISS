@@ -2540,6 +2540,36 @@ namespace KGERP.Service.Implementation
             return list;
         }
 
+        public List<object> ChekdetailList()
+        {
+            var list = new List<object>();
+
+            // Load the CheckDetail enum values
+            foreach (var detail in Enum.GetValues(typeof(CheckDetail)).Cast<CheckDetail>())
+            {
+                list.Add(new { Text = detail.ToString(), Value = (int)detail });
+            }
+
+            return list;
+        }
+
+
+
+        public List<object> ChekdTypeList()
+        {
+            var list = new List<object>();
+
+            // Load the CheckDetail enum values
+            foreach (var detail in Enum.GetValues(typeof(CheckType)).Cast<CheckType>())
+            {
+                list.Add(new { Text = detail.ToString(), Value = (int)detail });
+            }
+
+            return list;
+        }
+
+
+
         public List<object> EmployeesDropDownList(int companyId)
         {
             var list = new List<object>();
@@ -4262,7 +4292,21 @@ namespace KGERP.Service.Implementation
                                                          CreditLimit = t1.CreditLimit,
                                                          NID = t1.NID,
                                                          CustomerTypeFk = t1.CustomerTypeFK,
-                                                         VendorTypeId = t1.VendorTypeId
+                                                         VendorTypeId = t1.VendorTypeId,
+                                                         ACName=t1.ACName,
+                                                        BankName=t1.BankName,
+                                                        BranchName=t1.BranchName,
+                                                        Imageurl=t1.ImageUrl,
+                                                        ACNo=t1.ACNo,
+                                                        CheckNo=t1.CheckNo,
+                                                         CheckDetailId = (int)(CheckDetail)t1.CheckDetailId,
+                                                         CheckTypeId = (int)(CheckType)t1.CheckTypeId,
+                                                         TradeLicenceUrl =t1.TradeLicenseImageUrl,
+                                                         SaleLiUrl=t1.WLImageUrl,
+                                                         DelerLiUrl=t1.SDLImageUrl,
+                                                         TinUrl=t1.TINImageUrl,
+                                                         BankChkUrl=t1.CheckImageUrl
+
                                                      }).FirstOrDefault());
 
 
@@ -4418,7 +4462,21 @@ namespace KGERP.Service.Implementation
                 YearlyIncentive = vmCommonCustomer.YearlyIncentive,
                 FixedCommissionCattle = vmCommonCustomer.FixedCommissionCattle,
                 FixedCommissionFish = vmCommonCustomer.FixedCommissionFish,
-                FixedCommissionPoultry = vmCommonCustomer.FixedCommissionPoultry
+                FixedCommissionPoultry = vmCommonCustomer.FixedCommissionPoultry,
+                NIDImageUrl = vmCommonCustomer.NidImage,
+                ImageUrl = vmCommonCustomer.Imageurl,
+                TradeLicenseImageUrl=vmCommonCustomer.TradeLicenceUrl,
+                BSAMemberImageUrl=vmCommonCustomer.BSAMemUrl,
+                WLImageUrl=vmCommonCustomer.SaleLiUrl,
+                SDLImageUrl=vmCommonCustomer.DelerLiUrl,
+                TINImageUrl=vmCommonCustomer.TinUrl,
+                CheckImageUrl=vmCommonCustomer.BankChkUrl,
+                CheckDetailId=vmCommonCustomer.CheckDetailId,
+                CheckTypeId=vmCommonCustomer.CheckTypeId,
+                ACName=vmCommonCustomer.ACName,
+                ACNo=vmCommonCustomer.ACNo,
+                BankName=vmCommonCustomer.BankName,
+                BranchName=vmCommonCustomer.BranchName
 
             };
             _db.Vendors.Add(commonCustomer);
