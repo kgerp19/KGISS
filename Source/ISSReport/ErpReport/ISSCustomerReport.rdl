@@ -4,7 +4,7 @@
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="CustomerDS">
-      <DataSourceReference>ErpDataSource</DataSourceReference>
+      <DataSourceReference>ISSDataSource</DataSourceReference>
       <rd:SecurityType>None</rd:SecurityType>
       <rd:DataSourceID>de237ddf-2ebf-4078-b156-c3363cfa7481</rd:DataSourceID>
     </DataSource>
@@ -18,21 +18,24 @@
             <Value>=Parameters!CompanyId.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>SELECT        (select Name from Company where CompanyId=Erp.Vendor.CompanyId)  as Company,
-			  (select Url from UrlInfo where UrlType=1)+'Images/Logo/'+(select CompanyLogo from Company where CompanyId=Erp.Vendor.CompanyId) as CompanyLogo,
-              (select [Address] from Company where CompanyId=Erp.Vendor.CompanyId) as CompanyAddress,
-              (select Phone from Company where CompanyId=Erp.Vendor.CompanyId) as CompanyPhone,
-              (select Email from Company where CompanyId=Erp.Vendor.CompanyId) as CompanyEmail,
-              (select ShortName from Company where CompanyId=Erp.Vendor.CompanyId) as CompanyName,
-              isnull(CustomerType,'') as CustomerType,
-              isnull((select Name from Erp.Zone where ZoneId=Erp.Vendor.ZoneId),'') as ZoneName,
-			  isnull(Name,'') as Name, isnull(ContactName,'') as ContactName, isnull([Address],'') as [Address], 
-              isnull(Phone,'') as Phone, isnull(Email,'') as Email, isnull(NomineeName,'') as NomineeName,
-			  isnull(NomineePhone,'') as NomineePhone, CreditRatioFrom, CreditRatioTo, isnull(CreditLimit,0) as CreditLimit,
-			  isnull( MonthlyIncentive,0) as  MonthlyIncentive, isnull(YearlyIncentive,0) as YearlyIncentive, 
-              isnull(NID,'') as NID, isnull(BIN,'') as BIN,isnull(Remarks,'') as Remarks,IsActive
-FROM          Erp.Vendor
-where         IsActive=1 and VendorTypeId=2 and CompanyId=@CompanyId</CommandText>
+        <CommandText>SELECT c.Name as Company,
+		 (select Url from UrlInfo where UrlType=1)+'Images/Logo/'+ c.CompanyLogo as CompanyLogo,
+       C.[Address]  as CompanyAddress,
+       C.Phone as CompanyPhone,
+       C.Email as CompanyEmail,
+       C.ShortName   as CompanyName,
+       isnull(CustomerType,'') as CustomerType,
+       z.Name as ZoneName,
+		 isnull(v.Name,'') as Name, isnull(ContactName,'') as ContactName, isnull(v.[Address],'') as [Address], 
+       isnull(v.Phone,'') as Phone, isnull(v.Email,'') as Email, isnull(NomineeName,'') as NomineeName,
+		 isnull(NomineePhone,'') as NomineePhone, CreditRatioFrom, CreditRatioTo, isnull(CreditLimit,0) as CreditLimit,
+		 isnull( MonthlyIncentive,0) as  MonthlyIncentive, isnull(YearlyIncentive,0) as YearlyIncentive, 
+       isnull(NID,'') as NID, isnull(BIN,'') as BIN,isnull(v.Remarks,'') as Remarks,v.IsActive
+FROM   Erp.Vendor v
+Join Company as c on v.CompanyId = c.CompanyId
+Join Erp.Zone z on v.ZoneId = z.ZoneId
+
+where         v.IsActive=1 and VendorTypeId=2 and v.CompanyId=@CompanyId</CommandText>
       </Query>
       <Fields>
         <Field Name="Company">
@@ -109,11 +112,11 @@ where         IsActive=1 and VendorTypeId=2 and CompanyId=@CompanyId</CommandTex
         </Field>
         <Field Name="MonthlyIncentive">
           <DataField>MonthlyIncentive</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="YearlyIncentive">
           <DataField>YearlyIncentive</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="NID">
           <DataField>NID</DataField>

@@ -13,6 +13,7 @@ using KGERP.Service.Implementation.Realestate;
 using KGERP.Service.Implementation.RealStateMoneyReceipt;
 using KGERP.Service.Implementation.TaskManagment;
 using KGERP.Service.Interface;
+using KGERP.Service.ServiceModel.SeedProcessingModel;
 using KGERP.Services.Procurement;
 using KGERP.Utility;
 using System;
@@ -379,6 +380,19 @@ namespace KGERP.Controllers
             WebClient client = new WebClient();
             client.Credentials = nwc;
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&OrderMasterId={1}", reportName, orderMasterId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+        
+        [HttpGet]
+
+        public ActionResult GetSeedProcessingReport(long SeedProcessingId)
+        {
+            string reportName = string.Empty;
+            reportName = "ISSSeedProcessingReport";
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&SeedProcessingId={1}", reportName, SeedProcessingId);
             return File(client.DownloadData(reportURL), "application/pdf");
         }
 
@@ -4310,13 +4324,6 @@ namespace KGERP.Controllers
         }
 
 
-
-
-
-
-
-
-
         [HttpGet]
 
         public ActionResult GetCustomerSearchReport(ReportCustomModel model)
@@ -4324,7 +4331,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string reportURL = string.Format("http://192.168.0.7:98/ReportServer_SQLEXPRESS/?%2fErpReport/{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}", model.ReportName, model.ReportType, model.CompanyId);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}", model.ReportName, model.ReportType, model.CompanyId);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -8129,7 +8136,7 @@ namespace KGERP.Controllers
             WebClient client = new WebClient();
             client.Credentials = nwc;
             string reportURL = "";
-            model.ReportName = "KGMultipleVoucherReport";
+            model.ReportName = "ISSMultipleVoucherReport";
 
             reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&StrFromDate={3}&StrToDate={4}&VoucherTypeId={5}", model.ReportName, model.ReportType, model.CompanyId, model.StrFromDate, model.StrToDate, model.VoucherTypeId ?? 0);
             if (model.ReportType.Equals(ReportType.EXCEL))

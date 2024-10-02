@@ -1305,7 +1305,8 @@ namespace KGERP.Services.Procurement
                         CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
                         CreatedDate = DateTime.Now,
                         VATAddition = vmPurchaseOrderSlave.VATAddition,
-                        IsActive = true
+                        IsActive = true,
+                        IsVATIncluded=vmPurchaseOrderSlave.IsVATIncluded
                     };
                     _db.PurchaseOrderDetails.Add(procurementPurchaseOrderSlave);
 
@@ -4561,7 +4562,8 @@ namespace KGERP.Services.Procurement
                 CompanyId = vmPurchaseOrderSlave.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                IsVATIncluded=vmPurchaseOrderSlave.IsVATIncluded
             };
             _db.PurchaseOrderDetails.Add(procurementPurchaseOrderSlave);
             if (await _db.SaveChangesAsync() > 0)

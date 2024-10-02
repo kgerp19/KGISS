@@ -44,5 +44,7 @@ namespace KGERP.Data.Models
         public virtual MaterialReceive MaterialReceive { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SeedProcessingDetail> SeedProcessingDetails { get; set; }
+        public virtual MaterialReceiveDetail MaterialReceiveDetail1 { get; set; }
+        public virtual MaterialReceiveDetail MaterialReceiveDetail2 { get; set; }
     }
 }

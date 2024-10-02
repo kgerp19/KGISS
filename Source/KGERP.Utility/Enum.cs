@@ -203,7 +203,16 @@ namespace KGERP.Utility
         Cash_Verification = 3,
         Special_Investigation = 4
     }
-
+    public enum CheckDetail
+    {
+        MICR = 1,
+        NonMICR=2
+    }
+    public enum CheckType
+    {
+        Bank = 1,
+        Cash = 2
+    }
     public enum DayTypeEnum
     {
         Saturday = 1,

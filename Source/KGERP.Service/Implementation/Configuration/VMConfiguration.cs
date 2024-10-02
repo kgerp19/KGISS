@@ -276,6 +276,8 @@ namespace KGERP.Service.Configuration
         public SelectList PaymentTypeList { get; set; } = new SelectList(new List<object>());
         public SelectList NomineeRelationList { get; set; } = new SelectList(new List<object>());
         public SelectList vendorProfession { get; set; } = new SelectList(new List<object>());
+        public SelectList Checkdetail { get; set; } = new SelectList(new List<object>());
+        public SelectList CheckType { get; set; } = new SelectList(new List<object>());
 
 
 
@@ -331,6 +333,19 @@ namespace KGERP.Service.Configuration
         public string ETinNo { get;  set; }
         public string TradeLicense { get;  set; }
         public int CustomerProductTypeFk { get;  set; }
+        public int CheckTypeId { get; set; }
+        public int CheckDetailId { get; set; }
+        public string NidImage { get; set; }
+        public string BSAMemUrl { get; set; }
+        public string SaleLiUrl { get; set; }
+        public string DelerLiUrl { get; set; }
+        public string TinUrl { get; set; }
+        public string BankChkUrl { get; set; }
+        public string TradeLicenceUrl { get; set; }
+ public string Imageurl { get; set; }
+
+        public List<string> UploadedFileUrls { get; set; }
+
     }
     public class VMCommonSupplierProduct : VMCommonProduct
     {
