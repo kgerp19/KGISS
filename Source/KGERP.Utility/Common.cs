@@ -78,4 +78,26 @@ namespace KGERP.Utility
         }
 
     }
+
+    public static class PageInfo
+    {
+        private static bool IsShoqPageInfoValue = false;
+
+        public static string PageTitle = "PageTitle";
+        public static string PageHeader = "PageHeader";
+        public static string PageLink1 = "PageLink1";
+        public static string PageLink2 = "PageLink2";
+        public static string PageAdditionalInfo = "PageAdditionalInfo";
+        public static string btnText1 = "btnText1";
+        public static string btnText2 = "btnText2";
+        public static string btnClass1 = "btnClass1";
+        public static string btnClass2 = "btnClass2";
+        public static string PageHeaderFaIcon = "PageHeaderFaIcon";
+        public static bool IsShoqPageInfo
+        {
+            get { return IsShoqPageInfoValue; }
+            set { IsShoqPageInfoValue = value; }
+        }
+    }
+    
 }
