@@ -727,11 +727,11 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}", reportName, reportType, companyId);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}",reportName,reportType,companyId);
 
             if (reportType.Equals(ReportType.EXCEL))
             {
-                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", "ChartOfAccount.xls");
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", "ISSChartOfAccount.xls");
             }
             if (reportType.Equals(ReportType.PDF))
             {
@@ -739,7 +739,7 @@ namespace KGERP.Controllers
             }
             if (reportType.Equals(ReportType.WORD))
             {
-                return File(client.DownloadData(reportURL), "application/msword", "ChartOfAccount.doc");
+                return File(client.DownloadData(reportURL), "application/msword", "ISSChartOfAccount.doc");
             }
 
             return View();

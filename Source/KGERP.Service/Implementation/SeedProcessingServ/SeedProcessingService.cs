@@ -184,7 +184,7 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
                                       join t5 in _db.HeadGLs on t1.HeadGLId equals t5.Id into HeadLeft
                                       from t6 in HeadLeft.DefaultIfEmpty()
                                       join t3 in _db.Employees on t1.SeedProcessBy.ToLower() equals t3.EmployeeId into EmpLeft
-                                      where t1.IsActive
+                                      where t1.IsActive && t1.CompanyId==companyId
                                       from t4 in EmpLeft.DefaultIfEmpty()
 
                                       select new SeedProcessingDetailsVM
