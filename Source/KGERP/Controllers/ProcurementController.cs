@@ -938,6 +938,8 @@ namespace KG.App.Controllers
             vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
             vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownList(companyId), "Value", "Text");
             vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
+            vmSalesOrderSlave.PromoOfferList = new SelectList(_service.PromtionalOffersDropDownList(companyId), "Value", "Text");
+
 
             return View(vmSalesOrderSlave);
         }
@@ -953,6 +955,10 @@ namespace KG.App.Controllers
 
                 }
                 await _service.OrderDetailAdd(vmSalesOrderSlave);
+            }
+            if (vmSalesOrderSlave.PromotionalOfferId > 0)
+            {
+                await _service.PromtionalOfferIntegration(vmSalesOrderSlave);
             }
             else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
             {
@@ -2185,6 +2191,36 @@ namespace KG.App.Controllers
             return RedirectToAction(nameof(PromtionalOfferDetail), new { companyId = vmPromtionalOfferDetail.CompanyId, promtionalOfferId = vmPromtionalOfferDetail.PromtionalOfferId });
         }
 
+
+        [HttpGet]
+        public async Task<ActionResult> PromotionalOfferDetailList(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+
+            VMPromtionalOffer vmPurchaseOrder = new VMPromtionalOffer();
+            vmPurchaseOrder = await _service.PromtionalOfferListGet(companyId, fromDate, toDate);
+            vmPurchaseOrder.CompanyId = companyId;
+            vmPurchaseOrder.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            vmPurchaseOrder.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+             vmPurchaseOrder.UserId = System.Web.HttpContext.Current.User.Identity.Name;
+            return View(vmPurchaseOrder);
+        }
+        [HttpPost]
+
+        public async Task<ActionResult> PromtionalOfferDetailList(VMPurchaseOrder vmPurchaseOrder)
+        {
+            if (vmPurchaseOrder.CompanyId > 0)
+            {
+                Session["CompanyId"] = vmPurchaseOrder.CompanyId;
+            }
+            vmPurchaseOrder.FromDate = Convert.ToDateTime(vmPurchaseOrder.StrFromDate);
+            vmPurchaseOrder.ToDate = Convert.ToDateTime(vmPurchaseOrder.StrToDate);
+
+            return RedirectToAction(nameof(PackagingPurchaseOrderList), new { companyId = vmPurchaseOrder.CompanyId, fromDate = vmPurchaseOrder.FromDate, toDate = vmPurchaseOrder.ToDate, vStatus = vmPurchaseOrder.Status });
+        }
 
 
 

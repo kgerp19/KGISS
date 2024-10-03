@@ -255,6 +255,9 @@ namespace KGERP.Services.Procurement
         public System.DateTime ToDate { get; set; }
         public int CompanyId { get; set; }
         public int PromtionType { get; set; }
+        public string StrFromDate { get; set; }
+        public string StrToDate { get; set; }
+        public IEnumerable<VMPromtionalOffer> DataList { get; set; }
 
         public PromotionTypeEnum PromotionType { get { return (PromotionTypeEnum)this.PromtionType; } }
         public string PromotionTypeName { get { return BaseFunctionalities.GetEnumDescription(PromotionType); } }

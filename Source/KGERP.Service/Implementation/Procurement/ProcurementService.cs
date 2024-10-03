@@ -2490,6 +2490,34 @@ namespace KGERP.Services.Procurement
 
 
 
+        public async Task<VMPromtionalOffer> PromtionalOfferListGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            VMPromtionalOffer vmPromtionalOffer = new VMPromtionalOffer();
+            vmPromtionalOffer.DataList = await Task.Run(() => (from t1 in _db.PromtionalOffers.Where(x => x.IsActive && x.CompanyId == companyId && ((x.FromDate >= fromDate) && (x.FromDate <= toDate)) )
+
+                                                            select new VMPromtionalOffer
+                                                            {
+                                                                CompanyId = t1.CompanyId,
+                                                                CreatedBy = t1.CreatedBy,
+                                                                CreatedDate = t1.CreatedDate,
+                                                                FromDate = t1.FromDate,
+                                                                ModifiedBy = t1.ModifiedBy,
+                                                                ModifiedDate = t1.ModifiedDate,
+                                                                PromoCode = t1.PromoCode,
+                                                                PromtionalOfferId = t1.PromtionalOfferId,
+                                                                PromtionType = t1.PromtionType,
+                                                                
+                                                                ToDate = t1.ToDate
+
+
+                                                            }).OrderByDescending(c => c.PromtionalOfferId).AsEnumerable());
+             
+             
+
+            return vmPromtionalOffer;
+        }
+
+
         public async Task<VMPurchaseOrderSlave> ProcurementPurchaseOrderSlaveOpeningBalanceGet(int companyId)
         {
             VMPurchaseOrderSlave vmPurchaseOrderSlave = new VMPurchaseOrderSlave();
@@ -3149,6 +3177,7 @@ namespace KGERP.Services.Procurement
                                                                         PackSize = t3.PackSize,
                                                                         TotalAmount = t1.Qty * t1.UnitPrice,
                                                                         QtyInPack = t3.FormulaQty,
+                                                                        PromotionalOfferId = t1.PromotionalOfferId,
 
                                                                         FProductId = t3.ProductId,
 
