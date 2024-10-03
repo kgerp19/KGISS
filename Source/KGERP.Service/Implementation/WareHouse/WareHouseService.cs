@@ -386,14 +386,14 @@ namespace KGERP.Services.WareHouse
             //    IsActive = true,
             //};
 
-            var vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", vmSaleReturnDetail.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
+            var vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", vmSaleReturnDetail.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
             SaleReturnDetail saleReturnDetail = new SaleReturnDetail
             {
                 SaleReturnId = vmSaleReturnDetail.SaleReturnId,
                 ProductId = vmSaleReturnDetail.ProductId,
                 Qty = vmSaleReturnDetail.Qty,
-                COGSRate = vMProductStock.CostingPrice,
-                Rate = 0,
+                COGSRate = vMProductStock.ClosingRate,
+                Rate = vmSaleReturnDetail.Rate,
                 OrderDeliverDetailsId = vmSaleReturnDetail.OrderDeliverDetailsId,
 
                 BaseCommission = vmSaleReturnDetail.DiscountUnit,
@@ -2927,8 +2927,8 @@ namespace KGERP.Services.WareHouse
                                                                       select new VMSaleReturnDetail
                                                                       {
                                                                           
-                                                                          AccountingIncomeHeadId = t2.CompanyId == (int)CompanyName.KrishibidSeedLimited ? t7.AccountingIncomeHeadId : t6.AccountingIncomeHeadId,
-                                                                          AccountingHeadId = t2.CompanyId == (int)CompanyName.KrishibidSeedLimited ? t7.AccountingHeadId : t6.AccountingHeadId,
+                                                                          AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
+                                                                          AccountingHeadId = t7.AccountingHeadId,
                                                                           SaleReturnDetailId = t1.SaleReturnDetailId,
                                                                           Qty = t1.Qty,
                                                                           ProductId = t1.ProductId,
