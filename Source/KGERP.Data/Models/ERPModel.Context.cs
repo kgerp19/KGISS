@@ -161,7 +161,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_MobileBillDetail> PRoll_MobileBillDetail { get; set; }
         public virtual DbSet<PRoll_PaymentPurpose> PRoll_PaymentPurpose { get; set; }
         public virtual DbSet<PromotionType> PromotionTypes { get; set; }
-        public virtual DbSet<PromtionalOffer> PromtionalOffers { get; set; }
         public virtual DbSet<PromtionalOfferDetail> PromtionalOfferDetails { get; set; }
         public virtual DbSet<RealEstateReturn> RealEstateReturns { get; set; }
         public virtual DbSet<Region> Regions { get; set; }
@@ -361,6 +360,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<UrlInfo> UrlInfoes { get; set; }
         public virtual DbSet<Upazila> Upazilas { get; set; }
         public virtual DbSet<Vendor> Vendors { get; set; }
+        public virtual DbSet<PromtionalOffer> PromtionalOffers { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
