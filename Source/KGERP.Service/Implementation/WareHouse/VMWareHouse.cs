@@ -564,7 +564,7 @@ namespace KGERP.Services.WareHouse
         public double? PackSize { get; set; }
         public string ProductSubCategory { get; set; }
         public string ProductCategory { get; set; }
-
+        public int? PromotionalOfferId { get; set; }
         public string ProductName { get; set; }
         public string UnitName { get; set; }
         public string CompanyPhone { get; set; }

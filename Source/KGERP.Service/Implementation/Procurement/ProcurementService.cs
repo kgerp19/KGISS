@@ -1513,6 +1513,26 @@ namespace KGERP.Services.Procurement
             return result;
         }
 
+        public async Task<int> PromtionalOfferDetailUpdate(VMPromtionalOfferDetail vmPromtionalOfferDetail)
+        {
+            int result = -1;
+            PromtionalOfferDetail promtionalOfferDetail = await _db.PromtionalOfferDetails.FindAsync(vmPromtionalOfferDetail.PromtionalOfferDetailId);
+
+            promtionalOfferDetail.ProductId = vmPromtionalOfferDetail.ProductId;
+            promtionalOfferDetail.PromtionalOfferId = vmPromtionalOfferDetail.PromtionalOfferId;
+            promtionalOfferDetail.PromoAmount = vmPromtionalOfferDetail.PromoAmount;
+            promtionalOfferDetail.PromoQuantity = vmPromtionalOfferDetail.PromoQuantity;
+            promtionalOfferDetail.CreatedBy = Common.GetUserId();
+            promtionalOfferDetail.CreatedDate = DateTime.Now;
+
+            _db.Entry(promtionalOfferDetail).State = EntityState.Modified;
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = promtionalOfferDetail.PromtionalOfferDetailId;
+            }
+            return result;
+        }
+
         public async Task<long> ProcurementPurchaseOrderOpeningAdd(VMPurchaseOrderSlave vmPurchaseOrderSlave)
         {
             long result = -1;
@@ -2147,6 +2167,10 @@ namespace KGERP.Services.Procurement
         public async Task<VMPurchaseOrderSlave> ProcurementPurchaseOrderSlaveGet(int companyId, int purchaseOrderId)
         {
             VMPurchaseOrderSlave vmPurchaseOrderSlave = new VMPurchaseOrderSlave();
+            if (companyId <= 0 || purchaseOrderId <= 0)
+            {
+                return vmPurchaseOrderSlave;
+            }
             vmPurchaseOrderSlave = await Task.Run(() => (from t1 in _db.PurchaseOrders.Where(x => x.IsActive && x.PurchaseOrderId == purchaseOrderId && x.CompanyId == companyId)
                                                          join t2 in _db.Vendors on t1.SupplierId equals t2.VendorId
                                                          join t3 in _db.Companies on t1.CompanyId equals t3.CompanyId
@@ -2457,8 +2481,9 @@ namespace KGERP.Services.Procurement
                                                                 PromoCode = t1.PromoCode,
                                                                 PromtionalOfferId = t1.PromtionalOfferId,
                                                                 PromtionType = t1.PromtionType,
-                                                                ToDate = t1.ToDate
-
+                                                                ToDate = t1.ToDate,
+                                                                IsSumitted=t1.IsSubmitted
+                                                                
 
                                                             }).FirstOrDefault());
 
@@ -2490,31 +2515,34 @@ namespace KGERP.Services.Procurement
 
 
 
-        public async Task<VMPromtionalOffer> PromtionalOfferListGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        public async Task<VMPromtionalOffer> GetPromotionalOfferListAsync(int companyId, DateTime? fromDate, DateTime? toDate)
         {
-            VMPromtionalOffer vmPromtionalOffer = new VMPromtionalOffer();
-            vmPromtionalOffer.DataList = await Task.Run(() => (from t1 in _db.PromtionalOffers.Where(x => x.IsActive && x.CompanyId == companyId && ((x.FromDate >= fromDate) && (x.FromDate <= toDate)) )
+            var vmPromotionalOffer = new VMPromtionalOffer
+            {
+                DataList = await _db.PromtionalOffers
+                    .Where(x => x.IsActive
+                                 && x.CompanyId == companyId
+                                 && (!fromDate.HasValue || x.FromDate >= fromDate.Value)
+                                || (!toDate.HasValue || x.ToDate <= toDate.Value))
+                    .Select(t1 => new VMPromtionalOffer
+                    {
+                        CompanyId = t1.CompanyId,
+                        CreatedBy = t1.CreatedBy,
+                        CreatedDate = t1.CreatedDate,
+                        FromDate = t1.FromDate,
+                        ModifiedBy = t1.ModifiedBy,
+                        ModifiedDate = t1.ModifiedDate,
+                        PromoCode = t1.PromoCode,
+                        PromtionalOfferId = t1.PromtionalOfferId,
+                        PromtionType = t1.PromtionType,
+                        IsSumitted = t1.IsSubmitted,
+                        ToDate = t1.ToDate
+                    })
+                    .OrderByDescending(c => c.PromtionalOfferId)
+                    .ToListAsync() // Use ToListAsync for better performance  
+            };
 
-                                                            select new VMPromtionalOffer
-                                                            {
-                                                                CompanyId = t1.CompanyId,
-                                                                CreatedBy = t1.CreatedBy,
-                                                                CreatedDate = t1.CreatedDate,
-                                                                FromDate = t1.FromDate,
-                                                                ModifiedBy = t1.ModifiedBy,
-                                                                ModifiedDate = t1.ModifiedDate,
-                                                                PromoCode = t1.PromoCode,
-                                                                PromtionalOfferId = t1.PromtionalOfferId,
-                                                                PromtionType = t1.PromtionType,
-                                                                
-                                                                ToDate = t1.ToDate
-
-
-                                                            }).OrderByDescending(c => c.PromtionalOfferId).AsEnumerable());
-             
-             
-
-            return vmPromtionalOffer;
+            return vmPromotionalOffer;
         }
 
 
@@ -2753,6 +2781,77 @@ namespace KGERP.Services.Procurement
         }
 
         #endregion
+
+
+        public async Task<int> PromtionalOfferDetailsDelete(int id)
+        {
+            int result = -1;
+            PromtionalOfferDetail promtionalOfferDetails = await _db.PromtionalOfferDetails.FindAsync(id);
+            if (promtionalOfferDetails != null)
+            {
+                promtionalOfferDetails.IsActive = false;
+                promtionalOfferDetails.ModifiedBy = Common.GetUserId();
+                promtionalOfferDetails.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = promtionalOfferDetails.PromtionalOfferId;
+                }
+            }
+            return result;
+        }
+
+        public async Task<int> PromtionalOfferEdit(int offerId,string offerCode,DateTime fromDate,DateTime toDate)
+        {
+            int result = -1;
+            PromtionalOffer promtionalOfferModel = await _db.PromtionalOffers.FindAsync(offerId);
+            if (promtionalOfferModel != null)
+            {
+                promtionalOfferModel.PromoCode = offerCode;
+                promtionalOfferModel.FromDate = fromDate;
+                promtionalOfferModel.ToDate = toDate;
+                _db.Entry(promtionalOfferModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = promtionalOfferModel.PromtionalOfferId;
+                }
+            }
+            return result;
+        }
+
+        public async Task<int> PromtionalOfferDetailsSubmited(int promtionalOfferId)
+        {
+            int result = -1;
+            PromtionalOffer PromtionalOfferModel = await _db.PromtionalOffers.FindAsync(promtionalOfferId);
+            if (PromtionalOfferModel != null)
+            {
+                PromtionalOfferModel.IsSubmitted = true;
+                PromtionalOfferModel.ModifiedBy = Common.GetUserId();
+                PromtionalOfferModel.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = PromtionalOfferModel.PromtionalOfferId;
+                }
+            }
+            return result;
+        }
+
+        public async Task<int> PromtionalOfferDelete(int promtionalOfferId)
+        {
+            int result = -1;
+            PromtionalOffer PromtionalOfferModel = await _db.PromtionalOffers.FindAsync(promtionalOfferId);
+            if (PromtionalOfferModel != null)
+            {
+                PromtionalOfferModel.IsActive = false;
+                PromtionalOfferModel.ModifiedBy = Common.GetUserId();
+                PromtionalOfferModel.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = PromtionalOfferModel.PromtionalOfferId;
+                }
+            }
+            return result;
+        }
+
 
         public async Task<List<VMCommonCustomer>> CustomerLisBySubZonetGet(int subZoneId)
         {

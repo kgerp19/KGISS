@@ -549,6 +549,8 @@ namespace KG.App.Controllers
             return RedirectToAction(nameof(ProcurementPurchaseOrderSlave), new { companyId = vmPurchaseOrderSlave.CompanyFK, purchaseOrderId = vmPurchaseOrderSlave.PurchaseOrderId });
         }
 
+        
+
         public JsonResult GetTermNCondition(int id)
         {
             if (id != 0)
@@ -2183,12 +2185,38 @@ namespace KG.App.Controllers
                 }
                 await _service.PromtionalOfferDetailAdd(vmPromtionalOfferDetail);
             }
-            //else if (vmPurchaseOrderSlave.ActionEum == ActionEnum.Edit)
-            //{
-            //    //Delete
-            //    await _service.ProcurementPurchaseOrderSlaveEdit(vmPurchaseOrderSlave);
-            //}
+            else if (vmPromtionalOfferDetail.ActionEum == ActionEnum.Edit)
+            {
+                await _service.PromtionalOfferDetailUpdate(vmPromtionalOfferDetail);
+            }
             return RedirectToAction(nameof(PromtionalOfferDetail), new { companyId = vmPromtionalOfferDetail.CompanyId, promtionalOfferId = vmPromtionalOfferDetail.PromtionalOfferId });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PromtionalOfferDetailsDelete(VMPromtionalOfferDetail vMPromtionalOffer)
+        {
+            if (vMPromtionalOffer.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                vMPromtionalOffer.PromtionalOfferId = await _service.PromtionalOfferDetailsDelete(vMPromtionalOffer.PromtionalOfferDetailId);
+
+            }
+            return RedirectToAction(nameof(PromtionalOfferDetail), new { companyId = vMPromtionalOffer.CompanyFK, promtionalOfferId = vMPromtionalOffer.PromtionalOfferId });
+        }
+        
+        [HttpPost]
+        public async Task<ActionResult> PromtionalOfferEdit(VMPromtionalOffer vMPromtionalOffer)
+        {
+
+            vMPromtionalOffer.PromtionalOfferId = await _service.PromtionalOfferEdit(vMPromtionalOffer.PromtionalOfferId, vMPromtionalOffer.PromoCode, vMPromtionalOffer.FromDate, vMPromtionalOffer.ToDate);
+            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId = vMPromtionalOffer.CompanyId});
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PromtionalOfferDetailsSubmited(VMPromtionalOfferDetail vMPromtionalOffer)
+        {
+            vMPromtionalOffer.PromtionalOfferId = await _service.PromtionalOfferDetailsSubmited(vMPromtionalOffer.PromtionalOfferId);
+            return RedirectToAction(nameof(PromtionalOfferDetail), new { companyId = vMPromtionalOffer.CompanyId, promtionalOfferId = vMPromtionalOffer.PromtionalOfferId });
         }
 
 
@@ -2201,16 +2229,29 @@ namespace KG.App.Controllers
 
 
             VMPromtionalOffer vmPurchaseOrder = new VMPromtionalOffer();
-            vmPurchaseOrder = await _service.PromtionalOfferListGet(companyId, fromDate, toDate);
+            vmPurchaseOrder = await _service.GetPromotionalOfferListAsync(companyId, fromDate, toDate);
             vmPurchaseOrder.CompanyId = companyId;
             vmPurchaseOrder.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
             vmPurchaseOrder.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
              vmPurchaseOrder.UserId = System.Web.HttpContext.Current.User.Identity.Name;
             return View(vmPurchaseOrder);
         }
+
+        [HttpPost]
+        public ActionResult PromotionalOfferDetailList(int CompanyId,DateTime StrFromDate,DateTime StrToDate)
+        {
+            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId=CompanyId,fromDate= StrFromDate, toDate= StrToDate } );
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PromtionalOfferDelete(VMPromtionalOffer vMPromtionalOffer)
+        {
+            vMPromtionalOffer.PromtionalOfferId = await _service.PromtionalOfferDelete(vMPromtionalOffer.PromtionalOfferId);
+            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId = vMPromtionalOffer.CompanyId });
+        }
         [HttpPost]
 
-        public async Task<ActionResult> PromtionalOfferDetailList(VMPurchaseOrder vmPurchaseOrder)
+        public ActionResult PromtionalOfferDetailList(VMPurchaseOrder vmPurchaseOrder)
         {
             if (vmPurchaseOrder.CompanyId > 0)
             {

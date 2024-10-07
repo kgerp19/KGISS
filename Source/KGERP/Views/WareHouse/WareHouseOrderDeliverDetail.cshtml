@@ -10,7 +10,7 @@
 
     decimal TotalUnitDiscount = 0;
     double TotalGrossAmount = 0;
-    
+
     decimal? TotalSpetialDiscount = 0;
 
 }
@@ -324,7 +324,7 @@
                                                 <th class="center">Unit Price</th>
 
                                                 <th style="padding:5px;text-align:center;"> Unit Discount</th>
-                                                
+
                                                 <th style="padding:5px;text-align:center;">Special Discount</th>
                                                 <th class="center">Total Price</th>
                                                 <th class="center">Action</th>
@@ -337,72 +337,73 @@
                                             @foreach (var item in Model.DataListDetail)
                                             {
                                                 decimal unitDiscount = Convert.ToDecimal(item.DeliveredQty) * item.DiscountUnit;
-                                                 
+
 
                                                 TotalGrossAmount += item.DeliveredQty * item.UnitPrice;
                                                 TotalUnitDiscount += unitDiscount;
-                                             
-                                                TotalSpetialDiscount += item.SpecialDiscount??0;
-                                                TotalAmount += Convert.ToDecimal(item.DeliveredQty * item.UnitPrice) - (unitDiscount + item.SpecialDiscount??0);
 
+                                                TotalSpetialDiscount += item.SpecialDiscount ?? 0;
+                                                TotalAmount += Convert.ToDecimal(item.DeliveredQty * item.UnitPrice) - (unitDiscount + item.SpecialDiscount ?? 0);
 
-                                            <tr>
-                                                <td>@(++sl)</td>
-                                                <td>@item.ProductSubCategory @item.ProductName</td>
-                                                <td>@item.OrderQty @item.UnitName</td>
-                                                <th>@item.DeliveredQty @item.UnitName</th>
-                                                <td>@item.PackSize</td>
-                                                <td>
-                                                    @{
-                                                        var totalGm = item.DeliveredQty * item.PackSize;
-                                                        double divisor = 1000;
+                                                var OfferBtn = item.PromotionalOfferId != null ? $"<a target=\"_blank\" href=\"{Url.Action("PromtionalOfferDetail", "Procurement", new { companyId = Model.CompanyFK, promtionalOfferId = item.PromotionalOfferId })}\" class='btn btn-danger btn-xs'>Promotion Item</a>" :string.Empty;
 
-                                                        if (totalGm < divisor)
-                                                        {
-                                                            <span>
-                                                                @totalGm gm
-                                                            </span>
-                                                        }
-                                                        else
-                                                        {
-                                                            double dividend = totalGm ?? 0;
-                                                            double remainder = dividend % divisor;
-                                                            if (remainder == 0)
+                                                <tr>
+                                                    <td>@(++sl)</td>
+                                                    <td>@item.ProductSubCategory @item.ProductName @Html.Raw(OfferBtn) </td>
+                                                    <td>@item.OrderQty @item.UnitName</td>
+                                                    <th>@item.DeliveredQty @item.UnitName</th>
+                                                    <td>@item.PackSize</td>
+                                                    <td>
+                                                        @{
+                                                            var totalGm = item.DeliveredQty * item.PackSize;
+                                                            double divisor = 1000;
+
+                                                            if (totalGm < divisor)
                                                             {
-                                                                totalGm = totalGm / divisor;
                                                                 <span>
-                                                                    @totalGm KG
+                                                                    @totalGm gm
                                                                 </span>
                                                             }
                                                             else
                                                             {
-                                                                totalGm = (totalGm - remainder) / divisor;
-                                                                <span>
-                                                                    @totalGm KG @remainder gm
-                                                                </span>
+                                                                double dividend = totalGm ?? 0;
+                                                                double remainder = dividend % divisor;
+                                                                if (remainder == 0)
+                                                                {
+                                                                    totalGm = totalGm / divisor;
+                                                                    <span>
+                                                                        @totalGm KG
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    totalGm = (totalGm - remainder) / divisor;
+                                                                    <span>
+                                                                        @totalGm KG @remainder gm
+                                                                    </span>
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                </td>
-                                                <td>@String.Format("{0:0.00}", item.FormulaQty)</td>
-                                                <td>@String.Format("{0:0.00}", item.UnitPrice)</td>
-
-
-
-                                                <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", unitDiscount) (@String.Format("{0:0.00}", item.DiscountUnit))</td>
-                                                <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.SpecialDiscount)</td>
-
-
-                                                <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Amount)</td>
-                                                @if (!Model.IsSubmitted)
-                                                {
-                                                    <td class="text-center">
-                                                        <button class="btn btn-primary btn-sm" type="button" onclick="UpdateOrderDeliveryDetails('@item.OrderDeliverDetailId','@item.DeliveredQty');">Update</button>
-                                                        &nbsp;
-                                                        <button class="btn btn-danger btn-sm" type="button" onclick="DeleteOrderDeliveryDetails('@item.OrderDeliverDetailId');">Delete</button>
                                                     </td>
-                                                }
-                                            </tr>
+                                                    <td>@String.Format("{0:0.00}", item.FormulaQty)</td>
+                                                    <td>@String.Format("{0:0.00}", item.UnitPrice)</td>
+
+
+
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", unitDiscount) (@String.Format("{0:0.00}", item.DiscountUnit))</td>
+                                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.SpecialDiscount)</td>
+
+
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Amount)</td>
+                                                    @if (!Model.IsSubmitted)
+                                                    {
+                                                        <td class="text-center">
+                                                            <button class="btn btn-primary btn-sm" type="button" onclick="UpdateOrderDeliveryDetails('@item.OrderDeliverDetailId','@item.DeliveredQty');">Update</button>
+                                                            &nbsp;
+                                                            <button class="btn btn-danger btn-sm" type="button" onclick="DeleteOrderDeliveryDetails('@item.OrderDeliverDetailId');">Delete</button>
+                                                        </td>
+                                                    }
+                                                </tr>
                                             }
                                         </tbody>
                                         <tfoot>
@@ -441,7 +442,7 @@
 
                                             </tr>
 
-                                           
+
                                             <tr>
                                                 <td></td>
                                                 <td></td>
@@ -630,9 +631,12 @@
 
 }
 
+
+
 @section scripts {
 
     <script type="text/javascript">
+
         const DeleteOrderDeliveryDetails = (orderDeliverDetailId) => {
             $('#hdnOrderDeliverDetailId').val(orderDeliverDetailId);
             $("#OrderDeliverDetailIdDeleteModal").modal('toggle');
