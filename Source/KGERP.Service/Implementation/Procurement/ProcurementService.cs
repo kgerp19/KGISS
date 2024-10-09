@@ -319,16 +319,28 @@ namespace KGERP.Services.Procurement
         }
         public List<object> PromtionalOffersDropDownList(int companyId = 0)
         {
-            var List = new List<object>();
-            _db.PromtionalOffers
-         .Where(x => x.IsActive && x.CompanyId == companyId && DateTime.Now >= x.FromDate && DateTime.Now <= x.ToDate).Select(x => x).ToList()
-        .ForEach(x => List.Add(new
-        {
-            Value = x.PromtionalOfferId,
-            Text = x.PromoCode
-        }));
-            return List;
+            var list = new List<object>();
 
+            var currentDate = DateTime.Now.Date; // Get the current date without time  
+
+            var offers = _db.PromtionalOffers
+                .Where(offer => offer.IsActive == true &&
+                                offer.CompanyId == companyId &&
+                                offer.IsSubmitted == true &&
+                                DbFunctions.TruncateTime(currentDate) >= DbFunctions.TruncateTime(offer.FromDate) && // Compare only dates  
+                                DbFunctions.TruncateTime(currentDate) <= DbFunctions.TruncateTime(offer.ToDate)) // Compare only dates  
+                .Select(offer => new
+                {
+                    Value = offer.PromtionalOfferId,
+                    Text = offer.PromoCode
+                })
+                .ToList();
+
+            foreach (var offer in offers)
+            {
+                list.Add(new { offer.Value, offer.Text });
+            }
+            return list;
         }
 
 
