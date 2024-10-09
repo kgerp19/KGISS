@@ -25,5 +25,6 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> ModifiedDate { get; set; }
         public bool IsActive { get; set; }
         public int PromtionType { get; set; }
+        public bool IsSubmitted { get; set; }
     }
 }

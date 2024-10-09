@@ -243,7 +243,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<UpazilaAssign> UpazilaAssigns { get; set; }
         public virtual DbSet<VendorDeed> VendorDeeds { get; set; }
         public virtual DbSet<VendorType> VendorTypes { get; set; }
-        public virtual DbSet<Zone> Zones { get; set; }
         public virtual DbSet<Attendance_Shadow> Attendance_Shadow { get; set; }
         public virtual DbSet<AttendanceType> AttendanceTypes { get; set; }
         public virtual DbSet<Employee_Audit> Employee_Audit { get; set; }
@@ -361,6 +360,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<UrlInfo> UrlInfoes { get; set; }
         public virtual DbSet<Upazila> Upazilas { get; set; }
         public virtual DbSet<Vendor> Vendors { get; set; }
+        public virtual DbSet<Zone> Zones { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
