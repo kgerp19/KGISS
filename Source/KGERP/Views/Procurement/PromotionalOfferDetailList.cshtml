@@ -1,0 +1,264 @@
+﻿@model KGERP.Services.Procurement.VMPromtionalOffer
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Purchase Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Promotional Offer List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Promotional Offer List</li>
+        <li class="active">
+
+            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/Procurement/PromtionalOfferDetail?companyId=@Model.CompanyId">Add New Promotional Offer</a>
+
+        </li>
+    </ol>
+</section>
+@using (Html.BeginForm("PromotionalOfferDetailList", "Procurement", FormMethod.Post, new { id = "procurementPurchaseOrderListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                        <div class="row">
+
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <hr />
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Promo Code</th>
+
+                                        <th>From Date</th>
+                                        <th>To Date</th>
+                                        <th>Promtion Type</th>
+
+                                        <th>Action</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+                                            <td>
+                                                @item.PromoCode
+
+                                            </td>
+
+                                            <td>@item.FromDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.ToDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.PromotionTypeName</td>
+
+                                            <td>
+                                                @if (item.IsSumitted == false)
+                                                {
+                                                    <a id="@item.PromtionalOfferId" onclick=" makeEditble('@item.PromoCode','@item.FromDate','@item.ToDate','@item.PromtionalOfferId');" class="linkPointer" data-toggle="modal" data-target="#PromtionalOfferEditModal" title="Edit" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i></a>
+
+                                                    <a id="@item.PromtionalOfferId" onclick="makeDeletale(@item.PromtionalOfferId)" class="linkPointer" data-toggle="modal" data-target="#deletePromtionalOfferModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                }
+
+                                                <a href="~/Procurement/PromtionalOfferDetail?companyId=@item.CompanyId&promtionalOfferId=@item.PromtionalOfferId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                            </td>
+
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+}
+@using (Html.BeginForm("PromtionalOfferDelete", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="deletePromtionalOfferModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete Offer</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.PromtionalOfferId, new { id = "hidPromtionalOfferIdDel" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "deleteCompanyFK" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this Offer?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("PromtionalOfferEdit", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="PromtionalOfferEditModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Edit Offer</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.PromtionalOfferId, new { id = "hidPromtionalOfferIdEdit" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "eidtCompanyFK" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Promo Code</label>
+                                @Html.EditorFor(model => model.PromoCode, new { htmlAttributes = new { id = "txtPromoCode", @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.PromoCode, "", new { @class = "text-danger" })
+
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>From Date</label>
+                                <input name="FromDate" type="text"  required="required" class="datePicker form-control" id="txtFromDate" placeholder="From Date">
+                                @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>To Date</label>
+                                <input name="ToDate"  type="text"  required="required" class="datePicker form-control" id="txtToDate" placeholder="To Date">
+                                @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnUpdate" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+             
+        })
+
+
+        function makeDeletale(rowId) {
+
+            $('#hidPromtionalOfferIdDel').val(rowId);
+        }
+
+        function makeEditble(pomoCode, Fdate, Tdate, offerId) {
+            debugger
+            $('#hidPromtionalOfferIdEdit').val(offerId);
+            $('#txtPromoCode').val(pomoCode);
+            $('#txtFromDate').val(Fdate);
+            $('#txtToDate').val(Tdate);
+        }
+        function resetProcurementPurchaseOrderForm() {
+            $('#procurementPurchaseOrderListFormId')[0].reset();
+            $('#ActionId').val(1);
+        }
+    </script>
+}
+

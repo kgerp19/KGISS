@@ -251,10 +251,14 @@ namespace KGERP.Services.Procurement
     {
         public int PromtionalOfferId { get; set; }
         public string PromoCode { get; set; }
-        public System.DateTime FromDate { get; set; }
-        public System.DateTime ToDate { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
         public int CompanyId { get; set; }
         public int PromtionType { get; set; }
+        public string StrFromDate { get; set; }
+        public string StrToDate { get; set; }
+        public bool IsSumitted { get; set; }
+        public IEnumerable<VMPromtionalOffer> DataList { get; set; }
 
         public PromotionTypeEnum PromotionType { get { return (PromotionTypeEnum)this.PromtionType; } }
         public string PromotionTypeName { get { return BaseFunctionalities.GetEnumDescription(PromotionType); } }

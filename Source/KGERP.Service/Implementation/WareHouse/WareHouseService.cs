@@ -4015,7 +4015,7 @@ namespace KGERP.Services.WareHouse
                                                                             SpecialDiscount = t1.SpecialDiscount,
                                                                             AccountingHeadId = t7.AccountingHeadId,
                                                                             AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
-
+                                                                            PromotionalOfferId=t3.PromotionalOfferId,
                                                                             UnitName = t8.Name,
                                                                             UnitPrice = t1.UnitPrice,
                                                                             Amount = t1.DeliveredQty * t1.UnitPrice

@@ -203,7 +203,8 @@ namespace KGERP.Services.WareHouse
         public DateTime ReceivedDate { get; set; }
 
         //for feed material receive view data
-        public string EmployeeName { get; set; } = "";
+        [Required(ErrorMessage = "Employee name is required.")]
+        public string EmployeeName { get; set; }
         public string MaterialReceiveStatus { get; set; }
         public string TruckNo { get; set; } = "";
         public string DriverName { get; set; } = "";
@@ -563,7 +564,7 @@ namespace KGERP.Services.WareHouse
         public double? PackSize { get; set; }
         public string ProductSubCategory { get; set; }
         public string ProductCategory { get; set; }
-
+        public int? PromotionalOfferId { get; set; }
         public string ProductName { get; set; }
         public string UnitName { get; set; }
         public string CompanyPhone { get; set; }
