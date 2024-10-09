@@ -319,6 +319,7 @@ namespace KGERP.Service.Implementation
 
         public EmployeeModel GetEmployee(long id,int companyId)
         {
+
             if (id <= 0)
             {
                 //Employee lastEmployee = context.Employees.OrderByDescending(x => x.Id).FirstOrDefault();
