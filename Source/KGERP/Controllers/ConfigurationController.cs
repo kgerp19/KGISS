@@ -335,7 +335,6 @@ namespace Pos.App.Controllers
         }
 
         #region Common Zone
-
         public async Task<ActionResult> CommonZone(int companyId)
         {
             VMCommonZone vmCommonZone = new VMCommonZone();
