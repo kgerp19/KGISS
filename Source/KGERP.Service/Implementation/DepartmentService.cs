@@ -19,7 +19,7 @@ namespace KGERP.Service.Implementation
 
         public List<SelectModel> GetDepartmentSelectModels()
         {
-            return departmentRepository.Departments.OrderBy(x => x.Name).ToList().Select(x => new SelectModel()
+            return departmentRepository.Departments.Where(a => a.IsActive).OrderBy(x => x.Name).ToList().Select(x => new SelectModel()
             {
                 Text = x.Name.ToString(),
                 Value = x.DepartmentId.ToString()
