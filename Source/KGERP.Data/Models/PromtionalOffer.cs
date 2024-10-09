@@ -18,13 +18,13 @@ namespace KGERP.Data.Models
         public string PromoCode { get; set; }
         public System.DateTime FromDate { get; set; }
         public System.DateTime ToDate { get; set; }
-        public int PromtionType { get; set; }
         public int CompanyId { get; set; }
-        public bool IsSubmitted { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
         public Nullable<System.DateTime> ModifiedDate { get; set; }
         public bool IsActive { get; set; }
+        public int PromtionType { get; set; }
+        public bool IsSubmitted { get; set; }
     }
 }
