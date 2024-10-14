@@ -12,19 +12,18 @@ namespace KGERP.Data.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class PromtionalOffer
+    public partial class Production
     {
-        public int PromtionalOfferId { get; set; }
-        public string PromoCode { get; set; }
-        public System.DateTime FromDate { get; set; }
-        public System.DateTime ToDate { get; set; }
-        public int PromtionType { get; set; }
-        public int CompanyId { get; set; }
-        public bool IsSubmitted { get; set; }
+        public long ProductionId { get; set; }
+        public string ProductionNo { get; set; }
+        public System.DateTime ProductionDate { get; set; }
+        public Nullable<int> CompanyId { get; set; }
+        public string Remarks { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
         public Nullable<System.DateTime> ModifiedDate { get; set; }
         public bool IsActive { get; set; }
+        public bool IsSubmitted { get; set; }
     }
 }

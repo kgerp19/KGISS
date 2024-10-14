@@ -12,15 +12,13 @@ namespace KGERP.Data.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class PromtionalOffer
+    public partial class ProductionItem
     {
-        public int PromtionalOfferId { get; set; }
-        public string PromoCode { get; set; }
-        public System.DateTime FromDate { get; set; }
-        public System.DateTime ToDate { get; set; }
-        public int PromtionType { get; set; }
-        public int CompanyId { get; set; }
-        public bool IsSubmitted { get; set; }
+        public int ProductionItemID { get; set; }
+        public int ProductId { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal CostingPrice { get; set; }
+        public int ProductionId { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }

@@ -3141,6 +3141,51 @@ warning 6002: The table/view 'KGISSDB.dbo.ProcessAttenendance' does not have a p
           <Property Name="ProdReferenceId" Type="int" />
           <Property Name="FactoryExpensesHeadGLId" Type="int" />
         </EntityType>
+        <EntityType Name="Production">
+          <Key>
+            <PropertyRef Name="ProductionId" />
+          </Key>
+          <Property Name="ProductionId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProductionNo" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ProductionDate" Type="datetime" Nullable="false" />
+          <Property Name="CompanyId" Type="int" />
+          <Property Name="Remarks" Type="nvarchar" MaxLength="100" />
+          <Property Name="CreatedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" />
+          <Property Name="ModifiedDate" Type="datetime" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="IsSubmitted" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductionDetail">
+          <Key>
+            <PropertyRef Name="ProductionDetail" />
+          </Key>
+          <Property Name="ProductionDetail" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProductionIdId" Type="int" />
+          <Property Name="ExpensesHeadGLId" Type="int" />
+          <Property Name="CreatedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" />
+          <Property Name="ModifiedDate" Type="datetime" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="COGS" Type="decimal" Precision="18" Scale="3" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductionItem">
+          <Key>
+            <PropertyRef Name="ProductionItemID" />
+          </Key>
+          <Property Name="ProductionItemID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProductId" Type="int" Nullable="false" />
+          <Property Name="Quantity" Type="decimal" Precision="18" Scale="5" Nullable="false" />
+          <Property Name="CostingPrice" Type="decimal" Precision="18" Scale="7" Nullable="false" />
+          <Property Name="ProductionId" Type="int" Nullable="false" />
+          <Property Name="CreatedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" />
+          <Property Name="ModifiedDate" Type="datetime" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
         <EntityType Name="Project">
           <Key>
             <PropertyRef Name="ProjectId" />
@@ -8731,6 +8776,9 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="Prod_Reference" EntityType="Self.Prod_Reference" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Prod_ReferenceSlave" EntityType="Self.Prod_ReferenceSlave" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Prod_ReferenceSlaveConsumption" EntityType="Self.Prod_ReferenceSlaveConsumption" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Production" EntityType="Self.Production" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductionDetail" EntityType="Self.ProductionDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductionItem" EntityType="Self.ProductionItem" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Project" EntityType="Self.Project" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PRoll_Advance" EntityType="Self.PRoll_Advance" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PRoll_AdvanceDetail" EntityType="Self.PRoll_AdvanceDetail" Schema="dbo" store:Type="Tables" />
@@ -9962,7 +10010,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="PRoll_MobileBillDetail" EntityType="ERPModel.PRoll_MobileBillDetail" />
           <EntitySet Name="PRoll_PaymentPurpose" EntityType="ERPModel.PRoll_PaymentPurpose" />
           <EntitySet Name="PromotionTypes" EntityType="ERPModel.PromotionType" />
-          <EntitySet Name="PromtionalOffers" EntityType="ERPModel.PromtionalOffer" />
           <EntitySet Name="PromtionalOfferDetails" EntityType="ERPModel.PromtionalOfferDetail" />
           <EntitySet Name="RealEstateReturns" EntityType="ERPModel.RealEstateReturn" />
           <EntitySet Name="Regions" EntityType="ERPModel.Region" />
@@ -10038,11 +10085,13 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="StockTransferDetails" EntityType="ERPModel.StockTransferDetail" />
           <EntitySet Name="Stores" EntityType="ERPModel.Store" />
           <EntitySet Name="StoreDetails" EntityType="ERPModel.StoreDetail" />
+          <EntitySet Name="SubZones" EntityType="ERPModel.SubZone" />
           <EntitySet Name="TeamInfoes" EntityType="ERPModel.TeamInfo" />
           <EntitySet Name="Units" EntityType="ERPModel.Unit" />
           <EntitySet Name="UpazilaAssigns" EntityType="ERPModel.UpazilaAssign" />
           <EntitySet Name="VendorDeeds" EntityType="ERPModel.VendorDeed" />
           <EntitySet Name="VendorTypes" EntityType="ERPModel.VendorType" />
+          <EntitySet Name="Zones" EntityType="ERPModel.Zone" />
           <EntitySet Name="Attendance_Shadow" EntityType="ERPModel.Attendance_Shadow" />
           <EntitySet Name="AttendanceTypes" EntityType="ERPModel.AttendanceType" />
           <EntitySet Name="Employee_Audit" EntityType="ERPModel.Employee_Audit" />
@@ -10402,6 +10451,10 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_StoreDetail_Store" Association="ERPModel.FK_StoreDetail_Store">
             <End Role="Store" EntitySet="Stores" />
             <End Role="StoreDetail" EntitySet="StoreDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SubZone_Zone" Association="ERPModel.FK_SubZone_Zone">
+            <End Role="Zone" EntitySet="Zones" />
+            <End Role="SubZone" EntitySet="SubZones" />
           </AssociationSet>
           <AssociationSet Name="AspNetUserRoles" Association="ERPModel.AspNetUserRoles">
             <End Role="AspNetRole" EntitySet="AspNetRoles" />
@@ -10864,12 +10917,10 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="Vendor" EntitySet="Vendors" />
             <End Role="VendorOffer" EntitySet="VendorOffers" />
           </AssociationSet>
-          <EntitySet Name="Zones" EntityType="ERPModel.Zone" />
-          <EntitySet Name="SubZones" EntityType="ERPModel.SubZone" />
-          <AssociationSet Name="FK_SubZone_Zone" Association="ERPModel.FK_SubZone_Zone">
-            <End Role="Zone" EntitySet="Zones" />
-            <End Role="SubZone" EntitySet="SubZones" />
-          </AssociationSet>
+          <EntitySet Name="PromtionalOffers" EntityType="ERPModel.PromtionalOffer" />
+          <EntitySet Name="Productions" EntityType="ERPModel.Production" />
+          <EntitySet Name="ProductionDetails" EntityType="ERPModel.ProductionDetail" />
+          <EntitySet Name="ProductionItems" EntityType="ERPModel.ProductionItem" />
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
           <Property Type="Int64" Name="Id" Nullable="false" />
@@ -13549,23 +13600,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="PromotionName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="CompanyId" Type="Int32" Nullable="false" />
         </EntityType>
-        <EntityType Name="PromtionalOffer">
-          <Key>
-            <PropertyRef Name="PromtionalOfferId" />
-          </Key>
-          <Property Name="PromtionalOfferId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="PromoCode" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="FromDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ToDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="CompanyId" Type="Int32" Nullable="false" />
-          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <Property Name="PromtionType" Type="Int32" Nullable="false" />
-          <Property Name="IsSubmitted" Type="Boolean" Nullable="false" />
-        </EntityType>
         <EntityType Name="PromtionalOfferDetail">
           <Key>
             <PropertyRef Name="PromtionalOfferDetailId" />
@@ -15010,6 +15044,29 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="ProductDetails" Relationship="ERPModel.FK_ProductDetails_StoreDetail" FromRole="StoreDetail" ToRole="ProductDetail" />
           <NavigationProperty Name="Store" Relationship="ERPModel.FK_StoreDetail_Store" FromRole="StoreDetail" ToRole="Store" />
         </EntityType>
+        <EntityType Name="SubZone">
+          <Key>
+            <PropertyRef Name="SubZoneId" />
+          </Key>
+          <Property Name="SubZoneId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ZoneId" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="SalesOfficerName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Designation" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MobileOffice" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="MobilePersonal" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="AccountHeadId" Type="Int32" Nullable="false" />
+          <Property Name="SalesOfficerId" Type="Int64" />
+          <NavigationProperty Name="Zone" Relationship="ERPModel.FK_SubZone_Zone" FromRole="SubZone" ToRole="Zone" />
+        </EntityType>
         <EntityType Name="TeamInfo">
           <Key>
             <PropertyRef Name="Id" />
@@ -15090,6 +15147,30 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           </Key>
           <Property Name="VendorTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" Nullable="false" MaxLength="250" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Zone">
+          <Key>
+            <PropertyRef Name="ZoneId" />
+          </Key>
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="ZoneId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Remarks" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="Rate" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="ZoneIncharge" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="ZoneInchargeId" Type="Int64" />
+          <Property Name="Designation" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MobileOffice" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="MobilePersonal" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="HeadGLId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="SubZones" Relationship="ERPModel.FK_SubZone_Zone" FromRole="Zone" ToRole="SubZone" />
         </EntityType>
         <EntityType Name="Attendance_Shadow">
           <Key>
@@ -16350,6 +16431,18 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="StoreDetail">
               <PropertyRef Name="StoreId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SubZone_Zone">
+          <End Type="ERPModel.Zone" Role="Zone" Multiplicity="1" />
+          <End Type="ERPModel.SubZone" Role="SubZone" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Zone">
+              <PropertyRef Name="ZoneId" />
+            </Principal>
+            <Dependent Role="SubZone">
+              <PropertyRef Name="ZoneId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -19953,65 +20046,68 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="Zone">
+        <EntityType Name="PromtionalOffer">
           <Key>
-            <PropertyRef Name="ZoneId" />
+            <PropertyRef Name="PromtionalOfferId" />
           </Key>
-          <Property Name="CompanyId" Type="Int32" />
-          <Property Name="ZoneId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="Remarks" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
-          <Property Name="Rate" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="CreatedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <Property Name="ZoneIncharge" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
-          <Property Name="ZoneInchargeId" Type="Int64" />
-          <Property Name="Designation" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="MobileOffice" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MobilePersonal" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="HeadGLId" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="SubZones" Relationship="ERPModel.FK_SubZone_Zone" FromRole="Zone" ToRole="SubZone" />
-        </EntityType>
-        <EntityType Name="SubZone">
-          <Key>
-            <PropertyRef Name="SubZoneId" />
-          </Key>
-          <Property Name="SubZoneId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ZoneId" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="CreatedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="PromtionalOfferId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PromoCode" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="FromDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ToDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="PromtionType" Type="Int32" Nullable="false" />
           <Property Name="CompanyId" Type="Int32" Nullable="false" />
-          <Property Name="SalesOfficerName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Designation" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="MobileOffice" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MobilePersonal" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="AccountHeadId" Type="Int32" Nullable="false" />
-          <Property Name="SalesOfficerId" Type="Int64" />
-          <NavigationProperty Name="Zone" Relationship="ERPModel.FK_SubZone_Zone" FromRole="SubZone" ToRole="Zone" />
+          <Property Name="IsSubmitted" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
         </EntityType>
-        <Association Name="FK_SubZone_Zone">
-          <End Type="ERPModel.Zone" Role="Zone" Multiplicity="1" />
-          <End Type="ERPModel.SubZone" Role="SubZone" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Zone">
-              <PropertyRef Name="ZoneId" />
-            </Principal>
-            <Dependent Role="SubZone">
-              <PropertyRef Name="ZoneId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
+        <EntityType Name="Production">
+          <Key>
+            <PropertyRef Name="ProductionId" />
+          </Key>
+          <Property Name="ProductionId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProductionNo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ProductionDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="Remarks" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="IsSubmitted" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductionDetail">
+          <Key>
+            <PropertyRef Name="ProductionDetail1" />
+          </Key>
+          <Property Name="ProductionDetail1" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProductionIdId" Type="Int32" />
+          <Property Name="ExpensesHeadGLId" Type="Int32" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="COGS" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+        </EntityType>
+        <EntityType Name="ProductionItem">
+          <Key>
+            <PropertyRef Name="ProductionItemID" />
+          </Key>
+          <Property Name="ProductionItemID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProductId" Type="Int32" Nullable="false" />
+          <Property Name="Quantity" Type="Decimal" Nullable="false" Precision="18" Scale="5" />
+          <Property Name="CostingPrice" Type="Decimal" Nullable="false" Precision="18" Scale="7" />
+          <Property Name="ProductionId" Type="Int32" Nullable="false" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -22681,24 +22777,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="PromtionalOffers">
-            <EntityTypeMapping TypeName="ERPModel.PromtionalOffer">
-              <MappingFragment StoreEntitySet="PromtionalOffer">
-                <ScalarProperty Name="IsSubmitted" ColumnName="IsSubmitted" />
-                <ScalarProperty Name="PromtionType" ColumnName="PromtionType" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
-                <ScalarProperty Name="ToDate" ColumnName="ToDate" />
-                <ScalarProperty Name="FromDate" ColumnName="FromDate" />
-                <ScalarProperty Name="PromoCode" ColumnName="PromoCode" />
-                <ScalarProperty Name="PromtionalOfferId" ColumnName="PromtionalOfferId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="PromtionalOfferDetails">
             <EntityTypeMapping TypeName="ERPModel.PromtionalOfferDetail">
               <MappingFragment StoreEntitySet="PromtionalOfferDetail">
@@ -24135,6 +24213,29 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="SubZones">
+            <EntityTypeMapping TypeName="ERPModel.SubZone">
+              <MappingFragment StoreEntitySet="SubZone">
+                <ScalarProperty Name="SalesOfficerId" ColumnName="SalesOfficerId" />
+                <ScalarProperty Name="AccountHeadId" ColumnName="AccountHeadId" />
+                <ScalarProperty Name="MobilePersonal" ColumnName="MobilePersonal" />
+                <ScalarProperty Name="MobileOffice" ColumnName="MobileOffice" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Designation" ColumnName="Designation" />
+                <ScalarProperty Name="SalesOfficerName" ColumnName="SalesOfficerName" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
+                <ScalarProperty Name="SubZoneId" ColumnName="SubZoneId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="TeamInfoes">
             <EntityTypeMapping TypeName="ERPModel.TeamInfo">
               <MappingFragment StoreEntitySet="TeamInfo">
@@ -24214,6 +24315,30 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               <MappingFragment StoreEntitySet="VendorType">
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="VendorTypeId" ColumnName="VendorTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Zones">
+            <EntityTypeMapping TypeName="ERPModel.Zone">
+              <MappingFragment StoreEntitySet="Zone">
+                <ScalarProperty Name="HeadGLId" ColumnName="HeadGLId" />
+                <ScalarProperty Name="MobilePersonal" ColumnName="MobilePersonal" />
+                <ScalarProperty Name="MobileOffice" ColumnName="MobileOffice" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Designation" ColumnName="Designation" />
+                <ScalarProperty Name="ZoneInchargeId" ColumnName="ZoneInchargeId" />
+                <ScalarProperty Name="ZoneIncharge" ColumnName="ZoneIncharge" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -26877,50 +27002,69 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Zones">
-            <EntityTypeMapping TypeName="ERPModel.Zone">
-              <MappingFragment StoreEntitySet="Zone">
-                <ScalarProperty Name="HeadGLId" ColumnName="HeadGLId" />
-                <ScalarProperty Name="MobilePersonal" ColumnName="MobilePersonal" />
-                <ScalarProperty Name="MobileOffice" ColumnName="MobileOffice" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="Designation" ColumnName="Designation" />
-                <ScalarProperty Name="ZoneInchargeId" ColumnName="ZoneInchargeId" />
-                <ScalarProperty Name="ZoneIncharge" ColumnName="ZoneIncharge" />
+          <EntitySetMapping Name="PromtionalOffers">
+            <EntityTypeMapping TypeName="ERPModel.PromtionalOffer">
+              <MappingFragment StoreEntitySet="PromtionalOffer">
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="Rate" ColumnName="Rate" />
-                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
-                <ScalarProperty Name="Code" ColumnName="Code" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="IsSubmitted" ColumnName="IsSubmitted" />
                 <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="PromtionType" ColumnName="PromtionType" />
+                <ScalarProperty Name="ToDate" ColumnName="ToDate" />
+                <ScalarProperty Name="FromDate" ColumnName="FromDate" />
+                <ScalarProperty Name="PromoCode" ColumnName="PromoCode" />
+                <ScalarProperty Name="PromtionalOfferId" ColumnName="PromtionalOfferId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="SubZones">
-            <EntityTypeMapping TypeName="ERPModel.SubZone">
-              <MappingFragment StoreEntitySet="SubZone">
-                <ScalarProperty Name="SalesOfficerId" ColumnName="SalesOfficerId" />
-                <ScalarProperty Name="AccountHeadId" ColumnName="AccountHeadId" />
-                <ScalarProperty Name="MobilePersonal" ColumnName="MobilePersonal" />
-                <ScalarProperty Name="MobileOffice" ColumnName="MobileOffice" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="Designation" ColumnName="Designation" />
-                <ScalarProperty Name="SalesOfficerName" ColumnName="SalesOfficerName" />
-                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+          <EntitySetMapping Name="Productions">
+            <EntityTypeMapping TypeName="ERPModel.Production">
+              <MappingFragment StoreEntitySet="Production">
+                <ScalarProperty Name="IsSubmitted" ColumnName="IsSubmitted" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="Code" ColumnName="Code" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
-                <ScalarProperty Name="SubZoneId" ColumnName="SubZoneId" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="ProductionDate" ColumnName="ProductionDate" />
+                <ScalarProperty Name="ProductionNo" ColumnName="ProductionNo" />
+                <ScalarProperty Name="ProductionId" ColumnName="ProductionId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductionDetails">
+            <EntityTypeMapping TypeName="ERPModel.ProductionDetail">
+              <MappingFragment StoreEntitySet="ProductionDetail">
+                <ScalarProperty Name="COGS" ColumnName="COGS" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ExpensesHeadGLId" ColumnName="ExpensesHeadGLId" />
+                <ScalarProperty Name="ProductionIdId" ColumnName="ProductionIdId" />
+                <ScalarProperty Name="ProductionDetail1" ColumnName="ProductionDetail" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductionItems">
+            <EntityTypeMapping TypeName="ERPModel.ProductionItem">
+              <MappingFragment StoreEntitySet="ProductionItem">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ProductionId" ColumnName="ProductionId" />
+                <ScalarProperty Name="CostingPrice" ColumnName="CostingPrice" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="ProductId" ColumnName="ProductId" />
+                <ScalarProperty Name="ProductionItemID" ColumnName="ProductionItemID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
