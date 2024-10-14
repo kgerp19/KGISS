@@ -12,7 +12,6 @@ namespace KGERP.Data.Models
     using System;
     using System.Collections.Generic;
     
-    ///dfdfds
     public partial class Accounting_ChequeInfo
     {
         public Nullable<int> CompanyId { get; set; }

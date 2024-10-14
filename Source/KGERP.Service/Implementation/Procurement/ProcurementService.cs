@@ -804,6 +804,9 @@ namespace KGERP.Services.Procurement
                     result = orderDetails.OrderDetailId;
                 }
             }
+             
+
+
 
 
             return result;
