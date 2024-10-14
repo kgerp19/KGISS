@@ -22,7 +22,7 @@ namespace KGERP.Service.ServiceModel
         public string BankAccountName { get; set; }
 
         public long Id { get; set; }
-        [DisplayName("KG ID")]
+        [DisplayName("Employee ID")]
         public string EmployeeId { get; set; }
         [DisplayName("Manager")]
         public Nullable<long> ManagerId { get; set; }

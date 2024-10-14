@@ -67,6 +67,7 @@ namespace KGERP.Controllers
         {
             EmployeeVm model = new EmployeeVm();
             model = await employeeService.GetEmployees(companyId);
+            model.CompanyId = companyId;
             return View(model);
         }
         
