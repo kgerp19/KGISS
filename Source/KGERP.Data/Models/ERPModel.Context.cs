@@ -161,7 +161,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_MobileBillDetail> PRoll_MobileBillDetail { get; set; }
         public virtual DbSet<PRoll_PaymentPurpose> PRoll_PaymentPurpose { get; set; }
         public virtual DbSet<PromotionType> PromotionTypes { get; set; }
-        public virtual DbSet<PromtionalOffer> PromtionalOffers { get; set; }
         public virtual DbSet<PromtionalOfferDetail> PromtionalOfferDetails { get; set; }
         public virtual DbSet<RealEstateReturn> RealEstateReturns { get; set; }
         public virtual DbSet<Region> Regions { get; set; }
@@ -243,6 +242,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<UpazilaAssign> UpazilaAssigns { get; set; }
         public virtual DbSet<VendorDeed> VendorDeeds { get; set; }
         public virtual DbSet<VendorType> VendorTypes { get; set; }
+        public virtual DbSet<Zone> Zones { get; set; }
         public virtual DbSet<Attendance_Shadow> Attendance_Shadow { get; set; }
         public virtual DbSet<AttendanceType> AttendanceTypes { get; set; }
         public virtual DbSet<Employee_Audit> Employee_Audit { get; set; }
