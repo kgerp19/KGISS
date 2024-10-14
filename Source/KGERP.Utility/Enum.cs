@@ -633,7 +633,9 @@ namespace KGERP.Utility
         SonaliOrganicDairyLimited = 650,
         OrganicPoultryLimited = 651,
         NaturalFishFarmingLimited = 652,
-        KrishibidSafeFood = 648
+        KrishibidSafeFood = 648,
+        UddipanAgroLimited=21,
+        BondhonGeneticsLtd=2
     }
     public enum MonthList
     {

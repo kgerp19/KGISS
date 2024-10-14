@@ -244,55 +244,54 @@ namespace KG.App.Controllers
             return PartialView("_MaterialReceiveDetails", model);
         }
 
-
-
-        public async Task<ActionResult> GCCLProdReferenceSlave(int companyId = 0, int prodReferenceId = 0)
+        public async Task<ActionResult> ProductionReference(int companyId = 0, long productionId = 0)
         {
             VMProdReferenceSlave vmProdReferenceSlave = new VMProdReferenceSlave();
 
-            if (prodReferenceId == 0)
+            if (productionId == 0)
             {
                 vmProdReferenceSlave.CompanyFK = companyId;
 
             }
-            else if (prodReferenceId > 0)
+            else if (productionId > 0)
             {
-                vmProdReferenceSlave = await Task.Run(() => _service.GCCLProdReferenceSlaveGet(companyId, prodReferenceId));
+                vmProdReferenceSlave = await Task.Run(() => _service.ProductionReferenceGet(companyId, productionId));
 
             }
-            if (companyId == (int)CompanyName.GloriousCropCareLimited)
+            if (companyId == (int)CompanyName.BondhonGeneticsLtd)
             {
-
                 vmProdReferenceSlave.FactoryExpensesList = new SelectList(_service.GCCLLCFactoryExpanceHeadGLList(companyId), "Value", "Text");
-                vmProdReferenceSlave.AdvanceHeadList = new SelectList(_service.GCCLAdvanceHeadGLList(companyId), "Value", "Text");
-                //vmProdReferenceSlave.sto = new SelectList(_service.GCCLAdvanceHeadGLList(companyId), "Value", "Text");
-
             }
             return View(vmProdReferenceSlave);
         }
+
+
+
         [HttpPost]
-        public async Task<ActionResult> GCCLProdReferenceSlave(VMProdReferenceSlave vmProdReferenceSlave)
+        public async Task<ActionResult> ProductionReference(VMProdReferenceSlave vmProdReferenceSlave)
         {
 
             if (vmProdReferenceSlave.ActionEum == ActionEnum.Add)
             {
-                if (vmProdReferenceSlave.ProdReferenceId == 0)
+                if (vmProdReferenceSlave.ProductionId == 0)
                 {
-                    vmProdReferenceSlave.ProdReferenceId = await _service.Prod_ReferenceAdd(vmProdReferenceSlave);
+                    vmProdReferenceSlave.ProductionId = await _service.ProductionAdd(vmProdReferenceSlave);
                 }
-                if (vmProdReferenceSlave.RProductId > 0)
-                {
-                    await _service.GCCLProd_ReferenceSlaveConsumptionAdd(vmProdReferenceSlave);
-                }
+                //if (vmProdReferenceSlave.RProductId > 0)
+                //{
+                //    await _service.GCCLProd_ReferenceSlaveConsumptionAdd(vmProdReferenceSlave);
+                //}
                 if (vmProdReferenceSlave.FactoryExpensesHeadGLId > 0)
                 {
-                    await _service.GCCLProdReferenceFactoryExpensesAdd(vmProdReferenceSlave);
+                    await _service.ProductionReferenceExpensesAdd(vmProdReferenceSlave);
                 }
                 if (vmProdReferenceSlave.FProductId > 0)
                 {
-                    await _service.GCCLProdReferenceSlaveAdd(vmProdReferenceSlave);
+                    await _service.ProductionItemAdd(vmProdReferenceSlave);
                 }
             }
+
+
             else if (vmProdReferenceSlave.ActionEum == ActionEnum.Edit)
             {
                 //Delete
@@ -325,10 +324,8 @@ namespace KG.App.Controllers
             else if (vmProdReferenceSlave.ActionEum == ActionEnum.Finalize)
             {
                 await _service.SubmitProdReference(vmProdReferenceSlave);
-
-
             }
-            return RedirectToAction(nameof(GCCLProdReferenceSlave), new { companyId = vmProdReferenceSlave.CompanyFK, prodReferenceId = vmProdReferenceSlave.ProdReferenceId });
+            return RedirectToAction(nameof(ProductionReference), new { companyId = vmProdReferenceSlave.CompanyFK, productionId = vmProdReferenceSlave.ProductionId });
         }
 
         public async Task<ActionResult> KPLProdReference(int companyId = 0, int prodReferenceId = 0,int resultFlg=0)

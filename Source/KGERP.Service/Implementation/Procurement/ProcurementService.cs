@@ -4306,33 +4306,26 @@ namespace KGERP.Services.Procurement
             && !x.IsOpening).Count() + 1;
 
             string poCid = "";
-            if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidSeedLimited)
+            var CompanyInfo = await _db.Companies.FirstOrDefaultAsync(x => x.CompanyId == vmSalesOrderSlave.CompanyFK.Value);
+            string shortName = CompanyInfo.ShortName;
+            if (vmSalesOrderSlave.CompanyFK.Value>0)
             {
-                poCid = @"KSL#" + poMax.ToString();
-            }
-
-            else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.GloriousCropCareLimited)
-            {
-                poCid = @"SI#" + poMax.ToString();
-            }
-            else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidPackagingLimited)
-            {
-                poCid = @"KPL#" + poMax.ToString();
-            }
-            else if (vmSalesOrderSlave.CompanyFK.Value == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                poCid = @"SI#" + poMax.ToString();
+                poCid = shortName+"#"+poMax.ToString();
             }
             else
             {
-                poCid =
-                           @"SO-" +
-                                DateTime.Now.ToString("yy") +
-                                DateTime.Now.ToString("MM") +
-                                DateTime.Now.ToString("dd") + "-" +
-
-                           poMax.ToString();
+                return result;
             }
+            //else
+            //{
+            //    poCid =
+            //               @"SO-" +
+            //                    DateTime.Now.ToString("yy") +
+            //                    DateTime.Now.ToString("MM") +
+            //                    DateTime.Now.ToString("dd") + "-" +
+
+            //               poMax.ToString();
+            //}
 
             OrderMaster orderMaster = new OrderMaster
             {
@@ -4357,9 +4350,6 @@ namespace KGERP.Services.Procurement
                 SalePersonId = vmSalesOrderSlave.SalePersonId,
                 Remarks = vmSalesOrderSlave.Remarks,
                 IsService = vmSalesOrderSlave.IsService,
-
-
-
             };
             _db.OrderMasters.Add(orderMaster);
             if (await _db.SaveChangesAsync() > 0)
