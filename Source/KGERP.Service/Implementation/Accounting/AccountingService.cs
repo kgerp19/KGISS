@@ -2398,21 +2398,21 @@ namespace KGERP.Service.Implementation
             Voucher voucher = await _db.Vouchers.FindAsync(voucherId);
 
 
-            var data = (from t1 in _db.ReportApprovalDetails
-                        join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
-                        where t2.CompanyId == voucher.CompanyId &&
-                              t2.Month == voucher.VoucherDate.Value.Month &&
-                              t2.Year == voucher.VoucherDate.Value.Year &&
-                              t1.ApprovalStatus == 3 && t2.IsActive == true
-                        orderby t1.ReportApprovalDetail1 descending
-                        select new
-                        {
-                            ReportApprovalId = t2.ReportApprovalId,
-                            Month = t2.Month,
-                            Year = t2.Year,
-                            ReportApprovalDetailId = t1.ReportApprovalDetail1,
-                            Status = t1.ApprovalStatus,
-                        }).FirstOrDefault();
+            //var data = (from t1 in _db.ReportApprovalDetails
+            //            join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
+            //            where t2.CompanyId == voucher.CompanyId &&
+            //                  t2.Month == voucher.VoucherDate.Value.Month &&
+            //                  t2.Year == voucher.VoucherDate.Value.Year &&
+            //                  t1.ApprovalStatus == 3 && t2.IsActive == true
+            //            orderby t1.ReportApprovalDetail1 descending
+            //            select new
+            //            {
+            //                ReportApprovalId = t2.ReportApprovalId,
+            //                Month = t2.Month,
+            //                Year = t2.Year,
+            //                ReportApprovalDetailId = t1.ReportApprovalDetail1,
+            //                Status = t1.ApprovalStatus,
+            //            }).FirstOrDefault();
 
 
 
@@ -2456,19 +2456,22 @@ namespace KGERP.Service.Implementation
             voucher.TotalAmount = totalAmount;
 
 
-            if (data == null)
-            {
-                if (await _db.SaveChangesAsync() > 0)
-                {
-                    result = voucher.VoucherId;
 
-                }
-                //int erpSM = await SMSPush(voucher);
-            }
-            else
+
+            if (await _db.SaveChangesAsync() > 0)
             {
-                result = -1;
+                result = voucher.VoucherId;
+
             }
+            //if (data == null)
+            //{
+               
+            //    //int erpSM = await SMSPush(voucher);
+            //}
+            //else
+            //{
+            //    result = -1;
+            //}
 
 
             return result;
