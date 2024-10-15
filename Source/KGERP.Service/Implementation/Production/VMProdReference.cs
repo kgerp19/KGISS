@@ -10,13 +10,21 @@ namespace KGERP.Service.Implementation.Production
     public partial class VMProdReference : BaseVM
     {
         public int ProdReferenceId { get; set; }
+        public long ProductionId { get; set; }
         public int ProdReferenceSlaveID { get; set; }
         public string ManagerReferenceName { get; set; }
         public string ReferenceNo { get; set; }
+        public string ProductionNo { get; set; }
         public string CustomerPONo { get; set; }
         public string OrderMaterNo { get; set; }
         [Required]
         public DateTime ReferenceDate { get; set; }
+        public DateTime ProductionDate { get; set; }
+        [Required]
+        public DateTime ExpensesDate { get; set; }
+
+        [Required]
+        public DateTime ProductionItemDate { get; set; }
         public bool IsSubmitted { get; set; }
         public bool? IsAuthorized { get; set; }
 
@@ -53,6 +61,7 @@ namespace KGERP.Service.Implementation.Production
     public partial class VMProdReferenceSlave : VMProdReference
     {
         public int ProdReferenceSlaveID { get; set; }
+        public long ProductionItemId { get; set; }
         public int FProductId { get; set; }
         public int RProductId { get; set; }
         public decimal RawConsumeQuantity { get; set; }

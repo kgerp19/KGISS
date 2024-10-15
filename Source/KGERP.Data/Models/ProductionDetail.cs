@@ -14,8 +14,8 @@ namespace KGERP.Data.Models
     
     public partial class ProductionDetail
     {
-        public long ProductionDetail1 { get; set; }
-        public Nullable<int> ProductionIdId { get; set; }
+        public long ProductionDetailId { get; set; }
+        public Nullable<long> ProductionId { get; set; }
         public Nullable<int> ExpensesHeadGLId { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }

@@ -189,6 +189,11 @@ namespace KG.App.Controllers
             var model = await _service.GetSingleProdReferenceSlave(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+        public async Task<JsonResult> GetSingleProductionItem(int id)
+        {
+            var model = await _service.GetSingleProductionItem(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<JsonResult> SingleProdReferenceSlaveConsumption(int id)
         {
@@ -198,6 +203,12 @@ namespace KG.App.Controllers
         public async Task<JsonResult> SingleProdReferenceSlaveExpensessConsumption(int id)
         {
             var model = await _service.GetSingleProdReferenceSlaveExpansessConsumption(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<JsonResult> GetSingleProductionDetails(int id)
+        {
+            var model = await _service.GetSingleProductionDetails(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
         public async Task<JsonResult> SingleProdReference(int id)
@@ -244,69 +255,56 @@ namespace KG.App.Controllers
             return PartialView("_MaterialReceiveDetails", model);
         }
 
-
-
-        public async Task<ActionResult> GCCLProdReferenceSlave(int companyId = 0, int prodReferenceId = 0)
+        public async Task<ActionResult> ProductionReference(int companyId = 0, long productionId = 0)
         {
             VMProdReferenceSlave vmProdReferenceSlave = new VMProdReferenceSlave();
 
-            if (prodReferenceId == 0)
+            if (productionId == 0)
             {
                 vmProdReferenceSlave.CompanyFK = companyId;
 
             }
-            else if (prodReferenceId > 0)
+            else if (productionId > 0)
             {
-                vmProdReferenceSlave = await Task.Run(() => _service.GCCLProdReferenceSlaveGet(companyId, prodReferenceId));
+                vmProdReferenceSlave = await Task.Run(() => _service.ProductionReferenceGet(companyId, productionId));
 
             }
-            if (companyId == (int)CompanyName.GloriousCropCareLimited)
-            {
-
-                vmProdReferenceSlave.FactoryExpensesList = new SelectList(_service.GCCLLCFactoryExpanceHeadGLList(companyId), "Value", "Text");
-                vmProdReferenceSlave.AdvanceHeadList = new SelectList(_service.GCCLAdvanceHeadGLList(companyId), "Value", "Text");
-                //vmProdReferenceSlave.sto = new SelectList(_service.GCCLAdvanceHeadGLList(companyId), "Value", "Text");
-
-            }
+            vmProdReferenceSlave.FactoryExpensesList = new SelectList(_service.ISSExpensessHeadGLList(companyId), "Value", "Text");
             return View(vmProdReferenceSlave);
         }
+
+
+
         [HttpPost]
-        public async Task<ActionResult> GCCLProdReferenceSlave(VMProdReferenceSlave vmProdReferenceSlave)
+        public async Task<ActionResult> ProductionReference(VMProdReferenceSlave vmProdReferenceSlave)
         {
 
             if (vmProdReferenceSlave.ActionEum == ActionEnum.Add)
             {
-                if (vmProdReferenceSlave.ProdReferenceId == 0)
+                if (vmProdReferenceSlave.ProductionId == 0)
                 {
-                    vmProdReferenceSlave.ProdReferenceId = await _service.Prod_ReferenceAdd(vmProdReferenceSlave);
-                }
-                if (vmProdReferenceSlave.RProductId > 0)
-                {
-                    await _service.GCCLProd_ReferenceSlaveConsumptionAdd(vmProdReferenceSlave);
+                    vmProdReferenceSlave.ProductionId = await _service.ProductionAdd(vmProdReferenceSlave);
                 }
                 if (vmProdReferenceSlave.FactoryExpensesHeadGLId > 0)
                 {
-                    await _service.GCCLProdReferenceFactoryExpensesAdd(vmProdReferenceSlave);
+                    await _service.ProductionReferenceExpensesAdd(vmProdReferenceSlave);
                 }
                 if (vmProdReferenceSlave.FProductId > 0)
                 {
-                    await _service.GCCLProdReferenceSlaveAdd(vmProdReferenceSlave);
+                    await _service.ProductionItemAdd(vmProdReferenceSlave);
                 }
             }
+
+
             else if (vmProdReferenceSlave.ActionEum == ActionEnum.Edit)
             {
-                //Delete
-                if (vmProdReferenceSlave.RProductId > 0 && vmProdReferenceSlave.ID > 0)
-                {
-                    await _service.ProdReferenceSlaveRawConsumptionEdit(vmProdReferenceSlave);
-                }
                 if (vmProdReferenceSlave.FactoryExpensesHeadGLId > 0 && vmProdReferenceSlave.ID > 0)
                 {
-                    await _service.ProdReferenceSlaveFactoryConsumptionEdit(vmProdReferenceSlave);
+                    await _service.ProductionDetailEdit(vmProdReferenceSlave);
                 }
-                if (vmProdReferenceSlave.FProductId > 0 && vmProdReferenceSlave.ProdReferenceSlaveID > 0)
+                if (vmProdReferenceSlave.FProductId > 0 && vmProdReferenceSlave.ProductionItemId > 0)
                 {
-                    await _service.ProdReferenceSlaveEdit(vmProdReferenceSlave);
+                    await _service.ProductionItemEdit(vmProdReferenceSlave);
                 }                
             }
             else if (vmProdReferenceSlave.ActionEum == ActionEnum.Delete)
@@ -314,21 +312,19 @@ namespace KG.App.Controllers
                 //Delete
                 if (vmProdReferenceSlave.ID > 0)
                 {
-                    await _service.DeleteProdReferenceSlaveConsumption(vmProdReferenceSlave);
+                    await _service.DeleteProductionDetail(vmProdReferenceSlave);
                 }
-                if (vmProdReferenceSlave.ProdReferenceSlaveID > 0)
+                if (vmProdReferenceSlave.ProductionItemId > 0)
                 {
-                    await _service.DeleteProdReferenceSlave(vmProdReferenceSlave);
+                    await _service.DeleteProductionItem(vmProdReferenceSlave);
                 }
 
             }
             else if (vmProdReferenceSlave.ActionEum == ActionEnum.Finalize)
             {
-                await _service.SubmitProdReference(vmProdReferenceSlave);
-
-
+                await _service.SubmitProduction(vmProdReferenceSlave);
             }
-            return RedirectToAction(nameof(GCCLProdReferenceSlave), new { companyId = vmProdReferenceSlave.CompanyFK, prodReferenceId = vmProdReferenceSlave.ProdReferenceId });
+            return RedirectToAction(nameof(ProductionReference), new { companyId = vmProdReferenceSlave.CompanyFK, productionId = vmProdReferenceSlave.ProductionId });
         }
 
         public async Task<ActionResult> KPLProdReference(int companyId = 0, int prodReferenceId = 0,int resultFlg=0)
