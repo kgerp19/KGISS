@@ -19,6 +19,7 @@ namespace KGERP.Data.Models
         public decimal Quantity { get; set; }
         public decimal CostingPrice { get; set; }
         public int ProductionId { get; set; }
+        public Nullable<System.DateTime> ProductionItemDate { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }

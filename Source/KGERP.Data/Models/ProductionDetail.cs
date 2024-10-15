@@ -17,6 +17,7 @@ namespace KGERP.Data.Models
         public long ProductionDetailId { get; set; }
         public Nullable<long> ProductionId { get; set; }
         public Nullable<int> ExpensesHeadGLId { get; set; }
+        public Nullable<System.DateTime> ExpensesDate { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
