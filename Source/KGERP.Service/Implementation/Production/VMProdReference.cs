@@ -20,6 +20,11 @@ namespace KGERP.Service.Implementation.Production
         [Required]
         public DateTime ReferenceDate { get; set; }
         public DateTime ProductionDate { get; set; }
+        [Required]
+        public DateTime ExpensesDate { get; set; }
+
+        [Required]
+        public DateTime ProductionItemDate { get; set; }
         public bool IsSubmitted { get; set; }
         public bool? IsAuthorized { get; set; }
 
@@ -56,6 +61,7 @@ namespace KGERP.Service.Implementation.Production
     public partial class VMProdReferenceSlave : VMProdReference
     {
         public int ProdReferenceSlaveID { get; set; }
+        public long ProductionItemId { get; set; }
         public int FProductId { get; set; }
         public int RProductId { get; set; }
         public decimal RawConsumeQuantity { get; set; }
