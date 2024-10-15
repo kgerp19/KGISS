@@ -270,6 +270,7 @@ namespace KG.App.Controllers
 
             }
             vmProdReferenceSlave.FactoryExpensesList = new SelectList(_service.ISSExpensessHeadGLList(companyId), "Value", "Text");
+            vmProdReferenceSlave.PaymentList = new SelectList(_service.ISSBankOrCashHeadGLList(companyId), "Value", "Text");
             return View(vmProdReferenceSlave);
         }
 
@@ -323,6 +324,11 @@ namespace KG.App.Controllers
             else if (vmProdReferenceSlave.ActionEum == ActionEnum.Finalize)
             {
                 await _service.SubmitProduction(vmProdReferenceSlave);
+            }
+
+            else if (vmProdReferenceSlave.ActionEum == ActionEnum.Voucher)
+            {
+                await _service.ProductionDetailExpensesVoucher(vmProdReferenceSlave);
             }
             return RedirectToAction(nameof(ProductionReference), new { companyId = vmProdReferenceSlave.CompanyFK, productionId = vmProdReferenceSlave.ProductionId });
         }

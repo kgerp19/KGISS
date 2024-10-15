@@ -2872,6 +2872,55 @@ namespace KGERP.Service.Implementation
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             return resultData.VoucherId;
         }
+
+        public async Task<long> AccountingProductionExpencePush(DateTime journalDate, int CompanyFK, VMProdReferenceSlave vmProdReferenceSlave, string title, string description, int journalType)
+        {
+            long result = -1;
+            VMJournalSlave vMJournalSlave = new VMJournalSlave
+            {
+                JournalType = journalType,
+                Title = title,
+                Narration = description,
+                CompanyFK = CompanyFK,
+                Date = journalDate,
+                IsSubmit = true
+            };
+
+            vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+
+            
+
+            #region Production Manager Cr Factory Expenses Dr
+            foreach (var item in vmProdReferenceSlave.DataListSlave)
+            {
+                vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+                {
+                    Particular = item.FactoryExpecsesHeadName,
+                    Debit = Convert.ToDouble(item.FectoryExpensesAmount),
+                    Credit = 0,
+                    Accounting_HeadFK = item.FactoryExpensesHeadGLId.Value
+                });
+            }
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = description,
+                Debit = 0,
+                Credit = vmProdReferenceSlave.DataListSlave.Any() ? Convert.ToDouble(vmProdReferenceSlave.DataListSlave.Sum(x => x.FectoryExpensesAmount)) : 0,
+                Accounting_HeadFK = vmProdReferenceSlave.AdvanceHeadGLId.Value
+            });
+
+
+            #endregion
+
+            var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            if (resultData.VoucherId>0)
+            {
+                var ProductionDetailVoucherStatusUpdate = _db.ProductionDetails.FirstAsync(x => x.ProductionDetailId == vmProdReferenceSlave.ID);
+                
+            }
+            return resultData.VoucherId;
+        }
+
         public async Task<long> AccountiingPurchasePushFeed(int CompanyFK, VMWareHousePOReceivingSlave vmWareHousePOReceivingSlave, int journalType)
         {
             long result = -1;

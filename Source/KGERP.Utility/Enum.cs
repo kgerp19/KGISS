@@ -486,7 +486,8 @@ namespace KGERP.Utility
         UnApprove,
         ReOpen,
         Finalize,
-        Acknowledgement
+        Acknowledgement,
+        Voucher
     }
     public enum Provider
     {

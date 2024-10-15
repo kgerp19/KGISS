@@ -3,7 +3,7 @@
 
 
 @{
-    ViewData["Title"] = "Purchase Order";
+    ViewData["Title"] = "Production Process";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     int sl2 = 0;
@@ -15,12 +15,17 @@
     decimal? totalQuantity = 0;
     decimal? costingPrice = 0;
     decimal? GrossTotal = 0;
-    if (Model.DataListSlave!=null && Model.FinishDataListSlave!=null)
+    if (Model.DataListSlave != null && Model.DataListSlave.Count() > 0)
     {
-        GrossExpensesTotal =Model.DataListSlave.Sum(x => x.FectoryExpensesAmount);
-        totalQuantity =Model.FinishDataListSlave.Sum(x => x.Quantity);
-        costingPrice =GrossExpensesTotal / totalQuantity;
+        GrossExpensesTotal = Model.DataListSlave.Sum(x => x.FectoryExpensesAmount);
+    }
+    if (Model.FinishDataListSlave != null && Model.FinishDataListSlave.Count() > 0)
+    {
+
+        totalQuantity = Model.FinishDataListSlave.Sum(x => x.Quantity);
+        costingPrice = GrossExpensesTotal / totalQuantity;
         GrossTotal = totalQuantity * costingPrice;
+        
     }
 
 
@@ -148,7 +153,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Expenses Date</label>
-                                        <input name="ExpensesDate"  type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" style="width:100%;border:1px black solid" required="required" class="datePicker form-control" id="txtExpensesDate" placeholder="Date" autocomplete="off">
+                                        <input name="ExpensesDate" type="text" value="@DateTime.Today.ToString("yyyy-MM-dd")" style="width:100%;border:1px black solid" required="required" class="datePicker form-control" id="txtExpensesDate" placeholder="Date" autocomplete="off">
                                         @Html.ValidationMessageFor(model => model.ExpensesDate, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
@@ -194,6 +199,7 @@
                                             <tr>
                                                 <th style="padding:5px;text-align:center;">SL</th>
                                                 <th style="padding:5px;text-align:left;">Expenses Head</th>
+                                                <th style="padding:5px;text-align:left;">Expenses Date</th>
 
                                                 <th style="padding:5px;text-align:right;">Amount</th>
 
@@ -201,6 +207,8 @@
                                                 @if (Model.IsSubmitted == false)
                                                 {
                                                     <th style="padding:5px;text-align:center;">Action</th>
+
+                                                    <th style="padding:5px;text-align:center;">Make Voucher</th>
                                                 }
                                             </tr>
                                         </thead>
@@ -210,6 +218,7 @@
                                                 <tr>
                                                     <td style="padding:5px">@(++sl2)</td>
                                                     <td style="padding:5px;text-align:left;">@item.FactoryExpecsesHeadName</td>
+                                                    <td style="padding:5px;text-align:left;">@item.ExpensesDate.ToString("dd-MMM-yyyy")</td>
 
 
                                                     <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.FectoryExpensesAmount)</td>
@@ -218,9 +227,13 @@
                                                     @{ if (Model.IsSubmitted == false)
                                                         {
                                                             <td style="padding:5px;text-align:center;">
-                                                                <a id="@item.ID" onclick=" makeFactortExpensesEditble(@item.ID);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                                <a id="@item.ID" onclick=" makeFactortExpensesEditble(@item.ID);" style="cursor:pointer" class="btn btn-primary btn-xs" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
 
-                                                                <a id="@item.ID" onclick="makeFactoryExDeletale(@item.ID)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                                <a id="@item.ID" onclick="makeFactoryExDeletale(@item.ID)" style="cursor:pointer" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                            </td>
+
+                                                            <td style="padding:5px;text-align:center;">
+                                                                <a id="@item.ID" onclick="makeVoucher(@item.ID)" class="btn btn-danger btn-xs" style="cursor:pointer" data-toggle="modal" data-target="#voucherProductionDetailModal" title="Voucher" data-placement="top"><i class="glyphicon glyphicon-file" aria-hidden="true"></i></a>
                                                             </td>
                                                         }
                                                     }
@@ -233,6 +246,7 @@
                                             <tr>
                                                 <td></td>
                                                 <td><strong>Total Expenses</strong></td>
+                                                <td></td>
                                                 <td style="padding:5px;text-align:right;"><strong>@String.Format("{0:0.00}", GrossExpensesTotal)</strong></td>
 
                                             </tr>
@@ -304,7 +318,7 @@
                         {
                             if (Model.FinishDataListSlave.Any())
                             {
-                                
+
                                 <h4 style="color:indigo;text-decoration:underline;margin-left:1%"># Raw Goods</h4>
                                 <div class="table-responsive col-md-12  text-nowrap">
                                     <table id="KgErpDataTable2" class="table table-striped">
@@ -312,6 +326,7 @@
                                             <tr>
                                                 <th style="padding:5px;text-align:center;">SL</th>
                                                 <th style="padding:5px;text-align:left;">Raw Item</th>
+                                                <th style="padding:5px;text-align:left;">Production Item Date</th>
                                                 <th style="padding:5px;text-align:center;">Production Qty.</th>
 
                                                 <
@@ -330,14 +345,15 @@
                                                 <tr>
                                                     <td style="padding:5px">@(++sl3)</td>
                                                     <td style="padding:5px;text-align:left;">@item.ProductName</td>
+                                                    <td style="padding:5px;text-align:left;">@item.ProductionItemDate.ToString("dd-MMM-yyyy")</td>
 
 
 
                                                     <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.Quantity) @item.UnitName</td>
 
 
-                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.0000}", costingPrice)</td>
-                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Quantity*costingPrice)</td>
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.0000}", item.CostingPrice)</td>
+                                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Quantity * costingPrice)</td>
 
 
                                                     @{ if (Model.IsSubmitted == false)
@@ -357,7 +373,7 @@
                                         <tfoot>
                                             <tr>
                                                 <td></td>
-                                                <td colspan="3"><strong>Total Costing Amount</strong></td>
+                                                <td colspan="4"><strong>Total Costing Amount</strong></td>
                                                 <td style="padding:5px;text-align:right;"><strong>@String.Format("{0:0.00}", GrossTotal)</strong></td>
 
                                             </tr>
@@ -442,7 +458,50 @@
         </div>
     </div>
 }
+@using (Html.BeginForm("ProductionReference", "Production", FormMethod.Post, new { id = "deleteProdReferenceSlaveConsumptionFormId", @class = "formValidator" }))
+{
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="voucherProductionDetailModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Voucher</b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.ID, new { id = "hidVoucherProductionDetailID" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "voucherCompanyFK" })
+                    @Html.HiddenFor(model => model.ProductionId, new { id = "voucherProductionId" })
+                    @Html.HiddenFor(model => model.ActionId, new { id = "voucherActionId" })
 
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Payment Method</label>
+                                @Html.DropDownListFor(model => model.AdvanceHeadGLId, Model.PaymentList as SelectList, "==Select Expanse==", new { id = "ddlPaymentMethod", @class = "searchingDropdown form-control", style = "width:100%;border:1px black solid" })
+                                @Html.ValidationMessageFor(model => model.AdvanceHeadGLId, "", new { @class = "text-danger" })
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Make Voucher</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @using (Html.BeginForm("ProductionReference", "Production", FormMethod.Post, new { id = "deleteProdReferenceSlaveConsumptionFormId", @class = "formValidator" }))
 {
@@ -541,6 +600,14 @@
 
         }
 
+        function makeVoucher(rowId) {
+            $("#hidVoucherProductionDetailID").val(rowId)
+            $('#voucherCompanyFK').val("@Model.CompanyFK");
+            $('#voucherProductionId').val("@Model.ProductionId");
+            $('#voucherActionId').val(12);
+
+        }
+
         function makeFinishItemDeletale(rowId) {
             $("#deleteProductionItemID").val(rowId)
             $('#deleteProdReferenceSlaveCompanyFK').val("@Model.CompanyFK");
@@ -556,6 +623,11 @@
 
         $(document).ready(function () {
             $('.formValidator').bootstrapValidator();
+
+            $('#ddlPaymentMethod').change(() => {
+                let AccHead = $('#ddlPaymentMethod').val();
+                $('#AdvanceHeadGLId').val(AccHead);
+            })
 
             $("#ddlFinalDestinationCountryFk").val(19).change();
 

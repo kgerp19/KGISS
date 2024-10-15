@@ -1,4 +1,5 @@
 ﻿using KGERP.Service.Configuration;
+using KGERP.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -53,9 +54,14 @@ namespace KGERP.Service.Implementation.Production
         public DateTime? JobDate { get; set; }
         public string StrFromDate { get; set; }
         public string StrToDate { get; set; }
-
+        public int PaymentMethod { get; set; }
         public IEnumerable<VMProdReference> DataList { get; set; }
         public SelectList PoList { get; set; } = new SelectList(new List<object>());
+        public SelectList VoucherPaymentMethodList
+        {
+            get { return new SelectList(BaseFunctionalities.GetEnumList<CheckType>(), "Value", "Text"); }
+
+        }
 
     }
     public partial class VMProdReferenceSlave : VMProdReference
@@ -104,6 +110,7 @@ namespace KGERP.Service.Implementation.Production
 
         public int ResultFlg { get; set; }
         public SelectList FactoryExpensesList { get; set; } = new SelectList(new List<object>());
+        public SelectList PaymentList { get; set; } = new SelectList(new List<object>());
         public SelectList AdvanceHeadList { get; set; } = new SelectList(new List<object>());
 
         public List<VMProdReferenceSlaveConsumption> RowProductConsumeList { get; set; }
