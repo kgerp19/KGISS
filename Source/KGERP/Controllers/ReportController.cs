@@ -2565,12 +2565,54 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
+        public ActionResult ProductionReport(int companyId)
+        {
+            Session["CompanyId"] = companyId;
+            ReportCustomModel cm = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+
+                CostCenters = voucherTypeService.GetAccountingCostCenter(companyId)
+            };
+            return View(cm);
+        }
+
+        [HttpGet]
+
         public ActionResult GcclProductionReportView(ReportCustomModel model)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
             model.ReportName = "GCCLProductionReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", model.ReportName + ".doc");
+            }
+            return View();
+        }
+
+        [HttpGet]
+
+        public ActionResult ProductionReportView(ReportCustomModel model)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            model.ReportName = "ISSProductionProcReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -7307,6 +7349,25 @@ namespace KGERP.Controllers
             client.Credentials = nwc;
             model.ReportName = "ISSProdReferenceReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&prodReferenceId={2}&CompanyId={3}", model.ReportName, model.ReportType, prodReferenceId, companyId);
+
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            return View();
+        }
+
+        [HttpGet]
+
+        public ActionResult ProdReferenceReport(int ProductionId, int companyId)
+        {
+            ReportCustomModel model = new ReportCustomModel();
+            model.ReportType = "PDF";
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            model.ReportName = "ISSProductionProcReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&ProductionId={2}&CompanyId={3}", model.ReportName, model.ReportType, ProductionId, companyId);
 
             if (model.ReportType.Equals(ReportType.PDF))
             {

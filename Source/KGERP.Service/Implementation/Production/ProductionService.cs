@@ -135,6 +135,24 @@ namespace KGERP.Services.Production
             return vmProdReference;
         }
 
+        public async Task<VMProdReference> ProductionListGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            VMProdReference vmProdReference = new VMProdReference();
+            vmProdReference.CompanyFK = companyId;
+            vmProdReference.DataList = await Task.Run(() => (from t1 in _db.Productions.Where(x => x.IsActive && x.CompanyId == companyId)
+                                                             where t1.ProductionDate >= fromDate
+                                                             && t1.ProductionDate <= toDate
+                                                             select new VMProdReference
+                                                             {
+                                                                 ProductionId = t1.ProductionId,
+                                                                 ProductionDate = t1.ProductionDate,
+                                                                 ProductionNo = t1.ProductionNo,
+                                                                 CompanyFK = t1.CompanyId,
+                                                                 IsSubmitted = t1.IsSubmitted
+                                                             }).OrderByDescending(x => x.ProductionId).AsEnumerable());
+            return vmProdReference;
+        }
+
         public async Task<VMProdReference> KPLProdReferenceListGet(int companyId, DateTime? fromDate, DateTime? toDate)
         {
             VMProdReference vmProdReference = new VMProdReference();
@@ -922,7 +940,7 @@ namespace KGERP.Services.Production
                 }
 
                 string title = "Integrated Journal- Production Process: " + vmProdReferenceSlave.ReferenceNo + ". Reference Date: " + vmProdReferenceSlave.ReferenceDate.ToShortDateString();
-                string description = "";//"From Raw Materials: " + rawProductNames + ". To Finish Item: " + finishProduct.ProductName;
+                string description = "";
 
 
                 await _accountingService.AccountingProductionPushGCCL(vmProdReferenceSlave.ReferenceDate, vmProdReferenceSlave.CompanyFK.Value, vmProdReferenceSlave, title, description, (int)GCCLJournalEnum.ProductionVoucher);
@@ -962,15 +980,15 @@ namespace KGERP.Services.Production
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = model.ProductionId;
-                    await UpdateCostingPriceProdReferenceSlave(vmProdReferenceSlave);
+                    //await UpdateCostingPriceProdReferenceSlave(vmProdReferenceSlave);
 
                 }
 
-                string title = "Integrated Journal- Production Process: " + vmProdReferenceSlave.ReferenceNo + ". Reference Date: " + vmProdReferenceSlave.ReferenceDate.ToShortDateString();
+                string title = "Production Process: " + vmProdReferenceSlave.ProductionNo + ". Reference Date: " + vmProdReferenceSlave.ProductionDate.ToShortDateString();
                 string description = "";//"From Raw Materials: " + rawProductNames + ". To Finish Item: " + finishProduct.ProductName;
 
 
-                //await _accountingService.AccountingProductionPushGCCL(vmProdReferenceSlave.ReferenceDate, vmProdReferenceSlave.CompanyFK.Value, vmProdReferenceSlave, title, description, (int)GCCLJournalEnum.ProductionVoucher);
+                await _accountingService.AccountingProductionPushISS(vmProdReferenceSlave.ProductionDate, vmProdReferenceSlave.CompanyFK.Value, vmProdReferenceSlave, title, description, (int)GCCLJournalEnum.ProductionVoucher);
 
             }
 
@@ -979,12 +997,32 @@ namespace KGERP.Services.Production
         public async Task<long> ProductionDetailExpensesVoucher(VMProdReferenceSlave vmProdReferenceSlave)
         {
             long result = -1;
+
+            // Store the important ID values before potentially dropping the reference  
             var paymentHeadId = vmProdReferenceSlave.AdvanceHeadGLId;
-            vmProdReferenceSlave = await ProductionReferenceGet(vmProdReferenceSlave.CompanyFK.Value, vmProdReferenceSlave.ProductionId);
+            var productionDetailId = vmProdReferenceSlave.ID;
+
+            // Retrieve production reference data  
+            vmProdReferenceSlave = await ProductionReferenceGet(vmProdReferenceSlave.CompanyFK.Value, vmProdReferenceSlave.ProductionId,vmProdReferenceSlave.ID);
+
+            // Restore the original values  
             vmProdReferenceSlave.AdvanceHeadGLId = paymentHeadId;
-            string title = "Production Process: " + vmProdReferenceSlave.ProductionNo + ". Production Date: " + vmProdReferenceSlave.ProductionDate.ToShortDateString();
+            vmProdReferenceSlave.ID = productionDetailId;
+
+
+            string title = $"Production Process: {vmProdReferenceSlave.ProductionNo}. Production Date: {vmProdReferenceSlave.ProductionDate.ToShortDateString()}";
             string description = "";
-            await _accountingService.AccountingProductionExpencePush(vmProdReferenceSlave.ProductionDate, vmProdReferenceSlave.CompanyFK.Value, vmProdReferenceSlave, title, description, (int)GCCLJournalEnum.ProductionVoucher);
+
+
+            await _accountingService.AccountingProductionExpencePush(
+                vmProdReferenceSlave.ProductionDate,
+                vmProdReferenceSlave.CompanyFK.Value,
+                vmProdReferenceSlave,
+                title,
+                description,
+                (int)GCCLJournalEnum.ProductionVoucher
+            );
+
             return result;
         }
 
@@ -1517,7 +1555,7 @@ namespace KGERP.Services.Production
             return List;
 
         }
-        public async Task<VMProdReferenceSlave> ProductionReferenceGet(int companyId, long productionId)
+        public async Task<VMProdReferenceSlave> ProductionReferenceGet(int companyId, long productionId, long productionDetailsId = 0)
         {
             VMProdReferenceSlave vmProdReferenceSlave = new VMProdReferenceSlave();
             vmProdReferenceSlave = await Task.Run(() => (from t1 in _db.Productions.Where(x => x.IsActive && x.ProductionId == productionId && x.CompanyId == companyId)
@@ -1542,18 +1580,33 @@ namespace KGERP.Services.Production
                                                                                         select st1.Quantity).DefaultIfEmpty(0).Sum(),
 
                                                          }).FirstOrDefault());
-            vmProdReferenceSlave.DataListSlave = await Task.Run(() => (from t1 in _db.ProductionDetails.Where(x => x.IsActive && x.ProductionId == productionId && x.IsActive)
-                                                                       join t3 in _db.HeadGLs on t1.ExpensesHeadGLId equals t3.Id
-                                                                       join t4 in _db.Head5 on t3.ParentId equals t4.Id
-                                                                       select new VMProdReferenceSlave
-                                                                       {
-                                                                           ID = (int)t1.ProductionDetailId,
-                                                                           FactoryExpecsesHeadName = t3.AccCode + " - " + t3.AccName,
-                                                                           ProductionId = t1.ProductionId.Value,
-                                                                           FectoryExpensesAmount = t1.COGS,
-                                                                           FactoryExpensesHeadGLId = t1.ExpensesHeadGLId,
-                                                                           ExpensesDate = t1.ExpensesDate.Value
-                                                                       }).OrderByDescending(x => x.ID).ToListAsync());
+
+
+            var query = _db.ProductionDetails.Where(x => x.IsActive && x.ProductionId == productionId && x.IsActive);
+
+            if (productionDetailsId > 0)
+            {
+                query = query.Where(x => x.ProductionDetailId == productionDetailsId);
+            }
+
+            vmProdReferenceSlave.DataListSlave = await Task.Run(() =>
+                (from t1 in query
+                 join t3 in _db.HeadGLs on t1.ExpensesHeadGLId equals t3.Id
+                 join t4 in _db.Head5 on t3.ParentId equals t4.Id
+                 select new VMProdReferenceSlave
+                 {
+                     ID = (int)t1.ProductionDetailId,
+                     FactoryExpecsesHeadName = t3.AccCode + " - " + t3.AccName,
+                     ProductionId = t1.ProductionId.Value,
+                     FectoryExpensesAmount = t1.COGS,
+                     FactoryExpensesHeadGLId = t1.ExpensesHeadGLId,
+                     ExpensesDate = t1.ExpensesDate.Value,
+                     IsVoucher = t1.IsVoucher
+                 })
+                 .OrderByDescending(x => x.ID)
+                 .ToListAsync()
+            );
+
 
             var totalCOGS = (from pd1 in _db.ProductionDetails
                              where pd1.ProductionId == productionId && pd1.IsActive
@@ -1582,11 +1635,11 @@ namespace KGERP.Services.Production
                                                                              join t6 in _db.Units.Where(x => x.IsActive) on t3.UnitId equals t6.UnitId
                                                                              select new VMProdReferenceSlave
                                                                              {
-                                                                                 AccountingHeadId = t4.AccountingHeadId,
+                                                                                 AccountingHeadId = t5.AccountingHeadId,
                                                                                  ProductionItemId = t1.ProductionItemID,
                                                                                  ProductName = t4.Name + " " + t3.ProductName,
                                                                                  ProductionId = t1.ProductionId,
-
+                                                                                 ProductCategoryId = t5.ProductCategoryId,
                                                                                  FProductId = t1.ProductId,
                                                                                  Quantity = t1.Quantity,
                                                                                  UnitName = t6.Name,
@@ -1738,7 +1791,6 @@ namespace KGERP.Services.Production
             int result = -1;
             ProductionItem productionItem = new ProductionItem
             {
-                CostingPrice = (vmProdReferenceSlave.FectoryExpensesAmount / vmProdReferenceSlave.Quantity),
                 ProductId = vmProdReferenceSlave.FProductId,
                 ProductionId = (int)vmProdReferenceSlave.ProductionId,
                 Quantity = vmProdReferenceSlave.Quantity,

@@ -25,7 +25,7 @@
         totalQuantity = Model.FinishDataListSlave.Sum(x => x.Quantity);
         costingPrice = GrossExpensesTotal / totalQuantity;
         GrossTotal = totalQuantity * costingPrice;
-        
+
     }
 
 
@@ -59,6 +59,7 @@
     <ol class="breadcrumb">
         <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
         <li class="active">Production Process</li>
+        <li><a class="btn btn-warning btn-xs" target="_blank" href="~/Production/ProductionList?companyId=@Model.CompanyFK">Production List</a></li>
     </ol>
 </section>
 @using (Html.BeginForm("ProductionReference", "Production", FormMethod.Post, new { id = "procurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
@@ -206,9 +207,15 @@
 
                                                 @if (Model.IsSubmitted == false)
                                                 {
-                                                    <th style="padding:5px;text-align:center;">Action</th>
 
+
+                                                    <th style="padding:5px;text-align:center;">Action</th>
                                                     <th style="padding:5px;text-align:center;">Make Voucher</th>
+                                                }
+                                                else
+                                                {
+                                                    <th></th>
+                                                    <th style="padding:5px;text-align:center;">Voucher</th>
                                                 }
                                             </tr>
                                         </thead>
@@ -226,14 +233,32 @@
 
                                                     @{ if (Model.IsSubmitted == false)
                                                         {
-                                                            <td style="padding:5px;text-align:center;">
-                                                                <a id="@item.ID" onclick=" makeFactortExpensesEditble(@item.ID);" style="cursor:pointer" class="btn btn-primary btn-xs" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                            if (item.IsVoucher)
+                                                            {
+                                                                <td></td>
+                                                                <td style="padding:5px;text-align:center;">
+                                                                    <span class="btn btn-success btn-xs" style="cursor:pointer" title="Already Vouchered" data-placement="top"><i class="glyphicon glyphicon-ok" aria-hidden="true"></i></span>
+                                                                </td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td style="padding:5px;text-align:center;">
+                                                                    <a id="@item.ID" onclick=" makeFactortExpensesEditble(@item.ID);" style="cursor:pointer" class="btn btn-primary btn-xs" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
 
-                                                                <a id="@item.ID" onclick="makeFactoryExDeletale(@item.ID)" style="cursor:pointer" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
-                                                            </td>
+                                                                    <a id="@item.ID" onclick="makeFactoryExDeletale(@item.ID)" style="cursor:pointer" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderSlaveModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                                </td>
 
+                                                                <td style="padding:5px;text-align:center;">
+                                                                    <a id="@item.ID" onclick="makeVoucher(@item.ID)" class="btn btn-danger btn-xs" style="cursor:pointer" data-toggle="modal" data-target="#voucherProductionDetailModal" title="Voucher" data-placement="top"><i class="glyphicon glyphicon-file" aria-hidden="true"></i></a>
+                                                                </td>
+                                                            }
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <td></td>
                                                             <td style="padding:5px;text-align:center;">
-                                                                <a id="@item.ID" onclick="makeVoucher(@item.ID)" class="btn btn-danger btn-xs" style="cursor:pointer" data-toggle="modal" data-target="#voucherProductionDetailModal" title="Voucher" data-placement="top"><i class="glyphicon glyphicon-file" aria-hidden="true"></i></a>
+                                                                <span class="btn btn-success btn-xs" style="cursor:pointer" title="Already Vouchered" data-placement="top"><i class="glyphicon glyphicon-ok" aria-hidden="true"></i></span>
                                                             </td>
                                                         }
                                                     }
@@ -391,7 +416,7 @@
 
                             </div>
                             <div class="col-md-5">
-                                <a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/Report/GCCLProductionReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.ProdReferenceId&reportName=GCCLProductionReports">Production Report of @Model.ReferenceNo</a>
+                                <a target="_blank" class="btn btn-warning btn-block" style="width:100%" href="~/Report/GCCLProductionReport?companyId=@Model.CompanyFK&prodReferenceId=@Model.ProdReferenceId&reportName=GCCLProductionReports">Production Report of @Model.ProductionNo</a>
 
                             </div>
                             <div class="col-md-5" style="display:@hiddens">
@@ -483,9 +508,9 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label>Payment Method</label>
-                                @Html.DropDownListFor(model => model.AdvanceHeadGLId, Model.PaymentList as SelectList, "==Select Expanse==", new { id = "ddlPaymentMethod", @class = "searchingDropdown form-control", style = "width:100%;border:1px black solid" })
-                                @Html.ValidationMessageFor(model => model.AdvanceHeadGLId, "", new { @class = "text-danger" })
-                               
+                                @Html.DropDownListFor(model => model.AdvanceHeadGLId, Model.PaymentList as SelectList, "==Select Expense==", new { id = "ddlPaymentMethod", @class = "searchingDropdown form-control", style = "width:100%;border:1px black solid", required = "required" })
+                                
+
                             </div>
                         </div>
                     </div>
@@ -495,7 +520,7 @@
                         <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
                     </div>
                     <div class="col-md-9">
-                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Make Voucher</button>
+                        <button type="submit" id="btnSaveModal" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Make Voucher</button>
                     </div>
                 </div>
             </div>
@@ -622,8 +647,12 @@
         }
 
         $(document).ready(function () {
-            $('.formValidator').bootstrapValidator();
 
+            
+            $('.formValidator').bootstrapValidator();
+            $('#voucherProductionDetailModal').on('hidden.bs.modal', function () {
+                $("#btnSaveModal").removeAttr("disabled");
+            })
             $('#ddlPaymentMethod').change(() => {
                 let AccHead = $('#ddlPaymentMethod').val();
                 $('#AdvanceHeadGLId').val(AccHead);
