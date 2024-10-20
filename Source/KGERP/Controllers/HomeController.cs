@@ -57,10 +57,7 @@ namespace KGERP.Controllers
             return View(vendor);
         }
 
-        public ActionResult OfflinePage()
-        {
-            return View(); // Return the view for the offline state  
-        }
+        
         private string GetDatabaseNameFromConnectionString(string connectionString)
         {
             try

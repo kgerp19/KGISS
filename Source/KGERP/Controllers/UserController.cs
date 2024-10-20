@@ -146,24 +146,7 @@ namespace KGERP.Controllers
                         {
                             context.Database.ExecuteSqlCommand("exec updateInvalidException {0},{1}", userLogin.UserName, userLogin.Password);
                             FormsAuthentication.SetAuthCookie(user.UserName, false);
-                            EmployeeModel employeeModel = context.Database.SqlQuery<EmployeeModel>("exec sp_HRMS_GetEmployeeInfoByEmployeeId {0}", user.UserName).FirstOrDefault();
-
-                            var sss = Common.GetCompanyId();
-
-                            Session["UserName"] = user.UserName;
-                            Session["EmployeeName"] = employeeModel.Name;
-                            Session["CompanyId"] = employeeModel.CompanyId;
-                            Session["Id"] = employeeModel.Id;
-                            Session["DesignationName"] = employeeModel.DesignationName;
-                            Session["CompanyName"] = employeeModel.CompanyName;
-                            Session["CompanyLogo"] = employeeModel.CompanyLogo;
-                            Session["ManagerId"] = employeeModel.ManagerId;
-                            Session["ManagerEmployeeId"] = employeeModel.EmployeeIdOfManager;
-                            Session["ManagerName"] = employeeModel.ManagerName;
-                            Session["ManagerInfo"] = string.Format("[{0}] [{1}]", employeeModel.EmployeeIdOfManager, employeeModel.ManagerName);
-                            Session["HrAdminId"] = employeeModel.HrAdminId;
-                            Session["Picture"] = employeeModel.ImageFileName == null ? string.Format("{0}://{1}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority) + "/Images/Picture/default.png" : string.Format("{0}://{1}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority) + "/Images/Picture/" + employeeModel.ImageFileName;
-                            Parmission(user.UserName, employeeModel.CompanyId.Value);
+                            SessionData(user.UserName);
 
                             //MenuPartial();
 
@@ -192,6 +175,33 @@ namespace KGERP.Controllers
 
             }
             return View();
+        }
+
+        public void SessionData(string UserName)
+        {
+            if (string.IsNullOrEmpty(UserName))
+            {
+                RedirectToAction("User", "Login");
+            }
+            using (ERPEntities context = new ERPEntities())
+            {
+                var ssss = Common.GetUserId();
+                EmployeeModel employeeModel = context.Database.SqlQuery<EmployeeModel>("exec sp_HRMS_GetEmployeeInfoByEmployeeId {0}", UserName).FirstOrDefault();
+                Session["UserName"] = UserName;
+                Session["EmployeeName"] = employeeModel.Name;
+                Session["CompanyId"] = employeeModel.CompanyId;
+                Session["Id"] = employeeModel.Id;
+                Session["DesignationName"] = employeeModel.DesignationName;
+                Session["CompanyName"] = employeeModel.CompanyName;
+                Session["CompanyLogo"] = employeeModel.CompanyLogo;
+                Session["ManagerId"] = employeeModel.ManagerId;
+                Session["ManagerEmployeeId"] = employeeModel.EmployeeIdOfManager;
+                Session["ManagerName"] = employeeModel.ManagerName;
+                Session["ManagerInfo"] = string.Format("[{0}] [{1}]", employeeModel.EmployeeIdOfManager, employeeModel.ManagerName);
+                Session["HrAdminId"] = employeeModel.HrAdminId;
+                Session["Picture"] = employeeModel.ImageFileName == null ? string.Format("{0}://{1}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority) + "/Images/Picture/default.png" : string.Format("{0}://{1}", HttpContext.Request.Url.Scheme, HttpContext.Request.Url.Authority) + "/Images/Picture/" + employeeModel.ImageFileName;
+                Parmission(UserName, employeeModel.CompanyId.Value);
+            }
         }
 
         public void Parmission(string userId, int companyId) // Write by Mamun

@@ -696,6 +696,16 @@ namespace KGERP.Controllers
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&CompanyId={1}&ProdReferenceId={2}", reportName, companyId, prodReferenceId);
             return File(client.DownloadData(reportURL), "application/pdf");
         }
+
+        [HttpGet]
+        public ActionResult ISSProductionReport(int companyId, int ProductionId, string reportName)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&CompanyId={1}&ProductionId={2}", reportName, companyId, ProductionId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
         // GET: Purchase Order Report
         [HttpGet]
 

@@ -29,11 +29,13 @@ namespace KGERP.Utility
         public static string GetUserId()
         {
             var context = System.Web.HttpContext.Current;
-            if (context != null && context.User != null)
+
+            if (context == null && context.User == null)
             {
-                return context.User.Identity != null ? context.User.Identity.Name : null;
+               
             }
-            return null;
+
+            return context.User.Identity != null ? context.User.Identity.Name : null;
         }
         public static long GetIntUserId()
         {
