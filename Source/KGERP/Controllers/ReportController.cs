@@ -2622,7 +2622,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "ISSProductionProcReport";
+            model.ReportName = "ISSProductionReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
