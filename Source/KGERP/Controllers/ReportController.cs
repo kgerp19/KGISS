@@ -1036,12 +1036,12 @@ namespace KGERP.Controllers
         {
 
             string reportName = "";
-            reportName = "KGBankOrCashBook";
+            reportName = "ISSBankOrCashBook";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&AccHeadId={2}&StrFromDate={3}&StrToDate={4}&CompanyId={5}", reportName, model.ReportType, model.Id, model.StrFromDate, model.StrToDate, model.CompanyId);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&AccHeadId={5}", reportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.Id);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
