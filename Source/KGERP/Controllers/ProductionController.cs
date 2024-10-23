@@ -150,6 +150,25 @@ namespace KG.App.Controllers
             return View(vmPaymentMaster);
         }
 
+
+        [HttpGet]
+        public async Task<ActionResult> ProductionList(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            if (companyId > 0)
+            { Session["CompanyId"] = companyId; }
+
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+
+            VMProdReference vmPaymentMaster = new VMProdReference();
+            vmPaymentMaster = await Task.Run(() => _service.ProductionListGet(companyId, fromDate, toDate));
+            vmPaymentMaster.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            vmPaymentMaster.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+            return View(vmPaymentMaster);
+        }
+
         [HttpPost]
         
         public async Task<ActionResult> ProdReferenceList(VMProdReference model)
@@ -164,8 +183,21 @@ namespace KG.App.Controllers
 
         }
 
+        [HttpPost]
+        public ActionResult ProductionList(VMProdReference model)
+        {
+            if (model.CompanyFK > 0)
+            {
+                Session["CompanyId"] = model.CompanyFK;
+            }
+            model.FromDate = Convert.ToDateTime(model.StrFromDate);
+            model.ToDate = Convert.ToDateTime(model.StrToDate);
+            return RedirectToAction(nameof(ProductionList), new { companyId = model.CompanyFK, fromDate = model.FromDate, toDate = model.ToDate });
 
-        
+        }
+
+
+
         //[HttpGet]
         //public async Task<ActionResult> ProdReferenceList(int companyId)
         //{

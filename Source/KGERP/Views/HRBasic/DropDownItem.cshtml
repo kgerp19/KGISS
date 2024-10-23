@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = Model.TypeName;
     Layout = "~/Views/Shared/_Layout.cshtml";
+
 }
 @model KGERP.Service.ServiceModel.DropDownItemModel
 <script src="~/bower_components/jquery/dist/jquery.min.js"></script>
@@ -25,9 +26,9 @@
 @using (Html.BeginForm("DropDownItem", "HRBasic", FormMethod.Post, new { id = "DepartmentormId", @class = "formValidator", onreset = "resetDDL();" }))
 {
     <section class="content">
-       
-           
-        <div class="col-md-12">
+
+
+        <div class="row">
             <div class="col-md-4">
                 <div class="box">
                     @Html.AntiForgeryToken()
@@ -41,17 +42,11 @@
                             @Html.HiddenFor(model => model.DropDownTypeId, new { id = "hidDropDownTypeId" })
                             @Html.HiddenFor(model => model.DropDownItemId, new { id = "hidDropDownItemId" })
                             @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
-
-                            <div class="row">
-
-
-
-                                <div class="form-group">
-                                    <label>@Model.TypeName</label>
-                                    @Html.TextBoxFor(model => model.Name, new { id = "txtDropDownItemName", @class = "form-control input-sm", @placeholder = "Department" })
-                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-                                </div>
-
+                            @Html.HiddenFor(model => model.CompanyId, new { id = "hdnCompanyId" })
+                            <div class="form-group">
+                                <label>@Model.TypeName</label>
+                                @Html.TextBoxFor(model => model.Name, new { id = "txtDropDownItemName", @class = "form-control input-sm", @placeholder = "Department" })
+                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
                             </div>
 
 
@@ -112,12 +107,18 @@
                     </div>
                 </div>
             </div>
-          
+
         </div>
-     
+
     </section>
 
+}
+@using (Html.BeginForm("DropDownItem", "HRBasic", FormMethod.Post, new { id = "DepartmentormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
     <div class="modal fade" id="itemActionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        @Html.HiddenFor(model=>model.DropDownItemId,new {@id= "hdnDeleteDropDownItemId" })
+        @Html.HiddenFor(model=>model.ActionId,new {@id= "hdnDeleteActionId" })
+        @Html.HiddenFor(model=>model.CompanyId,new {@id= "hdnDeleteCompanyId" })
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -154,15 +155,16 @@
                     $('#hidDropDownTypeId').val("@Model.DropDownTypeId");
                     $('#hidDropDownItemId').val(rowId);
                     $('#ActionId').val(2);
-                    $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");                   
-                    $('#txtDropDownItemName').val($('#tdDropDownItemName_' + rowId).text().trim());  
+                    $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                    $('#txtDropDownItemName').val($('#tdDropDownItemName_' + rowId).text().trim());
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
             function makeDeletable(id) {
                 if (id !== null) {
-                    $('#hidDepartmentId').val(id);
-                    $('#ActionId').val(3);
+                    $('#hdnDeleteDropDownItemId').val(id);
+                    $('#hdnDeleteActionId').val(3);
+                    $('#hdnDeleteCompanyId').val('@Model.CompanyId');
                 }
             }
             function resetForm() {

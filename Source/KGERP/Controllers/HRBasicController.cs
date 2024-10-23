@@ -129,34 +129,38 @@ namespace Pos.App.Controllers
 
         public async Task<ActionResult> DropDownItem(int companyId = 0, int? dropDownItemId = 0)
         {
-            DropDownItemModel dropDownItemModel;
+            DropDownItemModel dropDownItemModel=new DropDownItemModel();
+            dropDownItemModel.CompanyId = companyId;
             dropDownItemModel = await Task.Run(() => _service.DropDownItemsGet(dropDownItemId));
+            dropDownItemModel.CompanyId = companyId;
+            dropDownItemModel.DropDownTypeId = dropDownItemId;
             return View(dropDownItemModel);
         }
         [HttpPost]
         public async Task<ActionResult> DropDownItem(DropDownItemModel model)
         {
-
+            int result = 0;
             if (model.ActionEum == ActionEnum.Add)
             {
                 //Add 
-                await _service.DropDownItemsAdd(model);
+                result=await _service.DropDownItemsAdd(model);
             }
             else if (model.ActionEum == ActionEnum.Edit)
             {
                 //Edit
-                await _service.DropDownItemEdit(model);
+                result=await _service.DropDownItemEdit(model);
             }
             else if (model.ActionEum == ActionEnum.Delete)
             {
                 //Delete
-                await _service.DropDownItemDelete(model.ID);
+                result=await _service.DropDownItemDelete((int)model.DropDownItemId);
             }
             else
             {
                 return RedirectToAction("Error");
             }
-            return RedirectToAction(nameof(DropDownItem), new { dropDownItemId = model.DropDownTypeId });
+
+            return RedirectToAction(nameof(DropDownItem), new { companyId=model.CompanyId, dropDownItemId = result });
         }
         #endregion
 

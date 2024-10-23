@@ -56,6 +56,8 @@ namespace KGERP.Controllers
             vendor.CompanyId = Common.GetCompanyId();
             return View(vendor);
         }
+
+        
         private string GetDatabaseNameFromConnectionString(string connectionString)
         {
             try

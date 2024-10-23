@@ -2806,7 +2806,7 @@ namespace KGERP.Service.Implementation
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
 
             #region Raw Item Cr Integration Dr
-            foreach (var item in vmProdReferenceSlave.RawDataListSlave)
+            foreach (var item in vmProdReferenceSlave.FinishDataListSlave)
             {
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                 {
@@ -2816,6 +2816,7 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
+
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = description,
@@ -2843,8 +2844,6 @@ namespace KGERP.Service.Implementation
                 Credit = vmProdReferenceSlave.DataListSlave.Any() ? Convert.ToDouble(vmProdReferenceSlave.DataListSlave.Sum(x => x.FectoryExpensesAmount)) : 0,
                 Accounting_HeadFK = vmProdReferenceSlave.AdvanceHeadGLId.Value
             });
-
-
             #endregion
 
             #region Integration Cr Finish Item Dr
@@ -2865,12 +2864,65 @@ namespace KGERP.Service.Implementation
                 Credit = vmProdReferenceSlave.FinishDataListSlave.Any() ? Convert.ToDouble(vmProdReferenceSlave.FinishDataListSlave.Sum(x => ((x.Quantity + x.QuantityOver) - x.QuantityLess) * x.CostingPrice)) : 0,
                 Accounting_HeadFK = 50606113 // ERP Integration
             });
-
-
             #endregion
 
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             return resultData.VoucherId;
+        }
+
+
+        public async Task<long> AccountingProductionPushISS(DateTime journalDate, int CompanyFK, VMProdReferenceSlave vmProdReferenceSlave, string title, string description, int journalType)
+        {
+            long result = -1;
+            VMJournalSlave vMJournalSlave = new VMJournalSlave
+            {
+                JournalType = journalType,
+                Title = title,
+                Narration = description,
+                CompanyFK = CompanyFK,
+                Date = journalDate,
+                IsSubmit = true
+            };
+
+            vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+
+            #region Raw Item Cr Integration Dr
+
+            foreach (var group in vmProdReferenceSlave.FinishDataListSlave.GroupBy(x => x.ProductCategoryId))
+            {
+                var firstItem = group.First();
+                var totalQuantity = group.Sum(x => x.Quantity);
+                var costingPrice = firstItem.CostingPrice;
+
+ 
+                if (costingPrice>0 && firstItem.AccountingHeadId.HasValue)
+                {
+                    vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+                    {
+                        Particular = firstItem.ProductName, 
+                        Debit = Convert.ToDouble(totalQuantity * costingPrice),
+                        Credit = 0,  
+                        Accounting_HeadFK = firstItem.AccountingHeadId.Value  
+                    });
+                }
+            }
+
+            var totalSum = vmProdReferenceSlave.FinishDataListSlave.Any()
+                ? vmProdReferenceSlave.FinishDataListSlave.Sum(x => x.Quantity) * vmProdReferenceSlave.FinishDataListSlave.First().CostingPrice
+                : 0;
+            var storeStockAccHead = _db.HeadGLs.Where(x => x.CompanyId == CompanyFK && x.AccCode == "4701001001001" && x.IsActive).FirstOrDefault();
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = description,
+                Debit = 0,
+                Credit = Convert.ToDouble(totalSum),
+                Accounting_HeadFK = storeStockAccHead.Id // ERP Raw Dr Integration  
+            });
+            #endregion
+
+            var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            result= resultData.VoucherId;
+            return result;
         }
 
         public async Task<long> AccountingProductionExpencePush(DateTime journalDate, int CompanyFK, VMProdReferenceSlave vmProdReferenceSlave, string title, string description, int journalType)
@@ -2915,8 +2967,11 @@ namespace KGERP.Service.Implementation
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId>0)
             {
-                var ProductionDetailVoucherStatusUpdate = _db.ProductionDetails.FirstAsync(x => x.ProductionDetailId == vmProdReferenceSlave.ID);
-                
+                var ProductionDetailVoucherStatusUpdate =await _db.ProductionDetails.FirstAsync(x => x.ProductionDetailId == vmProdReferenceSlave.ID);
+
+                ProductionDetailVoucherStatusUpdate.IsVoucher = true;
+                _db.Entry(ProductionDetailVoucherStatusUpdate).State = EntityState.Modified;
+                await _db.SaveChangesAsync();
             }
             return resultData.VoucherId;
         }
