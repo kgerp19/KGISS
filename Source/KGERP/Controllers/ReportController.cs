@@ -1425,7 +1425,7 @@ namespace KGERP.Controllers
 
         public ActionResult AccountingAdvancedLedgerReports(ReportCustomModel model)
         {
-            string reportName = "AccountingAdvancedLedger";
+            string reportName = "ISSAccountingAdvancedLedger";
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
@@ -4497,7 +4497,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "KGTrailBalance";
+            model.ReportName = "ISSTrailBalance";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&LayerNo={5}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.Id);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
