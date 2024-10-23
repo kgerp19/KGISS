@@ -96,6 +96,7 @@ namespace KGERP.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult CreateOrEditLnL(DropDownItemViewModel vm)
         {
+
             string message = string.Empty;
             if (vm.DropDownItem.DropDownItemId <= 0)
             {

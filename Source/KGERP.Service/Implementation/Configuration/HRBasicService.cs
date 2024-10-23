@@ -253,15 +253,16 @@ namespace KGERP.Service.Implementation
             DropDownItem dropDownItem = new DropDownItem
             {
                 Name = dropDownItemModel.Name,
-                 DropDownTypeId = dropDownItemModel.DropDownTypeId,
+                DropDownTypeId = dropDownItemModel.DropDownTypeId,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                CompanyId= dropDownItemModel.CompanyId
             };
             _db.DropDownItems.Add(dropDownItem);
             if (await _db.SaveChangesAsync() > 0)
             {
-                result = dropDownItem.DropDownItemId;
+                result = (int)dropDownItem.DropDownTypeId;
             }
             return result;
         }
@@ -277,7 +278,7 @@ namespace KGERP.Service.Implementation
                     dropDownItem.DropDownTypeId = dropDownItemModel.DropDownTypeId;
 
                     await _db.SaveChangesAsync();
-                    result = dropDownItem.DropDownItemId;
+                    result = (int)dropDownItem.DropDownTypeId;
                     dbTran.Commit();
                 }
                 catch (DbEntityValidationException ex)
@@ -301,7 +302,7 @@ namespace KGERP.Service.Implementation
                         DropDownItem dropDownItem = _db.DropDownItems.Find(id);
                         dropDownItem.IsActive = false;
                         await _db.SaveChangesAsync();
-                        result = dropDownItem.DropDownItemId;
+                        result = (int)dropDownItem.DropDownTypeId;
                         dbTran.Commit();
                     }
                     catch (DbEntityValidationException ex)

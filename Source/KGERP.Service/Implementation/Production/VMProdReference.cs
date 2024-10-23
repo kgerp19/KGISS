@@ -68,6 +68,7 @@ namespace KGERP.Service.Implementation.Production
     {
         public int ProdReferenceSlaveID { get; set; }
         public long ProductionItemId { get; set; }
+        public bool IsVoucher { get; set; }
         public int FProductId { get; set; }
         public int RProductId { get; set; }
         public decimal RawConsumeQuantity { get; set; }
@@ -118,6 +119,7 @@ namespace KGERP.Service.Implementation.Production
         public bool IsVATInclude { get;  set; }
         public double UnitPrice { get;  set; }
         public decimal VATPercent { get;  set; }
+        public int ProductCategoryId { get; set; }
     }
     public partial class VMProdReferenceSlaveConsumption : BaseVM
     {
