@@ -8,6 +8,7 @@ using System.Web.Mvc;
 namespace KGERP.Controllers
 {
     [CheckSession]
+
     public class AdminSetUpController : Controller
     {
         IAdminSetUpService adminSetUpService = new AdminSetUpService();
