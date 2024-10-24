@@ -6834,7 +6834,8 @@ namespace KGERP.Service.Implementation
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
                 JournalType = voucherType.VoucherTypeId,
-                Title = "<a href='" + _urlInfo + "Report/ISSPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
+                //Title = "<a href='" + _urlInfo + "Report/ISSPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
+               
                 Narration = vmPOReceiving.ChallanCID + " " + vmPOReceiving.Challan + " Date: " + vmPOReceiving.ChallanDate.ToString(),
                 CompanyFK = CompanyFK,
                 Date = vmPOReceiving.ChallanDate,
