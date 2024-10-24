@@ -657,7 +657,7 @@ namespace KGERP.Service.Implementation
                 employee.HrAdminId = Common.GetHRAdminId();
                 employee.CreatedBy = System.Web.HttpContext.Current.User.Identity.Name;
                 employee.CreatedDate = DateTime.Now;
-                employee.Active = model.Active;
+                employee.Active = true;
 
                 context.Employees.Add(employee);
                 try
