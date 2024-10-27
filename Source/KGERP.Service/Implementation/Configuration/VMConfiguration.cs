@@ -597,6 +597,7 @@ namespace KGERP.Service.Configuration
         public int? Common_ProductCategoryFk { get; set; }
         public int? Common_ProductSubCategoryFk { get; set; }
         public int? Common_ProductFk { get; set; }
+        public int? ErrorStatus { get; set; }
 
         public int WareHouse_POReceivingFk { get; set; }
         public int WareHouse_POReceivingSlaveFk { get; set; }

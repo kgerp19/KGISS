@@ -2967,107 +2967,114 @@ namespace KGERP.Service.Implementation
         public async Task<VMCommonProduct> ProductAdd(VMCommonProduct vmCommonProduct)
         {
             var result = -1;
-            #region Genarate Product No
-            int lsatProduct = _db.Products.Select(x => x.ProductId).OrderByDescending(ID => ID).FirstOrDefault();
-            if (lsatProduct == 0)
+            var checkDuplicateProduct = await _db.Products.AnyAsync(x => x.ProductCategoryId.Value == vmCommonProduct.Common_ProductCategoryFk.Value && x.ProductSubCategoryId.Value == vmCommonProduct.Common_ProductSubCategoryFk.Value && x.ProductName.ToLower() == vmCommonProduct.Name.ToLower());
+            if (!checkDuplicateProduct)
             {
-                lsatProduct = 1;
-            }
-            else
-            {
-                lsatProduct++;
-            }
-
-            var productID = vmCommonProduct.ProductType + lsatProduct.ToString().PadLeft(6, '0');
-            #endregion
-
-            Product commonProduct = new Product
-            {
-                ProductCode = productID,
-                ShortName = vmCommonProduct.ShortName,
-                ProductName = vmCommonProduct.Name,
-                UnitPrice = vmCommonProduct.UnitPrice,
-                TPPrice = vmCommonProduct.TPPrice,
-                CreditSalePrice = vmCommonProduct.CreditSalePrice,
-
-                ProductCategoryId = vmCommonProduct.Common_ProductCategoryFk,
-                ProductSubCategoryId = vmCommonProduct.Common_ProductSubCategoryFk,
-                UnitId = vmCommonProduct.Common_UnitFk,
-                Remarks = vmCommonProduct.Remarks,
-                CompanyId = vmCommonProduct.CompanyFK,
-                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                CreatedDate = DateTime.Now,
-                DieSize = vmCommonProduct.DieSize,
-                PackId = vmCommonProduct.PackId,
-                PackSize = vmCommonProduct.PackSize,
-                ProcessLoss = vmCommonProduct.ProcessLoss,
-                FormulaQty = vmCommonProduct.FormulaQty,
-
-                IsActive = true,
-                ProductType = vmCommonProduct.ProductType,
-                OrderNo = 0
-
-            };
-            _db.Products.Add(commonProduct);
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                if (commonProduct.CompanyId == (int)CompanyName.KrishibidFeedLimited)
+                #region Genarate Product No
+                int lsatProduct = _db.Products.Select(x => x.ProductId).OrderByDescending(ID => ID).FirstOrDefault();
+                if (lsatProduct == 0)
                 {
-                    result = commonProduct.ProductId;
-
-                    Product product = _db.Products.Find(commonProduct.ProductId);
-
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = product.ProductName,
-                        LayerNo = 6,
-                        Remarks = "6 Layer",
-                        IsIncomeHead = false,
-                        ProductType = product.ProductType,
-                        CompanyFK = commonProduct.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now
-                    };
-                    int headGl = ProductHeadGlPush(integration, commonProduct);
-
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
+                    lsatProduct = 1;
                 }
-                //if (commonProduct.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                //{
-                //    result = commonProduct.ProductId;
+                else
+                {
+                    lsatProduct++;
+                }
 
-                //    Product product = _db.Products.Find(commonProduct.ProductId);
+                var productID = vmCommonProduct.ProductType + lsatProduct.ToString().PadLeft(6, '0');
+                #endregion
 
-                //    VMHeadIntegration integration = new VMHeadIntegration
-                //    {
-                //        AccName = product.ProductName,
-                //        LayerNo = 6,
-                //        Remarks = "6 Layer",
-                //        IsIncomeHead = false,
-                //        ProductType = product.ProductType,
-                //        CompanyFK = commonProduct.CompanyId,
-                //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                //        CreatedDate = DateTime.Now
-                //    };
+                Product commonProduct = new Product
+                {
+                    ProductCode = productID,
+                    ShortName = vmCommonProduct.ShortName,
+                    ProductName = vmCommonProduct.Name,
+                    UnitPrice = vmCommonProduct.UnitPrice,
+                    TPPrice = vmCommonProduct.TPPrice,
+                    CreditSalePrice = vmCommonProduct.CreditSalePrice,
+
+                    ProductCategoryId = vmCommonProduct.Common_ProductCategoryFk,
+                    ProductSubCategoryId = vmCommonProduct.Common_ProductSubCategoryFk,
+                    UnitId = vmCommonProduct.Common_UnitFk,
+                    Remarks = vmCommonProduct.Remarks,
+                    CompanyId = vmCommonProduct.CompanyFK,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now,
+                    DieSize = vmCommonProduct.DieSize,
+                    PackId = vmCommonProduct.PackId,
+                    PackSize = vmCommonProduct.PackSize,
+                    ProcessLoss = vmCommonProduct.ProcessLoss,
+                    FormulaQty = vmCommonProduct.FormulaQty,
+
+                    IsActive = true,
+                    ProductType = vmCommonProduct.ProductType,
+                    OrderNo = 0
+
+                };
+                _db.Products.Add(commonProduct);
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    if (commonProduct.CompanyId == (int)CompanyName.KrishibidFeedLimited)
+                    {
+                        result = commonProduct.ProductId;
+
+                        Product product = _db.Products.Find(commonProduct.ProductId);
+
+                        VMHeadIntegration integration = new VMHeadIntegration
+                        {
+                            AccName = product.ProductName,
+                            LayerNo = 6,
+                            Remarks = "6 Layer",
+                            IsIncomeHead = false,
+                            ProductType = product.ProductType,
+                            CompanyFK = commonProduct.CompanyId,
+                            CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                            CreatedDate = DateTime.Now
+                        };
+                        int headGl = ProductHeadGlPush(integration, commonProduct);
+
+                        //if (headGlId != null)
+                        //{
+                        //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
+                        //}
+                    }
+                    //if (commonProduct.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+                    //{
+                    //    result = commonProduct.ProductId;
+
+                    //    Product product = _db.Products.Find(commonProduct.ProductId);
+
+                    //    VMHeadIntegration integration = new VMHeadIntegration
+                    //    {
+                    //        AccName = product.ProductName,
+                    //        LayerNo = 6,
+                    //        Remarks = "6 Layer",
+                    //        IsIncomeHead = false,
+                    //        ProductType = product.ProductType,
+                    //        CompanyFK = commonProduct.CompanyId,
+                    //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    //        CreatedDate = DateTime.Now
+                    //    };
 
 
-                //    int headGl = ProductHeadGlPush(integration, commonProduct);
+                    //    int headGl = ProductHeadGlPush(integration, commonProduct);
 
-                //    //if (headGlId != null)
-                //    //{
-                //    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                //    //}
-                //}
+                    //    //if (headGlId != null)
+                    //    //{
+                    //    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
+                    //    //}
+                    //}
 
-                result = commonProduct.ProductId;
+                    result = commonProduct.ProductId;
+                }
+
+                vmCommonProduct.Common_ProductFk = result;
+                vmCommonProduct.Common_ProductSubCategoryFk = commonProduct.ProductSubCategoryId;
+                vmCommonProduct.Common_ProductCategoryFk = commonProduct.ProductCategoryId;
             }
+            vmCommonProduct.ErrorStatus = 1;
 
-            vmCommonProduct.Common_ProductFk = result;
-            vmCommonProduct.Common_ProductSubCategoryFk = commonProduct.ProductSubCategoryId;
-            vmCommonProduct.Common_ProductCategoryFk = commonProduct.ProductCategoryId;
+
             return vmCommonProduct;
         }
 
