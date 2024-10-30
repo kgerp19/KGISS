@@ -430,6 +430,7 @@ namespace KGERP.Services.WareHouse
         public DateTime PODate { get; set; }
         public decimal ProductDiscount { get;  set; }
         public decimal VATAddition { get; set; }
+        public bool IsVATIncluded { get; set; }
     }
 
     public class GcclFinishProductCurrentStock

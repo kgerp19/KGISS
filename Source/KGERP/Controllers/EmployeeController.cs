@@ -434,13 +434,18 @@ namespace KGERP.Controllers
                 {
                     return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId,  id = 0 });
                 }
+                
             }
             else
             {
                 result = employeeService.SaveEmployee(vm.Employee.Id, vm.Employee);
-                if (result)
+                if (result && vm.Employee.Active)
                 {
                     return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId, id = vm.Employee.Id });
+                }
+                else if (vm.Employee.Active == false)
+                {
+                    return RedirectToAction("Index", new { companyId = vm.Employee.CompanyId });
                 }
 
             }

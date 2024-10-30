@@ -84,7 +84,7 @@ namespace KGERP.Service.ServiceModel
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public Nullable<System.DateTime> PermanentDate { get; set; }
 
-        public bool Active { get; set; }
+        public bool Active { get; set; } = true;
         [DisplayName("Shift")]
         public Nullable<int> ShiftId { get; set; }
         [DisplayName("Date of Birth")]

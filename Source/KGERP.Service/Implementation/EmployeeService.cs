@@ -640,7 +640,7 @@ namespace KGERP.Service.Implementation
                 UserModel userModel = new UserModel();
                 userModel.UserName = model.EmployeeId;
                 userModel.Email = "kgerp19@gmail.com";
-                userModel.Active = true;
+                userModel.Active = model.Active;
                 userModel.IsEmailVerified = true;
 
                 userModel.Password = Crypto.Hash(userModel.UserName.ToLower());

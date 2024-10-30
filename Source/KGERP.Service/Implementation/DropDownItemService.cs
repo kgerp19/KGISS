@@ -48,7 +48,7 @@ namespace KGERP.Service.Implementation
         {
             if (id == 16)
             {
-                return context.DropDownItems.ToList().Where(x => x.DropDownTypeId == id).OrderBy(x => x.OrderNo).Select(x => new SelectModel()
+                return context.DropDownItems.ToList().Where(x => x.DropDownTypeId == id && x.IsActive).OrderBy(x => x.OrderNo).Select(x => new SelectModel()
                 {
                     Text = x.Name,
                     Value = x.DropDownItemId
@@ -57,7 +57,7 @@ namespace KGERP.Service.Implementation
             }
             else
             {
-                return context.DropDownItems.ToList().Where(x => x.DropDownTypeId == id).OrderBy(x => x.Name).Select(x => new SelectModel()
+                return context.DropDownItems.ToList().Where(x => x.DropDownTypeId == id && x.IsActive).OrderBy(x => x.Name).Select(x => new SelectModel()
                 {
                     Text = x.Name,
                     Value = x.DropDownItemId

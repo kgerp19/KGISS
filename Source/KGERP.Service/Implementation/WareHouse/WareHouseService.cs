@@ -1706,7 +1706,7 @@ namespace KGERP.Services.WareHouse
                             PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive ).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
                             UnitName = t8.Name,
                             PODate = (DateTime)t2.PurchaseDate,
-                            
+                            IsVATIncluded=t1.IsVATIncluded,
                             //ProductDiscount = t1.ProductDiscount,
                             //VATAddition = t1.VATAddition,
 
@@ -5367,7 +5367,7 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.OrderDeliverId;
             }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidPackagingLimited)
+            if (result > 0 )
             {
                 #region Ready To Account Integration
                 VMOrderDeliverDetail AccData = await PackagingWareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, vmModel.OrderDeliverId);
