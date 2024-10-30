@@ -5510,6 +5510,24 @@ namespace KGERP.Service.Implementation
             return vMCommonBank;
         }
 
+        public async Task<VMCommonDesignation> GetDesignation(int companyId)
+        {
+            VMCommonDesignation commonDesignation = new VMCommonDesignation();
+
+            commonDesignation.CompanyFK = companyId;
+
+            commonDesignation.DataList = await Task.Run(() => (from t1 in _db.Designations
+                                                               where t1.IsActive && (t1.CompanyId==null || t1.CompanyId == companyId)
+                                                               select new VMCommonDesignation
+                                                               {
+                                                                   ID = t1.DesignationId,
+                                                                   Name = t1.Name,
+                                                                   CompanyFK = t1.CompanyId,
+                                                               }).OrderByDescending(x => x.ID).AsEnumerable());
+
+            return commonDesignation;
+        }
+
 
         public async Task<int> BankAdd(VMCommonBank vMCommonBank)
         {
@@ -5532,6 +5550,25 @@ namespace KGERP.Service.Implementation
             return result;
         }
 
+        public async Task<int> DesignationAdd(VMCommonDesignation vMCommonDesignation)
+        {
+            var result = -1;
+            Designation designation = new Designation
+            {
+                Name = vMCommonDesignation.Name,
+                CompanyId = vMCommonDesignation.CompanyFK,
+                CreatedDate = DateTime.Now,
+                IsActive = true,
+
+            };
+            _db.Designations.Add(designation);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = designation.DesignationId;
+            }
+            return result;
+        }
+
         public async Task<int> BankEdit(VMCommonBank vMCommonBank)
         {
             var result = -1;
@@ -5548,6 +5585,19 @@ namespace KGERP.Service.Implementation
             return result;
         }
 
+        public async Task<int> DesignationEdit(VMCommonDesignation vMCommonDesignation)
+        {
+            var result = -1;
+            Designation designation = _db.Designations.Find(vMCommonDesignation.ID);
+            designation.Name = vMCommonDesignation.Name;
+
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = designation.DesignationId;
+            }
+            return result;
+        }
+
 
         public async Task<int> BankDelete(int id)
         {
@@ -5560,6 +5610,22 @@ namespace KGERP.Service.Implementation
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = bank.BankId;
+                }
+            }
+            return result;
+        }
+
+        public async Task<int> DesignationDelete(int id)
+        {
+            int result = -1;
+            if (id != 0)
+            {
+                Designation designation = _db.Designations.Find(id);
+                designation.IsActive = false;
+
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = designation.DesignationId;
                 }
             }
             return result;

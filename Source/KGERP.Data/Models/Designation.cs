@@ -22,8 +22,10 @@ namespace KGERP.Data.Models
     
         public int DesignationId { get; set; }
         public string Name { get; set; }
+        public Nullable<int> CompanyId { get; set; }
         public Nullable<int> CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
+        public bool IsActive { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Employee> Employees { get; set; }

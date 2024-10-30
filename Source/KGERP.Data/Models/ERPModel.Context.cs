@@ -84,7 +84,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Currency> Currencies { get; set; }
         public virtual DbSet<CustomerBookingFileMapping> CustomerBookingFileMappings { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
-        public virtual DbSet<Designation> Designations { get; set; }
         public virtual DbSet<DisputedList> DisputedLists { get; set; }
         public virtual DbSet<District> Districts { get; set; }
         public virtual DbSet<Division> Divisions { get; set; }
@@ -364,6 +363,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<ProductionItem> ProductionItems { get; set; }
         public virtual DbSet<ProductionDetail> ProductionDetails { get; set; }
         public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public virtual DbSet<Designation> Designations { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

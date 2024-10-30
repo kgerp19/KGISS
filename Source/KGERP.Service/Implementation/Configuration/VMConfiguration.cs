@@ -1016,9 +1016,16 @@ namespace KGERP.Service.Configuration
     }
 
     #region Bank
-    public class VMCommonBank : BaseVM
+    public class VMCommonDesignation : BaseVM
     {
         
+        public string Name { get; set; }
+        public IEnumerable<VMCommonDesignation> DataList { get; set; }
+    }
+
+    public class VMCommonBank : BaseVM
+    {
+
         public string Name { get; set; }
         public IEnumerable<VMCommonBank> DataList { get; set; }
         public string ShortName { get; set; }

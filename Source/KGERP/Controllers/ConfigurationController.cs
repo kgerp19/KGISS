@@ -1968,6 +1968,38 @@ namespace Pos.App.Controllers
 
         #endregion
 
+        public async Task<ActionResult> CommonDesignation(int companyId)
+        {
+            VMCommonDesignation commonDesignation = new VMCommonDesignation();
+            commonDesignation = await Task.Run(() => _service.GetDesignation(companyId));
+            return View(commonDesignation);
+        }
+        [HttpPost]
+        public async Task<ActionResult> CommonDesignation(VMCommonDesignation vMCommonDesignation)
+        {
+
+            if (vMCommonDesignation.ActionEum == ActionEnum.Add)
+            {
+                //Add 
+                await _service.DesignationAdd(vMCommonDesignation);
+            }
+            else if (vMCommonDesignation.ActionEum == ActionEnum.Edit)
+            {
+                //Edit
+                await _service.DesignationEdit(vMCommonDesignation);
+            }
+            else if (vMCommonDesignation.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                await _service.DesignationDelete(vMCommonDesignation.ID);
+            }
+            else
+            {
+                return RedirectToAction("Error");
+            }
+            return RedirectToAction(nameof(CommonDesignation), new { companyId = vMCommonDesignation.CompanyFK });
+        }
+
         #region Bank Branch
         public async Task<ActionResult> CommonBankBranchGet(int companyId, int bankId)
         {
