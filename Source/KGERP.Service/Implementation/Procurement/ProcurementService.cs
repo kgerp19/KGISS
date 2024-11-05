@@ -3577,13 +3577,13 @@ namespace KGERP.Services.Procurement
         {
             var v = await Task.Run(() => (from t1 in _db.OrderDetails
                                           join t2 in _db.Products.Where(x => x.IsActive) on t1.ProductId equals t2.ProductId
-
                                           join t4 in _db.ProductSubCategories.Where(x => x.IsActive) on t2.ProductSubCategoryId equals t4.ProductSubCategoryId
                                           join t3 in _db.ProductCategories.Where(x => x.IsActive) on t4.ProductCategoryId equals t3.ProductCategoryId
                                           join t5 in _db.Units on t2.UnitId equals t5.UnitId
                                           join t7 in _db.OrderMasters on t1.OrderMasterId equals t7.OrderMasterId
-                                          join t6 in _db.VendorOffers on t2.ProductId equals t6.ProductId
-                                          where t1.OrderDetailId == id && t6.VendorId == t7.CustomerId
+                                          join t6 in _db.VendorOffers on t2.ProductId equals t6.ProductId into LJVendorOffer
+                                          from t6 in LJVendorOffer.DefaultIfEmpty()
+                                          where t1.OrderDetailId == id || t7.CustomerId.Value == t6.VendorId
                                           select new VMSalesOrderSlave
                                           {
                                               ProductName = t2.ProductName,
@@ -3608,6 +3608,7 @@ namespace KGERP.Services.Procurement
                                               CarryingCommission = t6.CarryingCommission ?? 0,
                                               ProductId = t2.ProductId
                                           }).FirstOrDefault());
+
             return v;
         }
 

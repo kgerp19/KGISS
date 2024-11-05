@@ -684,7 +684,27 @@
             $('#procurementSalesOrderSlaveFormId')[0].reset();
             $('#ActionId').val(1);
         }
-
+        function fetchProductStock(companyId, productId) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("ProductStockByProduct", "Procurement")",
+                datatype: "json",
+                data: { companyId: companyId, productId: productId },
+                success: function (data) {
+                    console.log(data);
+                    if (data) {
+                        $('#tblStockAvailable').show();
+                        $('.txtUnitName').text(data.UnitName);
+                        $('#stockAvailable').text(data.CurrentStock + ' ' + data.UnitName);
+                        $("#txtUnitPrice").val(data.UnitPrice);
+                        $("#txtPackSize").val(data.PackSize);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching product stock:", error);
+                }
+            });
+        }
 
         $(document).ready(function () {
             //$('.formValidator').bootstrapValidator();
@@ -744,8 +764,8 @@
             select: function (e, i) {
                 console.log(i);
                     $("#ddlRProductFK").val(i.item.val);
-
-                    $.ajax({
+                    fetchProductStock("@Model.CompanyFK",i.item.val);
+                    @*$.ajax({
                         type: "GET",
                         url: "@Url.Action("ProductStockByProduct", "Procurement")",
                         datatype: "Json",
@@ -762,7 +782,7 @@
 
                             }
                         }
-                    });
+                    });*@
                 $('#txtSalesQuantity').focus();
                 $('#txtSalesQuantity').select();
 
@@ -879,10 +899,11 @@
                       $("#txtPackQuantity").val(data.PackQuantity);
                       $("#txtConsumption").val(data.Consumption);
 
-                      $("#txtPurchaseQuantity").val(data.Qty);
+                      $("#txtSalesQuantity").val(data.Qty);
                       $('#txtUnitPrice').val(data.UnitPrice);
                       $("#hidOrderDetailId").val(data.OrderDetailId)
                       $('.txtUnitName').text(data.UnitName);
+                      fetchProductStock(data.CompanyFK, data.FProductId);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
                  });

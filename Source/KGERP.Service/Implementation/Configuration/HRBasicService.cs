@@ -35,17 +35,17 @@ namespace KGERP.Service.Implementation
         }
 
         #region Grade
-        public async Task<VMGrade> GradeGet()
+        public async Task<VMGrade> GradeGet(int companyId)
         {
             VMGrade vmGrade = new VMGrade();
-            vmGrade.DataList = await Task.Run(() => GradeDataLoad());
+            vmGrade.DataList = await Task.Run(() => GradeDataLoad(companyId));
             return vmGrade;
         }
 
-        public IEnumerable<VMGrade> GradeDataLoad()
+        public IEnumerable<VMGrade> GradeDataLoad(int companyId)
         {
             var v = (from t1 in _db.Grades
-                     where t1.IsActive == true
+                     where t1.IsActive == true 
                      select new VMGrade
                      {
                          GradeId = t1.GradeId,
