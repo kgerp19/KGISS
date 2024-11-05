@@ -35,22 +35,23 @@ namespace KGERP.Service.Implementation
         }
 
         #region Grade
-        public async Task<VMGrade> GradeGet(int companyId)
+        public async Task<VMGrade> GradeGet(int? companyId)
         {
             VMGrade vmGrade = new VMGrade();
             vmGrade.DataList = await Task.Run(() => GradeDataLoad(companyId));
             return vmGrade;
         }
 
-        public IEnumerable<VMGrade> GradeDataLoad(int companyId)
+        public IEnumerable<VMGrade> GradeDataLoad(int? companyId)
         {
             var v = (from t1 in _db.Grades
-                     where t1.IsActive == true 
+                     where t1.IsActive == true && (t1.CompanyId==null || t1.CompanyId==companyId)
                      select new VMGrade
                      {
                          GradeId = t1.GradeId,
                          Name = t1.Name,
-                         GradeCode = t1.GradeCode
+                         GradeCode = t1.GradeCode,
+                         PayScale=t1.PayScale
                      }).OrderByDescending(x => x.GradeId).AsEnumerable();
             return v;
         }
@@ -67,6 +68,8 @@ namespace KGERP.Service.Implementation
                 GradeCode = vmGrade.GradeCode,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
+                PayScale=vmGrade.PayScale,
+                CompanyId=vmGrade.CompanyFK,
                 IsActive = true
             };
             _db.Grades.Add(grade);
@@ -88,7 +91,7 @@ namespace KGERP.Service.Implementation
 
                     grad.Name = vmGrade.Name;
                     grad.GradeCode = vmGrade.GradeCode;
-
+                    grad.PayScale = vmGrade.PayScale;
                     await _db.SaveChangesAsync();
                     result = grad.GradeId;
                     dbTran.Commit();

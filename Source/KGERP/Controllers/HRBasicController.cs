@@ -55,10 +55,11 @@ namespace Pos.App.Controllers
 
 
         #region User Menu
-        public async Task<ActionResult> Grade(int companyId)
+        public async Task<ActionResult> Grade(int? companyId)
         {
             VMGrade vmGrade;
             vmGrade = await Task.Run(() => _service.GradeGet(companyId));
+            vmGrade.CompanyFK = companyId;
            
 
             return View(vmGrade);

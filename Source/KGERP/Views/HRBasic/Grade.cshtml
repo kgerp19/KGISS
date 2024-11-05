@@ -30,6 +30,7 @@
                 <div class="box">
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(m => m.CompanyFK)
                     <div class="box-danger">
                         <div class="box-header">
                             <h4>Add Grade</h4>
@@ -42,21 +43,27 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Grade</label>
-                                        @Html.TextBoxFor(model => model.GradeCode, new { id = "txtGradeCode", @class = "form-control input-sm", @placeholder = "Grade" })
+                                        <label class="required">Grade</label>
+                                        @Html.TextBoxFor(model => model.GradeCode, new { id = "txtGradeCode", @class = "form-control input-sm", @placeholder = "Grade", @required = "required" })
                                         @Html.ValidationMessageFor(model => model.GradeCode, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="required">Pay Scale</label>
+                                        @Html.TextBoxFor(model => model.PayScale, new { id = "txtPayScale", @class = "form-control input-sm", @placeholder = "PayScale", @required = "required" })
+                                        @Html.ValidationMessageFor(model => model.PayScale, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
 
-
-                                <div class="col-md-9">
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Grade Designation</label>
                                         @Html.TextAreaFor(model => model.Name, new { id = "txtGradeName", @class = "form-control input-sm", @placeholder = "Grade Designation" })
                                         @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
-                            </div>                         
+                            </div>
 
                             <div class="form-group">
                                 <div class="col-md-8">
@@ -91,7 +98,7 @@
                                         <tr>
                                             <th style="width:10px">SL</th>
                                             <th style="width:20px">Grade</th>
-                                            <th style="width:60px">Grade Name</th>                                           
+                                            <th style="width:60px">Grade Name</th>
                                             <th style="width:10px">Action</th>
                                         </tr>
                                     </thead>
@@ -101,18 +108,19 @@
                                         @foreach (var item in Model.DataList)
                                         {
 
-                                        <tr>
-                                            <td>@(++sl)</td>
-                                            <td id="tdGradeCode_@item.GradeId">@item.GradeCode</td>
-                                            <td id="tdGradeName_@item.GradeId">@item.Name</td>
-                                            <td>
-                                                <a id="@item.GradeId" onclick=" makeEditble(this);" class="linkPointer" data-toggle="modal" data-target="#exampleModal" title="Edit" data-placement="top"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-                                                <a id="@item.GradeId" onclick="makeDeletable(@item.GradeId);" class="linkPointer" data-toggle="modal" data-target="#itemActionModal" title="Delete"
-                                                   data-placement="top">
-                                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
+                                            <tr>
+                                                <td>@(++sl)</td>
+                                                <td id="tdGradeCode_@item.GradeId">@item.GradeCode</td>
+                                                <td id="tdGradeName_@item.GradeId">@item.Name</td>
+                                                <td hidden id="tdPayName_@item.GradeId">@item.Name</td>
+                                                <td>
+                                                    <a id="@item.GradeId" onclick=" makeEditble(this);" class="linkPointer" data-toggle="modal" data-target="#exampleModal" title="Edit" data-placement="top"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                                                    <a id="@item.GradeId" onclick="makeDeletable(@item.GradeId);" class="linkPointer" data-toggle="modal" data-target="#itemActionModal" title="Delete"
+                                                       data-placement="top">
+                                                        <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
                                         }
                                     </tbody>
                                 </table>
@@ -127,7 +135,14 @@
         </div>
     </section>
 
+
+}
+@using (Html.BeginForm("Grade", "HRBasic", FormMethod.Post, new { id = "gradeormId", @class = "formValidator", onreset = "resetDDL();" }))
+{
     <div class="modal fade" id="itemActionModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        @Html.HiddenFor(m => m.CompanyFK, new {@id="hdnCompanyFK"})
+        @Html.HiddenFor(m => m.ID, new {@id= "hdnGradeId" })
+        @Html.HiddenFor(m => m.ActionId, new {@id= "hdnActionId" })
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -150,40 +165,40 @@
         </div>
     </div>
 }
-
-
 @section scripts {
     <script type="text/javascript">
-            $(document).ready(function () {
-                $('.formValidator').bootstrapValidator();
-            });
+        $(document).ready(function () {
+            $('.formValidator').bootstrapValidator();
+        });
 
-            function makeEditble(elem) {
-                if (elem !== null) {
-                    var rowId = elem.id;
-                    $('#hidGradeId').val(rowId);
-                    $('#ActionId').val(2);
-                    $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
-                    $('#txtGradeCode').val($('#tdGradeCode_' + rowId).text().trim());
-                    $('#txtGradeName').val($('#tdGradeName_' + rowId).text().trim());
-                   
+        function makeEditble(elem) {
+            if (elem !== null) {
+                var rowId = elem.id;
+                $('#hidGradeId').val(rowId);
+                $('#ActionId').val(2);
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#txtGradeCode').val($('#tdGradeCode_' + rowId).text().trim());
+                $('#txtGradeName').val($('#tdGradeName_' + rowId).text().trim());
+                $('#txtPayScale').val($('#tdPayName_' + rowId).text().trim());
 
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
             }
+        }
 
-            function makeDeletable(id) {
-                if (id !== null) {
-                    $('#hidGradeId').val(id);
-                    $('#ActionId').val(3);
+        function makeDeletable(id) {
+            if (id !== null) {
+                $('#hdnGradeId').val(id);
+                $('#hdnCompanyFK').val("@Model.CompanyFK");
+                $('#hdnActionId').val(3);
 
-                }
             }
-            function resetForm() {
-                $('#gradeormId')[0].reset();
-                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
-            }
+        }
+        function resetForm() {
+            $('#gradeormId')[0].reset();
+            $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Add");
+        }
 
     </script>
 }
