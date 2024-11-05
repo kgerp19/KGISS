@@ -122,7 +122,6 @@ namespace KGERP.Data.Models
         public virtual DropDownItem DropDownItem9 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Education> Educations { get; set; }
-        public virtual Grade Grade { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Employee> Employee1 { get; set; }
         public virtual Employee Employee2 { get; set; }
@@ -154,5 +153,6 @@ namespace KGERP.Data.Models
         public virtual ICollection<Upazila> Upazilas { get; set; }
         public virtual Vendor Vendor { get; set; }
         public virtual Designation Designation { get; set; }
+        public virtual Grade Grade { get; set; }
     }
 }

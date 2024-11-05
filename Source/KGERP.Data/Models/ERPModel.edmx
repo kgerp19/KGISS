@@ -1770,6 +1770,7 @@ warning 6002: The table/view 'KGISSDB.dbo.EmployeeLeaveDetail' does not have a p
           <Property Name="GradeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="PayScale" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="CompanyId" Type="int" />
           <Property Name="CreatedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
           <Property Name="GradeCode" Type="varchar" MaxLength="20" Nullable="false" />
@@ -9959,7 +9960,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="FileArchives" EntityType="ERPModel.FileArchive" />
           <EntitySet Name="FileAttachments" EntityType="ERPModel.FileAttachment" />
           <EntitySet Name="FileCatagories" EntityType="ERPModel.FileCatagory" />
-          <EntitySet Name="Grades" EntityType="ERPModel.Grade" />
           <EntitySet Name="Head1" EntityType="ERPModel.Head1" />
           <EntitySet Name="Head2" EntityType="ERPModel.Head2" />
           <EntitySet Name="Head3" EntityType="ERPModel.Head3" />
@@ -10625,10 +10625,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="Employee" EntitySet="Employees" />
             <End Role="Education" EntitySet="Educations" />
           </AssociationSet>
-          <AssociationSet Name="FK_Employee_Grade" Association="ERPModel.FK_Employee_Grade">
-            <End Role="Grade" EntitySet="Grades" />
-            <End Role="Employee" EntitySet="Employees" />
-          </AssociationSet>
           <AssociationSet Name="FK_Employee_HrAdmin" Association="ERPModel.FK_Employee_HrAdmin">
             <End Role="Employee" EntitySet="Employees" />
             <End Role="Employee1" EntitySet="Employees" />
@@ -10924,6 +10920,11 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="Designations" EntityType="ERPModel.Designation" />
           <AssociationSet Name="FK_Employee_Designation" Association="ERPModel.FK_Employee_Designation">
             <End Role="Designation" EntitySet="Designations" />
+            <End Role="Employee" EntitySet="Employees" />
+          </AssociationSet>
+          <EntitySet Name="Grades" EntityType="ERPModel.Grade" />
+          <AssociationSet Name="FK_Employee_Grade" Association="ERPModel.FK_Employee_Grade">
+            <End Role="Grade" EntitySet="Grades" />
             <End Role="Employee" EntitySet="Employees" />
           </AssociationSet>
           </EntityContainer>
@@ -12428,19 +12429,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="FolderPath" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="FileArchives" Relationship="ERPModel.FK_FileArchive_FileCatagory" FromRole="FileCatagory" ToRole="FileArchive" />
-        </EntityType>
-        <EntityType Name="Grade">
-          <Key>
-            <PropertyRef Name="GradeId" />
-          </Key>
-          <Property Name="GradeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="PayScale" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="GradeCode" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Grade" FromRole="Grade" ToRole="Employee" />
         </EntityType>
         <EntityType Name="Head1">
           <Key>
@@ -17717,7 +17705,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="DropDownItem8" Relationship="ERPModel.FK_Employee_OfficeType" FromRole="Employee" ToRole="DropDownItem" />
           <NavigationProperty Name="DropDownItem9" Relationship="ERPModel.FK_Employee_Religion" FromRole="Employee" ToRole="DropDownItem" />
           <NavigationProperty Name="Educations" Relationship="ERPModel.FK_Education_Employee" FromRole="Employee" ToRole="Education" />
-          <NavigationProperty Name="Grade" Relationship="ERPModel.FK_Employee_Grade" FromRole="Employee" ToRole="Grade" />
           <NavigationProperty Name="Employee1" Relationship="ERPModel.FK_Employee_HrAdmin" FromRole="Employee" ToRole="Employee1" />
           <NavigationProperty Name="Employee2" Relationship="ERPModel.FK_Employee_HrAdmin" FromRole="Employee1" ToRole="Employee" />
           <NavigationProperty Name="Employee11" Relationship="ERPModel.FK_Employee_Manager" FromRole="Employee" ToRole="Employee1" />
@@ -17736,6 +17723,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Upazilas" Relationship="ERPModel.FK_Upazila_Upazila" FromRole="Employee" ToRole="Upazila" />
           <NavigationProperty Name="Vendor" Relationship="ERPModel.FK_Employee_Vendor" FromRole="Employee" ToRole="Vendor" />
           <NavigationProperty Name="Designation" Relationship="ERPModel.FK_Employee_Designation" FromRole="Employee" ToRole="Designation" />
+          <NavigationProperty Name="Grade" Relationship="ERPModel.FK_Employee_Grade" FromRole="Employee" ToRole="Grade" />
         </EntityType>
         <Association Name="FK_AssetAssign_Employee">
           <End Type="ERPModel.Employee" Role="Employee" Multiplicity="1" />
@@ -17962,18 +17950,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="Education">
               <PropertyRef Name="Id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Employee_Grade">
-          <End Type="ERPModel.Grade" Role="Grade" Multiplicity="0..1" />
-          <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Grade">
-              <PropertyRef Name="GradeId" />
-            </Principal>
-            <Dependent Role="Employee">
-              <PropertyRef Name="GradeId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -20118,6 +20094,32 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Grade">
+          <Key>
+            <PropertyRef Name="GradeId" />
+          </Key>
+          <Property Name="GradeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PayScale" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="GradeCode" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Grade" FromRole="Grade" ToRole="Employee" />
+        </EntityType>
+        <Association Name="FK_Employee_Grade">
+          <End Type="ERPModel.Grade" Role="Grade" Multiplicity="0..1" />
+          <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Grade">
+              <PropertyRef Name="GradeId" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="GradeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -21572,19 +21574,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="FolderPath" ColumnName="FolderPath" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="FileCatagoryId" ColumnName="FileCatagoryId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Grades">
-            <EntityTypeMapping TypeName="ERPModel.Grade">
-              <MappingFragment StoreEntitySet="Grade">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="GradeCode" ColumnName="GradeCode" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="PayScale" ColumnName="PayScale" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="GradeId" ColumnName="GradeId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -27080,6 +27069,20 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="DesignationId" ColumnName="DesignationId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Grades">
+            <EntityTypeMapping TypeName="ERPModel.Grade">
+              <MappingFragment StoreEntitySet="Grade">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="GradeCode" ColumnName="GradeCode" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="PayScale" ColumnName="PayScale" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="GradeId" ColumnName="GradeId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

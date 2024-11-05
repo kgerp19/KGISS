@@ -105,7 +105,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<FileArchive> FileArchives { get; set; }
         public virtual DbSet<FileAttachment> FileAttachments { get; set; }
         public virtual DbSet<FileCatagory> FileCatagories { get; set; }
-        public virtual DbSet<Grade> Grades { get; set; }
         public virtual DbSet<Head1> Head1 { get; set; }
         public virtual DbSet<Head2> Head2 { get; set; }
         public virtual DbSet<Head3> Head3 { get; set; }
@@ -364,6 +363,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<ProductionDetail> ProductionDetails { get; set; }
         public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public virtual DbSet<Designation> Designations { get; set; }
+        public virtual DbSet<Grade> Grades { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

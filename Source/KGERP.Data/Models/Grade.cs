@@ -23,6 +23,7 @@ namespace KGERP.Data.Models
         public int GradeId { get; set; }
         public string Name { get; set; }
         public string PayScale { get; set; }
+        public Nullable<int> CompanyId { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string GradeCode { get; set; }
