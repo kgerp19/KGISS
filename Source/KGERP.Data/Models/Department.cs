@@ -22,6 +22,9 @@ namespace KGERP.Data.Models
     
         public int DepartmentId { get; set; }
         public string Name { get; set; }
+        public Nullable<int> CompanyId { get; set; }
+        public string ModifyBy { get; set; }
+        public Nullable<System.DateTime> ModifyDate { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public bool IsActive { get; set; }

@@ -502,7 +502,7 @@ namespace KGERP.Controllers
             {
                 model.EmployeePasswordList = await (from e in context.Employees
                                                     join a in context.AdminSetUps on e.EmployeeId equals a.EmployeeId
-                                                    where e.Active && e.CompanyId == companyId
+                                                    where e.Active && e.CompanyId == companyId 
                                                     select new GetEmployeePasswordVM
                                                     {
                                                         EmployeeName = e.Name,

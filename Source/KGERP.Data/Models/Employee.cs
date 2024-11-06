@@ -106,7 +106,6 @@ namespace KGERP.Data.Models
         public virtual Bank Bank { get; set; }
         public virtual BankBranch BankBranch { get; set; }
         public virtual Company Company { get; set; }
-        public virtual Department Department { get; set; }
         public virtual District District { get; set; }
         public virtual District District1 { get; set; }
         public virtual Division Division { get; set; }
@@ -154,5 +153,6 @@ namespace KGERP.Data.Models
         public virtual Vendor Vendor { get; set; }
         public virtual Designation Designation { get; set; }
         public virtual Grade Grade { get; set; }
+        public virtual Department Department { get; set; }
     }
 }

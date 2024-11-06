@@ -1260,6 +1260,9 @@ warning 6002: The table/view 'KGISSDB.dbo.AttendanceType' does not have a primar
           </Key>
           <Property Name="DepartmentId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="CompanyId" Type="int" />
+          <Property Name="ModifyBy" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
           <Property Name="CreatedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime2" Precision="0" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
@@ -9938,7 +9941,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="CrmUploadHistories" EntityType="ERPModel.CrmUploadHistory" />
           <EntitySet Name="Currencies" EntityType="ERPModel.Currency" />
           <EntitySet Name="CustomerBookingFileMappings" EntityType="ERPModel.CustomerBookingFileMapping" />
-          <EntitySet Name="Departments" EntityType="ERPModel.Department" />
           <EntitySet Name="DisputedLists" EntityType="ERPModel.DisputedList" />
           <EntitySet Name="Districts" EntityType="ERPModel.District" />
           <EntitySet Name="Divisions" EntityType="ERPModel.Division" />
@@ -10565,10 +10567,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="Company" EntitySet="Companies" />
             <End Role="Employee" EntitySet="Employees" />
           </AssociationSet>
-          <AssociationSet Name="FK_Employee_Department" Association="ERPModel.FK_Employee_Department">
-            <End Role="Department" EntitySet="Departments" />
-            <End Role="Employee" EntitySet="Employees" />
-          </AssociationSet>
           <AssociationSet Name="FK_Employee_District" Association="ERPModel.FK_Employee_District">
             <End Role="District" EntitySet="Districts" />
             <End Role="Employee" EntitySet="Employees" />
@@ -10926,6 +10924,11 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_SaleReturn_OrderDeliver" Association="ERPModel.FK_SaleReturn_OrderDeliver">
             <End Role="OrderDeliver" EntitySet="OrderDelivers" />
             <End Role="SaleReturn" EntitySet="SaleReturns" />
+          </AssociationSet>
+          <EntitySet Name="Departments" EntityType="ERPModel.Department" />
+          <AssociationSet Name="FK_Employee_Department" Association="ERPModel.FK_Employee_Department">
+            <End Role="Department" EntitySet="Departments" />
+            <End Role="Employee" EntitySet="Employees" />
           </AssociationSet>
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
@@ -12064,17 +12067,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="CreatedDate" Type="DateTime" Precision="3" />
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="Department">
-          <Key>
-            <PropertyRef Name="DepartmentId" />
-          </Key>
-          <Property Name="DepartmentId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Department" FromRole="Department" ToRole="Employee" />
         </EntityType>
         <EntityType Name="DisputedList">
           <Key>
@@ -17690,7 +17682,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Bank" Relationship="ERPModel.FK_Employee_Bank" FromRole="Employee" ToRole="Bank" />
           <NavigationProperty Name="BankBranch" Relationship="ERPModel.FK_Employee_Employee" FromRole="Employee" ToRole="BankBranch" />
           <NavigationProperty Name="Company" Relationship="ERPModel.FK_Employee_Company" FromRole="Employee" ToRole="Company" />
-          <NavigationProperty Name="Department" Relationship="ERPModel.FK_Employee_Department" FromRole="Employee" ToRole="Department" />
           <NavigationProperty Name="District" Relationship="ERPModel.FK_Employee_District" FromRole="Employee" ToRole="District" />
           <NavigationProperty Name="District1" Relationship="ERPModel.FK_Employee_RegionDistrict" FromRole="Employee" ToRole="District" />
           <NavigationProperty Name="Division" Relationship="ERPModel.FK_Employee_Division" FromRole="Employee" ToRole="Division" />
@@ -17724,6 +17715,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Vendor" Relationship="ERPModel.FK_Employee_Vendor" FromRole="Employee" ToRole="Vendor" />
           <NavigationProperty Name="Designation" Relationship="ERPModel.FK_Employee_Designation" FromRole="Employee" ToRole="Designation" />
           <NavigationProperty Name="Grade" Relationship="ERPModel.FK_Employee_Grade" FromRole="Employee" ToRole="Grade" />
+          <NavigationProperty Name="Department" Relationship="ERPModel.FK_Employee_Department" FromRole="Employee" ToRole="Department" />
         </EntityType>
         <Association Name="FK_AssetAssign_Employee">
           <End Type="ERPModel.Employee" Role="Employee" Multiplicity="1" />
@@ -17770,18 +17762,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="Employee">
               <PropertyRef Name="CompanyId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Employee_Department">
-          <End Type="ERPModel.Department" Role="Department" Multiplicity="0..1" />
-          <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Department">
-              <PropertyRef Name="DepartmentId" />
-            </Principal>
-            <Dependent Role="Employee">
-              <PropertyRef Name="DepartmentId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -20120,6 +20100,32 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Department">
+          <Key>
+            <PropertyRef Name="DepartmentId" />
+          </Key>
+          <Property Name="DepartmentId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="ModifyBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Department" FromRole="Department" ToRole="Employee" />
+        </EntityType>
+        <Association Name="FK_Employee_Department">
+          <End Type="ERPModel.Department" Role="Department" Multiplicity="0..1" />
+          <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Department">
+              <PropertyRef Name="DepartmentId" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="DepartmentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -21229,17 +21235,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="DocId" ColumnName="DocId" />
                 <ScalarProperty Name="CGId" ColumnName="CGId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Departments">
-            <EntityTypeMapping TypeName="ERPModel.Department">
-              <MappingFragment StoreEntitySet="Department">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -27083,6 +27078,20 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="ProductType" ColumnName="ProductType" />
                 <ScalarProperty Name="OrderMasterId" ColumnName="OrderMasterId" />
                 <ScalarProperty Name="OrderDeliverId" ColumnName="OrderDeliverId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Departments">
+            <EntityTypeMapping TypeName="ERPModel.Department">
+              <MappingFragment StoreEntitySet="Department">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="ModifyBy" ColumnName="ModifyBy" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
