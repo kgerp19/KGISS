@@ -342,7 +342,8 @@ namespace KGERP.Service.Implementation
             }
             this.context.Database.CommandTimeout = 180;
             //Employee employee = context.Employees.Include(x => x.FileAttachments).Include("Employee3").Include("Company").Include("Department").Include("Designation").Include("District").Include("Shift").Include("Grade").Include("Bank").Include("BankBranch").Include("DropDownItem").Include("DropDownItem1").Include("DropDownItem2").Include("DropDownItem3").Include("DropDownItem4").Include("DropDownItem5").Include("DropDownItem6").Include("DropDownItem7").Include("DropDownItem8").Include("DropDownItem9").OrderByDescending(x => x.Id == id).FirstOrDefault();
-            string PassText = (from e in context.Employees
+            string PassText;
+            var PassText1 = (from e in context.Employees
                                join user in context.AdminSetUps
                                on e.EmployeeId equals user.EmployeeId into userGroup
                                from user in userGroup.DefaultIfEmpty()
@@ -350,7 +351,17 @@ namespace KGERP.Service.Implementation
                                select new
                                {
                                    Password = user.Remarks
-                               }).First().Password;
+                               }).FirstOrDefault();
+
+            if (PassText1!=null)
+            {
+                PassText = PassText1.Password;
+            }
+            else
+            {
+                PassText = null;
+            }
+
             Employee employee = context.Employees.Include(x => x.FileAttachments).Include("Employee3").Include("Company").Include("Department").Include("Designation").Include("District").Include("Grade").Include("Bank").Include("BankBranch").Include("DropDownItem").Include("DropDownItem1").Include("DropDownItem2").Include("DropDownItem3").Include("DropDownItem4").Include("DropDownItem5").Include("DropDownItem6").Include("DropDownItem7").Include("DropDownItem8").Include("DropDownItem9").OrderByDescending(x => x.Id == id).FirstOrDefault();
 
             if (employee.ShiftId != null)

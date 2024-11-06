@@ -4295,7 +4295,7 @@ namespace KGERP.Service.Implementation
                                                          Remarks = t1.Remarks,
                                                          CompanyFK = t1.CompanyId,
                                                          Phone = t1.Phone,
-                                                         ZoneName = t5.Name,
+                                                         ZoneName = t6.Name,
                                                          ZoneIncharge = t6.ZoneIncharge,
                                                          CreditLimit = t1.CreditLimit,
                                                          NID = t1.NID,
