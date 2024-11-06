@@ -30,9 +30,11 @@ namespace KGERP.Utility
         {
             var context = System.Web.HttpContext.Current;
 
-            if (context == null && context.User == null)
+            if (context.User == null)
             {
-               
+                context.Response.Redirect("~/User/Login");
+                context.Response.End();
+                return null;
             }
 
             return context.User.Identity != null ? context.User.Identity.Name : null;

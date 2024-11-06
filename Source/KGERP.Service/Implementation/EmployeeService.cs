@@ -10,6 +10,7 @@ using KGERP.Utility.Util;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Data.Entity.Validation;
 using System.Data.SqlClient;
 using System.Globalization;
@@ -256,7 +257,7 @@ namespace KGERP.Service.Implementation
             string newKgNumber = num.ToString().PadLeft(4, '0');
             return kg + newKgNumber;
         }
-        private string GetEmployeeIdISS(string employeeId,int companyId)
+        private string GetEmployeeIdISS(string employeeId, int companyId)
         {
             if (string.IsNullOrEmpty(employeeId))
             {
@@ -273,7 +274,7 @@ namespace KGERP.Service.Implementation
             if (int.TryParse(numericPart, out int number))
             {
                 number++;
-                string incrementedNumericPart = number.ToString(new string('0', numericPart.Length)); 
+                string incrementedNumericPart = number.ToString(new string('0', numericPart.Length));
                 return textPart + incrementedNumericPart;
             }
             else
@@ -317,7 +318,7 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public EmployeeModel GetEmployee(long id,int companyId)
+        public EmployeeModel GetEmployee(long id, int companyId)
         {
 
             if (id <= 0)
@@ -336,7 +337,7 @@ namespace KGERP.Service.Implementation
                 }
                 return new EmployeeModel()
                 {
-                    EmployeeId = GetEmployeeIdISS(lastEmployee.EmployeeId,companyId)
+                    EmployeeId = GetEmployeeIdISS(lastEmployee.EmployeeId, companyId)
                 };
             }
             this.context.Database.CommandTimeout = 180;
@@ -536,7 +537,7 @@ namespace KGERP.Service.Implementation
         //    {
         //        currentMonthDataOfAttendanceLogDetail.ForEach(x => x.CompanyId = CompanyId);
         //    }
-             
+
         //    if (await context.SaveChangesAsync() > 0)
         //    {
 
@@ -615,22 +616,23 @@ namespace KGERP.Service.Implementation
                         }
                     }
 
-                }
-                else
-                {
-                    employee.EndDate = null;
-                    employee.EndReason = null;
-                    User user = context.Users.FirstOrDefault(d => d.UserName == model.EmployeeId);
-                    if (user != null)
-                    {
-                        user.Active = true;
-                        user.IsEmailVerified = true;
-                        context.Users.Add(user);
-                        context.Entry(user).State = EntityState.Modified;
-                        context.SaveChanges();
-                    }
 
                 }
+                //else
+                //{
+                //    employee.EndDate = null;
+                //    employee.EndReason = null;
+                //    User user = context.Users.FirstOrDefault(d => d.UserName == model.EmployeeId);
+                //    if (user != null)
+                //    {
+                //        user.Active = true;
+                //        user.IsEmailVerified = true;
+                //        context.Users.Add(user);
+                //        context.Entry(user).State = EntityState.Modified;
+                //        context.SaveChanges();
+                //    }
+
+                //}
 
 
 
@@ -711,63 +713,75 @@ namespace KGERP.Service.Implementation
                 }
             }
 
+            if (model.Active)
+            {
+                employee.Active = model.Active;
+                employee.EmployeeId = model.EmployeeId;
+                employee.ManagerId = model.ManagerId;
+                employee.HrAdminId = Common.GetHRAdminId();
+                employee.CardId = model.CardId;
+                employee.ShortName = model.ShortName;
+                employee.Name = model.Name;
+                employee.GenderId = model.GenderId;
+                employee.PresentAddress = model.PresentAddress;
+                employee.FatherName = model.FatherName;
+                employee.MotherName = model.MotherName;
+                employee.SpouseName = model.SpouseName;
+                employee.Telephone = model.Telephone;
+                employee.MobileNo = model.MobileNo;
+                employee.PABX = model.PABX;
+                employee.FaxNo = model.FaxNo;
+                employee.Email = model.Email;
+                employee.SocialId = model.SocialId;
+                employee.OfficeEmail = model.OfficeEmail;
+                employee.PermanentAddress = model.PermanentAddress;
+                employee.DepartmentId = model.DepartmentId;
+                employee.DesignationId = model.DesignationId;
+                employee.EmployeeCategoryId = model.EmployeeCategoryId;
+                employee.ServiceTypeId = model.ServiceTypeId;
+                employee.JobStatusId = model.JobStatusId;
+                employee.JoiningDate = model.JoiningDate;
+                employee.ProbationEndDate = model.ProbationEndDate;
+                employee.PermanentDate = model.PermanentDate;
+                employee.CompanyId = model.CompanyId;
+                employee.ShiftId = model.ShiftId;
+                employee.DateOfBirth = model.DateOfBirth;
+                employee.DateOfMarriage = model.DateOfMarriage;
+                employee.GradeId = model.GradeId;
+                employee.CountryId = model.CountryId;
+                employee.MaritalTypeId = model.MaritalTypeId;
+                employee.DivisionId = model.DivisionId;
+                employee.DistrictId = model.DistrictId;
+                employee.UpzillaId = model.UpzillaId;
+                employee.BankId = model.BankId;
+                employee.BankBranchId = model.BankBranchId;
+                employee.BankAccount = model.BankAccount;
+                employee.DrivingLicenseNo = model.DrivingLicenseNo;
+                employee.PassportNo = model.PassportNo;
+                employee.NationalId = model.NationalId;
+                employee.TinNo = model.TinNo;
+                employee.ReligionId = model.ReligionId;
+                employee.BloodGroupId = model.BloodGroupId;
+                employee.DesignationFlag = model.DesignationFlag;
+                employee.DisverseMethodId = model.DisverseMethodId;
+                employee.OfficeTypeId = model.OfficeTypeId;
+                employee.Remarks = model.Remarks;
+                employee.EmployeeOrder = model.EmployeeOrder;
+                employee.SalaryTag = model.SalaryTag;
+                employee.RegionDistictId = model.RegionDistictId;
+                employee.VendorId = model.VendorId;
+            }
+            else if(!model.Active)
+            {
+                employee.Active = model.Active;
+            }
+            employee.ModifedBy = Common.GetUserId();
+            employee.ModifiedDate = DateTime.Now;
 
 
-            employee.Active = model.Active;
-            employee.EmployeeId = model.EmployeeId;
-            employee.ManagerId = model.ManagerId;
-            employee.HrAdminId = Common.GetHRAdminId();
-            employee.CardId = model.CardId;
-            employee.ShortName = model.ShortName;
-            employee.Name = model.Name;
-            employee.GenderId = model.GenderId;
-            employee.PresentAddress = model.PresentAddress;
-            employee.FatherName = model.FatherName;
-            employee.MotherName = model.MotherName;
-            employee.SpouseName = model.SpouseName;
-            employee.Telephone = model.Telephone;
-            employee.MobileNo = model.MobileNo;
-            employee.PABX = model.PABX;
-            employee.FaxNo = model.FaxNo;
-            employee.Email = model.Email;
-            employee.SocialId = model.SocialId;
-            employee.OfficeEmail = model.OfficeEmail;
-            employee.PermanentAddress = model.PermanentAddress;
-            employee.DepartmentId = model.DepartmentId;
-            employee.DesignationId = model.DesignationId;
-            employee.EmployeeCategoryId = model.EmployeeCategoryId;
-            employee.ServiceTypeId = model.ServiceTypeId;
-            employee.JobStatusId = model.JobStatusId;
-            employee.JoiningDate = model.JoiningDate;
-            employee.ProbationEndDate = model.ProbationEndDate;
-            employee.PermanentDate = model.PermanentDate;
-            employee.CompanyId = model.CompanyId;
-            employee.ShiftId = model.ShiftId;
-            employee.DateOfBirth = model.DateOfBirth;
-            employee.DateOfMarriage = model.DateOfMarriage;
-            employee.GradeId = model.GradeId;
-            employee.CountryId = model.CountryId;
-            employee.MaritalTypeId = model.MaritalTypeId;
-            employee.DivisionId = model.DivisionId;
-            employee.DistrictId = model.DistrictId;
-            employee.UpzillaId = model.UpzillaId;
-            employee.BankId = model.BankId;
-            employee.BankBranchId = model.BankBranchId;
-            employee.BankAccount = model.BankAccount;
-            employee.DrivingLicenseNo = model.DrivingLicenseNo;
-            employee.PassportNo = model.PassportNo;
-            employee.NationalId = model.NationalId;
-            employee.TinNo = model.TinNo;
-            employee.ReligionId = model.ReligionId;
-            employee.BloodGroupId = model.BloodGroupId;
-            employee.DesignationFlag = model.DesignationFlag;
-            employee.DisverseMethodId = model.DisverseMethodId;
-            employee.OfficeTypeId = model.OfficeTypeId;
-            employee.Remarks = model.Remarks;
-            employee.EmployeeOrder = model.EmployeeOrder;
-            employee.SalaryTag = model.SalaryTag;
-            employee.RegionDistictId = model.RegionDistictId;
-            employee.VendorId = model.VendorId;
+
+
+
             //employee.ServiceCompany = model.ServiceCompany;
             //var existEmployee = context.Employees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
 
@@ -776,7 +790,9 @@ namespace KGERP.Service.Implementation
             //                   select i.Id).FirstOrDefault();
             try
             {
+
                 bool u = context.SaveChanges() > 0;
+
                 if (u == true)
                 {
                     //model.Id = employee.Id;

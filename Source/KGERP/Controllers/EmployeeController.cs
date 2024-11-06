@@ -432,7 +432,7 @@ namespace KGERP.Controllers
                 result = employeeService.SaveEmployee(0, vm.Employee);
                 if (result)
                 {
-                    return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId,  id = 0 });
+                    return RedirectToAction("CreateOrEdit", new { companyId = vm.Employee.CompanyId,  id = vm.Employee.Id });
                 }
                 
             }

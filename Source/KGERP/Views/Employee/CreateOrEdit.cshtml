@@ -63,7 +63,7 @@
                                         @Html.LabelFor(model => model.Employee.ManagerId, htmlAttributes: new { @class = "control-label col-md-4" })
                                         <div class="col-md-8">
                                             @*@Html.DropDownListFor(model => model.Employee.ManagerId, new SelectList(Model.Managers, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control selectpicker" })*@
-                                            @Html.DropDownListFor(model => model.Employee.ManagerId, new SelectList(Model.Managers, "Value", "Text"), "---Select---", new { @class = "searchingDropdown form-control input-sm" })
+                                            @Html.DropDownListFor(model => model.Employee.ManagerId, new SelectList(Model.Managers, "Value", "Text"), "---Select---", new { @class = "searchingDropdown form-control input-sm", @required = "required" })
                                             @Html.ValidationMessageFor(model => model.Employee.ManagerId, "", new { @class = "text-danger" })
                                             @*@Html.EditorFor(model => model.Employee.ManagerName, new { htmlAttributes = new { @class = "form-control", @name = "managerName", @id = "managerName" } })
                                                 @Html.HiddenFor(x => x.Employee.ManagerId, new { @id = "managerId", @name = "managerId" })
@@ -598,7 +598,7 @@
             <div class="col-md-offset-6 col-md-6">
                 <div class="form-group">
                     <div class="col-md-offset-9">
-                        <input type="submit" value="@Model.Employee.ButtonName" class="btn btn-primary" />
+                        <input type="submit" id="btnSubmit" value="@Model.Employee.ButtonName" class="btn btn-primary" />
                         @*<input type="submit" value="@Model.Employee.ButtonName" onclick="javascript: return SubmitForm();" class="btn btn-info" />*@
                     </div>
                 </div>
@@ -613,6 +613,42 @@
     @Styles.Render("~/Content/cssjqryUi")
 
     <script type="text/javascript">
+        let mandatoryEmployeeFieldCheck = () => {
+            debugger
+            // Get values from the input fields  
+            let employeeJoiningDate = $('#Employee_JoiningDate').val();
+            let employeeManagerId = $('#Employee_ManagerId').val();
+            let employeeProbationEndDate = $('#Employee_ProbationEndDate').val();
+            let employeeDepartmentId = $('#Employee_DepartmentId').val();
+            let designationId = $('#designationId').val();
+            let employeeEmployeeCategoryId = $('#Employee_EmployeeCategoryId').val();
+            let employeeJobStatusId = $('#Employee_JobStatusId').val();
+            let employeeServiceTypeId = $('#Employee_ServiceTypeId').val();
+            let employeeOfficeTypeId = $('#Employee_OfficeTypeId').val();
+            let employeeShiftId = $('#Employee_ShiftId').val();
+            let employeeGradeId = $('#Employee_GradeId').val();
+
+            // Check if any of the required fields are empty  
+            let allFieldsFilled = employeeJoiningDate && employeeProbationEndDate && employeeDepartmentId &&
+                designationId && employeeEmployeeCategoryId && employeeJobStatusId &&
+                employeeServiceTypeId && employeeOfficeTypeId && employeeShiftId &&
+                employeeGradeId && employeeManagerId;
+
+            // Select the submit button  
+            let submitButton = $('#btnSubmit');
+
+            if (allFieldsFilled) {
+                // Enable the submit button if all fields are filled  
+                submitButton.prop('disabled', false);
+                submitButton.attr('title', ''); // Clear tooltip  
+            } else {
+                // Disable the submit button and add tooltip if any field is empty  
+                submitButton.prop('disabled', true);
+                submitButton.attr('title', 'Job information is mandatory With Manager');
+            }
+        };
+
+
         $(document).ready(function () {
             // Enable Live Search.
             $('#designationId').attr('data-live-search', true);
@@ -632,6 +668,8 @@
         });
 
         $(function () {
+            mandatoryEmployeeFieldCheck();
+            $('#Employee_JoiningDate, #Employee_ProbationEndDate, #Employee_DepartmentId, #designationId, #Employee_EmployeeCategoryId, #Employee_JobStatusId, #Employee_ServiceTypeId, #Employee_OfficeTypeId, #Employee_ShiftId, #Employee_GradeId,#Employee_ManagerId').on('change', mandatoryEmployeeFieldCheck);
             $("#managerName").autocomplete({
                 source: function (request, response) {
                     $.ajax({

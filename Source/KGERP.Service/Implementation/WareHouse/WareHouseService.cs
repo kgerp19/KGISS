@@ -3416,6 +3416,7 @@ namespace KGERP.Services.WareHouse
         //Feed RMAdjustmentad Starts - Hridoy 17 May 2022
         public async Task<int> FeedStockAdjustAdd(VMStockAdjustDetail vmStockAdjustDetail)
         {
+           
             int result = -1;
             #region Genarate Store-In ID
             int deliverDetailCount = _db.StockAdjusts.Where(x => x.CompanyId == vmStockAdjustDetail.CompanyFK).Count();
@@ -3441,7 +3442,7 @@ namespace KGERP.Services.WareHouse
 
 
                 CompanyId = vmStockAdjustDetail.CompanyFK.Value,
-                CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),// System.Web.HttpContext.Current.User.Identity.Name,
+                CreatedBy = Common.GetUserId(),
                 CreatedDate = DateTime.Now,
                 IsActive = true
             };
