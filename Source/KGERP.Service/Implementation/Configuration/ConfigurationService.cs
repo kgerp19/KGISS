@@ -3360,6 +3360,7 @@ namespace KGERP.Service.Implementation
             VMProductStock vMProductStock = new VMProductStock();
             vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", products.ID, products.CompanyFK).FirstOrDefault();
             products.CostingPrice = vMProductStock.ClosingRate;
+            products.RemainingStockInQty = vMProductStock.ClosingQty;
 
             return products;
         }

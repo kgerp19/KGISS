@@ -775,6 +775,7 @@ namespace KGERP.Services.WareHouse
         public int StockAdjustDetailId { get; set; }
         public int ProductId { get; set; }
         public decimal UnitPrice { get; set; }
+        public decimal RemainingStockInQty { get; set; }
         public decimal ExcessQty { get; set; }
         public decimal LessQty { get; set; }
 

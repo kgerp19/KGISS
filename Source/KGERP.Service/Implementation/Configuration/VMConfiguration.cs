@@ -659,7 +659,7 @@ namespace KGERP.Service.Configuration
         public decimal TransportationOverhead { get; set; }
         public decimal OthersCost { get; set; }
         public string OthersCostNote { get; set; }
-
+        public decimal RemainingStockInQty { get; set; }
         public IEnumerable<VMCommonProduct> DataList { get; set; }
         public List<SelectModelType> GetProductCategoryList { get; set; }
         public SelectList ProductCategoryList { get; set; } = new SelectList(new List<object>());
