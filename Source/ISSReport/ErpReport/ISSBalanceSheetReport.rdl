@@ -7,9 +7,9 @@
     </am:CreatedBy>
     <am:UpdatedBy>
       <am:Name>SSDTRS</am:Name>
-      <am:Version>17.6.33723.286</am:Version>
+      <am:Version>17.11.35327.3</am:Version>
     </am:UpdatedBy>
-    <am:LastModifiedTimestamp>2024-10-23T05:28:35.0141409Z</am:LastModifiedTimestamp>
+    <am:LastModifiedTimestamp>2024-11-07T10:29:46.5870644Z</am:LastModifiedTimestamp>
   </am:AuthoringMetadata>
   <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
   <AutoRefresh>0</AutoRefresh>
@@ -334,7 +334,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
 
 	
 	Select 
-	(Select SUM(Income)
+	IsNull((Select IsNull(SUM(Income),0)
 	From (SELECT 
 		(CASE
 		WHEN Head1.DrIncrease = 1
@@ -355,11 +355,11 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
  AND Voucher.IsSubmit = 1
  and Voucher.VoucherDate  &lt;=  @FromDate
  AND (@CostCenterId = 0  or Voucher.Accounting_CostCenterFk = @CostCenterId)
- Group By Head1.DrIncrease, HeadGL.Id) AS TotalIncome)
+ Group By Head1.DrIncrease, HeadGL.Id) AS TotalIncome),0)
 
  -
 
- (Select SUM(Expenses) From 
+ ISNULL((Select ISNULL(SUM(Expenses),0) From 
  (SELECT 
 		(CASE
 		WHEN Head1.DrIncrease = 1
@@ -380,7 +380,7 @@ WHERE        (CompanyId = @CompanyId)</CommandText>
  AND Voucher.IsSubmit =1
  and Voucher.VoucherDate  &lt;=  @FromDate 
 AND (@CostCenterId = 0  or Voucher.Accounting_CostCenterFk = @CostCenterId)
- Group By Head1.DrIncrease, HeadGL.Id) AS TotalIncome) AS Balance
+ Group By Head1.DrIncrease, HeadGL.Id) AS TotalIncome),0) AS Balance
 	</CommandText>
       </Query>
       <Fields>

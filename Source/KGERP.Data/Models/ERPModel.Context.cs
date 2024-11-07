@@ -163,7 +163,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Region> Regions { get; set; }
         public virtual DbSet<ReportingPerson> ReportingPersons { get; set; }
         public virtual DbSet<ShareHolder> ShareHolders { get; set; }
-        public virtual DbSet<Shift> Shifts { get; set; }
         public virtual DbSet<ShiftEmployee> ShiftEmployees { get; set; }
         public virtual DbSet<Shipper> Shippers { get; set; }
         public virtual DbSet<SMSScheduleLog> SMSScheduleLogs { get; set; }
@@ -364,6 +363,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<Grade> Grades { get; set; }
         public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
+        public virtual DbSet<Shift> Shifts { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

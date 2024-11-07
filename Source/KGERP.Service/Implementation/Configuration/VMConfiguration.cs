@@ -1031,6 +1031,16 @@ namespace KGERP.Service.Configuration
         public string ShortName { get; set; }
     }
 
+    public class VMCommonShift : BaseVM
+    {
+
+        public string Name { get; set; }
+        public string StarAt { get; set; }
+        public string EndAt { get; set; }
+        public bool PostFlag { get; set; }
+        public IEnumerable<VMCommonShift> DataList { get; set; }
+    }
+
     public class VMCommonBankBranch : BaseVM
     {
         public string Name { get; set; }

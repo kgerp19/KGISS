@@ -3863,7 +3863,12 @@ warning 6002: The table/view 'KGISSDB.dbo.ServerConfig' does not have a primary 
           <Property Name="StartAt" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="EndAt" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="PostFlag" Type="int" Nullable="false" />
-          <Property Name="CreatedDate" Type="datetime2" Precision="0" Nullable="false" />
+          <Property Name="CompanyId" Type="int" />
+          <Property Name="CreatedBy" Type="varchar" MaxLength="50" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="UpdateBy" Type="varchar" MaxLength="50" />
+          <Property Name="UpdateDate" Type="datetime" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="ShiftEmployee">
           <Key>
@@ -10021,7 +10026,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="Regions" EntityType="ERPModel.Region" />
           <EntitySet Name="ReportingPersons" EntityType="ERPModel.ReportingPerson" />
           <EntitySet Name="ShareHolders" EntityType="ERPModel.ShareHolder" />
-          <EntitySet Name="Shifts" EntityType="ERPModel.Shift" />
           <EntitySet Name="ShiftEmployees" EntityType="ERPModel.ShiftEmployee" />
           <EntitySet Name="Shippers" EntityType="ERPModel.Shipper" />
           <EntitySet Name="SMSScheduleLogs" EntityType="ERPModel.SMSScheduleLog" />
@@ -10631,10 +10635,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="Employee" EntitySet="Employees" />
             <End Role="Employee1" EntitySet="Employees" />
           </AssociationSet>
-          <AssociationSet Name="FK_Employee_Shift" Association="ERPModel.FK_Employee_Shift">
-            <End Role="Shift" EntitySet="Shifts" />
-            <End Role="Employee" EntitySet="Employees" />
-          </AssociationSet>
           <AssociationSet Name="FK_EmployeeAttendance_Employee" Association="ERPModel.FK_EmployeeAttendance_Employee">
             <End Role="Employee" EntitySet="Employees" />
             <End Role="EmployeeAttendance" EntitySet="EmployeeAttendances" />
@@ -10928,6 +10928,11 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="Departments" EntityType="ERPModel.Department" />
           <AssociationSet Name="FK_Employee_Department" Association="ERPModel.FK_Employee_Department">
             <End Role="Department" EntitySet="Departments" />
+            <End Role="Employee" EntitySet="Employees" />
+          </AssociationSet>
+          <EntitySet Name="Shifts" EntityType="ERPModel.Shift" />
+          <AssociationSet Name="FK_Employee_Shift" Association="ERPModel.FK_Employee_Shift">
+            <End Role="Shift" EntitySet="Shifts" />
             <End Role="Employee" EntitySet="Employees" />
           </AssociationSet>
           </EntityContainer>
@@ -13667,18 +13672,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-        </EntityType>
-        <EntityType Name="Shift">
-          <Key>
-            <PropertyRef Name="ShiftId" />
-          </Key>
-          <Property Name="ShiftId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="StartAt" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="EndAt" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="PostFlag" Type="Int32" Nullable="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="0" />
-          <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Shift" FromRole="Shift" ToRole="Employee" />
         </EntityType>
         <EntityType Name="ShiftEmployee">
           <Key>
@@ -17700,7 +17693,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Employee2" Relationship="ERPModel.FK_Employee_HrAdmin" FromRole="Employee1" ToRole="Employee" />
           <NavigationProperty Name="Employee11" Relationship="ERPModel.FK_Employee_Manager" FromRole="Employee" ToRole="Employee1" />
           <NavigationProperty Name="Employee3" Relationship="ERPModel.FK_Employee_Manager" FromRole="Employee1" ToRole="Employee" />
-          <NavigationProperty Name="Shift" Relationship="ERPModel.FK_Employee_Shift" FromRole="Employee" ToRole="Shift" />
           <NavigationProperty Name="EmployeeAttendances" Relationship="ERPModel.FK_EmployeeAttendance_Employee" FromRole="Employee" ToRole="EmployeeAttendance" />
           <NavigationProperty Name="FileAttachments" Relationship="ERPModel.FK_FileAttachment_Employee" FromRole="Employee" ToRole="FileAttachment" />
           <NavigationProperty Name="LeaveApplications" Relationship="ERPModel.FK_LeaveApplication_Employee" FromRole="Employee" ToRole="LeaveApplication" />
@@ -17716,6 +17708,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Designation" Relationship="ERPModel.FK_Employee_Designation" FromRole="Employee" ToRole="Designation" />
           <NavigationProperty Name="Grade" Relationship="ERPModel.FK_Employee_Grade" FromRole="Employee" ToRole="Grade" />
           <NavigationProperty Name="Department" Relationship="ERPModel.FK_Employee_Department" FromRole="Employee" ToRole="Department" />
+          <NavigationProperty Name="Shift" Relationship="ERPModel.FK_Employee_Shift" FromRole="Employee" ToRole="Shift" />
         </EntityType>
         <Association Name="FK_AssetAssign_Employee">
           <End Type="ERPModel.Employee" Role="Employee" Multiplicity="1" />
@@ -17954,18 +17947,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="Employee1">
               <PropertyRef Name="ManagerId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Employee_Shift">
-          <End Type="ERPModel.Shift" Role="Shift" Multiplicity="0..1" />
-          <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Shift">
-              <PropertyRef Name="ShiftId" />
-            </Principal>
-            <Dependent Role="Employee">
-              <PropertyRef Name="ShiftId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -20123,6 +20104,35 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="Employee">
               <PropertyRef Name="DepartmentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Shift">
+          <Key>
+            <PropertyRef Name="ShiftId" />
+          </Key>
+          <Property Name="ShiftId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="StartAt" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="EndAt" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="PostFlag" Type="Int32" Nullable="false" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="CreatedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdateBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="UpdateDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Shift" FromRole="Shift" ToRole="Employee" />
+        </EntityType>
+        <Association Name="FK_Employee_Shift">
+          <End Type="ERPModel.Shift" Role="Shift" Multiplicity="0..1" />
+          <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Shift">
+              <PropertyRef Name="ShiftId" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="ShiftId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -22855,18 +22865,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
                 <ScalarProperty Name="ShareHolderTypeId" ColumnName="ShareHolderTypeId" />
                 <ScalarProperty Name="ShareHolderId" ColumnName="ShareHolderId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Shifts">
-            <EntityTypeMapping TypeName="ERPModel.Shift">
-              <MappingFragment StoreEntitySet="Shift">
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="PostFlag" ColumnName="PostFlag" />
-                <ScalarProperty Name="EndAt" ColumnName="EndAt" />
-                <ScalarProperty Name="StartAt" ColumnName="StartAt" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="ShiftId" ColumnName="ShiftId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -27092,6 +27090,23 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Shifts">
+            <EntityTypeMapping TypeName="ERPModel.Shift">
+              <MappingFragment StoreEntitySet="Shift">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="UpdateDate" ColumnName="UpdateDate" />
+                <ScalarProperty Name="UpdateBy" ColumnName="UpdateBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="PostFlag" ColumnName="PostFlag" />
+                <ScalarProperty Name="EndAt" ColumnName="EndAt" />
+                <ScalarProperty Name="StartAt" ColumnName="StartAt" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ShiftId" ColumnName="ShiftId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

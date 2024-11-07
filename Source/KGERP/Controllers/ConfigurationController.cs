@@ -1939,6 +1939,8 @@ namespace Pos.App.Controllers
             vmCommonBank = await Task.Run(() => _service.GetBanks(companyId));
             return View(vmCommonBank);
         }
+
+        
         [HttpPost]
         public async Task<ActionResult> CommonBank(VMCommonBank vMCommonBank)
         {
@@ -1967,6 +1969,38 @@ namespace Pos.App.Controllers
 
 
         #endregion
+        public async Task<ActionResult> CommonShift(int companyId)
+        {
+            VMCommonShift vMCommonShift = new VMCommonShift();
+            vMCommonShift = await Task.Run(() => _service.GetShift(companyId));
+            return View(vMCommonShift);
+        }
+        [HttpPost]
+        public async Task<ActionResult> CommonShift(VMCommonShift vMCommonShift)
+        {
+
+            if (vMCommonShift.ActionEum == ActionEnum.Add)
+            {
+                //Add 
+                await _service.ShiftAdd(vMCommonShift);
+            }
+            else if (vMCommonShift.ActionEum == ActionEnum.Edit)
+            {
+                //Edit
+                await _service.ShiftEdit(vMCommonShift);
+            }
+            else if (vMCommonShift.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                await _service.ShiftDelete(vMCommonShift.ID);
+            }
+            else
+            {
+                return RedirectToAction("Error");
+            }
+            return RedirectToAction(nameof(CommonShift), new { companyId = vMCommonShift.CompanyFK });
+        }
+
 
         public async Task<ActionResult> CommonDesignation(int companyId)
         {

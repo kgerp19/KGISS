@@ -5511,6 +5511,26 @@ namespace KGERP.Service.Implementation
             return vMCommonBank;
         }
 
+        public async Task<VMCommonShift> GetShift(int companyId)
+        {
+            VMCommonShift vMCommonShift = new VMCommonShift();
+
+            vMCommonShift.CompanyFK = companyId;
+
+            vMCommonShift.DataList = await Task.Run(() => (from t1 in _db.Shifts
+                                                          where t1.IsActive && (t1.CompanyId==null ||  t1.CompanyId == companyId)
+                                                          select new VMCommonShift
+                                                          {
+                                                              ID = t1.ShiftId,
+                                                              Name = t1.Name,
+                                                              StarAt=t1.StartAt,
+                                                              EndAt=t1.EndAt,
+                                                              CompanyFK = t1.CompanyId,
+                                                          }).OrderByDescending(x => x.ID).AsEnumerable());
+
+            return vMCommonShift;
+        }
+
         public async Task<VMCommonDesignation> GetDesignation(int companyId)
         {
             VMCommonDesignation commonDesignation = new VMCommonDesignation();
@@ -5551,6 +5571,29 @@ namespace KGERP.Service.Implementation
             return result;
         }
 
+        public async Task<int> ShiftAdd(VMCommonShift vMCommonShift)
+        {
+            var result = -1;
+            Shift shift = new Shift
+            {
+                Name = vMCommonShift.Name,
+                CompanyId = vMCommonShift.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                CreatedDate = DateTime.Now,
+                IsActive = true,
+                StartAt=vMCommonShift.StarAt,
+                EndAt=vMCommonShift.EndAt,
+                
+
+            };
+            _db.Shifts.Add(shift);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = shift.ShiftId;
+            }
+            return result;
+        }
+
         public async Task<int> DesignationAdd(VMCommonDesignation vMCommonDesignation)
         {
             var result = -1;
@@ -5586,6 +5629,23 @@ namespace KGERP.Service.Implementation
             return result;
         }
 
+        public async Task<int> ShiftEdit(VMCommonShift vMCommonShift)
+        {
+            var result = -1;
+            Shift shift = _db.Shifts.Find(vMCommonShift.ID);
+            shift.Name = vMCommonShift.Name;
+            shift.UpdateBy = Common.GetUserId();
+            shift.UpdateDate = DateTime.Now;
+            shift.StartAt = vMCommonShift.StarAt;
+            shift.EndAt = vMCommonShift.EndAt;
+
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = shift.ShiftId;
+            }
+            return result;
+        }
+
         public async Task<int> DesignationEdit(VMCommonDesignation vMCommonDesignation)
         {
             var result = -1;
@@ -5611,6 +5671,22 @@ namespace KGERP.Service.Implementation
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = bank.BankId;
+                }
+            }
+            return result;
+        }
+
+        public async Task<int> ShiftDelete(int id)
+        {
+            int result = -1;
+            if (id != 0)
+            {
+                Shift shift = _db.Shifts.Find(id);
+                shift.IsActive = false;
+
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = shift.ShiftId;
                 }
             }
             return result;
