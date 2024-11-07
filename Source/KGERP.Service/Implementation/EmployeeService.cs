@@ -327,7 +327,7 @@ namespace KGERP.Service.Implementation
 
                 //Employee lastEmployee = context.Employees.OrderByDescending(x => x.EmployeeId).FirstOrDefault();
                 //Employee lastEmployee = context.Employees.Where(x => x.EmployeeId.StartsWith("KG")).OrderByDescending(x => x.EmployeeId).FirstOrDefault();
-                Employee lastEmployee = context.Employees.Where(x => x.CompanyId == companyId && x.Active).OrderByDescending(x => x.EmployeeId).FirstOrDefault();
+                Employee lastEmployee = context.Employees.Where(x => x.CompanyId == companyId).OrderByDescending(x => x.EmployeeId).FirstOrDefault();
 
                 if (lastEmployee == null)
                 {
@@ -679,7 +679,7 @@ namespace KGERP.Service.Implementation
                     {
                         context.Database.ExecuteSqlCommand("exec insertInvalidException {0},{1}", userModel.UserName, userModel.UserName.ToLower());
                         //-----------------Default Menu Assign--------------------
-                        int noOfRowsAffected = context.Database.ExecuteSqlCommand("spHRMSAssignDefaultMenu {0},{1}", employee.EmployeeId, employee.CreatedBy);
+                        int noOfRowsAffected = 1;// context.Database.ExecuteSqlCommand("spHRMSAssignDefaultMenu {0},{1}", employee.EmployeeId, employee.CreatedBy);
                         //LeaveService.InsertSickLeave(employee.Id, employee.JoiningDate ?? DateTime.Today, true);
                         id = employee.Id;
                         model.Id = employee.Id;

@@ -135,11 +135,11 @@ namespace KGERP.Service.Implementation
         #endregion
 
         #region Departments
-        public async Task<VMDepartment> DepartmentGet()
+        public async Task<VMDepartment> DepartmentGet(int CompanyId)
         {
             VMDepartment vmDepartment = new VMDepartment();
             vmDepartment.DataList = (from t1 in _db.Departments
-                                     where t1.IsActive == true
+                                     where t1.IsActive && (t1.CompanyId==null || t1.CompanyId== CompanyId)
                                      select new VMDepartment
                                      {
                                          DepartmentId = t1.DepartmentId,
@@ -159,6 +159,7 @@ namespace KGERP.Service.Implementation
                 Name = vmDepartment.Name,                
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
+                CompanyId=vmDepartment.CompanyFK,
                 IsActive = true
             };
             _db.Departments.Add(department);
@@ -176,7 +177,9 @@ namespace KGERP.Service.Implementation
                 try
                 {
                     Department department = _db.Departments.Find(vmDepartment.DepartmentId);
-                    department.Name = vmDepartment.Name;                    
+                    department.Name = vmDepartment.Name;
+                    department.ModifyDate = DateTime.Now;
+                    department.ModifyBy = Common.GetUserId();
                    await _db.SaveChangesAsync();
                     result = department.DepartmentId;
                     dbTran.Commit();

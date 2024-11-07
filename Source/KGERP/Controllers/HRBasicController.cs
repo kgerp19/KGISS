@@ -92,11 +92,11 @@ namespace Pos.App.Controllers
 
 
 
-        public async Task<ActionResult> Department()
+        public async Task<ActionResult> Department(int companyId)
         {
             VMDepartment vmGrade;
-            vmGrade = await Task.Run(() => _service.DepartmentGet());
-
+            vmGrade = await Task.Run(() => _service.DepartmentGet(companyId));
+            vmGrade.CompanyFK = companyId;
 
             return View(vmGrade);
         }
