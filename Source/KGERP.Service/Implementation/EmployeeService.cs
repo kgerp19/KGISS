@@ -679,7 +679,7 @@ namespace KGERP.Service.Implementation
                     {
                         context.Database.ExecuteSqlCommand("exec insertInvalidException {0},{1}", userModel.UserName, userModel.UserName.ToLower());
                         //-----------------Default Menu Assign--------------------
-                        int noOfRowsAffected = 1;// context.Database.ExecuteSqlCommand("spHRMSAssignDefaultMenu {0},{1}", employee.EmployeeId, employee.CreatedBy);
+                        int noOfRowsAffected = 1; // context.Database.ExecuteSqlCommand("spHRMSAssignDefaultMenu {0},{1}", employee.EmployeeId, employee.CreatedBy);
                         //LeaveService.InsertSickLeave(employee.Id, employee.JoiningDate ?? DateTime.Today, true);
                         id = employee.Id;
                         model.Id = employee.Id;
