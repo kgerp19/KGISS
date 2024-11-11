@@ -951,7 +951,7 @@ namespace KGERP.Service.Implementation
                          label = (t1.Name + "-" + t2.Name + "( " + t1.EmployeeId + " )"),
                          val = t1.Id,
                          mob = t1.MobileNo,
-                         Email=t1.Email,
+                         Email=(t1.OfficeEmail == null?t1.Email : t1.OfficeEmail),
                          Designation=t2.Name
                      }).OrderBy(x => x.label).Take(100).ToList();
 
