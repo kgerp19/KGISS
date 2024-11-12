@@ -104,11 +104,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<FileArchive> FileArchives { get; set; }
         public virtual DbSet<FileAttachment> FileAttachments { get; set; }
         public virtual DbSet<FileCatagory> FileCatagories { get; set; }
-        public virtual DbSet<Head1> Head1 { get; set; }
-        public virtual DbSet<Head2> Head2 { get; set; }
-        public virtual DbSet<Head3> Head3 { get; set; }
-        public virtual DbSet<Head4> Head4 { get; set; }
-        public virtual DbSet<Head5> Head5 { get; set; }
         public virtual DbSet<HolidayCategory> HolidayCategories { get; set; }
         public virtual DbSet<IncentiveCatagory> IncentiveCatagories { get; set; }
         public virtual DbSet<IncentiveDistributionChart> IncentiveDistributionCharts { get; set; }
@@ -325,7 +320,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<QualityExceptionComplaint> QualityExceptionComplaints { get; set; }
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
         public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
-        public virtual DbSet<HeadGL> HeadGLs { get; set; }
         public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
         public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
         public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
@@ -364,6 +358,12 @@ namespace KGERP.Data.Models
         public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<Shift> Shifts { get; set; }
+        public virtual DbSet<HeadGL> HeadGLs { get; set; }
+        public virtual DbSet<Head1> Head1 { get; set; }
+        public virtual DbSet<Head2> Head2 { get; set; }
+        public virtual DbSet<Head3> Head3 { get; set; }
+        public virtual DbSet<Head4> Head4 { get; set; }
+        public virtual DbSet<Head5> Head5 { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

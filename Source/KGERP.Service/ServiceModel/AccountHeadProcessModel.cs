@@ -27,6 +27,7 @@ namespace KGERP.Service.ServiceModel
         public string Status { get; set; }
         public string ButtonName { get; set; }
         public string DeletedStatus { get; set; }
+        public bool IsPrimaryHead { get; set; }
         public bool IsActive { get; set; }
 
     }

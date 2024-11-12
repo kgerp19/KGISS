@@ -26,6 +26,7 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> CreateDate { get; set; }
         public string ModifiedBy { get; set; }
         public Nullable<System.DateTime> ModifiedDate { get; set; }
+        public bool IsPrimary { get; set; }
         public int IsMember { get; set; }
         public int IsPFMember { get; set; }
         public bool IsActive { get; set; }

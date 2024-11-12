@@ -28,6 +28,7 @@ namespace KGERP.Data.Models
         public Nullable<int> OrderNo { get; set; }
         public Nullable<int> LayerNo { get; set; }
         public string Remarks { get; set; }
+        public bool IsPrimaryHead5 { get; set; }
         public string CreatedBy { get; set; }
         public Nullable<System.DateTime> CreateDate { get; set; }
         public string ModifiedBy { get; set; }

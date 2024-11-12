@@ -450,7 +450,37 @@ namespace KGERP.Service.Implementation
 
         public AccountHeadProcessModel GetSelectedItem(int accountHeadId, int layerNo, string accCode, string accName)
         {
-            return new AccountHeadProcessModel { Id = accountHeadId, LayerNo = layerNo, AccCode = accCode, AccName = accName };
+
+            bool isPrimaryHead = false;
+
+            switch (layerNo)
+            {
+                case 1:
+                    isPrimaryHead = context.Head1.Any(x => x.Id == accountHeadId && x.IsPrimaryHead1 && x.IsActive);
+                    break;
+                case 2:
+                    isPrimaryHead = context.Head2.Any(x => x.Id == accountHeadId && x.IsPrimaryHead2 && x.IsActive);
+                    break;
+                case 3:
+                    isPrimaryHead = context.Head3.Any(x => x.Id == accountHeadId && x.IsPrimaryHead3 && x.IsActive);
+                    break;
+                case 4:
+                    isPrimaryHead = context.Head4.Any(x => x.Id == accountHeadId && x.IsPrimaryHead4 && x.IsActive);
+                    break;
+                case 5:
+                    isPrimaryHead = context.Head5.Any(x => x.Id == accountHeadId && x.IsPrimaryHead5 && x.IsActive);
+                    break;
+                case 6:
+                    isPrimaryHead = context.HeadGLs.Any(x => x.Id == accountHeadId && x.IsPrimary && x.IsActive);
+                    break;
+
+                default:
+                    isPrimaryHead = false;
+                    break;
+            }
+            
+
+            return new AccountHeadProcessModel { Id = accountHeadId, LayerNo = layerNo, AccCode = accCode, AccName = accName,IsPrimaryHead= isPrimaryHead };
         }
 
         public bool SaveAccountHead(AccountHeadProcessModel model)
