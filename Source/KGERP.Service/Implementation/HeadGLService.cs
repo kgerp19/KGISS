@@ -692,7 +692,7 @@ namespace KGERP.Service.Implementation
                     }
                     else
                     {
-                        var chiled2 = context.Head3.Where(e => e.ParentId == model.Id).ToList();
+                        var chiled2 = context.Head3.Where(e => e.ParentId == model.Id && e.IsActive).ToList();
 
                         if (chiled2.Count == 0)
                         {
@@ -725,7 +725,7 @@ namespace KGERP.Service.Implementation
                     }
                     else
                     {
-                        var chiled3=context.Head4.Where(e=>e.ParentId==model.Id).ToList();
+                        var chiled3=context.Head4.Where(e=>e.ParentId==model.Id && e.IsActive).ToList();
                         if(chiled3.Count == 0)
                         {
                             obj.IsActive = false;
@@ -759,7 +759,7 @@ namespace KGERP.Service.Implementation
                     }
                     else
                     {
-                        var chiled4 = context.Head5.Where(e => e.ParentId == model.Id).ToList();
+                        var chiled4 = context.Head5.Where(e => e.ParentId == model.Id && e.IsActive).ToList();
 
                         if( chiled4.Count == 0)
                         {
@@ -795,7 +795,7 @@ namespace KGERP.Service.Implementation
                     else
                     {
 
-                        var child5 = context.HeadGLs.Where(e => e.ParentId == model.Id).ToList();
+                        var child5 = context.HeadGLs.Where(e => e.ParentId == model.Id && e.IsActive).ToList();
 
                         if (child5.Count == 0)
                         {
@@ -848,7 +848,7 @@ namespace KGERP.Service.Implementation
                     }
                     else
                     {
-                        var childGl = context.VoucherDetails.Where(e => e.AccountHeadId == model.Id).ToList();
+                        var childGl = context.VoucherDetails.Where(e => e.AccountHeadId == model.Id && e.IsActive).ToList();
 
                         if (childGl.Count == 0)
                         {
@@ -1120,6 +1120,11 @@ namespace KGERP.Service.Implementation
         public AccountHeadProcessModel GetAccountHeadProcessDelete(int accountHeadId, int layerNo, string status)
         {
             AccountHeadProcessModel model = new AccountHeadProcessModel { ButtonName = "Delete" };
+            int countVouchers = context.VoucherDetails.Count(x => x.AccountHeadId == accountHeadId && x.IsActive);
+            if (countVouchers > 0)
+            {
+                model.DeletedStatus = $"Could not be deleted! Already Have {countVouchers} voucher details using this";
+            }
             if (layerNo == 1)
             {
                 Head1 head1 = context.Head1.Where(x => x.Id == accountHeadId).FirstOrDefault();
