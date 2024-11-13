@@ -345,7 +345,7 @@ namespace KGERP.Service.Configuration
  public string Imageurl { get; set; }
 
         public List<string> UploadedFileUrls { get; set; }
-
+        public string SubZoneName { get; set; }
     }
     public class VMCommonSupplierProduct : VMCommonProduct
     {

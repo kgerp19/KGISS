@@ -4313,7 +4313,8 @@ namespace KGERP.Service.Implementation
                                                          SaleLiUrl=t1.WLImageUrl,
                                                          DelerLiUrl=t1.SDLImageUrl,
                                                          TinUrl=t1.TINImageUrl,
-                                                         BankChkUrl=t1.CheckImageUrl
+                                                         BankChkUrl=t1.CheckImageUrl,
+                                                         SubZoneName=t5.Name
 
                                                      }).FirstOrDefault());
 
