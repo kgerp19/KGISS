@@ -7,6 +7,6 @@ namespace KGERP.Service.Interface
     public interface IGradeService
     {
         List<Grade> GetGrades();
-        List<SelectModel> GetGradeSelectModels();
+        List<SelectModel> GetGradeSelectModels(int CompanyId);
     }
 }

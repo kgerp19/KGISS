@@ -350,8 +350,8 @@ namespace KGERP.Controllers
                 vm.Districts = new List<SelectModel>();
             }
 
-            vm.Shifts = shiftService.GetShiftSelectModels();
-            vm.SalaryGrades = gradeService.GetGradeSelectModels();
+            vm.Shifts = shiftService.GetShiftSelectModels(companyId);
+            vm.SalaryGrades = gradeService.GetGradeSelectModels(companyId);
             return View(vm);
         }
        
@@ -527,8 +527,8 @@ namespace KGERP.Controllers
                 vm.Districts = new List<SelectModel>();
             }
 
-            vm.Shifts = shiftService.GetShiftSelectModels();
-            vm.SalaryGrades = gradeService.GetGradeSelectModels();
+            vm.Shifts = shiftService.GetShiftSelectModels(CompanyId);
+            vm.SalaryGrades = gradeService.GetGradeSelectModels(CompanyId);
             vm.Employee.CompanyId = CompanyId;
             return View(vm);
         }

@@ -7,6 +7,6 @@ namespace KGERP.Service.Interface
     public interface IShiftService
     {
         List<Shift> GetShifts();
-        List<SelectModel> GetShiftSelectModels();
+        List<SelectModel> GetShiftSelectModels(int CompanyId);
     }
 }

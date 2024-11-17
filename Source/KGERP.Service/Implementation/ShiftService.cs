@@ -14,11 +14,11 @@ namespace KGERP.Service.Implementation
             return shiftRepository.Shifts.ToList();
         }
 
-        public List<SelectModel> GetShiftSelectModels()
+        public List<SelectModel> GetShiftSelectModels(int CompanyId)
         {
-            return shiftRepository.Shifts.ToList().Select(x => new SelectModel()
+            return shiftRepository.Shifts.Where(x=>x.IsActive && (x.CompanyId==null || x.CompanyId==CompanyId)).ToList().Select(x => new SelectModel()
             {
-                Text = x.Name.ToString(),
+                Text = x.Name+ "("+x.StartAt+"-"+x.EndAt+")",
                 Value = x.ShiftId.ToString()
             }).ToList();
         }

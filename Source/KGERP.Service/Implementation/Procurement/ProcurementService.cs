@@ -1319,7 +1319,7 @@ namespace KGERP.Services.Procurement
                         CompanyId = vmPurchaseOrderSlave.CompanyFK,
                         CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
                         CreatedDate = DateTime.Now,
-                        VATAddition = vmPurchaseOrderSlave.VATAddition,
+                        VATAddition = 0, //vmPurchaseOrderSlave.VATAddition,
                         IsActive = true,
                         IsVATIncluded=vmPurchaseOrderSlave.IsVATIncluded
                     };

@@ -14,9 +14,9 @@ namespace KGERP.Service.Implementation
             return gradeRepository.Grades.ToList();
         }
 
-        public List<SelectModel> GetGradeSelectModels()
+        public List<SelectModel> GetGradeSelectModels(int CompanyId)
         {
-            return gradeRepository.Grades.ToList().Select(x => new SelectModel()
+            return gradeRepository.Grades.Where(x => x.IsActive && (x.CompanyId == null || x.CompanyId == CompanyId)).ToList().Select(x => new SelectModel()
             {
                 Text =x.GradeCode+" - "+ x.Name.ToString(),
                 Value = x.GradeId.ToString()
