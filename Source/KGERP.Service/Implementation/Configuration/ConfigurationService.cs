@@ -816,7 +816,7 @@ namespace KGERP.Service.Implementation
                      join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
                      join t4 in _db.Units on t1.UnitId equals t4.UnitId
 
-                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType &&
+                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType && t2.IsActive && t3.IsActive && t4.IsActive &&
                      ((t1.ProductName.StartsWith(prefix)) || (t2.Name.StartsWith(prefix)) || (t3.Name.StartsWith(prefix)) || (t1.ShortName.StartsWith(prefix)))
 
                      select new
@@ -1998,7 +1998,7 @@ namespace KGERP.Service.Implementation
             vmCommonProductCategory.CompanyFK = companyId;
             vmCommonProductCategory.DataList = await Task.Run(() => (from t1 in _db.ProductCategories
                                                                      where t1.ProductType == productType &&
-                                                                     t1.IsActive && t1.CompanyId == companyId
+                                                                     t1.IsActive && t1.CompanyId == companyId && t1.IsActive
                                                                      // productCategoryId > 0 ? t1.ProductCategoryId == productCategoryId: t1.ProductCategoryId > 0
                                                                      select new VMCommonProductCategory
                                                                      {
@@ -2157,7 +2157,7 @@ namespace KGERP.Service.Implementation
             VMCommonProductSubCategory vmCommonProductSubCategory = new VMCommonProductSubCategory();
             if (categoryId > 0)
             {
-                vmCommonProductSubCategory = await Task.Run(() => (from t1 in _db.ProductCategories.Where(x => x.ProductCategoryId == categoryId)
+                vmCommonProductSubCategory = await Task.Run(() => (from t1 in _db.ProductCategories.Where(x => x.ProductCategoryId == categoryId && x.IsActive)
 
                                                                    select new VMCommonProductSubCategory
                                                                    {
@@ -2659,8 +2659,8 @@ namespace KGERP.Service.Implementation
             VMCommonProduct vmCommonProduct = new VMCommonProduct();
             if ((categoryId == 0 && subCategoryId > 0) || (categoryId > 0 && subCategoryId > 0))
             {
-                vmCommonProduct = await (from t1 in _db.ProductSubCategories.Where(x => x.ProductSubCategoryId == subCategoryId)
-                                         join t2 in _db.ProductCategories on t1.ProductCategoryId equals t2.ProductCategoryId
+                vmCommonProduct = await (from t1 in _db.ProductSubCategories.Where(x => x.ProductSubCategoryId == subCategoryId && x.IsActive)
+                                         join t2 in _db.ProductCategories.Where(x=>x.IsActive) on t1.ProductCategoryId equals t2.ProductCategoryId
                                          select new VMCommonProduct
                                          {
                                              Common_ProductSubCategoryFk = t1.ProductSubCategoryId,
@@ -3394,6 +3394,45 @@ namespace KGERP.Service.Implementation
                          FormulaQty = t1.FormulaQty
 
                      }).FirstOrDefault();
+            return v;
+        }
+
+        public VMRealStateProduct GetCommonProductByProducId(int id, int CompanyId = 0)
+        {
+            var v = (from t1 in _db.Products.Where(x => x.ProductId == id)
+                     join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                     join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+                     join t4 in _db.Units on t1.UnitId equals t4.UnitId
+
+                     select new VMRealStateProduct
+                     {
+                         ID = t1.ProductId,
+                         Name = t1.ProductName,
+                         UnitPrice = t1.UnitPrice ?? 0,
+                         TPPrice = t1.TPPrice,
+                         ShortName = t1.ShortName,
+                         SubCategoryName = t2.Name,
+                         CategoryName = t3.Name,
+                         UnitName = t4.Name,
+                         Common_ProductSubCategoryFk = t1.ProductSubCategoryId,
+                         Common_UnitFk = t1.UnitId,
+                         Common_ProductCategoryFk = t2.ProductCategoryId,
+                         CompanyFK = t1.CompanyId,
+                         CostingPrice = t1.CostingPrice,
+                         PackId = t1.PackId,
+
+                         DieSize = t1.DieSize,
+                         PackSize = t1.PackSize,
+                         ProcessLoss = t1.ProcessLoss,
+                         FormulaQty = t1.FormulaQty
+
+                     }).FirstOrDefault();
+            if (CompanyId > 0)
+            {
+                VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", id, CompanyId).FirstOrDefault();
+                v.CostingPrice = products.ClosingRate;
+            }
+
             return v;
         }
 
