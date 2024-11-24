@@ -1064,6 +1064,13 @@ namespace Pos.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetCommonProductByProducId(int id,int CompanyId=0)
+        {
+
+            var model = _service.GetCommonProductByProducId(id, CompanyId);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult AutoCompleteSupplier(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteSupplier(companyId, prefix);

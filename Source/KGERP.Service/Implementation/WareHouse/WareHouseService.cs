@@ -3484,7 +3484,7 @@ namespace KGERP.Services.WareHouse
 
                 StockInfoId = vmStockAdjustDetail.StockInfoId,
                 CompanyId = vmStockAdjustDetail.CompanyFK.Value,
-                CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),// System.Web.HttpContext.Current.User.Identity.Name,
+                CreatedBy = System.Web.HttpContext.Current.Session["UserName"].ToString(),// System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true
             };
@@ -5445,7 +5445,7 @@ namespace KGERP.Services.WareHouse
                 result = model.StockAdjustId;
             }
 
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
+            if (result > 0)
             {
                 #region Ready To Account Integration
                 VMStockAdjustDetail AccData = await WareHouseOrderItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
@@ -5454,29 +5454,38 @@ namespace KGERP.Services.WareHouse
                 #endregion
             }
 
+            //if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
+            //{
+            //    #region Ready To Account Integration
+            //    VMStockAdjustDetail AccData = await WareHouseOrderItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
+            //    await _accountingService.StockAdjustPushIss(vmModel.CompanyFK.Value, AccData);
 
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                #region Ready To Account Integration
-                VMStockAdjustDetail AccData = await GCCLItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushGCCL(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.AdjustmentEntry);
-                //if (AccData.LessQty == 0 && AccData.ExcessQty > 0)
-                //{
-                //    UpdateProductCostingPrice(AccData);
-                //}
-                #endregion
-            }
-            if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-            {
-                #region Ready To Account Integration
-                VMStockAdjustDetail AccData = await KfmalItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
-                await _accountingService.AccountingStockAdjustPushKfmal(vmModel.CompanyFK.Value, AccData, (int)KfmalJournalEnum.Adjustment);
-                //if (AccData.LessQty == 0 && AccData.ExcessQty > 0)
-                //{
-                //    UpdateProductCostingPrice(AccData);
-                //}
-                #endregion
-            }
+            //    #endregion
+            //}
+
+
+            //if (result > 0 && vmModel.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
+            //{
+            //    #region Ready To Account Integration
+            //    VMStockAdjustDetail AccData = await GCCLItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
+            //    await _accountingService.AccountingStockAdjustPushGCCL(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.AdjustmentEntry);
+            //    //if (AccData.LessQty == 0 && AccData.ExcessQty > 0)
+            //    //{
+            //    //    UpdateProductCostingPrice(AccData);
+            //    //}
+            //    #endregion
+            //}
+            //if (result > 0 && vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+            //{
+            //    #region Ready To Account Integration
+            //    VMStockAdjustDetail AccData = await KfmalItemAdjustmentDetailGet(vmModel.CompanyFK.Value, vmModel.StockAdjustId);
+            //    await _accountingService.AccountingStockAdjustPushKfmal(vmModel.CompanyFK.Value, AccData, (int)KfmalJournalEnum.Adjustment);
+            //    //if (AccData.LessQty == 0 && AccData.ExcessQty > 0)
+            //    //{
+            //    //    UpdateProductCostingPrice(AccData);
+            //    //}
+            //    #endregion
+            //}
             return result;
         }
 
