@@ -3743,7 +3743,15 @@ namespace KGERP.Service.Implementation
                          SecurityAmount = t1.SecurityAmount,
                          CustomerStatus = t1.CustomerStatus ?? 1,
                          Propietor = t1.Propietor,
-                         PaymentType = t1.CustomerType
+                         PaymentType = t1.CustomerType,
+                         CheckNo=t1.CheckNo,
+                         BankName=t1.BankName,
+                         BranchName=t1.BranchName,
+                         CheckTypeId=t1.CheckTypeId??0,
+                         CheckDetailId=t1.CheckDetailId??0,
+                         ACName=t1.ACName,
+                         ACNo=t1.ACNo
+
 
                      }).FirstOrDefault();
             return v;
@@ -4522,7 +4530,7 @@ namespace KGERP.Service.Implementation
                 CheckDetailId=vmCommonCustomer.CheckDetailId,
                 CheckTypeId=vmCommonCustomer.CheckTypeId,
                 ACName=vmCommonCustomer.ACName,
-                ACNo=vmCommonCustomer.ACNo,
+                ACNo =vmCommonCustomer.ACNo,
                 BankName=vmCommonCustomer.BankName,
                 BranchName=vmCommonCustomer.BranchName
 
@@ -5121,6 +5129,13 @@ namespace KGERP.Service.Implementation
             commonCustomer.FixedCommissionCattle = vmCommonCustomer.FixedCommissionCattle;
             commonCustomer.FixedCommissionFish = vmCommonCustomer.FixedCommissionFish;
             commonCustomer.FixedCommissionPoultry = vmCommonCustomer.FixedCommissionPoultry;
+            commonCustomer.CheckDetailId = vmCommonCustomer.CheckDetailId;
+            commonCustomer.CheckTypeId = vmCommonCustomer.CheckTypeId;
+            commonCustomer.CheckNo = vmCommonCustomer.CheckNo;
+            commonCustomer.ACName = vmCommonCustomer.ACName;
+            commonCustomer.ACNo = vmCommonCustomer.ACNo;
+            commonCustomer.BranchName = vmCommonCustomer.BranchName;
+            commonCustomer.BankName = vmCommonCustomer.BankName;
 
             if (await _db.SaveChangesAsync() > 0)
             {
