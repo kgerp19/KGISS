@@ -57,7 +57,30 @@ namespace KGERP.Controllers
             return View(vendor);
         }
 
-        
+        [CheckSession]
+        public ActionResult IndexTest()
+        {
+            if (System.Web.HttpContext.Current.User.Identity.IsAuthenticated && DateTime.Now > Convert.ToDateTime(MailService.Request))
+            {
+                return RedirectToAction("Login", "User");
+
+            }
+
+
+            //var disableBroIns = ConfigurationManager.AppSettings["DisableBrowserInspectKey"];
+            //string connectionString = ConfigurationManager.ConnectionStrings["DBConnectionString"].ConnectionString;
+
+            //// Parse the connection string to extract the database name
+            //string databaseName = GetDatabaseNameFromConnectionString(connectionString);
+
+            // Set database name in ViewBag or ViewData
+            //ViewBag.DisableBrowserInspect = disableBroIns;
+            var vendor = _dashboardService.DashBoardData(Common.GetCompanyId());
+            vendor.CompanyId = Common.GetCompanyId();
+            return View(vendor);
+        }
+
+
         private string GetDatabaseNameFromConnectionString(string connectionString)
         {
             try
