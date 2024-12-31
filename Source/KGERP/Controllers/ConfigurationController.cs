@@ -1684,14 +1684,14 @@ namespace Pos.App.Controllers
             {
                 return RedirectToAction("Error");
             }
-            if (vmCommonCustomer.CompanyFK == (int)CompanyName.GloriousLandsAndDevelopmentsLimited || vmCommonCustomer.CompanyFK == (int)CompanyName.KrishibidPropertiesLimited)
-            {
-                return RedirectToAction(nameof(RSCommonCustomer), new { companyId = vmCommonCustomer.CompanyFK });
-            }
-            if (vmCommonCustomer.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                return RedirectToAction(nameof(CommonFeedCustomer), new { companyId = vmCommonCustomer.CompanyFK });
-            }
+            //if (vmCommonCustomer.CompanyFK == (int)CompanyName.GloriousLandsAndDevelopmentsLimited || vmCommonCustomer.CompanyFK == (int)CompanyName.KrishibidPropertiesLimited)
+            //{
+            //    return RedirectToAction(nameof(RSCommonCustomer), new { companyId = vmCommonCustomer.CompanyFK });
+            //}
+            //if (vmCommonCustomer.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
+            //{
+            //    return RedirectToAction(nameof(CommonFeedCustomer), new { companyId = vmCommonCustomer.CompanyFK });
+            //}
             return RedirectToAction(nameof(CommonCustomer), new { companyId = vmCommonCustomer.CompanyFK });
         }
 
