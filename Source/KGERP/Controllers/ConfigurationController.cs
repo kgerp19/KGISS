@@ -578,22 +578,24 @@ namespace Pos.App.Controllers
             else if (vmCommonProduct.ActionEum == ActionEnum.Delete)
             {
                 //Delete
-                await _service.ProductDelete(vmCommonProduct.ID);
+               var result= await _service.ProductDelete(vmCommonProduct.ID);
+                vmCommonProduct.Common_ProductSubCategoryFk = result.Common_ProductSubCategoryFk;
+                vmCommonProduct.Common_ProductFk = result.Common_ProductFk;
             }
             else
             {
                 return RedirectToAction("Error");
             }
 
-            if (vmCommonProduct.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
-            {
-                return RedirectToAction(nameof(GCCLCommonFinishProduct), new
-                {
-                    companyId = vmCommonProduct.CompanyFK,
-                    categoryId = 0,//vmCommonProduct.Common_ProductCategoryFk, 
-                    subCategoryId = 0// vmCommonProduct.Common_ProductSubCategoryFk
-                });
-            }
+            //if (vmCommonProduct.CompanyFK == (int)CompanyName.GloriousCropCareLimited)
+            //{
+            //    return RedirectToAction(nameof(GCCLCommonFinishProduct), new
+            //    {
+            //        companyId = vmCommonProduct.CompanyFK,
+            //        categoryId = 0,//vmCommonProduct.Common_ProductCategoryFk, 
+            //        subCategoryId = 0// vmCommonProduct.Common_ProductSubCategoryFk
+            //    });
+            //}
 
 
             return RedirectToAction(nameof(CommonFinishProduct), new { companyId = vmCommonProduct.CompanyFK, categoryId = vmCommonProduct.Common_ProductCategoryFk, subCategoryId = vmCommonProduct.Common_ProductSubCategoryFk });
