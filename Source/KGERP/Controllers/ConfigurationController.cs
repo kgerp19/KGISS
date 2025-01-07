@@ -954,6 +954,7 @@ namespace Pos.App.Controllers
             return View(vmTremsAndConditions);
         }
         [HttpPost]
+
         public async Task<ActionResult> POTremsAndConditions(VMPOTremsAndConditions vmpoTremsAndConditions)
         {
 
