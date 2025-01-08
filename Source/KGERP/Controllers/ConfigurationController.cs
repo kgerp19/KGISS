@@ -67,6 +67,7 @@ namespace Pos.App.Controllers
         #region URLInfo
         public ActionResult Index(int? id)
         {
+            var companyId = Common.GetCompanyId();
             UrlInfo urlInfo;
             if (id.HasValue)
             {
@@ -81,7 +82,7 @@ namespace Pos.App.Controllers
             {
                 DataList = _service.GetAllUrls(),
                 UrlInfo = urlInfo,
-                CompanyList = new SelectList(_service.CompaniesDropDownList(), "Value", "Text")
+                CompanyList = new SelectList(_service.CompaniesDropDownList(companyId), "Value", "Text")
             };
 
             return View(model);
@@ -1868,8 +1869,8 @@ namespace Pos.App.Controllers
 
             VMAccountingSignatory vmAccountingSignatory = new VMAccountingSignatory();
             vmAccountingSignatory = await Task.Run(() => _service.GetAccountingSignatory(companyId));
-            vmAccountingSignatory.CompanyList = new SelectList(_service.CompaniesDropDownList(), "Value", "Text");
-            vmAccountingSignatory.DDLEmployee = _dropdownService.RenderDDL(await _dropDownItemService.GetDDLAllEmployeeByCompanyId(), true);
+            vmAccountingSignatory.CompanyList = new SelectList(_service.CompaniesDropDownList(companyId), "Value", "Text");
+            vmAccountingSignatory.DDLEmployee = _dropdownService.RenderDDL(await _dropDownItemService.GetDDLAllEmployeeByCompanyId(companyId), true);
             return View(vmAccountingSignatory);
         }
         [HttpPost]
