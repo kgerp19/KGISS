@@ -87,7 +87,7 @@ namespace KGERP.Service.Implementation
             vmMenuAssignment.DataList = await Task.Run(() => CompanyUserMenuDataLoad(vmUserMenuAssignment));
             vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
             vmMenuAssignment.UserId = vmUserMenuAssignment.UserId;
-            vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(), "Value", "Text");
+            vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(vmMenuAssignment.CompanyFK??0), "Value", "Text");
 
             return vmMenuAssignment;
         }
@@ -2488,10 +2488,10 @@ namespace KGERP.Service.Implementation
                 ).ToList();
             return list;
         }
-        public List<object> CompaniesDropDownList()
+        public List<object> CompaniesDropDownList(int companyid=0)
         {
             var list = new List<object>();
-            var v = _db.Companies.ToList();
+            var v = _db.Companies.Where(x=>(companyid==0 || x.CompanyId==companyid)).ToList();
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.CompanyId });
