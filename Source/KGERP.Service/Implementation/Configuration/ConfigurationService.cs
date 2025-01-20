@@ -5140,11 +5140,11 @@ namespace KGERP.Service.Implementation
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = commonCustomer.VendorId;
-                if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited)
-                {
-                    _db.Database.ExecuteSqlCommand("exec spUpdateCustomerCommission {0},{1},{2}", commonCustomer.CompanyId, commonCustomer.VendorId, commonCustomer.CreatedBy);
+                //if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited)
+                //{
+                //    _db.Database.ExecuteSqlCommand("exec spUpdateCustomerCommission {0},{1},{2}", commonCustomer.CompanyId, commonCustomer.VendorId, commonCustomer.CreatedBy);
 
-                }
+                //}
             }
 
             await IntegratedAccountsHeadEdit(commonCustomer.Name, commonCustomer.HeadGLId.Value);
