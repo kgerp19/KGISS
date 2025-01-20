@@ -321,7 +321,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
         public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
         public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
-        public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
         public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
         public virtual DbSet<KGSalesCollectedAchivement> KGSalesCollectedAchivements { get; set; }
         public virtual DbSet<WorkBoard> WorkBoards { get; set; }
@@ -364,6 +363,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<Head3> Head3 { get; set; }
         public virtual DbSet<Head4> Head4 { get; set; }
         public virtual DbSet<Head5> Head5 { get; set; }
+        public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

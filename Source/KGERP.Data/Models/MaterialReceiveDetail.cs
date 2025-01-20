@@ -14,12 +14,6 @@ namespace KGERP.Data.Models
     
     public partial class MaterialReceiveDetail
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public MaterialReceiveDetail()
-        {
-            this.SeedProcessingDetails = new HashSet<SeedProcessingDetail>();
-        }
-    
         public long MaterialReceiveDetailId { get; set; }
         public Nullable<long> MaterialReceiveId { get; set; }
         public Nullable<int> ProductId { get; set; }
@@ -40,10 +34,8 @@ namespace KGERP.Data.Models
         public System.DateTime CreatedDate { get; set; }
         public Nullable<System.DateTime> ModifiedDate { get; set; }
         public string ModifiedBy { get; set; }
+        public string LotNumber { get; set; }
     
-        public virtual MaterialReceive MaterialReceive { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SeedProcessingDetail> SeedProcessingDetails { get; set; }
         public virtual MaterialReceiveDetail MaterialReceiveDetail1 { get; set; }
         public virtual MaterialReceiveDetail MaterialReceiveDetail2 { get; set; }
     }
