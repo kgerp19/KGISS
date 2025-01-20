@@ -146,6 +146,7 @@ namespace KGERP.Service.Configuration
     public class VMPOTremsAndConditions : BaseVM
     {
         public string Key { get; set; }
+        [AllowHtml]
         public string Value { get; set; }
         public IEnumerable<VMPOTremsAndConditions> DataList { get; set; }
     }

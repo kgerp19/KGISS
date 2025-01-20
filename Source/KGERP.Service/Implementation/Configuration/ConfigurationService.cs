@@ -87,7 +87,7 @@ namespace KGERP.Service.Implementation
             vmMenuAssignment.DataList = await Task.Run(() => CompanyUserMenuDataLoad(vmUserMenuAssignment));
             vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
             vmMenuAssignment.UserId = vmUserMenuAssignment.UserId;
-            vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(), "Value", "Text");
+            vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(vmMenuAssignment.CompanyFK??0), "Value", "Text");
 
             return vmMenuAssignment;
         }
@@ -951,8 +951,8 @@ namespace KGERP.Service.Implementation
                          label = (t1.Name + "-" + t2.Name + "( " + t1.EmployeeId + " )"),
                          val = t1.Id,
                          mob = t1.MobileNo,
-                         Email=(t1.OfficeEmail == null?t1.Email : t1.OfficeEmail),
-                         Designation=t2.Name
+                         Email = (t1.OfficeEmail == null ? t1.Email : t1.OfficeEmail),
+                         Designation = t2.Name
                      }).OrderBy(x => x.label).Take(100).ToList();
 
             return v;
@@ -2221,81 +2221,81 @@ namespace KGERP.Service.Implementation
             {
                 result = commonProductSubCategory.ProductSubCategoryId;
 
-                if (commonProductSubCategory.CompanyId == (int)CompanyName.GloriousCropCareLimited)
-                {
+                //if (commonProductSubCategory.CompanyId == (int)CompanyName.GloriousCropCareLimited)
+                //{
 
-                    ProductSubCategory Subcatetegory = _db.ProductSubCategories.Find(commonProductSubCategory.ProductSubCategoryId);
+                //    ProductSubCategory Subcatetegory = _db.ProductSubCategories.Find(commonProductSubCategory.ProductSubCategoryId);
 
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = Subcatetegory.Name,
-                        LayerNo = 6,
-                        Remarks = "6 Layer",
-                        IsIncomeHead = false,
-                        ProductType = Subcatetegory.ProductType,
-                        CompanyFK = commonProductSubCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now
-                    };
-
-
-                    int headGl = AccHeadGlPush(integration, commonProductSubCategory);
-
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
-                }
+                //    VMHeadIntegration integration = new VMHeadIntegration
+                //    {
+                //        AccName = Subcatetegory.Name,
+                //        LayerNo = 6,
+                //        Remarks = "6 Layer",
+                //        IsIncomeHead = false,
+                //        ProductType = Subcatetegory.ProductType,
+                //        CompanyFK = commonProductSubCategory.CompanyId,
+                //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                //        CreatedDate = DateTime.Now
+                //    };
 
 
-                if (commonProductSubCategory.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
-                {
-                    int head5Id = BlockHead5Push(commonProductSubCategory);
-                    var catetegory = _db.ProductCategories.Find(commonProductSubCategory.ProductCategoryId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = catetegory.Name + " - " + commonProductSubCategory.Name,
-                        LayerNo = 6,
-                        Remarks = "GL Layer",
-                        IsIncomeHead = false,
-                        ParentId = 50602122,
+                //    int headGl = AccHeadGlPush(integration, commonProductSubCategory);
 
-                        CompanyFK = commonProductSubCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
-                    };
-                    HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
-                    if (headGlId != null)
-                    {
-                        await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    }
-                }
-                if (commonProductSubCategory.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
-
-                    ProductSubCategory Subcatetegory = _db.ProductSubCategories.Find(commonProductSubCategory.ProductSubCategoryId);
-
-                    //Brand brnd = _db.Brands.Find(commonProductSubCategory.BrandId);
-                    VMHeadIntegration integration = new VMHeadIntegration
-                    {
-                        AccName = Subcatetegory.Name, //+ "(" + brnd.BrandName+")",
-                        LayerNo = 5,
-                        Remarks = "5 Layer",
-                        IsIncomeHead = false,
-                        ProductType = Subcatetegory.ProductType,
-                        CompanyFK = commonProductSubCategory.CompanyId,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now
-                    };
+                //    //if (headGlId != null)
+                //    //{
+                //    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
+                //    //}
+                //}
 
 
-                    int headGl = Acc5PushKFMAL(integration, commonProductSubCategory);
+                //if (commonProductSubCategory.CompanyId == (int)CompanyName.GloriousLandsAndDevelopmentsLimited)
+                //{
+                //    int head5Id = BlockHead5Push(commonProductSubCategory);
+                //    var catetegory = _db.ProductCategories.Find(commonProductSubCategory.ProductCategoryId);
+                //    VMHeadIntegration integration = new VMHeadIntegration
+                //    {
+                //        AccName = catetegory.Name + " - " + commonProductSubCategory.Name,
+                //        LayerNo = 6,
+                //        Remarks = "GL Layer",
+                //        IsIncomeHead = false,
+                //        ParentId = 50602122,
 
-                    //if (headGlId != null)
-                    //{
-                    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
-                    //}
-                }
+                //        CompanyFK = commonProductSubCategory.CompanyId,
+                //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                //        CreatedDate = DateTime.Now,
+                //    };
+                //    HeadGL headGlId = await PayableHeadIntegrationAdd(integration);
+                //    if (headGlId != null)
+                //    {
+                //        await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
+                //    }
+                //}
+                //if (commonProductSubCategory.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+                //{
+
+                //    ProductSubCategory Subcatetegory = _db.ProductSubCategories.Find(commonProductSubCategory.ProductSubCategoryId);
+
+                //    //Brand brnd = _db.Brands.Find(commonProductSubCategory.BrandId);
+                //    VMHeadIntegration integration = new VMHeadIntegration
+                //    {
+                //        AccName = Subcatetegory.Name, //+ "(" + brnd.BrandName+")",
+                //        LayerNo = 5,
+                //        Remarks = "5 Layer",
+                //        IsIncomeHead = false,
+                //        ProductType = Subcatetegory.ProductType,
+                //        CompanyFK = commonProductSubCategory.CompanyId,
+                //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                //        CreatedDate = DateTime.Now
+                //    };
+
+
+                //    int headGl = Acc5PushKFMAL(integration, commonProductSubCategory);
+
+                //    //if (headGlId != null)
+                //    //{
+                //    //    await GLDLBlockCodeAndHeadGLIdEdit(commonProductSubCategory.ProductSubCategoryId, headGlId, head5Id);
+                //    //}
+                //}
             }
 
 
@@ -2488,10 +2488,10 @@ namespace KGERP.Service.Implementation
                 ).ToList();
             return list;
         }
-        public List<object> CompaniesDropDownList()
+        public List<object> CompaniesDropDownList(int companyid=0)
         {
             var list = new List<object>();
-            var v = _db.Companies.ToList();
+            var v = _db.Companies.Where(x=>(companyid==0 || x.CompanyId==companyid)).ToList();
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.CompanyId });
@@ -2508,7 +2508,7 @@ namespace KGERP.Service.Implementation
             }
             return list;
         }
-        
+
         public List<object> CompanyMenusDropDownList()
         {
             var list = new List<object>();
@@ -2660,7 +2660,7 @@ namespace KGERP.Service.Implementation
             if ((categoryId == 0 && subCategoryId > 0) || (categoryId > 0 && subCategoryId > 0))
             {
                 vmCommonProduct = await (from t1 in _db.ProductSubCategories.Where(x => x.ProductSubCategoryId == subCategoryId && x.IsActive)
-                                         join t2 in _db.ProductCategories.Where(x=>x.IsActive) on t1.ProductCategoryId equals t2.ProductCategoryId
+                                         join t2 in _db.ProductCategories.Where(x => x.IsActive) on t1.ProductCategoryId equals t2.ProductCategoryId
                                          select new VMCommonProduct
                                          {
                                              Common_ProductSubCategoryFk = t1.ProductSubCategoryId,
@@ -2687,20 +2687,56 @@ namespace KGERP.Service.Implementation
                 vmCommonProduct.CompanyFK = companyId;
 
             }
-            vmCommonProduct.DataList = await (from t1 in _db.Products.Where(x => x.CompanyId == companyId && x.ProductType == productType)
+            //vmCommonProduct.DataList = await (from t1 in _db.Products.Where(x => x.CompanyId == companyId && x.ProductType == productType)
+            //                                  join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+            //                                  join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+            //                                  join t4 in _db.Units on t1.UnitId equals t4.UnitId
+            //                                  join t5 in _db.Products on t1.PackId equals t5.ProductId into t5_Join
+            //                                  from t5 in t5_Join.DefaultIfEmpty()
+            //                                  join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId into t6_Join
+            //                                  from t6 in t6_Join.DefaultIfEmpty()
+
+
+            //                                  where t1.IsActive && t2.IsActive && t3.IsActive &&
+            //                                  ((categoryId > 0 && subCategoryId == 0) ? t2.ProductCategoryId == categoryId
+            //                                  : (categoryId == 0 && subCategoryId > 0) ? t1.ProductSubCategoryId == subCategoryId
+            //                                  : t1.ProductId > 0)
+            //                                  select new VMCommonProduct
+            //                                  {
+            //                                      ID = t1.ProductId,
+            //                                      Name = t1.ProductName,
+            //                                      ShortName = t1.ShortName,
+            //                                      UnitPrice = t1.UnitPrice ?? 0,
+            //                                      TPPrice = t1.TPPrice,
+            //                                      CreditSalePrice = t1.CreditSalePrice,
+            //                                      SubCategoryName = t2.Name,
+            //                                      CategoryName = t3.Name,
+            //                                      UnitName = t4.Name,
+            //                                      ProductType = t1.ProductType,
+            //                                      Code = t1.ProductCode,
+
+            //                                      DieSize = t1.DieSize,
+            //                                      PackSize = t1.PackSize,
+            //                                      ProcessLoss = t1.ProcessLoss,
+            //                                      FormulaQty = t1.FormulaQty
+            //                                  }).OrderByDescending(x => x.ID).ToListAsync();//.AsEnumerable()
+            vmCommonProduct.DataList = await (from t1 in _db.Products
+                                              where t1.CompanyId == companyId
+                                                    && t1.ProductType == productType
+                                                    && t1.IsActive
                                               join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                                              where t2.IsActive
                                               join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+                                              where t3.IsActive
                                               join t4 in _db.Units on t1.UnitId equals t4.UnitId
                                               join t5 in _db.Products on t1.PackId equals t5.ProductId into t5_Join
                                               from t5 in t5_Join.DefaultIfEmpty()
                                               join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId into t6_Join
                                               from t6 in t6_Join.DefaultIfEmpty()
-
-
-                                              where t1.IsActive && t2.IsActive && t3.IsActive &&
-                                              ((categoryId > 0 && subCategoryId == 0) ? t2.ProductCategoryId == categoryId
-                                              : (categoryId == 0 && subCategoryId > 0) ? t1.ProductSubCategoryId == subCategoryId
-                                              : t1.ProductId > 0)
+                                              where (categoryId > 0 && subCategoryId > 0 && t2.ProductCategoryId == categoryId && t2.ProductSubCategoryId == subCategoryId) ||
+                                                    (categoryId > 0 && subCategoryId == 0 && t2.ProductCategoryId == categoryId) ||
+                                                    (categoryId == 0 && subCategoryId > 0 && t1.ProductSubCategoryId == subCategoryId) ||
+                                                    (categoryId == 0 && subCategoryId == 0)
                                               select new VMCommonProduct
                                               {
                                                   ID = t1.ProductId,
@@ -2714,7 +2750,6 @@ namespace KGERP.Service.Implementation
                                                   UnitName = t4.Name,
                                                   ProductType = t1.ProductType,
                                                   Code = t1.ProductCode,
-
                                                   DieSize = t1.DieSize,
                                                   PackSize = t1.PackSize,
                                                   ProcessLoss = t1.ProcessLoss,
@@ -3445,7 +3480,7 @@ namespace KGERP.Service.Implementation
                      select new VMFinishProductBOM
                      {
                          ID = t1.ID,
-                         FCEnumId=t1.CalculationUnit??0,
+                         FCEnumId = t1.CalculationUnit ?? 0,
                          RequiredQuantity = t1.RequiredQuantity,
                          RProductFK = t1.RProductFK,
                          FProductFK = t1.FProductFK,
@@ -3493,8 +3528,8 @@ namespace KGERP.Service.Implementation
                                                                               ID = t1.ID,
                                                                               RProductFK = t1.RProductFK,
                                                                               FProductFK = t1.FProductFK,
-                                                                              FCEnumId=t1.CalculationUnit!=null? t1.CalculationUnit.Value:0,
-                                                                              FCEnumName= t1.CalculationUnit != null ? ((FormulaCalculationEnum)t1.CalculationUnit).ToString():"N/A",
+                                                                              FCEnumId = t1.CalculationUnit != null ? t1.CalculationUnit.Value : 0,
+                                                                              FCEnumName = t1.CalculationUnit != null ? ((FormulaCalculationEnum)t1.CalculationUnit).ToString() : "N/A",
                                                                               CategoryName = t4.Name,
                                                                               SubCategoryName = t3.Name,
                                                                               Name = t2.ProductName,
@@ -3599,7 +3634,7 @@ namespace KGERP.Service.Implementation
                 RequiredQuantity = vmFinishProductBOM.RequiredQuantity,
                 RProductFK = vmFinishProductBOM.RProductFK,
                 RProcessLoss = vmFinishProductBOM.RProcessLoss,
-                CalculationUnit=vmFinishProductBOM.FCEnumId,
+                CalculationUnit = vmFinishProductBOM.FCEnumId,
                 CompanyId = vmFinishProductBOM.CompanyFK.Value,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
@@ -3744,13 +3779,13 @@ namespace KGERP.Service.Implementation
                          CustomerStatus = t1.CustomerStatus ?? 1,
                          Propietor = t1.Propietor,
                          PaymentType = t1.CustomerType,
-                         CheckNo=t1.CheckNo,
-                         BankName=t1.BankName,
-                         BranchName=t1.BranchName,
-                         CheckTypeId=t1.CheckTypeId??0,
-                         CheckDetailId=t1.CheckDetailId??0,
-                         ACName=t1.ACName,
-                         ACNo=t1.ACNo
+                         CheckNo = t1.CheckNo,
+                         BankName = t1.BankName,
+                         BranchName = t1.BranchName,
+                         CheckTypeId = t1.CheckTypeId ?? 0,
+                         CheckDetailId = t1.CheckDetailId ?? 0,
+                         ACName = t1.ACName,
+                         ACNo = t1.ACNo
 
 
                      }).FirstOrDefault();
@@ -4348,20 +4383,20 @@ namespace KGERP.Service.Implementation
                                                          NID = t1.NID,
                                                          CustomerTypeFk = t1.CustomerTypeFK,
                                                          VendorTypeId = t1.VendorTypeId,
-                                                         ACName=t1.ACName,
-                                                        BankName=t1.BankName,
-                                                        BranchName=t1.BranchName,
-                                                        Imageurl=t1.ImageUrl,
-                                                        ACNo=t1.ACNo,
-                                                        CheckNo=t1.CheckNo,
+                                                         ACName = t1.ACName,
+                                                         BankName = t1.BankName,
+                                                         BranchName = t1.BranchName,
+                                                         Imageurl = t1.ImageUrl,
+                                                         ACNo = t1.ACNo,
+                                                         CheckNo = t1.CheckNo,
                                                          CheckDetailId = (int)(CheckDetail)t1.CheckDetailId,
                                                          CheckTypeId = (int)(CheckType)t1.CheckTypeId,
-                                                         TradeLicenceUrl =t1.TradeLicenseImageUrl,
-                                                         SaleLiUrl=t1.WLImageUrl,
-                                                         DelerLiUrl=t1.SDLImageUrl,
-                                                         TinUrl=t1.TINImageUrl,
-                                                         BankChkUrl=t1.CheckImageUrl,
-                                                         SubZoneName=t5.Name
+                                                         TradeLicenceUrl = t1.TradeLicenseImageUrl,
+                                                         SaleLiUrl = t1.WLImageUrl,
+                                                         DelerLiUrl = t1.SDLImageUrl,
+                                                         TinUrl = t1.TINImageUrl,
+                                                         BankChkUrl = t1.CheckImageUrl,
+                                                         SubZoneName = t5.Name
 
                                                      }).FirstOrDefault());
 
@@ -4521,18 +4556,18 @@ namespace KGERP.Service.Implementation
                 FixedCommissionPoultry = vmCommonCustomer.FixedCommissionPoultry,
                 NIDImageUrl = vmCommonCustomer.NidImage,
                 ImageUrl = vmCommonCustomer.Imageurl,
-                TradeLicenseImageUrl=vmCommonCustomer.TradeLicenceUrl,
-                BSAMemberImageUrl=vmCommonCustomer.BSAMemUrl,
-                WLImageUrl=vmCommonCustomer.SaleLiUrl,
-                SDLImageUrl=vmCommonCustomer.DelerLiUrl,
-                TINImageUrl=vmCommonCustomer.TinUrl,
-                CheckImageUrl=vmCommonCustomer.BankChkUrl,
-                CheckDetailId=vmCommonCustomer.CheckDetailId,
-                CheckTypeId=vmCommonCustomer.CheckTypeId,
-                ACName=vmCommonCustomer.ACName,
-                ACNo =vmCommonCustomer.ACNo,
-                BankName=vmCommonCustomer.BankName,
-                BranchName=vmCommonCustomer.BranchName
+                TradeLicenseImageUrl = vmCommonCustomer.TradeLicenceUrl,
+                BSAMemberImageUrl = vmCommonCustomer.BSAMemUrl,
+                WLImageUrl = vmCommonCustomer.SaleLiUrl,
+                SDLImageUrl = vmCommonCustomer.DelerLiUrl,
+                TINImageUrl = vmCommonCustomer.TinUrl,
+                CheckImageUrl = vmCommonCustomer.BankChkUrl,
+                CheckDetailId = vmCommonCustomer.CheckDetailId,
+                CheckTypeId = vmCommonCustomer.CheckTypeId,
+                ACName = vmCommonCustomer.ACName,
+                ACNo = vmCommonCustomer.ACNo,
+                BankName = vmCommonCustomer.BankName,
+                BranchName = vmCommonCustomer.BranchName
 
             };
             _db.Vendors.Add(commonCustomer);
@@ -5573,15 +5608,15 @@ namespace KGERP.Service.Implementation
             vMCommonShift.CompanyFK = companyId;
 
             vMCommonShift.DataList = await Task.Run(() => (from t1 in _db.Shifts
-                                                          where t1.IsActive && (t1.CompanyId==null ||  t1.CompanyId == companyId)
-                                                          select new VMCommonShift
-                                                          {
-                                                              ID = t1.ShiftId,
-                                                              Name = t1.Name,
-                                                              StarAt=t1.StartAt,
-                                                              EndAt=t1.EndAt,
-                                                              CompanyFK = t1.CompanyId,
-                                                          }).OrderByDescending(x => x.ID).AsEnumerable());
+                                                           where t1.IsActive && (t1.CompanyId == null || t1.CompanyId == companyId)
+                                                           select new VMCommonShift
+                                                           {
+                                                               ID = t1.ShiftId,
+                                                               Name = t1.Name,
+                                                               StarAt = t1.StartAt,
+                                                               EndAt = t1.EndAt,
+                                                               CompanyFK = t1.CompanyId,
+                                                           }).OrderByDescending(x => x.ID).AsEnumerable());
 
             return vMCommonShift;
         }
@@ -5593,7 +5628,7 @@ namespace KGERP.Service.Implementation
             commonDesignation.CompanyFK = companyId;
 
             commonDesignation.DataList = await Task.Run(() => (from t1 in _db.Designations
-                                                               where t1.IsActive && (t1.CompanyId==null || t1.CompanyId == companyId)
+                                                               where t1.IsActive && (t1.CompanyId == null || t1.CompanyId == companyId)
                                                                select new VMCommonDesignation
                                                                {
                                                                    ID = t1.DesignationId,
@@ -5636,9 +5671,9 @@ namespace KGERP.Service.Implementation
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                StartAt=vMCommonShift.StarAt,
-                EndAt=vMCommonShift.EndAt,
-                
+                StartAt = vMCommonShift.StarAt,
+                EndAt = vMCommonShift.EndAt,
+
 
             };
             _db.Shifts.Add(shift);

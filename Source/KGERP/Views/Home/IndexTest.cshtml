@@ -1,0 +1,248 @@
+﻿@using KGERP.Utility
+@model KGERP.Service.ServiceModel.DashBoardViewModel
+@{
+    ViewBag.Title = "Index";
+}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+@*<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>*@
+<script src="~/Content/lib/chart.umd.min.js"></script>
+<style>
+    .card {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card p {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .card a {
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+            .card a:hover {
+                color: #065f46; /* Slight dark green for hover */
+            }
+
+    #dashboardPieChart {
+        max-width: 350px; /* Adjust the size of the pie chart */
+        max-height: 350px;
+        margin: 0 auto; /* Center the chart horizontally */
+    }
+
+    #dashboardChart {
+        max-width: 100%; /* Ensures the bar chart adjusts to container */
+        height: 300px; /* Fixed height for bar chart */
+    }
+</style>
+
+<div class="bg-gray-50">
+    <div class="container mx-auto px-6 py-10">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-900">Welcome To @Common.GetCompanyName()</h1>
+        </div>
+
+        <!-- Existing Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="card bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-gray-700">Total Customer</h2>
+                <p class="text-green-500">@Model.Totalvendor</p>
+                <a href="#" class="text-green-600 hover:text-green-800 mt-4 inline-block">More info &gt;</a>
+            </div>
+            <div class="card bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-gray-700">Total Supplier</h2>
+                <p class="text-red-500">@Model.Totalsupplier</p>
+                <a href="#" class="text-red-600 hover:text-red-800 mt-4 inline-block">More info &gt;</a>
+            </div>
+            <div class="card bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-gray-700">Total Employee</h2>
+                <p class="text-blue-900">@Model.TotalEmployee</p>
+                <a href="#" class="text-blue-800 hover:text-blue-800 mt-4 inline-block">More info &gt;</a>
+            </div>
+            <div class="card bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-gray-700">Today's Collection</h2>
+                <p class="text-red-900">@Model.Collection.ToString("F2")</p>
+                <a href="#" class="text-red-900 hover:text-red-900 mt-4 inline-block">More info &gt;</a>
+            </div>
+        </div>
+        <div class="mt-12 mb-3 grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboardChartsss">
+            <!-- Pie Chart Section -->
+            <div class="flex flex-col items-center justify-center">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-4 text-center">Dashboard Pie Chart</h2>
+                <div class="flex justify-center">
+                    <canvas id="dashboardPieChart" style="max-width: 400px; max-height: 400px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart Section -->
+            <div class="flex flex-col items-center justify-center">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-4 text-center">Dashboard Bar Chart</h2>
+                <div>
+                    <canvas id="dashboardChart" style="max-width: 100%; height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+
+    $(document).ready(function() {
+        initializeDashboardChart();
+        initializeDashboardPieChart();
+    });
+    function initializeDashboardPieChart() {
+    var chartLabels = ["Today's Sale", "Today's Purchase", "Last Month Purches", "Last Month Sale","Total Sales","Total Purches"];
+    var chartData = [
+        @Model.TodaySales,
+        @Model.TodayPurchase,
+        @Model.TotalPreviousMonthSeleAmmount,
+        @Model.TotalPreviousMonthPurchesAmmount,
+        @Model.TotalPurcaseAmmount,
+        @Model.TotalSalesAmmount,
+    ];
+
+    var ctx = $('#dashboardPieChart')[0].getContext('2d');
+    var dashboardPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                data: chartData,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 159, 64, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(244, 156, 245, 0.46)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(244, 156, 245, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Allows custom size
+            plugins: {
+                legend: {
+                    position: 'bottom', // Place legend below the pie chart
+                    labels: {
+                        boxWidth: 10, // Smaller color box for each label
+                        padding: 20,  // Space between legend items
+                        font: {
+                            size: 12 // Adjust font size
+                        }
+                    }
+                }
+            }
+        }
+
+    });
+}
+
+
+
+
+
+    function initializeDashboardChart() {
+        var chartLabels = ["Today's Sale", "Today's Purchase", "Last Month Purches", "Last Month Sale", "Total Sales", "Total Purches"];
+    var chartData = [
+        @Model.TodaySales,
+        @Model.TodayPurchase,
+        @Model.TotalPreviousMonthSeleAmmount,
+        @Model.TotalPreviousMonthPurchesAmmount,
+        @Model.TotalPurcaseAmmount,
+        @Model.TotalSalesAmmount,
+    ];
+
+    // Chart.js Setup
+    var ctx = $('#dashboardChart')[0].getContext('2d');
+    var dashboardChart = new Chart(ctx, {
+        type: 'bar', // Change to 'line', 'pie', etc., for other chart types
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Dashboard Metrics',
+                data: chartData,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)', // Light green
+                    'rgba(255, 99, 132, 0.2)', // Light red
+                    'rgba(54, 162, 235, 0.2)', // Light blue
+                    'rgba(255, 159, 64, 0.2)', // Orange
+                    'rgba(153, 102, 255, 0.2)', // Purple
+                    'rgba(244, 156, 245, 0.46)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(244, 156, 245, 0.46)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10, // Customize X-axis label font size
+                            weight: 'bold', // Make it bold if needed
+                        },
+                        color: '#333', // Optional: Change label color
+                        padding: 5 // Space between labels and axis
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: 10, // Customize Y-axis label font size
+                        },
+                        color: '#333' // Optional: Change label color
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true, // Show legend
+                    labels: {
+                        font: {
+                            size: 10 // Font size for legend labels
+                        }
+                    }
+                }
+            }
+        }
+
+    });
+}
+    </script>
+}
