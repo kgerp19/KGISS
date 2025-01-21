@@ -300,6 +300,7 @@ namespace KGERP.Services.WareHouse
         public string LcNo { get;  set; }
         public string PiNO { get;  set; }
         public string CurancYName { get;  set; }
+        public string LotNumber { get;  set; }
         public decimal CurrenceyRate { get;  set; }
         public decimal TDSDeduction { get;  set; }
         public decimal TDSDeductionAmount { get;  set; }
@@ -427,6 +428,7 @@ namespace KGERP.Services.WareHouse
         public long Procurement_PurchaseOrderFk { get; set; }
         public string SupplierName { get; set; }
         public string POCID { get; set; }
+        public string LotNumber { get; set; }
         public DateTime PODate { get; set; }
         public decimal ProductDiscount { get;  set; }
         public decimal VATAddition { get; set; }

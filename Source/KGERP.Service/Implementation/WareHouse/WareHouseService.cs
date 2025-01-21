@@ -949,7 +949,8 @@ namespace KGERP.Services.WareHouse
 
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
-                        IsActive = true
+                        IsActive = true,
+                        LotNumber= dataListSlavePartial[i].LotNumber,
                     };
                     _db.MaterialReceiveDetails.Add(materialReceiveDetail);
                     if (await _db.SaveChangesAsync() > 0)
@@ -2331,7 +2332,9 @@ namespace KGERP.Services.WareHouse
                                                                                   AccountingHeadId = t7.AccountingHeadId,
                                                                                   AccountingExpenseHeadId = t7.AccountingExpenseHeadId,
                                                                                   SubTotalInBDT = (t1.ReceiveQty * t1.UnitPrice),
-                                                                                  IsReturn = t1.IsReturn
+                                                                                  IsReturn = t1.IsReturn,
+                                                                                  LotNumber=t1.LotNumber
+                                                                                  
                                                                               }).OrderByDescending(x => x.MaterialReceiveDetailId).ToList());
 
 
