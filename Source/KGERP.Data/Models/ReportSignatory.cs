@@ -18,6 +18,7 @@ namespace KGERP.Data.Models
         public string ReportSignatoryName { get; set; }
         public string ReportPropertyName { get; set; }
         public string IntegrateWith { get; set; }
+        public int ReportHeadId { get; set; }
         public Nullable<int> CompanyId { get; set; }
         public Nullable<bool> IsActive { get; set; }
         public Nullable<int> CreatedBy { get; set; }

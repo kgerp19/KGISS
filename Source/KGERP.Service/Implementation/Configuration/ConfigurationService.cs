@@ -683,9 +683,20 @@ namespace KGERP.Service.Implementation
                                                               CompanyFK = t1.CompanyId
 
                                                           }).OrderByDescending(x => x.ID).AsEnumerable());
+
+            vmCommonSignatory.ReportList = await Task.Run(() => (from t1 in _db.ReportHeads
+                                                                 where t1.IsActive == true
+                                                                 && t1.CompanyId == companyId
+                                                                 select new SelectListItem
+                                                                 {
+                                                                     Text = t1.ReportHeadName,
+                                                                     Value = t1.ReportHeadId.ToString()
+
+                                                                 }).OrderByDescending(x => x.Value).ToListAsync());
             return vmCommonSignatory;
         }
 
+        
 
         public async Task<int> ReportSignatoryAdd(CommonReportSignatoryVM commonReportSignatory)
         {

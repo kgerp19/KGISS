@@ -202,9 +202,12 @@ namespace KGERP.Service.Configuration
     public class CommonReportSignatoryVM : BaseVM
     {
         public string Name { get; set; }
+        public string ReportName { get; set; }
+
 
         public IEnumerable<CommonReportSignatoryVM> DataList { get; set; }
-    }
+        public List<SelectListItem> ReportList { get; set; }
+}
 
     public class NOticeBoardViewModel
     {
