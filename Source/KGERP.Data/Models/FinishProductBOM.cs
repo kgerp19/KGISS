@@ -34,5 +34,6 @@ namespace KGERP.Data.Models
         public string ORDStyle { get; set; }
         public Nullable<int> Status { get; set; }
         public decimal COGS { get; set; }
+        public string LotNumber { get; set; }
     }
 }

@@ -3426,8 +3426,12 @@ namespace KGERP.Service.Implementation
                          DieSize = t1.DieSize,
                          PackSize = t1.PackSize,
                          ProcessLoss = t1.ProcessLoss,
-                         FormulaQty = t1.FormulaQty
-
+                         FormulaQty = t1.FormulaQty,
+                         LotNumbers = _db.MaterialReceiveDetails
+                                .Where(m => m.ProductId == id)
+                                .Select(m => m.LotNumber)
+                                .Distinct()
+                                .ToList()
                      }).FirstOrDefault();
             return v;
         }
@@ -3486,7 +3490,8 @@ namespace KGERP.Service.Implementation
                          FProductFK = t1.FProductFK,
                          RawProductName = t2.ProductName,
                          UnitName = t4.Name,
-                         CompanyFK = t1.CompanyId
+                         CompanyFK = t1.CompanyId,
+                         LotNumbers=t1.LotNumber
 
                      }).FirstOrDefault();
             return v;
@@ -3514,6 +3519,7 @@ namespace KGERP.Service.Implementation
                                                            Common_UnitFk = t1.UnitId,
                                                            Common_ProductCategoryFk = t2.ProductCategoryId,
                                                            CompanyFK = t1.CompanyId,
+                                                          
 
                                                        }).FirstOrDefault());
 
@@ -3541,7 +3547,9 @@ namespace KGERP.Service.Implementation
                                                                               Common_ProductSubCategoryFk = t2.ProductSubCategoryId,
                                                                               Common_UnitFk = t2.UnitId,
                                                                               Common_ProductCategoryFk = t2.ProductCategoryId,
-                                                                              CompanyFK = t1.CompanyId
+                                                                              CompanyFK = t1.CompanyId,
+                                                                              LotNumbers=t1.LotNumber
+                                                                           
 
                                                                           }).ToListAsync());
 
@@ -3638,7 +3646,9 @@ namespace KGERP.Service.Implementation
                 CompanyId = vmFinishProductBOM.CompanyFK.Value,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                LotNumber=vmFinishProductBOM.LotNumbers
+                
 
             };
             _db.FinishProductBOMs.Add(finishProductBOM);
