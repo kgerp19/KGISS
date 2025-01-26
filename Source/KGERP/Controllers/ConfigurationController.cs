@@ -243,6 +243,41 @@ namespace Pos.App.Controllers
         }
         #endregion
 
+        #region Report Signatory
+        public async Task<ActionResult> CommonReportSignatory(int companyId)
+        {
+
+            CommonReportSignatoryVM commonReportSignatory = new CommonReportSignatoryVM();
+            commonReportSignatory = await Task.Run(() => _service.GetReportSignatory(companyId));
+            return View(commonReportSignatory);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> CommonReportSignatory(CommonReportSignatoryVM commonReportSignatory)
+        {
+
+            if (commonReportSignatory.ActionEum == ActionEnum.Add)
+            {
+                //Add 
+                await _service.ReportSignatoryAdd(commonReportSignatory);
+            }
+            else if (commonReportSignatory.ActionEum == ActionEnum.Edit)
+            {
+                //Edit
+                await _service.ReportSignatoryEdit(commonReportSignatory);
+            }
+            else if (commonReportSignatory.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                await _service.ReportSignatoryDelete(commonReportSignatory.ID);
+            }
+            else
+            {
+                return RedirectToAction("Error");
+            }
+            return RedirectToAction(nameof(CommonReportSignatory), new { companyId = commonReportSignatory.CompanyFK });
+        }
+        #endregion
         #region Unit
         public async Task<JsonResult> SingleCommonUnit(int id)
         {

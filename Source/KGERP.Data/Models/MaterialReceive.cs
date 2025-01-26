@@ -49,5 +49,6 @@ namespace KGERP.Data.Models
         public bool IsSeen { get; set; }
     
         public virtual PurchaseOrder PurchaseOrder { get; set; }
+        public virtual MaterialReceiveDetail MaterialReceiveDetails { get; set; }
     }
 }

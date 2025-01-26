@@ -199,6 +199,13 @@ namespace KGERP.Service.Configuration
         public IEnumerable<VMCommonUnit> DataList { get; set; }
     }
 
+    public class CommonReportSignatoryVM : BaseVM
+    {
+        public string Name { get; set; }
+
+        public IEnumerable<CommonReportSignatoryVM> DataList { get; set; }
+    }
+
     public class NOticeBoardViewModel
     {
         public List<HttpPostedFileBase> Attachments { get; set; }
