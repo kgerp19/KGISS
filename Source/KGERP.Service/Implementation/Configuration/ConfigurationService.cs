@@ -674,13 +674,16 @@ namespace KGERP.Service.Implementation
             CommonReportSignatoryVM vmCommonSignatory = new CommonReportSignatoryVM();
             vmCommonSignatory.CompanyFK = companyId;
             vmCommonSignatory.DataList = await Task.Run(() => (from t1 in _db.ReportSignatories
+                                                               join t2 in _db.ReportHeads on t1.ReportHeadId equals t2.ReportHeadId
                                                           where t1.IsActive==true
                                                           && t1.CompanyId == companyId
                                                           select new CommonReportSignatoryVM
                                                           {
                                                               ID = t1.ReportSignatoryId,
-                                                              Name = t1.IntegrateWith,
-                                                              CompanyFK = t1.CompanyId
+                                                              Name = t1.ReportPropertyName,
+                                                              CompanyFK = t1.CompanyId,
+                                                              ReportHeadId=t1.ReportHeadId,
+                                                              ReportName=t2.ReportHeadName
 
                                                           }).OrderByDescending(x => x.ID).AsEnumerable());
 
@@ -703,9 +706,10 @@ namespace KGERP.Service.Implementation
             var result = -1;
             ReportSignatory commonRS = new ReportSignatory
             {
-                IntegrateWith = commonReportSignatory.Name,
+                ReportPropertyName = commonReportSignatory.Name,
                 CompanyId = commonReportSignatory.CompanyFK,
-                CreatedBy = (int)Common.GetIntUserId(),
+                CreatedBy = (int?)Common.GetIntUserId()??0,
+                ReportHeadId= commonReportSignatory.ReportHeadId,
                 CreatedDate = DateTime.Now,
                 IsActive = true
             };
@@ -723,7 +727,8 @@ namespace KGERP.Service.Implementation
             ReportSignatory commonRS = _db.ReportSignatories.Find(commonReportSignatory.ID);
             if (commonRS!=null)
             {
-                commonRS.IntegrateWith = commonReportSignatory.Name;
+                commonRS.ReportPropertyName = commonReportSignatory.Name;
+                commonRS.ReportHeadId = commonReportSignatory.ReportHeadId;
                 commonRS.ModifyBy = (int)Common.GetIntUserId();
                 commonRS.ModifyDate = DateTime.Now;
 

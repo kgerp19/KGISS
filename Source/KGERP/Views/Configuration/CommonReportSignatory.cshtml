@@ -42,9 +42,10 @@
                                 @Html.HiddenFor(model => model.ID, new { Value = "", id = "reportSignatoryId" })
                                 @Html.HiddenFor(model => model.ActionId, new { Value = "", id = "ActionId" })
                                 @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
+                                @Html.HiddenFor(model => model.ReportHeadId, new { id = "numReportHeadId" })
                                 <div class="form-group">
                                     <label>Report</label>
-                                    @Html.DropDownListFor(model => model.ReportName, new SelectList(Model.ReportList, "Value", "Text"), "==Select Report==", new { id = "ddlPromotionType", @class = "form-control ddlReset", style = "width:100%", required = "required" })
+                                    @Html.DropDownListFor(model => model.ReportHeadId, new SelectList(Model.ReportList, "Value", "Text"), "==Select Report==", new { id = "ddlReportHeadId", @class = "form-control ddlReset", style = "width:100%", required = "required" })
                                     @Html.ValidationMessageFor(model => model.ReportName, "", new { @class = "text-danger" })
                                 </div>
                                 <div class="form-group">
@@ -83,6 +84,7 @@
                                         <thead>
                                             <tr>
                                                 <th>SL</th>
+                                                <th>Report</th>
                                                 <th>Report Property Name</th>
                                                 <th>Action</th>
                                             </tr>
@@ -95,9 +97,10 @@
 
                                                 <tr>
                                                     <td>@(++sl)</td>
-                                                    <td id="tdUnitName_@item.ID">@item.Name</td>
+                                                    <td id="tdReportName_@item.ReportHeadId">@item.ReportName</td>
+                                                    <td id="tdUnitName_@item.ID" >@item.Name</td>
                                                     <td>
-                                                        <a id="@item.ID" onclick="makeEditble(this);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
+                                                        <a id="@item.ID" data-reportheadid="@item.ReportHeadId" onclick="makeEditble(this);" class="linkPointer" title="Edit"><i class="fa fa-pencil-square-o"></i></a>
 
                                                         <a id="@item.ID" onclick="makeDeletable(@item.ID);" class="linkPointer" data-toggle="modal" data-target="#unitDeleteModal" title="Delete"
                                                            data-placement="top">
@@ -163,16 +166,26 @@
         $(document).ready(function () {
             $('.formValidator').bootstrapValidator();
 
+            $('#ddlReportHeadId').change(function () {
+                let reportId = $(this).val(); 
+                $('#numReportHeadId').val(reportId);
+            }); 
+
         });
 
 
         function makeEditble(elem) {
+            console.log(elem.id);
+            
+
             if (elem !== null) {
                 var rowId = elem.id;
+                var reportHeadId = $(elem).data('reportheadid');
                 $('#reportSignatoryId').val(rowId);
                 $('#ActionId').val(2);
                 $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
                 $('#reportSignatoryName').val($('#tdUnitName_' + rowId).text().trim());
+                $('#ddlReportHeadId').val(reportHeadId).change();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
             }

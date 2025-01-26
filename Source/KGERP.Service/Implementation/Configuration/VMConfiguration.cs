@@ -203,6 +203,7 @@ namespace KGERP.Service.Configuration
     {
         public string Name { get; set; }
         public string ReportName { get; set; }
+        public int ReportHeadId { get; set; }
 
 
         public IEnumerable<CommonReportSignatoryVM> DataList { get; set; }
