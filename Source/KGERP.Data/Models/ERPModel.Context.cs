@@ -364,6 +364,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<Head4> Head4 { get; set; }
         public virtual DbSet<Head5> Head5 { get; set; }
         public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
+        public virtual DbSet<ReportSignatory> ReportSignatories { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
