@@ -12,12 +12,10 @@ namespace KGERP.Data.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class ReportSignatory
+    public partial class ReportHead
     {
-        public int ReportSignatoryId { get; set; }
-        public string ReportSignatoryName { get; set; }
-        public string ReportPropertyName { get; set; }
-        public string IntegrateWith { get; set; }
+        public int ReportHeadId { get; set; }
+        public string ReportHeadName { get; set; }
         public Nullable<int> CompanyId { get; set; }
         public Nullable<bool> IsActive { get; set; }
         public Nullable<int> CreatedBy { get; set; }

@@ -357,7 +357,8 @@ namespace KGERP.Service.Implementation
 
         public MaterialReceiveModel GetMaterialReceiveEdit(long id)
         {
-            MaterialReceive materialReceive = context.MaterialReceives.Include(x => x.MaterialReceiveDetails).Where(x => x.MaterialReceiveId == id).FirstOrDefault();
+            //MaterialReceive materialReceive = context.MaterialReceives.Include(x => x.MaterialReceiveDetails).Where(x => x.MaterialReceiveId == id).FirstOrDefault();
+            MaterialReceive materialReceive=new MaterialReceive();
             if (materialReceive == null)
             {
                 throw new Exception("Material Receive not found");
