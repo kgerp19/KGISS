@@ -460,18 +460,27 @@ namespace KGERP.Services.Production
 
 
             vmProdReferenceSlave.RowProductConsumeList = (from aaa in _db.Prod_ReferenceSlaveConsumption.Where(x => x.IsActive == true)
-                                                          join fff in _db.Prod_ReferenceSlave.Where(x => x.IsActive == true) on aaa.ProdReferenceSlaveID equals fff.ProdReferenceSlaveID
+                                                          join fff in _db.Prod_ReferenceSlave.Where(x => x.IsActive == true)
+                                                              on aaa.ProdReferenceSlaveID equals fff.ProdReferenceSlaveID
+                                                          join bbb in _db.Products
+                                                              on aaa.RProductId equals bbb.ProductId
+                                                          join ccc in _db.ProductSubCategories
+                                                              on bbb.ProductSubCategoryId equals ccc.ProductSubCategoryId
+                                                          join ddd in _db.ProductCategories
+                                                              on ccc.ProductCategoryId equals ddd.ProductCategoryId
+                                                          join eee in _db.Units
+                                                              on bbb.UnitId equals eee.UnitId
 
-                                                          join bbb in _db.Products on aaa.RProductId equals bbb.ProductId
-                                                          join ccc in _db.ProductSubCategories on bbb.ProductSubCategoryId equals ccc.ProductSubCategoryId
-                                                          join ddd in _db.ProductCategories on ccc.ProductCategoryId equals ddd.ProductCategoryId
-                                                          join eee in _db.Units on bbb.UnitId equals eee.UnitId
-
-
-                                                          join fbbb in _db.Products on fff.FProductId equals fbbb.ProductId
-                                                          join fccc in _db.ProductSubCategories on fbbb.ProductSubCategoryId equals fccc.ProductSubCategoryId
-                                                          join fddd in _db.ProductCategories on fccc.ProductCategoryId equals fddd.ProductCategoryId
-                                                          join feee in _db.Units on fbbb.UnitId equals feee.UnitId
+                                                          join fbbb in _db.Products
+                                                              on fff.FProductId equals fbbb.ProductId
+                                                          join fccc in _db.ProductSubCategories
+                                                              on fbbb.ProductSubCategoryId equals fccc.ProductSubCategoryId
+                                                          join fddd in _db.ProductCategories
+                                                              on fccc.ProductCategoryId equals fddd.ProductCategoryId
+                                                          join feee in _db.Units
+                                                              on fbbb.UnitId equals feee.UnitId
+                                                          join mr in _db.MaterialReceiveDetails
+                                                              on bbb.ProductId equals mr.ProductId
 
                                                           where fff.ProdReferenceId == prodReferenceId
                                                           select new VMProdReferenceSlaveConsumption
@@ -486,7 +495,9 @@ namespace KGERP.Services.Production
                                                               TotalConsumeQuantity = aaa.TotalConsumeQuantity,
                                                               COGS = aaa.COGS,
                                                               TotalCOGS = aaa.TotalConsumeQuantity * aaa.COGS,
-                                                              AccountingHeadId = ddd.AccountingHeadId
+                                                              AccountingHeadId = ddd.AccountingHeadId,
+                                                              LotNumber=mr.LotNumber
+                                                             
 
                                                           }).OrderBy(x => x.ProdReferenceSlaveConsumptionID).ToList();
 
@@ -715,7 +726,7 @@ namespace KGERP.Services.Production
                 foreach (var bom in bomsOfProduct)
                 {
                     VMProductStock vMProductStock = new VMProductStock();
-                    vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", bom.RProductFK, bom.CompanyId).FirstOrDefault();
+                    vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, bom.LotNumber ?? "xyzz").FirstOrDefault();
                     bom.RequiredQuantity = bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm ? bom.RequiredQuantity / 1000 : bom.RequiredQuantity;
 
                     Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption

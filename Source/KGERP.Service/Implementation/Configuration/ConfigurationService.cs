@@ -3558,7 +3558,7 @@ namespace KGERP.Service.Implementation
             {
 
                 VMProductStock vMProductStock = new VMProductStock();
-                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", item.RProductFK, item.CompanyId).FirstOrDefault();
+                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", item.RProductFK, item.CompanyId,item.LotNumbers?? "xyzz").FirstOrDefault();
                 item.CurrentStock = vMProductStock.ClosingQty;
 
             }
@@ -3670,6 +3670,7 @@ namespace KGERP.Service.Implementation
             finishProductBOM.CalculationUnit = vmFinishProductBOM.FCEnumId;
             finishProductBOM.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             finishProductBOM.ModifiedDate = DateTime.Now;
+            finishProductBOM.LotNumber = vmFinishProductBOM.LotNumbers;
 
             if (await _db.SaveChangesAsync() > 0)
             {

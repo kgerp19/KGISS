@@ -11,7 +11,7 @@ namespace KGERP.Data.Models
 {
     using System;
     using System.Collections.Generic;
-
+    
     public partial class MaterialReceive
     {
         public long MaterialReceiveId { get; set; }
@@ -47,8 +47,8 @@ namespace KGERP.Data.Models
         public string MaterialReceiveStatus { get; set; }
         public bool IsSubmitted { get; set; }
         public bool IsSeen { get; set; }
-
+    
         public virtual PurchaseOrder PurchaseOrder { get; set; }
-        public MaterialReceiveDetail MaterialReceiveDetails { get; set; }
+        public virtual MaterialReceiveDetail MaterialReceiveDetails { get; set; }
     }
 }

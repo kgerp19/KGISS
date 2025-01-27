@@ -140,6 +140,7 @@ namespace KGERP.Service.Implementation.Production
         public decimal TotalCOGS { get; set; }
 
         public int? AccountingHeadId { get; set; }
+        public string LotNumber { get;  set; }
 
     }
 
