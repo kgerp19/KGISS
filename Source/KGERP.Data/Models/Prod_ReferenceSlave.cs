@@ -28,5 +28,6 @@ namespace KGERP.Data.Models
         public decimal QuantityLess { get; set; }
         public decimal CostingPrice { get; set; }
         public long OrderDetailId { get; set; }
+        public string LotNumber { get; set; }
     }
 }

@@ -711,7 +711,8 @@ namespace KGERP.Services.Production
                 CompanyId = vmProdReferenceSlave.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                LotNumber=vmProdReferenceSlave.LotNumber
             };
             _db.Prod_ReferenceSlave.Add(prodReferenceSlave);
             if (await _db.SaveChangesAsync() > 0)

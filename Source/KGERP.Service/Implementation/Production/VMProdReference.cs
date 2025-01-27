@@ -120,6 +120,7 @@ namespace KGERP.Service.Implementation.Production
         public double UnitPrice { get;  set; }
         public decimal VATPercent { get;  set; }
         public int ProductCategoryId { get; set; }
+        public string LotNumber { get; set; }
     }
     public partial class VMProdReferenceSlaveConsumption : BaseVM
     {
