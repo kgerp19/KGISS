@@ -228,6 +228,7 @@
                                             @Html.ValidationMessageFor(model => model.FProductId, "", new { @class = "text-danger" })
                                         </div>
                                     </div>
+                                 
 
 
 
@@ -265,7 +266,18 @@
 
 
                                     <div class="row">
-                                        <div class="col-md-4">
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Lot Number  <span class="text-danger" id="perUnitDiscountValue"></span></label>
+                                                <select id="ddlLotNumbers" name="LotNumber" class="form-control">
+                                                    <option value="">Select a lot number</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-3">
                                             <div class="form-group">
                                                 <label>Per Unit Discount  <span class="text-danger" id="perUnitDiscountValue"></span></label>
                                                 @Html.TextBoxFor(model => model.ProductDiscountUnit, new { id = "ProductDiscountUnit", type = "number", @onkeyup = "TotalAmountWithDiscountSumation()", @class = "form-control", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Discount", required = "Required" })
@@ -273,7 +285,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-4" style="padding:0px">
+                                        <div class="col-md-3" style="padding:0px">
                                             <div class="form-group">
                                                 <label>Special Discount</label>
                                                 <div class="input-group">
@@ -285,7 +297,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <div class="form-group">
                                                 <label>Total Amount</label>
                                                 @Html.TextBoxFor(model => model.TotalAmount, new { id = "txtTotalAmount", type = "number", @readonly = "readonly", @class = "form-control", @style = "width:100%;border:1px black solid;text-align:right;", placeholder = "Total Price", required = "Required" })
@@ -748,6 +760,7 @@
                         cache: true,
                         contentType: "application/json; charset=utf-8",
                         success: function (data) {
+                            console.log("Received data:", data);
                             response($.map(data, function (item) {
                                 return item;
                             }))
@@ -764,27 +777,55 @@
             select: function (e, i) {
                 console.log(i);
                     $("#ddlRProductFK").val(i.item.val);
-                    fetchProductStock("@Model.CompanyFK",i.item.val);
-                    @*$.ajax({
-                        type: "GET",
-                        url: "@Url.Action("ProductStockByProduct", "Procurement")",
-                        datatype: "Json",
-                        data: { companyId: "@Model.CompanyFK", productId: i.item.val },
-                        success: function (data) {
-                            console.log(data);
-                            var items = "";
-                            if (data) {
-                                $('#tblStockAvailable').show();
-                                $('.txtUnitName').text(data.UnitName);
-                                $('#stockAvailable').text(data.CurrentStock + ' ' + data.UnitName);
-                                $("#txtUnitPrice").val(data.UnitPrice);
-                                $("#txtPackSize").val(data.PackSize);
+                fetchProductStock("@Model.CompanyFK", i.item.val);
+                console.log("Lo",i.item.val)
 
-                            }
-                        }
-                    });*@
-                $('#txtSalesQuantity').focus();
-                $('#txtSalesQuantity').select();
+               $.ajax({
+    type: "GET",
+    url: "@Url.Action("GetLotNymber", "Configuration")", 
+    datatype: "json",
+    data: {
+        companyId: "@Model.CompanyFK", 
+        ProductId: i.item.val 
+    },
+    success: function (data) {
+        console.log("Lot number data:", data); 
+
+  
+        $('#ddlLotNumbers').empty();
+
+   
+        if (data.length > 0) {
+           
+            $.each(data, function(index, item) {
+                $('#ddlLotNumbers').append(
+                    $('<option>', {
+                        value: item.label, 
+                        text: item.label   
+                    })
+                );
+            });
+
+            $('#ddlLotNumbers').val(data[0].label);
+        } else {
+           
+            $('#ddlLotNumbers').append(
+                $('<option>', {
+                    value: '',
+                    text: 'No lots available'
+                })
+            );
+        }
+    },
+    error: function (xhr, status, error) {
+        console.error("Error in AJAX request:", status, error); // Log any AJAX error details
+    }
+});
+
+// Focus and select the quantity input field
+$('#txtSalesQuantity').focus();
+$('#txtSalesQuantity').select();
+
 
 
                 },

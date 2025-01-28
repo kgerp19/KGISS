@@ -892,6 +892,28 @@ namespace KGERP.Service.Implementation
         }
 
 
+        public object GetAutoCompleteLot(int companyId,int ProductId)
+        {
+            var v = (from t1 in _db.Products
+                     join t2 in _db.FinishProductBOMs on t1.ProductId equals t2.FProductFK
+                    
+
+                     where t1.CompanyId == companyId && t1.IsActive && t2.IsActive && 
+                     (t1.ProductType == "F") && t1.ProductId== ProductId
+
+
+                     select new
+                     {
+                         label = t2.LotNumber
+                        
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
+
+
+
+
 
 
 

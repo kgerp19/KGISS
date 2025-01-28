@@ -1104,7 +1104,15 @@ namespace Pos.App.Controllers
 
         public JsonResult AutoCompleteFinishedGoodsGet(int companyId, string prefix)
         {
+
             var products = _service.GetAutoCompleteFinishedGoods(companyId, prefix);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetLotNymber(int companyId, int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLot(companyId, ProductId);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
         public JsonResult GetAutoCompleteSalesPerson( string prefix, int companyId)

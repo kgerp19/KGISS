@@ -301,7 +301,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<RequisitionItemDetail> RequisitionItemDetails { get; set; }
         public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
         public virtual DbSet<StockAdjust> StockAdjusts { get; set; }
-        public virtual DbSet<Prod_ReferenceSlaveConsumption> Prod_ReferenceSlaveConsumption { get; set; }
         public virtual DbSet<WorkState> WorkStates { get; set; }
         public virtual DbSet<WorkSpacesMember> WorkSpacesMembers { get; set; }
         public virtual DbSet<CommonBookingInfo> CommonBookingInfoes { get; set; }
@@ -364,6 +363,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
+        public virtual DbSet<Prod_ReferenceSlaveConsumption> Prod_ReferenceSlaveConsumption { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

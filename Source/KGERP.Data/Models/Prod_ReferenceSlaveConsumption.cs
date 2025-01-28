@@ -28,5 +28,6 @@ namespace KGERP.Data.Models
         public decimal COGS { get; set; }
         public Nullable<int> ProdReferenceId { get; set; }
         public Nullable<int> FactoryExpensesHeadGLId { get; set; }
+        public string LotNumber { get; set; }
     }
 }
