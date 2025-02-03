@@ -983,6 +983,25 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
+        public object GetAutoCompleteRawGoods(int companyId, string prefix)
+        {
+            var v = (from t1 in _db.Products
+                     join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                     join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+
+                     where t1.CompanyId == companyId && t1.IsActive && t2.IsActive && t3.IsActive &&
+                     (t1.ProductType == "R") &&
+                     ((t1.ProductName.Contains(prefix)) || (t2.Name.Contains(prefix)) || (t3.Name.Contains(prefix)))
+
+                     select new
+                     {
+                         label = "Raw Goods: " + t3.Name + " " + t2.Name + " " + t1.ProductName,
+                         val = t1.ProductId
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
+
 
 
 

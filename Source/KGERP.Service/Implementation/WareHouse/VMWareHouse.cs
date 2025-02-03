@@ -637,7 +637,7 @@ namespace KGERP.Services.WareHouse
         public decimal CurrentStock { get;  set; }
         public decimal VATPercent { get;  set; }
         public decimal TDSPercent { get;  set; }
-        
+        public string ProductType { get;  set; }
     }
 
     public partial class VMSaleReturn : BaseVM
