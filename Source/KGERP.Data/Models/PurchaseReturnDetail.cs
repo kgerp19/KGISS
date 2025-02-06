@@ -22,6 +22,7 @@ namespace KGERP.Data.Models
         public Nullable<decimal> COGS { get; set; }
         public bool IsActive { get; set; }
         public Nullable<long> MaterialReceiveDetailId { get; set; }
+        public string LotNumber { get; set; }
     
         public virtual PurchaseReturn PurchaseReturn { get; set; }
     }

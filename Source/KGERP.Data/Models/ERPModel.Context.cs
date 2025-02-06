@@ -363,6 +363,9 @@ namespace KGERP.Data.Models
         public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
         public virtual DbSet<ReportHead> ReportHeads { get; set; }
         public virtual DbSet<ReportSignatory> ReportSignatories { get; set; }
+        public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
+        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
+        public virtual DbSet<OrderDetail> OrderDetails { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
