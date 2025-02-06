@@ -319,7 +319,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<QualityExceptionComplaintMap> QualityExceptionComplaintMaps { get; set; }
         public virtual DbSet<QualityExceptionComplaint> QualityExceptionComplaints { get; set; }
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
-        public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
         public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
         public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
         public virtual DbSet<KGSalesCollectedAchivement> KGSalesCollectedAchivements { get; set; }
@@ -337,12 +336,10 @@ namespace KGERP.Data.Models
         public virtual DbSet<ProductBookingInfo> ProductBookingInfoes { get; set; }
         public virtual DbSet<PurchaseReturnDetail> PurchaseReturnDetails { get; set; }
         public virtual DbSet<OrderMaster> OrderMasters { get; set; }
-        public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
         public virtual DbSet<ProductCategory> ProductCategories { get; set; }
         public virtual DbSet<SeedProcessingDetail> SeedProcessingDetails { get; set; }
         public virtual DbSet<Prod_Reference> Prod_Reference { get; set; }
-        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<SeedProcessing> SeedProcessings { get; set; }
         public virtual DbSet<UrlInfo> UrlInfoes { get; set; }
         public virtual DbSet<Upazila> Upazilas { get; set; }

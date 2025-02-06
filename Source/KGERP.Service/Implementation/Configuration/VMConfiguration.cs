@@ -497,6 +497,7 @@ namespace KGERP.Service.Configuration
         public string CourierNo { get; set; }
         public int SupplierId { get; set; }
         public SelectList FCEnumSelectionList { get { return new SelectList(BaseFunctionalities.GetEnumList<FormulaCalculationEnum>(), "Value", "Text"); } }
+        public string LotNumbers { get; set; }
 
     }
 
@@ -506,6 +507,7 @@ namespace KGERP.Service.Configuration
         public FlatProperties FlatProp { get; set; } = new FlatProperties();
         public PlotProperties PlotProp { get; set; }
         public List<SelectModelType> FacingDropDown { get; set; }
+        public List<string> LotNumbers { get;  set; }
     }
 
     public class VMrealStateProductsForList
