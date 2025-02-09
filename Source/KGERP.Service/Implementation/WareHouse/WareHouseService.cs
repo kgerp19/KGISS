@@ -1756,8 +1756,7 @@ namespace KGERP.Services.WareHouse
                             DiscountUnit = t1.DiscountUnit,
                             SpecialDiscount = t1.SpecialBaseCommission,
                             CompanyFK = t2.CompanyId,
-                            ProductType=t2.ProductType
-                            CompanyFK = t2.CompanyId,
+                            ProductType=t2.ProductType,
                             LotNumber=t1.LotNumber
                             
                         }).ToList();
