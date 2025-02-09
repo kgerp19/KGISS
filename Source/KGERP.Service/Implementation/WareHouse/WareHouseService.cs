@@ -1756,6 +1756,8 @@ namespace KGERP.Services.WareHouse
                             DiscountUnit = t1.DiscountUnit,
                             SpecialDiscount = t1.SpecialBaseCommission,
                             CompanyFK = t2.CompanyId,
+                            ProductType=t2.ProductType
+                            CompanyFK = t2.CompanyId,
                             LotNumber=t1.LotNumber
                             
                         }).ToList();
@@ -1763,7 +1765,15 @@ namespace KGERP.Services.WareHouse
             foreach (VMOrderDeliverDetailPartial item in list)
             {
                 VMProductStock vmProductStock = new VMProductStock();
-                vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                if (item.ProductType=="R")
+                {
+                    vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                }
+                else if (item.ProductType=="F")
+                {
+                    vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                }
+                
                 item.CurrentStock = vmProductStock.ClosingQty;
                 item.ClosingRate = vmProductStock.ClosingRate;
 

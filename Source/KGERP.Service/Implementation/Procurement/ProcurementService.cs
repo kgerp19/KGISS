@@ -409,6 +409,46 @@ namespace KGERP.Services.Procurement
 
             vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.OrderMasters
                                                           .Where(x => x.IsActive
+                                                          && x.ProductType=="F"
+                                                          && x.CompanyId == companyId
+                                                          && x.OrderDate >= fromDate && x.OrderDate <= toDate
+                                                          && !x.IsOpening
+                                                          && x.Status < (int)EnumPOStatus.Closed)
+                                                          join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
+
+                                                          select new VMSalesOrder
+                                                          {
+                                                              OrderMasterId = t1.OrderMasterId,
+                                                              CustomerId = t1.CustomerId.Value,
+                                                              CommonCustomerName = t2.Name,
+                                                              CreatedBy = t1.CreatedBy,
+                                                              CustomerPaymentMethodEnumFK = t1.PaymentMethod,
+                                                              OrderNo = t1.OrderNo,
+                                                              OrderDate = t1.OrderDate,
+                                                              ExpectedDeliveryDate = t1.ExpectedDeliveryDate,
+
+                                                              Status = t1.Status,
+                                                              CompanyFK = t1.CompanyId,
+                                                              CourierNo = t1.CourierNo,
+                                                              FinalDestination = t1.FinalDestination,
+                                                              CourierCharge = t1.CourierCharge
+
+                                                          }).OrderByDescending(x => x.OrderMasterId).AsEnumerable());
+            if (vStatus != -1 && vStatus != null)
+            {
+                vmSalesOrder.DataList = vmSalesOrder.DataList.Where(q => q.Status == vStatus);
+            }
+            return vmSalesOrder;
+        }
+
+        public async Task<VMSalesOrder> ProcurementOrderMastersRMListGet(int companyId, DateTime? fromDate, DateTime? toDate, int? vStatus)
+        {
+            VMSalesOrder vmSalesOrder = new VMSalesOrder();
+            vmSalesOrder.CompanyFK = companyId;
+
+            vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.OrderMasters
+                                                          .Where(x => x.IsActive
+                                                          && x.ProductType == "R"
                                                           && x.CompanyId == companyId
                                                           && x.OrderDate >= fromDate && x.OrderDate <= toDate
                                                           && !x.IsOpening
@@ -741,20 +781,20 @@ namespace KGERP.Services.Procurement
 
 
 
-            if (orderMasters != null)
-            {
-                if (orderMasters.IsService && orderMasters.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
-                    #region Ready To Account Integration
-                    var AccData = await Task.Run(() => KfmalProcurementSalesOrderDetailsGet(orderMasters.CompanyId.Value, orderMasters.OrderMasterId));
+            //if (orderMasters != null)
+            //{
+            //    if (orderMasters.IsService && orderMasters.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+            //    {
+            //        #region Ready To Account Integration
+            //        var AccData = await Task.Run(() => KfmalProcurementSalesOrderDetailsGet(orderMasters.CompanyId.Value, orderMasters.OrderMasterId));
 
-                    //VMOrderDeliverDetail AccData = await KfmalOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
-                    await _accountingService.AccServiceSalesPushKfmal(AccData.CompanyId, AccData, (int)KfmalJournalEnum.SalesVoucher);
-                    //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
+            //        //VMOrderDeliverDetail AccData = await KfmalOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
+            //        await _accountingService.AccServiceSalesPushKfmal(AccData.CompanyId, AccData, (int)KfmalJournalEnum.SalesVoucher);
+            //        //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
 
-                    #endregion
-                }
-            }
+            //        #endregion
+            //    }
+            //}
 
 
 
@@ -3289,7 +3329,7 @@ namespace KGERP.Services.Procurement
                                                                         Qty = t1.Qty,
                                                                         UnitName = t6.Name,
                                                                         UnitPrice = t1.UnitPrice,                                                                       
-                                                                        PackSize = t3.PackSize,
+                                                                        PackSize = t1.PackQuantity,
                                                                         TotalAmount = t1.Qty * t1.UnitPrice,
                                                                         QtyInPack = t3.FormulaQty,
                                                                         PromotionalOfferId = t1.PromotionalOfferId,
@@ -3603,6 +3643,9 @@ namespace KGERP.Services.Procurement
                                               ProductCategoryName = t3.Name,
                                               ProductSubCategoryName = t4.Name,
                                               SpecialDiscount = t1.SpecialDiscount,
+                                              SpecialBaseCommission = t1.SpecialBaseCommission,
+                                              DiscountUnit = t1.DiscountUnit,
+                                              DiscountAmount = t1.DiscountAmount,
                                               BaseCommission = t6.BaseCommission ?? 0,
                                               CashCommission = t6.CashCommission ?? 0,
                                               AdditionPrice = t6.AdditionPrice ?? 0,
@@ -3716,6 +3759,32 @@ namespace KGERP.Services.Procurement
 
             return vmProduct;
         }
+
+        public VMCommonProduct RMProductStockByProductGet(int companyId, int productId)
+        {
+            VMCommonProduct vmProduct = new VMCommonProduct();
+
+            vmProduct = (from t1 in _db.Products.Where(x => x.IsActive && x.ProductId == productId)
+                         join t2 in _db.Units on t1.UnitId equals t2.UnitId
+
+                         select new VMCommonProduct
+                         {
+                             Name = t1.ProductName,
+                             UnitName = t2.Name,
+                             PackSize = t1.PackSize,
+                             CompanyFK = t1.CompanyId,
+                             FormulaQty = t1.FormulaQty,
+                             UnitPrice = t1.UnitPrice ?? 0
+
+                         }).FirstOrDefault();
+
+            VMProductStock vmProductStock = new VMProductStock();
+            vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", productId, companyId).FirstOrDefault();
+            vmProduct.CurrentStock = vmProductStock.ClosingQty;
+
+
+            return vmProduct;
+        }
         public async Task<long> OrderDetailAdd(VMSalesOrderSlave vmSalesOrderSlave)
         {
             long dateTime = DateTime.Now.Ticks;
@@ -3728,7 +3797,7 @@ namespace KGERP.Services.Procurement
                 UnitPrice = vmSalesOrderSlave.UnitPrice,
                 Amount = (vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice),
                 Comsumption = vmSalesOrderSlave.Consumption,
-                PackQuantity = vmSalesOrderSlave.PackQuantity,
+                PackQuantity = vmSalesOrderSlave.PackSize,
 
                 DiscountUnit = vmSalesOrderSlave.ProductDiscountUnit,
                 SpecialBaseCommission = vmSalesOrderSlave.SpecialDiscount,
@@ -4012,7 +4081,7 @@ namespace KGERP.Services.Procurement
             model.UnitPrice = vmSalesOrderSlave.UnitPrice;
             model.Amount = (vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice);
             model.Comsumption = vmSalesOrderSlave.Consumption;
-            model.PackQuantity = vmSalesOrderSlave.PackQuantity;
+            model.PackQuantity = vmSalesOrderSlave.PackSize;
             model.DiscountUnit = vmSalesOrderSlave.ProductDiscountUnit;
             model.SpecialBaseCommission = vmSalesOrderSlave.SpecialDiscount;
 
@@ -4341,6 +4410,68 @@ namespace KGERP.Services.Procurement
                 ExpectedDeliveryDate = vmSalesOrderSlave.ExpectedDeliveryDate,
                 PaymentMethod = vmSalesOrderSlave.CustomerPaymentMethodEnumFK,
                 ProductType = "F",
+                Status = (int)EnumPOStatus.Draft,
+                CourierNo = vmSalesOrderSlave.CourierNo,
+                FinalDestination = vmSalesOrderSlave.FinalDestination,
+                CourierCharge = vmSalesOrderSlave.CourierCharge,
+                CurrentPayable = Convert.ToDecimal(vmSalesOrderSlave.PayableAmount),
+                StockInfoId = vmSalesOrderSlave.StockInfoId,
+                CompanyId = vmSalesOrderSlave.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,// System.Web.HttpContext.Current.User.Identity.Name,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                OrderStatus = "N",
+                SalePersonId = vmSalesOrderSlave.SalePersonId,
+                Remarks = vmSalesOrderSlave.Remarks,
+                IsService = vmSalesOrderSlave.IsService,
+            };
+            _db.OrderMasters.Add(orderMaster);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = orderMaster.OrderMasterId;
+            }
+            return result;
+        }
+
+        public async Task<long> OrderMasterRawAdd(VMSalesOrderSlave vmSalesOrderSlave)
+        {
+            long result = -1;
+
+            var poMax = _db.OrderMasters.Where(x => x.CompanyId ==
+            vmSalesOrderSlave.CompanyFK
+            && !x.IsOpening).Count() + 1;
+
+            string poCid = "";
+            var CompanyInfo = await _db.Companies.FirstOrDefaultAsync(x => x.CompanyId == vmSalesOrderSlave.CompanyFK.Value);
+            string shortName = CompanyInfo.ShortName;
+            if (vmSalesOrderSlave.CompanyFK.Value > 0)
+            {
+                poCid = shortName + "#" + poMax.ToString();
+            }
+            else
+            {
+                return result;
+            }
+            //else
+            //{
+            //    poCid =
+            //               @"SO-" +
+            //                    DateTime.Now.ToString("yy") +
+            //                    DateTime.Now.ToString("MM") +
+            //                    DateTime.Now.ToString("dd") + "-" +
+
+            //               poMax.ToString();
+            //}
+
+            OrderMaster orderMaster = new OrderMaster
+            {
+                CustomerPONo = vmSalesOrderSlave.CustomerPONo,
+                OrderNo = poCid,
+                OrderDate = vmSalesOrderSlave.OrderDate,
+                CustomerId = vmSalesOrderSlave.CustomerId,
+                ExpectedDeliveryDate = vmSalesOrderSlave.ExpectedDeliveryDate,
+                PaymentMethod = vmSalesOrderSlave.CustomerPaymentMethodEnumFK,
+                ProductType = "R",
                 Status = (int)EnumPOStatus.Draft,
                 CourierNo = vmSalesOrderSlave.CourierNo,
                 FinalDestination = vmSalesOrderSlave.FinalDestination,

@@ -945,6 +945,30 @@ namespace KG.App.Controllers
 
             return View(vmSalesOrderSlave);
         }
+
+        [HttpGet]
+        public async Task<ActionResult> ProcurementRMSalesOrderSlave(int companyId = 0, int orderMasterId = 0)
+        {
+            VMSalesOrderSlave vmSalesOrderSlave = new VMSalesOrderSlave();
+
+            if (orderMasterId == 0)
+            {
+                vmSalesOrderSlave.CompanyFK = companyId;
+                vmSalesOrderSlave.Status = (int)EnumPOStatus.Draft;
+            }
+            else
+            {
+                vmSalesOrderSlave = await Task.Run(() => _service.ProcurementSalesOrderDetailsGet(companyId, orderMasterId));
+
+            }
+            vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
+            vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownList(companyId), "Value", "Text");
+            vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
+            vmSalesOrderSlave.PromoOfferList = new SelectList(_service.PromtionalOffersDropDownList(companyId), "Value", "Text");
+
+
+            return View(vmSalesOrderSlave);
+        }
         [HttpPost]
         public async Task<ActionResult> ProcurementSalesOrderSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
@@ -971,6 +995,31 @@ namespace KG.App.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> ProcurementRMSalesOrderSlave(VMSalesOrderSlave vmSalesOrderSlave)
+        {
+
+            if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
+            {
+                if (vmSalesOrderSlave.OrderMasterId == 0)
+                {
+                    vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterRawAdd(vmSalesOrderSlave);
+
+                }
+                await _service.OrderDetailAdd(vmSalesOrderSlave);
+            }
+            if (vmSalesOrderSlave.PromotionalOfferId > 0)
+            {
+                await _service.PromtionalOfferIntegration(vmSalesOrderSlave);
+            }
+            else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
+            {
+                //Delete
+                await _service.OrderDetailEdit(vmSalesOrderSlave);
+            }
+            return RedirectToAction(nameof(ProcurementRMSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
+        }
+
+        [HttpPost]
         public async Task<ActionResult> DeleteProcurementSalesOrderSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
             if (vmSalesOrderSlave.ActionEum == ActionEnum.Delete)
@@ -990,6 +1039,21 @@ namespace KG.App.Controllers
 
             VMSalesOrder vmSalesOrder = new VMSalesOrder();
             vmSalesOrder = await _service.ProcurementOrderMastersListGet(companyId, fromDate, toDate, vStatus);
+            vmSalesOrder.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            vmSalesOrder.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+            vmSalesOrder.Status = vStatus ?? -1;
+            return View(vmSalesOrder);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ProcurementRMSalesOrderList(int companyId, DateTime? fromDate, DateTime? toDate, int? vStatus)
+        {
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            VMSalesOrder vmSalesOrder = new VMSalesOrder();
+            vmSalesOrder = await _service.ProcurementOrderMastersRMListGet(companyId, fromDate, toDate, vStatus);
             vmSalesOrder.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
             vmSalesOrder.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
             vmSalesOrder.Status = vStatus ?? -1;
@@ -1046,6 +1110,19 @@ namespace KG.App.Controllers
             vmSalesOrder.FromDate = Convert.ToDateTime(vmSalesOrder.StrFromDate);
             vmSalesOrder.ToDate = Convert.ToDateTime(vmSalesOrder.StrToDate);
             return RedirectToAction(nameof(ProcurementSalesOrderList), new { companyId = vmSalesOrder.CompanyId, fromDate = vmSalesOrder.FromDate, toDate = vmSalesOrder.ToDate, vStatus = vmSalesOrder.Status });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ProcurementRMSalesOrderfilter(VMSalesOrder vmSalesOrder)
+        {
+            if (vmSalesOrder.CompanyId > 0)
+            {
+                Session["CompanyId"] = vmSalesOrder.CompanyId;
+            }
+
+            vmSalesOrder.FromDate = Convert.ToDateTime(vmSalesOrder.StrFromDate);
+            vmSalesOrder.ToDate = Convert.ToDateTime(vmSalesOrder.StrToDate);
+            return RedirectToAction(nameof(ProcurementRMSalesOrderList), new { companyId = vmSalesOrder.CompanyId, fromDate = vmSalesOrder.FromDate, toDate = vmSalesOrder.ToDate, vStatus = vmSalesOrder.Status });
         }
 
         [HttpPost]
@@ -1121,6 +1198,12 @@ namespace KG.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult RMProductStockByProductGet(int companyId, int productId)
+        {
+            var model = _service.RMProductStockByProductGet(companyId, productId);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
 
 
         //public async Task<ActionResult> GetProductCategory()
@@ -1160,6 +1243,13 @@ namespace KG.App.Controllers
         {
             vmSalesOrderSlave.OrderMasterId = await _service.OrderMastersSubmit(vmSalesOrderSlave.OrderMasterId);
             return RedirectToAction(nameof(ProcurementSalesOrderSlave), "Procurement", new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SubmitRMOrderMastersFromSlave(VMSalesOrderSlave vmSalesOrderSlave)
+        {
+            vmSalesOrderSlave.OrderMasterId = await _service.OrderMastersSubmit(vmSalesOrderSlave.OrderMasterId);
+            return RedirectToAction(nameof(ProcurementRMSalesOrderSlave), "Procurement", new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
         }
         [HttpPost]
         public async Task<ActionResult> GCCLSubmitOrderMastersFromSlave(VMSalesOrderSlave vmSalesOrderSlave)
@@ -1270,6 +1360,17 @@ namespace KG.App.Controllers
                 vmSalesOrder.OrderMasterId = await _service.OrderMastersDelete(vmSalesOrder.OrderMasterId);
             }
             return RedirectToAction(nameof(ProcurementSalesOrderList), new { companyId = vmSalesOrder.CompanyFK });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> DeleteRMOrderMasters(VMSalesOrder vmSalesOrder)
+        {
+            if (vmSalesOrder.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                vmSalesOrder.OrderMasterId = await _service.OrderMastersDelete(vmSalesOrder.OrderMasterId);
+            }
+            return RedirectToAction(nameof(ProcurementRMSalesOrderList), new { companyId = vmSalesOrder.CompanyFK });
         }
 
         [HttpPost]

@@ -668,6 +668,98 @@ namespace KGERP.Service.Implementation
         }
         #endregion
 
+        #region Report Signatory
+        public async Task<CommonReportSignatoryVM> GetReportSignatory(int companyId)
+        {
+            CommonReportSignatoryVM vmCommonSignatory = new CommonReportSignatoryVM();
+            vmCommonSignatory.CompanyFK = companyId;
+            vmCommonSignatory.DataList = await Task.Run(() => (from t1 in _db.ReportSignatories
+                                                               join t2 in _db.ReportHeads on t1.ReportHeadId equals t2.ReportHeadId
+                                                          where t1.IsActive==true
+                                                          && t1.CompanyId == companyId
+                                                          select new CommonReportSignatoryVM
+                                                          {
+                                                              ID = t1.ReportSignatoryId,
+                                                              Name = t1.ReportPropertyName,
+                                                              CompanyFK = t1.CompanyId,
+                                                              ReportHeadId=t1.ReportHeadId,
+                                                              ReportName=t2.ReportHeadName
+
+                                                          }).OrderByDescending(x => x.ID).AsEnumerable());
+
+            vmCommonSignatory.ReportList = await Task.Run(() => (from t1 in _db.ReportHeads
+                                                                 where t1.IsActive == true
+                                                                 && t1.CompanyId == companyId
+                                                                 select new SelectListItem
+                                                                 {
+                                                                     Text = t1.ReportHeadName,
+                                                                     Value = t1.ReportHeadId.ToString()
+
+                                                                 }).OrderByDescending(x => x.Value).ToListAsync());
+            return vmCommonSignatory;
+        }
+
+        
+
+        public async Task<int> ReportSignatoryAdd(CommonReportSignatoryVM commonReportSignatory)
+        {
+            var result = -1;
+            ReportSignatory commonRS = new ReportSignatory
+            {
+                ReportPropertyName = commonReportSignatory.Name,
+                CompanyId = commonReportSignatory.CompanyFK,
+                CreatedBy = (int?)Common.GetIntUserId()??0,
+                ReportHeadId= commonReportSignatory.ReportHeadId,
+                CreatedDate = DateTime.Now,
+                IsActive = true
+            };
+            _db.ReportSignatories.Add(commonRS);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = commonRS.ReportSignatoryId;
+            }
+            return result;
+        }
+
+        public async Task<int> ReportSignatoryEdit(CommonReportSignatoryVM commonReportSignatory)
+        {
+            var result = -1;
+            ReportSignatory commonRS = _db.ReportSignatories.Find(commonReportSignatory.ID);
+            if (commonRS!=null)
+            {
+                commonRS.ReportPropertyName = commonReportSignatory.Name;
+                commonRS.ReportHeadId = commonReportSignatory.ReportHeadId;
+                commonRS.ModifyBy = (int)Common.GetIntUserId();
+                commonRS.ModifyDate = DateTime.Now;
+
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = commonReportSignatory.ID;
+                }
+                return result;
+            }
+            
+            return result;
+        }
+
+        public async Task<int> ReportSignatoryDelete(int id)
+        {
+            int result = -1;
+            if (id != 0)
+            {
+                ReportSignatory commonRS = _db.ReportSignatories.Find(id);
+                commonRS.IsActive = false;
+                commonRS.ModifyBy = (int)Common.GetIntUserId();
+                commonRS.ModifyDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = commonRS.ReportSignatoryId;
+                }
+            }
+            return result;
+        }
+        #endregion
+
         #region Common Unit
         public async Task<VMCommonUnit> GetUnit(int companyId)
         {
@@ -886,6 +978,25 @@ namespace KGERP.Service.Implementation
                      select new
                      {
                          label = "Finished Goods: " + t3.Name + " " + t2.Name + " " + t1.ProductName,
+                         val = t1.ProductId
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
+
+        public object GetAutoCompleteRawGoods(int companyId, string prefix)
+        {
+            var v = (from t1 in _db.Products
+                     join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                     join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+
+                     where t1.CompanyId == companyId && t1.IsActive && t2.IsActive && t3.IsActive &&
+                     (t1.ProductType == "R") &&
+                     ((t1.ProductName.Contains(prefix)) || (t2.Name.Contains(prefix)) || (t3.Name.Contains(prefix)))
+
+                     select new
+                     {
+                         label = "Raw Goods: " + t3.Name + " " + t2.Name + " " + t1.ProductName,
                          val = t1.ProductId
                      }).OrderBy(x => x.label).Take(100).ToList();
 

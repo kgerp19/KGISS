@@ -199,6 +199,17 @@ namespace KGERP.Service.Configuration
         public IEnumerable<VMCommonUnit> DataList { get; set; }
     }
 
+    public class CommonReportSignatoryVM : BaseVM
+    {
+        public string Name { get; set; }
+        public string ReportName { get; set; }
+        public int ReportHeadId { get; set; }
+
+
+        public IEnumerable<CommonReportSignatoryVM> DataList { get; set; }
+        public List<SelectListItem> ReportList { get; set; }
+}
+
     public class NOticeBoardViewModel
     {
         public List<HttpPostedFileBase> Attachments { get; set; }
@@ -295,7 +306,7 @@ namespace KGERP.Service.Configuration
         public SelectList CustomerStatusEnumList { get { return new SelectList(BaseFunctionalities.GetEnumList<CustomerStatusEnum>(), "Value", "Text"); } }
         public string ContactPerson { get; set; }
         [Required]
-        [RegularExpression("^[0-9]{11}$",ErrorMessage = "Phone Number Must be 11 digit")]
+        //[RegularExpression("^[0-9]{11}$",ErrorMessage = "Phone Number Must be 11 digit")]
        
         public string Phone { get; set; }
         

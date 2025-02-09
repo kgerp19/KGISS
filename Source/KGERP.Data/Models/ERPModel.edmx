@@ -3768,6 +3768,19 @@ warning 6002: The table/view 'KGISSDB.dbo.ProcessAttenendance' does not have a p
           <Property Name="RegionId" Type="int" Nullable="false" />
           <Property Name="RegionDescription" Type="nchar" MaxLength="50" Nullable="false" />
         </EntityType>
+        <EntityType Name="ReportHead">
+          <Key>
+            <PropertyRef Name="ReportHeadId" />
+          </Key>
+          <Property Name="ReportHeadId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReportHeadName" Type="nvarchar" MaxLength="500" />
+          <Property Name="CompanyId" Type="int" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="ModifyBy" Type="int" />
+          <Property Name="ModifyDate" Type="datetime" />
+        </EntityType>
         <EntityType Name="ReportingPerson">
           <Key>
             <PropertyRef Name="id" />
@@ -3778,6 +3791,22 @@ warning 6002: The table/view 'KGISSDB.dbo.ProcessAttenendance' does not have a p
           <Property Name="def_rep_person_id" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="active" Type="int" Nullable="false" />
           <Property Name="date" Type="date" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ReportSignatory">
+          <Key>
+            <PropertyRef Name="ReportSignatoryId" />
+          </Key>
+          <Property Name="ReportSignatoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReportSignatoryName" Type="nvarchar" MaxLength="500" />
+          <Property Name="ReportPropertyName" Type="nvarchar" MaxLength="500" />
+          <Property Name="IntegrateWith" Type="nvarchar" MaxLength="500" />
+          <Property Name="ReportHeadId" Type="int" Nullable="false" />
+          <Property Name="CompanyId" Type="int" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="ModifyBy" Type="int" />
+          <Property Name="ModifyDate" Type="datetime" />
         </EntityType>
         <EntityType Name="SCreditCollection">
           <Key>
@@ -8840,7 +8869,9 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="QualityExceptionComplaintMap" EntityType="Self.QualityExceptionComplaintMap" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="RealEstateReturn" EntityType="Self.RealEstateReturn" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Region" EntityType="Self.Region" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ReportHead" EntityType="Self.ReportHead" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ReportingPerson" EntityType="Self.ReportingPerson" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ReportSignatory" EntityType="Self.ReportSignatory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SCreditCollection" EntityType="Self.SCreditCollection" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ShareHolder" EntityType="Self.ShareHolder" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Shift" EntityType="Self.Shift" Schema="dbo" store:Type="Tables" />
@@ -10914,6 +10945,8 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="MaterialReceiveDetail" EntitySet="MaterialReceiveDetails" />
             <End Role="MaterialReceiveDetail1" EntitySet="MaterialReceiveDetails" />
           </AssociationSet>
+          <EntitySet Name="ReportHeads" EntityType="ERPModel.ReportHead" />
+          <EntitySet Name="ReportSignatories" EntityType="ERPModel.ReportSignatory" />
           <EntitySet Name="FinishProductBOMs" EntityType="ERPModel.FinishProductBOM" />
           <EntitySet Name="Prod_ReferenceSlave" EntityType="ERPModel.Prod_ReferenceSlave" />
           <EntitySet Name="Prod_ReferenceSlaveConsumption" EntityType="ERPModel.Prod_ReferenceSlaveConsumption" />
@@ -18102,6 +18135,26 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Prod_ReferenceSlaveConsumption">
+          <Key>
+            <PropertyRef Name="ProdReferenceSlaveConsumptionID" />
+          </Key>
+          <Property Name="ProdReferenceSlaveConsumptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProdReferenceSlaveID" Type="Int32" Nullable="false" />
+          <Property Name="RProductId" Type="Int32" Nullable="false" />
+          <Property Name="TotalConsumeQuantity" Type="Decimal" Nullable="false" Precision="18" Scale="5" />
+          <Property Name="UnitPrice" Type="Decimal" Nullable="false" Precision="18" Scale="5" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="COGS" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="ProdReferenceId" Type="Int32" />
+          <Property Name="FactoryExpensesHeadGLId" Type="Int32" />
+          <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
         <EntityType Name="WorkState">
           <Key>
             <PropertyRef Name="WorkStateId" />
@@ -18377,6 +18430,52 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="Downpayment" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
           <Property Name="PaidDownPayment" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
         </EntityType>
+        <EntityType Name="OrderDeliverDetail">
+          <Key>
+            <PropertyRef Name="OrderDeliverDetailId" />
+          </Key>
+          <Property Name="OrderDeliverDetailId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OrderDeliverId" Type="Int64" />
+          <Property Name="ProductId" Type="Int32" Nullable="false" />
+          <Property Name="UnitPrice" Type="Double" Nullable="false" />
+          <Property Name="DeliveredQty" Type="Double" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="BaseCommission" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="CashCommission" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="CarryingRate" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="CreditCommission" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="SpecialDiscount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="EBaseCommission" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="ECarryingCommission" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="ECashCommission" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="COGSPrice" Type="Decimal" Nullable="false" Precision="18" Scale="4" />
+          <Property Name="SaleCommissionRate" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="AdditionPrice" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="EngineNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ChassisNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BatteryNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RearTyreRH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RearTyreLH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="OrderDetailId" Type="Int64" Nullable="false" />
+          <Property Name="OverQty" Type="Double" Nullable="false" />
+          <Property Name="TPPrice" Type="Decimal" Nullable="false" Precision="18" Scale="4" />
+          <Property Name="MonthlyIncentive" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="YearlyIncentive" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="VATPercent" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="TDSPercent" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="IsReturn" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifedDate" Type="DateTime" Precision="3" />
+          <Property Name="GrossWeight" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="NetWeight" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="NoofReels" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="NoofBags" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <NavigationProperty Name="OrderDeliver" Relationship="ERPModel.FK_OrderDeliverDetail_OrderDeliver" FromRole="OrderDeliverDetail" ToRole="OrderDeliver" />
+          <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
         <EntityType Name="QualityExceptionComplaintMap">
           <Key>
             <PropertyRef Name="QualityExceptionComplaintMapId" />
@@ -18439,6 +18538,38 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="QualityExceptionComplaintDetail1">
               <PropertyRef Name="QualityExceptionComplaintDetailId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="SaleReturnDetail">
+          <Key>
+            <PropertyRef Name="SaleReturnDetailId" />
+          </Key>
+          <Property Name="SaleReturnDetailId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SaleReturnId" Type="Int64" />
+          <Property Name="ProductId" Type="Int32" />
+          <Property Name="Qty" Type="Decimal" Precision="18" Scale="9" />
+          <Property Name="Rate" Type="Decimal" Precision="18" Scale="9" />
+          <Property Name="COGSRate" Type="Decimal" Precision="18" Scale="9" />
+          <Property Name="BaseCommission" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CashCommission" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CarryingCommission" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="SpecialDiscount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="AdditionPrice" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="OrderDeliverDetailsId" Type="Int64" Nullable="false" />
+          <NavigationProperty Name="SaleReturn" Relationship="ERPModel.FK_SaleReturnDetail_SaleReturn" FromRole="SaleReturnDetail" ToRole="SaleReturn" />
+          <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="FK_SaleReturnDetail_SaleReturn">
+          <End Type="ERPModel.SaleReturn" Role="SaleReturn" Multiplicity="0..1" />
+          <End Type="ERPModel.SaleReturnDetail" Role="SaleReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SaleReturn">
+              <PropertyRef Name="SaleReturnId" />
+            </Principal>
+            <Dependent Role="SaleReturnDetail">
+              <PropertyRef Name="SaleReturnId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -18804,6 +18935,33 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="ProductBookingInfo">
               <PropertyRef Name="InstallmentTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="PurchaseReturnDetail">
+          <Key>
+            <PropertyRef Name="PurchaseReturnDetailId" />
+          </Key>
+          <Property Name="PurchaseReturnDetailId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PurchaseReturnId" Type="Int64" Nullable="false" />
+          <Property Name="ProductId" Type="Int32" />
+          <Property Name="Qty" Type="Decimal" Precision="18" Scale="3" />
+          <Property Name="Rate" Type="Decimal" Precision="18" Scale="9" />
+          <Property Name="COGS" Type="Decimal" Precision="18" Scale="9" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="MaterialReceiveDetailId" Type="Int64" />
+          <NavigationProperty Name="PurchaseReturn" Relationship="ERPModel.FK_PurchaseReturnDetail_PurchaseReturn" FromRole="PurchaseReturnDetail" ToRole="PurchaseReturn" />
+          <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="FK_PurchaseReturnDetail_PurchaseReturn">
+          <End Type="ERPModel.PurchaseReturn" Role="PurchaseReturn" Multiplicity="1" />
+          <End Type="ERPModel.PurchaseReturnDetail" Role="PurchaseReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PurchaseReturn">
+              <PropertyRef Name="PurchaseReturnId" />
+            </Principal>
+            <Dependent Role="PurchaseReturnDetail">
+              <PropertyRef Name="PurchaseReturnId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -19873,6 +20031,35 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="ReportHead">
+          <Key>
+            <PropertyRef Name="ReportHeadId" />
+          </Key>
+          <Property Name="ReportHeadId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReportHeadName" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyBy" Type="Int32" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="ReportSignatory">
+          <Key>
+            <PropertyRef Name="ReportSignatoryId" />
+          </Key>
+          <Property Name="ReportSignatoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReportSignatoryName" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ReportPropertyName" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="IntegrateWith" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ReportHeadId" Type="Int32" Nullable="false" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyBy" Type="Int32" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+        </EntityType>
         <EntityType Name="FinishProductBOM">
           <Key>
             <PropertyRef Name="ID" />
@@ -19937,6 +20124,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="COGS" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
           <Property Name="ProdReferenceId" Type="Int32" />
           <Property Name="FactoryExpensesHeadGLId" Type="Int32" />
+          <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="OrderDetail">
@@ -25663,6 +25851,27 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="Prod_ReferenceSlaveConsumption">
+            <EntityTypeMapping TypeName="ERPModel.Prod_ReferenceSlaveConsumption">
+              <MappingFragment StoreEntitySet="Prod_ReferenceSlaveConsumption">
+                <ScalarProperty Name="LotNumber" ColumnName="LotNumber" />
+                <ScalarProperty Name="FactoryExpensesHeadGLId" ColumnName="FactoryExpensesHeadGLId" />
+                <ScalarProperty Name="ProdReferenceId" ColumnName="ProdReferenceId" />
+                <ScalarProperty Name="COGS" ColumnName="COGS" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+                <ScalarProperty Name="TotalConsumeQuantity" ColumnName="TotalConsumeQuantity" />
+                <ScalarProperty Name="RProductId" ColumnName="RProductId" />
+                <ScalarProperty Name="ProdReferenceSlaveID" ColumnName="ProdReferenceSlaveID" />
+                <ScalarProperty Name="ProdReferenceSlaveConsumptionID" ColumnName="ProdReferenceSlaveConsumptionID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="WorkStates">
             <EntityTypeMapping TypeName="ERPModel.WorkState">
               <MappingFragment StoreEntitySet="WorkState">
@@ -25912,6 +26121,52 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="OrderDeliverDetails">
+            <EntityTypeMapping TypeName="ERPModel.OrderDeliverDetail">
+              <MappingFragment StoreEntitySet="OrderDeliverDetail">
+                <ScalarProperty Name="LotNumber" ColumnName="LotNumber" />
+                <ScalarProperty Name="NoofBags" ColumnName="NoofBags" />
+                <ScalarProperty Name="NoofReels" ColumnName="NoofReels" />
+                <ScalarProperty Name="NetWeight" ColumnName="NetWeight" />
+                <ScalarProperty Name="GrossWeight" ColumnName="GrossWeight" />
+                <ScalarProperty Name="ModifedDate" ColumnName="ModifedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="IsReturn" ColumnName="IsReturn" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="TDSPercent" ColumnName="TDSPercent" />
+                <ScalarProperty Name="VATPercent" ColumnName="VATPercent" />
+                <ScalarProperty Name="YearlyIncentive" ColumnName="YearlyIncentive" />
+                <ScalarProperty Name="MonthlyIncentive" ColumnName="MonthlyIncentive" />
+                <ScalarProperty Name="TPPrice" ColumnName="TPPrice" />
+                <ScalarProperty Name="OverQty" ColumnName="OverQty" />
+                <ScalarProperty Name="OrderDetailId" ColumnName="OrderDetailId" />
+                <ScalarProperty Name="RearTyreLH" ColumnName="RearTyreLH" />
+                <ScalarProperty Name="RearTyreRH" ColumnName="RearTyreRH" />
+                <ScalarProperty Name="BatteryNo" ColumnName="BatteryNo" />
+                <ScalarProperty Name="ChassisNo" ColumnName="ChassisNo" />
+                <ScalarProperty Name="EngineNo" ColumnName="EngineNo" />
+                <ScalarProperty Name="AdditionPrice" ColumnName="AdditionPrice" />
+                <ScalarProperty Name="SaleCommissionRate" ColumnName="SaleCommissionRate" />
+                <ScalarProperty Name="COGSPrice" ColumnName="COGSPrice" />
+                <ScalarProperty Name="ECashCommission" ColumnName="ECashCommission" />
+                <ScalarProperty Name="ECarryingCommission" ColumnName="ECarryingCommission" />
+                <ScalarProperty Name="EBaseCommission" ColumnName="EBaseCommission" />
+                <ScalarProperty Name="SpecialDiscount" ColumnName="SpecialDiscount" />
+                <ScalarProperty Name="CreditCommission" ColumnName="CreditCommission" />
+                <ScalarProperty Name="CarryingRate" ColumnName="CarryingRate" />
+                <ScalarProperty Name="CashCommission" ColumnName="CashCommission" />
+                <ScalarProperty Name="BaseCommission" ColumnName="BaseCommission" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="DeliveredQty" ColumnName="DeliveredQty" />
+                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+                <ScalarProperty Name="ProductId" ColumnName="ProductId" />
+                <ScalarProperty Name="OrderDeliverId" ColumnName="OrderDeliverId" />
+                <ScalarProperty Name="OrderDeliverDetailId" ColumnName="OrderDeliverDetailId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="QualityExceptionComplaintMaps">
             <EntityTypeMapping TypeName="ERPModel.QualityExceptionComplaintMap">
               <MappingFragment StoreEntitySet="QualityExceptionComplaintMap">
@@ -25963,6 +26218,26 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="OrderDeliverDetailId" ColumnName="OrderDeliverDetailId" />
                 <ScalarProperty Name="QualityExceptionComplaintId" ColumnName="QualityExceptionComplaintId" />
                 <ScalarProperty Name="QualityExceptionComplaintDetailId" ColumnName="QualityExceptionComplaintDetailId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SaleReturnDetails">
+            <EntityTypeMapping TypeName="ERPModel.SaleReturnDetail">
+              <MappingFragment StoreEntitySet="SaleReturnDetail">
+                <ScalarProperty Name="LotNumber" ColumnName="LotNumber" />
+                <ScalarProperty Name="OrderDeliverDetailsId" ColumnName="OrderDeliverDetailsId" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="AdditionPrice" ColumnName="AdditionPrice" />
+                <ScalarProperty Name="SpecialDiscount" ColumnName="SpecialDiscount" />
+                <ScalarProperty Name="CarryingCommission" ColumnName="CarryingCommission" />
+                <ScalarProperty Name="CashCommission" ColumnName="CashCommission" />
+                <ScalarProperty Name="BaseCommission" ColumnName="BaseCommission" />
+                <ScalarProperty Name="COGSRate" ColumnName="COGSRate" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="Qty" ColumnName="Qty" />
+                <ScalarProperty Name="ProductId" ColumnName="ProductId" />
+                <ScalarProperty Name="SaleReturnId" ColumnName="SaleReturnId" />
+                <ScalarProperty Name="SaleReturnDetailId" ColumnName="SaleReturnDetailId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -26277,6 +26552,21 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="ProductId" ColumnName="ProductId" />
                 <ScalarProperty Name="BookingNo" ColumnName="BookingNo" />
                 <ScalarProperty Name="BookingId" ColumnName="BookingId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PurchaseReturnDetails">
+            <EntityTypeMapping TypeName="ERPModel.PurchaseReturnDetail">
+              <MappingFragment StoreEntitySet="PurchaseReturnDetail">
+                <ScalarProperty Name="LotNumber" ColumnName="LotNumber" />
+                <ScalarProperty Name="MaterialReceiveDetailId" ColumnName="MaterialReceiveDetailId" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="COGS" ColumnName="COGS" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="Qty" ColumnName="Qty" />
+                <ScalarProperty Name="ProductId" ColumnName="ProductId" />
+                <ScalarProperty Name="PurchaseReturnId" ColumnName="PurchaseReturnId" />
+                <ScalarProperty Name="PurchaseReturnDetailId" ColumnName="PurchaseReturnDetailId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -26919,6 +27209,37 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="ReportHeads">
+            <EntityTypeMapping TypeName="ERPModel.ReportHead">
+              <MappingFragment StoreEntitySet="ReportHead">
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="ModifyBy" ColumnName="ModifyBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="ReportHeadName" ColumnName="ReportHeadName" />
+                <ScalarProperty Name="ReportHeadId" ColumnName="ReportHeadId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ReportSignatories">
+            <EntityTypeMapping TypeName="ERPModel.ReportSignatory">
+              <MappingFragment StoreEntitySet="ReportSignatory">
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="ModifyBy" ColumnName="ModifyBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="ReportHeadId" ColumnName="ReportHeadId" />
+                <ScalarProperty Name="IntegrateWith" ColumnName="IntegrateWith" />
+                <ScalarProperty Name="ReportPropertyName" ColumnName="ReportPropertyName" />
+                <ScalarProperty Name="ReportSignatoryName" ColumnName="ReportSignatoryName" />
+                <ScalarProperty Name="ReportSignatoryId" ColumnName="ReportSignatoryId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="FinishProductBOMs">
             <EntityTypeMapping TypeName="ERPModel.FinishProductBOM">
               <MappingFragment StoreEntitySet="FinishProductBOM">
@@ -26967,6 +27288,10 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="FinishProductBOMs">
+            <EntityTypeMapping TypeName="ERPModel.FinishProductBOM">
+              <MappingFragment StoreEntitySet="FinishProductBOM">
+                <ScalarProperty Name="LotNumber" ColumnName="LotNumber" />
           <EntitySetMapping Name="Prod_ReferenceSlaveConsumption">
             <EntityTypeMapping TypeName="ERPModel.Prod_ReferenceSlaveConsumption">
               <MappingFragment StoreEntitySet="Prod_ReferenceSlaveConsumption">

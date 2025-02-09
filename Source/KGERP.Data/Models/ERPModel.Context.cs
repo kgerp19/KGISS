@@ -357,6 +357,8 @@ namespace KGERP.Data.Models
         public virtual DbSet<Head4> Head4 { get; set; }
         public virtual DbSet<Head5> Head5 { get; set; }
         public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
+        public virtual DbSet<ReportHead> ReportHeads { get; set; }
+        public virtual DbSet<ReportSignatory> ReportSignatories { get; set; }
         public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
         public virtual DbSet<Prod_ReferenceSlaveConsumption> Prod_ReferenceSlaveConsumption { get; set; }

@@ -643,6 +643,7 @@ namespace KGERP.Services.WareHouse
         public decimal TDSPercent { get;  set; }
         public string LotNumber { get; set; }   
         
+        public string ProductType { get;  set; }
     }
 
     public partial class VMSaleReturn : BaseVM
