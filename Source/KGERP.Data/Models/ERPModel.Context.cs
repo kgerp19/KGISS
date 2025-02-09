@@ -314,9 +314,11 @@ namespace KGERP.Data.Models
         public virtual DbSet<KGCompanySaleTerget> KGCompanySaleTergets { get; set; }
         public virtual DbSet<OfficerAssign> OfficerAssigns { get; set; }
         public virtual DbSet<MoneyReceiptDetail> MoneyReceiptDetails { get; set; }
+        public virtual DbSet<OrderDeliverDetail> OrderDeliverDetails { get; set; }
         public virtual DbSet<QualityExceptionComplaintMap> QualityExceptionComplaintMaps { get; set; }
         public virtual DbSet<QualityExceptionComplaint> QualityExceptionComplaints { get; set; }
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
+        public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
         public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
         public virtual DbSet<KGSalesCollectedAchivement> KGSalesCollectedAchivements { get; set; }
         public virtual DbSet<WorkBoard> WorkBoards { get; set; }
@@ -331,6 +333,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_SpecialAddition> PRoll_SpecialAddition { get; set; }
         public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
         public virtual DbSet<ProductBookingInfo> ProductBookingInfoes { get; set; }
+        public virtual DbSet<PurchaseReturnDetail> PurchaseReturnDetails { get; set; }
         public virtual DbSet<OrderMaster> OrderMasters { get; set; }
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
         public virtual DbSet<ProductCategory> ProductCategories { get; set; }
@@ -359,13 +362,10 @@ namespace KGERP.Data.Models
         public virtual DbSet<MaterialReceiveDetail> MaterialReceiveDetails { get; set; }
         public virtual DbSet<ReportHead> ReportHeads { get; set; }
         public virtual DbSet<ReportSignatory> ReportSignatories { get; set; }
-        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<Prod_ReferenceSlave> Prod_ReferenceSlave { get; set; }
         public virtual DbSet<Prod_ReferenceSlaveConsumption> Prod_ReferenceSlaveConsumption { get; set; }
+        public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
-        public virtual DbSet<OrderDeliverDetail> OrderDeliverDetails { get; set; }
-        public virtual DbSet<PurchaseReturnDetail> PurchaseReturnDetails { get; set; }
-        public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
