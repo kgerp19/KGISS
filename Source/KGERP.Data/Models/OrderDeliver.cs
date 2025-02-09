@@ -17,8 +17,8 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public OrderDeliver()
         {
-            this.OrderDeliverDetails = new HashSet<OrderDeliverDetail>();
             this.SaleReturns = new HashSet<SaleReturn>();
+            this.OrderDeliverDetails = new HashSet<OrderDeliverDetail>();
         }
     
         public long OrderDeliverId { get; set; }
@@ -51,8 +51,8 @@ namespace KGERP.Data.Models
     
         public virtual OrderMaster OrderMaster { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderDeliverDetail> OrderDeliverDetails { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SaleReturn> SaleReturns { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<OrderDeliverDetail> OrderDeliverDetails { get; set; }
     }
 }

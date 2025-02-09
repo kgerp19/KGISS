@@ -9,6 +9,7 @@ using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
 using KGERP.Services.Procurement;
 using KGERP.Utility;
+using OfficeOpenXml.Table.PivotTable;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -403,7 +404,8 @@ namespace KGERP.Services.WareHouse
                 AdditionPrice = 0,
                 CarryingCommission = 0,
 
-                IsActive = true
+                IsActive = true,
+                LotNumber=vmSaleReturnDetail.LotNumber
 
             };
 
@@ -538,7 +540,8 @@ namespace KGERP.Services.WareHouse
                     AdditionPrice = 0,
                     CarryingCommission = 0,
 
-                    IsActive = true
+                    IsActive = true,
+                    LotNumber=item.LotNumber
 
                 };
                 saleReturnList.Add(saleReturnDetail);
@@ -1408,7 +1411,8 @@ namespace KGERP.Services.WareHouse
                         MaterialReceiveDetailId = item.materialReceiveDetailId,
                         IsActive = true,
                         COGS = vMProductStock.ClosingRate,
-                        Rate = item.UnitPrice
+                        Rate = item.UnitPrice,
+                        LotNumber=item.LotNumber
 
 
                     };
@@ -1590,6 +1594,14 @@ namespace KGERP.Services.WareHouse
                                                        //x.WareHouse_POReceivingFk == t1.WareHouse_POReceivingFk &&
                                                        x.IsActive && x.IsReturn && y.ChallanNo == tr.ChallanNo
                                                       select x.ReceiveQty).DefaultIfEmpty(0).Sum(),
+
+                            //LotNumber = (from x in _db.MaterialReceiveDetails
+                            //                 join y in _db.MaterialReceives on x.MaterialReceiveId equals y.MaterialReceiveId
+                            //                 where x.MaterialReceiveId == poReceivingId
+                            //                 select x.LotNumber).ToList()
+                            LotNumber =t1.LotNumber
+
+
                         }).ToList();
 
 
@@ -1628,6 +1640,7 @@ namespace KGERP.Services.WareHouse
                             DiscountUnit = t1.BaseCommission,
                             DiscountRate = t1.CashCommission,
                             SpecialDiscount = t1.SpecialDiscount,
+                            LotNumber=t1.LotNumber,
 
 
                             PriviousReturnQuantity = (_db.SaleReturnDetails.Where(x => x.OrderDeliverDetailsId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.Qty).DefaultIfEmpty(0).Sum()),
@@ -1742,7 +1755,9 @@ namespace KGERP.Services.WareHouse
                             UnitName = t8.Name,
                             DiscountUnit = t1.DiscountUnit,
                             SpecialDiscount = t1.SpecialBaseCommission,
-                            CompanyFK = t2.CompanyId
+                            CompanyFK = t2.CompanyId,
+                            LotNumber=t1.LotNumber
+                            
                         }).ToList();
 
             foreach (VMOrderDeliverDetailPartial item in list)
@@ -2908,6 +2923,7 @@ namespace KGERP.Services.WareHouse
                                                            IsUnitAsCost = t1.IsUnitAsCost,
                                                            //CreatedBy = t1.CreatedBy,
                                                            IntegratedFrom = "SaleReturn"
+                                                       
                                                            //ProcurementPurchaseOrderList = new SelectList(PODropDownList(), "Value", "Text")
                                                        }).FirstOrDefault());
 
@@ -2945,7 +2961,8 @@ namespace KGERP.Services.WareHouse
                                                                           CostingPrice = t1.Qty * t1.COGSRate,
                                                                           DiscountUnit = t1.BaseCommission,
                                                                           DiscountRate = t1.CashCommission,
-                                                                          SpecialDiscount = t1.SpecialDiscount
+                                                                          SpecialDiscount = t1.SpecialDiscount,
+                                                                          LotNumber=t1.LotNumber
                                                                       }).OrderByDescending(x => x.SaleReturnDetailId).AsEnumerable());
 
             return vmSaleReturnDetail;
@@ -3652,7 +3669,9 @@ namespace KGERP.Services.WareHouse
                         IsReturn = false,
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreateDate = DateTime.Now,
-                        IsActive = true
+                        IsActive = true,
+                        LotNumber = dataListSlavePartial[i].LotNumber
+                       
                     };
                     orderDeliverDetails.Add(orderDeliverDetail);
                 }
@@ -4022,7 +4041,9 @@ namespace KGERP.Services.WareHouse
                                                                             PromotionalOfferId=t3.PromotionalOfferId,
                                                                             UnitName = t8.Name,
                                                                             UnitPrice = t1.UnitPrice,
-                                                                            Amount = t1.DeliveredQty * t1.UnitPrice
+                                                                            Amount = t1.DeliveredQty * t1.UnitPrice,
+                                                                            LotNunmber =t1.LotNumber
+                                                                           
                                                                         }).OrderByDescending(x => x.OrderDeliverDetailId).AsEnumerable());
 
 

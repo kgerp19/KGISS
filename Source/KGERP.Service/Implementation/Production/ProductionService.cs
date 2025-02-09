@@ -453,7 +453,8 @@ namespace KGERP.Services.Production
                                                                            CompanyFK = t1.CompanyId,
                                                                            CostingPrice = t1.CostingPrice,
                                                                            TotalPrice = t1.Quantity * t1.CostingPrice,
-                                                                           AccountingHeadId = t5.AccountingHeadId
+                                                                           AccountingHeadId = t5.AccountingHeadId,
+                                                                           LotNumber = t1.LotNumber
 
 
                                                                        }).OrderByDescending(x => x.ProdReferenceSlaveID).AsEnumerable());
@@ -462,25 +463,16 @@ namespace KGERP.Services.Production
             vmProdReferenceSlave.RowProductConsumeList = (from aaa in _db.Prod_ReferenceSlaveConsumption.Where(x => x.IsActive == true)
                                                           join fff in _db.Prod_ReferenceSlave.Where(x => x.IsActive == true)
                                                               on aaa.ProdReferenceSlaveID equals fff.ProdReferenceSlaveID
-                                                          join bbb in _db.Products
-                                                              on aaa.RProductId equals bbb.ProductId
-                                                          join ccc in _db.ProductSubCategories
-                                                              on bbb.ProductSubCategoryId equals ccc.ProductSubCategoryId
-                                                          join ddd in _db.ProductCategories
-                                                              on ccc.ProductCategoryId equals ddd.ProductCategoryId
-                                                          join eee in _db.Units
-                                                              on bbb.UnitId equals eee.UnitId
+                                                          join bbb in _db.Products  on aaa.RProductId equals bbb.ProductId
+                                                          join ccc in _db.ProductSubCategories  on bbb.ProductSubCategoryId equals ccc.ProductSubCategoryId
+                                                          join ddd in _db.ProductCategories on ccc.ProductCategoryId equals ddd.ProductCategoryId
+                                                          join eee in _db.Units  on bbb.UnitId equals eee.UnitId
 
-                                                          join fbbb in _db.Products
-                                                              on fff.FProductId equals fbbb.ProductId
-                                                          join fccc in _db.ProductSubCategories
-                                                              on fbbb.ProductSubCategoryId equals fccc.ProductSubCategoryId
-                                                          join fddd in _db.ProductCategories
-                                                              on fccc.ProductCategoryId equals fddd.ProductCategoryId
-                                                          join feee in _db.Units
-                                                              on fbbb.UnitId equals feee.UnitId
-                                                          join mr in _db.MaterialReceiveDetails
-                                                              on bbb.ProductId equals mr.ProductId
+                                                          join fbbb in _db.Products    on fff.FProductId equals fbbb.ProductId
+                                                          join fccc in _db.ProductSubCategories  on fbbb.ProductSubCategoryId equals fccc.ProductSubCategoryId
+                                                          join fddd in _db.ProductCategories on fccc.ProductCategoryId equals fddd.ProductCategoryId
+                                                          join feee in _db.Units  on fbbb.UnitId equals feee.UnitId
+                                                         // join mr in _db.MaterialReceiveDetails  on bbb.ProductId equals mr.ProductId
 
                                                           where fff.ProdReferenceId == prodReferenceId
                                                           select new VMProdReferenceSlaveConsumption
@@ -496,7 +488,7 @@ namespace KGERP.Services.Production
                                                               COGS = aaa.COGS,
                                                               TotalCOGS = aaa.TotalConsumeQuantity * aaa.COGS,
                                                               AccountingHeadId = ddd.AccountingHeadId,
-                                                              LotNumber=mr.LotNumber
+                                                              LotNumber= aaa.LotNumber
                                                              
 
                                                           }).OrderBy(x => x.ProdReferenceSlaveConsumptionID).ToList();
@@ -711,17 +703,18 @@ namespace KGERP.Services.Production
                 CompanyId = vmProdReferenceSlave.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true,
-                LotNumber=vmProdReferenceSlave.LotNumber
+                IsActive = true
+                 
             };
             _db.Prod_ReferenceSlave.Add(prodReferenceSlave);
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = prodReferenceSlave.ProdReferenceSlaveID;
             }
-
+            string lot = "";
             if (result > 0)
             {
+               
                 var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive).AsEnumerable();
                 List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
                 foreach (var bom in bomsOfProduct)
@@ -739,9 +732,12 @@ namespace KGERP.Services.Production
                         CompanyId = vmProdReferenceSlave.CompanyFK,
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
-                        IsActive = true
+                        IsActive = true,
+                        LotNumber = bom.LotNumber,
                     };
                     List.Add(prod_ReferenceSlaveConsumption);
+
+                    lot += bom.LotNumber;
                 }
                 _db.Prod_ReferenceSlaveConsumption.AddRange(List);
                 await _db.SaveChangesAsync();
@@ -753,6 +749,7 @@ namespace KGERP.Services.Production
             {
                 Prod_ReferenceSlave referenceSlave = _db.Prod_ReferenceSlave.Find(result);
                 referenceSlave.CostingPrice = consumeAmount / referenceSlave.Quantity;
+                referenceSlave.LotNumber = lot;
                 await _db.SaveChangesAsync();
 
             }

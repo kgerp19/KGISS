@@ -53,6 +53,7 @@ namespace KGERP.Data.Models
         public decimal NetWeight { get; set; }
         public decimal NoofReels { get; set; }
         public decimal NoofBags { get; set; }
+        public string LotNumber { get; set; }
     
         public virtual OrderDeliver OrderDeliver { get; set; }
     }

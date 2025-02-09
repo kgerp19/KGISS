@@ -27,6 +27,7 @@ namespace KGERP.Data.Models
         public Nullable<decimal> AdditionPrice { get; set; }
         public bool IsActive { get; set; }
         public long OrderDeliverDetailsId { get; set; }
+        public string LotNumber { get; set; }
     
         public virtual SaleReturn SaleReturn { get; set; }
     }

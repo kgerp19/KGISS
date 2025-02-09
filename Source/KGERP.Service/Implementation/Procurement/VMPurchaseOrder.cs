@@ -435,6 +435,7 @@ namespace KGERP.Services.Procurement
         
         public bool IsService { get; set; }
         public string JobOrderNo { get; set; }
+        public string LotNumber { get; set; }
         public bool IsVATInclude { get; set; }
     }
     public partial class FeedOrderMaster : VMFeedPayment

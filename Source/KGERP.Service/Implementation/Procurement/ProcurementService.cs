@@ -3268,6 +3268,7 @@ namespace KGERP.Services.Procurement
                                                           DiscountRate = t1.DiscountRate ?? 0,
                                                           TotalAmountAfterDiscount = t1.TotalAmount ?? 0,
                                                           OfficerNAme = t8 != null ? t8.Name : ""
+                                                          
 
 
 
@@ -3297,7 +3298,9 @@ namespace KGERP.Services.Procurement
 
                                                                         ProductDiscountUnit = t1.DiscountUnit,//Unit Discount                                                             
                                                                                                                                       
-                                                                        SpecialDiscount = t1.SpecialBaseCommission, // SpecialDiscount   
+                                                                        SpecialDiscount = t1.SpecialBaseCommission,
+                                                                        LotNumber=t1.LotNumber
+                                                                        // SpecialDiscount   
 
                                                                     }).OrderByDescending(x => x.OrderDetailId).AsEnumerable());
 
@@ -3739,7 +3742,8 @@ namespace KGERP.Services.Procurement
                 CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
                 CreateDate = DateTime.Now,
                 StyleNo = Convert.ToString(dateTime),
-                IsActive = true
+                IsActive = true,
+                LotNumber=vmSalesOrderSlave.LotNumber
             };
             _db.OrderDetails.Add(orderDetail);
             if (await _db.SaveChangesAsync() > 0)

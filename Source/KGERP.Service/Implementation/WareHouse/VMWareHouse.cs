@@ -341,6 +341,8 @@ namespace KGERP.Services.WareHouse
         public List<SelectModel> StockInfos { get; set; }
         public List<SelectModel> BagWeights { get; set; }
         public long materialReceiveDetailId { get; set; }
+        //public List<string> LotNumber { get; set; }
+        public string LotNumber { get; set; }
     }
     public class VMWareHousePOReturnSlave : VMWareHousePOReceiving
     {
@@ -598,7 +600,7 @@ namespace KGERP.Services.WareHouse
         public string POPaymentMethodName { get { return BaseFunctionalities.GetEnumDescription(POPaymentMethod); } }
         public SelectList POPaymentMethodList { get { return new SelectList(BaseFunctionalities.GetEnumList<VendorsPaymentMethodEnum>(), "Value", "Text"); } }
 
-     
+        public string LotNunmber { get;  set; }
     }
     public partial class VMOrderDeliverDetailPartial : BaseVM
     {
@@ -639,6 +641,7 @@ namespace KGERP.Services.WareHouse
         public decimal CurrentStock { get;  set; }
         public decimal VATPercent { get;  set; }
         public decimal TDSPercent { get;  set; }
+        public string LotNumber { get; set; }   
         
     }
 
@@ -684,6 +687,7 @@ namespace KGERP.Services.WareHouse
         public string CustomerAddress { get; set; }
         public string CustomerEmail { get; set; }
         public string ContactPerson { get; set; }
+        public string LotNumber { get; set; }
         public SelectList SubZoneList { get; set; } = new SelectList(new List<object>());
         public SelectList StockInfoList { get; set; } = new SelectList(new List<object>());
         public SelectList CustomerList { get; set; } = new SelectList(new List<object>());
@@ -744,6 +748,7 @@ namespace KGERP.Services.WareHouse
         public decimal? DiscountUnit { get; set; }
 
         public bool IsUnitAsCost { get; set; }
+        
     }
     public partial class VMSaleReturnDetailPartial : VMSaleReturn
     {

@@ -815,6 +815,7 @@ namespace KGERP.Service.Implementation
                      join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
                      join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
                      join t4 in _db.Units on t1.UnitId equals t4.UnitId
+                     //join t5 in _db.OrderDeliverDetails on t1.ProductId equals t5.ProductId
 
                      where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType && t2.IsActive && t3.IsActive && t4.IsActive &&
                      ((t1.ProductName.StartsWith(prefix)) || (t2.Name.StartsWith(prefix)) || (t3.Name.StartsWith(prefix)) || (t1.ShortName.StartsWith(prefix)))
@@ -892,24 +893,18 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public object GetAutoCompleteLot(int companyId,int ProductId)
+        public object GetAutoCompleteLot(int companyId, int productId)
         {
-            var v = (from t1 in _db.Products
-                     join t2 in _db.FinishProductBOMs on t1.ProductId equals t2.FProductFK
-                    
-
-                     where t1.CompanyId == companyId && t1.IsActive && t2.IsActive && 
-                     (t1.ProductType == "F") && t1.ProductId== ProductId
-
-
+            var v = (from t1 in _db.Prod_ReferenceSlave
+                     where t1.CompanyId == companyId && t1.IsActive && t1.FProductId == productId
                      select new
                      {
-                         label = t2.LotNumber
-                        
+                         label = t1.LotNumber
                      }).OrderBy(x => x.label).Take(100).ToList();
 
             return v;
         }
+
 
 
 
@@ -3449,7 +3444,7 @@ namespace KGERP.Service.Implementation
                          PackSize = t1.PackSize,
                          ProcessLoss = t1.ProcessLoss,
                          FormulaQty = t1.FormulaQty,
-                         LotNumbers = _db.MaterialReceiveDetails
+                         LotNumbers = _db.OrderDeliverDetails
                                 .Where(m => m.ProductId == id)
                                 .Select(m => m.LotNumber)
                                 .Distinct()
