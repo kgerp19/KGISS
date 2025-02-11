@@ -36,6 +36,10 @@ namespace KGERP.Utility
         public string Text { get; set; }
         public long Value { get; set; }
     }
+
+
+
+  
     public class SelectDDLModel
     {
         public string Text { get; set; }

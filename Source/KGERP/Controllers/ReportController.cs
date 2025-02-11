@@ -8851,8 +8851,8 @@ namespace KGERP.Controllers
                 StrToDate = DateTime.Now.ToShortDateString(),
                 ReportName = "ISSRMStockReport",
                 NoteReportName = "ISSRMStockSummeryReport",
-
-                Title = title
+                Title = title,
+                LotNumber=_configrationService.GetLotNumber(companyId)
             };
             return View(cm);
         }
@@ -8904,7 +8904,9 @@ namespace KGERP.Controllers
                 StrToDate = DateTime.Now.ToShortDateString(),
 
                 Title = "Finish Product Stock Report",
-                Stocks = stockSelectModels
+                Stocks = stockSelectModels,
+                LotNumber=_configrationService.GetLotNumberFinish(companyId),
+
             };
             return View(cm);
         }

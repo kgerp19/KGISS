@@ -8173,6 +8173,28 @@ namespace KGERP.Service.Implementation
         }
 
 
+        public List<string> GetLotNumber(int companyId)
+        {
+            var list = _db.MaterialReceiveDetails
+                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null")
+                .Select(x => x.LotNumber)
+                .Distinct()  // Ensures that LotNumbers are unique
+                .ToList();
+
+            return list;
+        }
+
+        public List<string> GetLotNumberFinish(int companyId)
+        {
+            var list = _db.OrderDeliverDetails
+                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null")
+                .Select(x => x.LotNumber)
+                .Distinct()  // Ensures that LotNumbers are unique
+                .ToList();
+
+            return list;
+        }
+
 
         #region Incentives
         public async Task<VMIncentive> GetIncentives(int companyId)

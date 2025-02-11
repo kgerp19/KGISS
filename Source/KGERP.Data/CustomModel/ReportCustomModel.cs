@@ -45,6 +45,7 @@ namespace KGERP.Data.CustomModel
         public Nullable<System.DateTime> ToDate { get; set; }
         public string ReportType { get; set; }
         public List<SelectModel> PayType { get; set; }
+        public string SelectedLotNumber { get; set; }
         public List<SelectModelSaleTitle> SaleTitle { get; set; }
         public long SaleTitleId { get; set; }
         public string ReportName { get; set; }
@@ -68,6 +69,7 @@ namespace KGERP.Data.CustomModel
         public Nullable<int> ZoneId { get; set; }
         public int? SubZoneId { get; set; }
         public List<SelectModel> Years { get; set; }
+        public List<string> LotNumber { get; set; }
         public List<SelectModel> Employees { get; set; }
         public List<SelectModel> Vendors { get; set; }
         public List<SelectModelType> VendorsList { get; set; }
