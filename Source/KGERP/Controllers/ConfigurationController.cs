@@ -810,6 +810,21 @@ namespace Pos.App.Controllers
             vmCommonProduct.UnitList = new SelectList(_service.UnitDropDownList(companyId), "Value", "Text");
             return View(vmCommonProduct);
         }
+        public async Task<ActionResult> CommonRawProductR(int companyId, int categoryId = 0, int subCategoryId = 0)
+        {
+            // Fetch the products based on the parameters
+            var products = await _service.SerCommonRawProductR(companyId, categoryId, subCategoryId);
+
+            // Return the products as JSON (note that Product objects must have ProductId and ProductName to work)
+            return Json(products.Select(p => new { ProductId = p.ProductId, ProductName = p.ProductName }), JsonRequestBehavior.AllowGet);
+        }
+
+
+
+
+
+
+
         [HttpPost]
         public async Task<ActionResult> CommonRawProduct(VMCommonProduct vmCommonProduct)
         {
@@ -2674,9 +2689,24 @@ namespace Pos.App.Controllers
             return View(list);
 
         }
+        public ActionResult GetLotNumberM(int productid)
+        {
+
+            var lot = _service.GetLotNumber(productid);
+
+            return Json(lot, JsonRequestBehavior.AllowGet);
+
+        }
+        public ActionResult GetLotNumberF(int productid)
+        {
+
+            var lot = _service.GetLotNumberFinish(productid);
+
+            return Json(lot, JsonRequestBehavior.AllowGet);
+
+        }
 
 
-        
         [HttpPost]
         public async Task<JsonResult> DeleteUpazila(int id)
         {

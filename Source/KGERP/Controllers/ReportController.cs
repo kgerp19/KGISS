@@ -16,6 +16,7 @@ using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel.SeedProcessingModel;
 using KGERP.Services.Procurement;
 using KGERP.Utility;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8852,24 +8853,32 @@ namespace KGERP.Controllers
                 ReportName = "ISSRMStockReport",
                 NoteReportName = "ISSRMStockSummeryReport",
                 Title = title,
-                LotNumber=_configrationService.GetLotNumber(companyId)
+              
             };
             return View(cm);
         }
+
+
+
+   
+
+
 
         [HttpGet]
 
         public ActionResult GetPackagingRMStockReport(ReportCustomModel model)
         {
 
-
-
+            string lotNumber = string.IsNullOrEmpty(model.SelectedLotNumber) ? "xyz" : model.SelectedLotNumber;
+            int categoryId = model.Common_ProductCategoryFk ?? 0;
+            int subCategoryId = model.Common_ProductSubCategoryFk ?? 0;
+            int productId = model.ProductId ?? 0;
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
             string reportURL;
 
-            reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
+            reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductCategoryId={5}&ProductSubCategoryId={6}&ProductId={7}&LotNo={8}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId,categoryId,subCategoryId,productId, lotNumber);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -8916,12 +8925,15 @@ namespace KGERP.Controllers
         public ActionResult StockReportFinishedISSView(ReportCustomModel model)
         {
             model.ReportName = "ISSFinishedGoodsStockReport";
-
+            string lotNumber = string.IsNullOrEmpty(model.SelectedLotNumber) ? "xyz" : model.SelectedLotNumber;
+            int categoryId = model.Common_ProductCategoryFk ?? 0;
+            int subCategoryId = model.Common_ProductSubCategoryFk ?? 0;
+            int productId = model.ProductId ?? 0;
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
             string reportURL;
-            reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
+            reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductCategoryId={5}&ProductSubCategoryId={6}&ProductId={7}&LotNo={8}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, categoryId, subCategoryId, productId, lotNumber);
 
 
             if (model.ReportType.Equals(ReportType.EXCEL))

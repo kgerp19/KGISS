@@ -2887,6 +2887,38 @@ namespace KGERP.Service.Implementation
             return vmCommonProduct;
         }
 
+
+        public async Task<List<Product>> SerCommonRawProductR(int companyId, int categoryId = 0, int subCategoryId = 0)
+        {
+            // Fetch the products using the LINQ query, including the ProductType filter
+            var products = await (from t1 in _db.Products
+                                  where t1.CompanyId == companyId
+                                         // Use ProductType parameter here
+                                        && t1.IsActive
+                                  join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                                  where t2.IsActive
+                                  join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+                                  where t3.IsActive
+                                  join t5 in _db.Products on t1.PackId equals t5.ProductId into t5_Join
+                                  from t5 in t5_Join.DefaultIfEmpty()
+                                  join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId into t6_Join
+                                  from t6 in t6_Join.DefaultIfEmpty()
+                                  where (categoryId > 0 && subCategoryId > 0 && t2.ProductCategoryId == categoryId && t2.ProductSubCategoryId == subCategoryId) ||
+                                        (categoryId > 0 && subCategoryId == 0 && t2.ProductCategoryId == categoryId) ||
+                                        (categoryId == 0 && subCategoryId > 0 && t1.ProductSubCategoryId == subCategoryId) ||
+                                        (categoryId == 0 && subCategoryId == 0)
+                                  select t1) // Return the Product entity itself, not an anonymous type
+                                  .ToListAsync();
+
+            // Return the list of products
+            return products;
+        }
+
+
+
+
+
+
         public async Task<VMCommonProduct> kfmalGetProduct(int companyId, int categoryId = 0, int subCategoryId = 0, string productType = "")
         {
             VMCommonProduct vmCommonProduct = new VMCommonProduct();
@@ -3555,7 +3587,7 @@ namespace KGERP.Service.Implementation
                          PackSize = t1.PackSize,
                          ProcessLoss = t1.ProcessLoss,
                          FormulaQty = t1.FormulaQty,
-                         LotNumbers = _db.OrderDeliverDetails
+                         LotNumbers = _db.MaterialReceiveDetails
                                 .Where(m => m.ProductId == id)
                                 .Select(m => m.LotNumber)
                                 .Distinct()
@@ -8173,10 +8205,10 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public List<string> GetLotNumber(int companyId)
+        public List<string> GetLotNumber(int ProductId)
         {
             var list = _db.MaterialReceiveDetails
-                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null")
+                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.ProductId== ProductId)
                 .Select(x => x.LotNumber)
                 .Distinct()  // Ensures that LotNumbers are unique
                 .ToList();
@@ -8184,10 +8216,10 @@ namespace KGERP.Service.Implementation
             return list;
         }
 
-        public List<string> GetLotNumberFinish(int companyId)
+        public List<string> GetLotNumberFinish(int ProductId)
         {
             var list = _db.OrderDeliverDetails
-                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null")
+                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.ProductId == ProductId)
                 .Select(x => x.LotNumber)
                 .Distinct()  // Ensures that LotNumbers are unique
                 .ToList();
