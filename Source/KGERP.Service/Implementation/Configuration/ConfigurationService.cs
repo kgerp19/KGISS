@@ -8218,8 +8218,8 @@ namespace KGERP.Service.Implementation
 
         public List<string> GetLotNumberFinish(int ProductId)
         {
-            var list = _db.OrderDeliverDetails
-                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.ProductId == ProductId)
+            var list = _db.Prod_ReferenceSlave
+                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.FProductId == ProductId)
                 .Select(x => x.LotNumber)
                 .Distinct()  // Ensures that LotNumbers are unique
                 .ToList();
