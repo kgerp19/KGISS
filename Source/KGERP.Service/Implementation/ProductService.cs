@@ -491,7 +491,7 @@ namespace KGERP.Service.Implementation
             productModel.DataList = await Task.Run(() => (from t1 in context.Products
                                                           join t2 in context.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
                                                           join t3 in context.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
-                                                          where t1.CompanyId == companyId
+                                                          where t1.CompanyId == companyId && t1.IsActive && t2.IsActive && t3.IsActive
                                                           && t1.ProductType == "F"
                                                           select new ProductPriceModel
                                                           {
