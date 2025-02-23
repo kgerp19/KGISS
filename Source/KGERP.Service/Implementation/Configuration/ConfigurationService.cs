@@ -906,11 +906,12 @@ namespace KGERP.Service.Implementation
             var v = (from t1 in _db.Products
                      join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
                      join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
-                     join t4 in _db.Units on t1.UnitId equals t4.UnitId
+                     join t4 in _db.Units on t1.UnitId equals t4.UnitId into Lt4
+                     from t4 in Lt4.DefaultIfEmpty()
                      //join t5 in _db.OrderDeliverDetails on t1.ProductId equals t5.ProductId
 
-                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType && t2.IsActive && t3.IsActive && t4.IsActive &&
-                     ((t1.ProductName.StartsWith(prefix)) || (t2.Name.StartsWith(prefix)) || (t3.Name.StartsWith(prefix)) || (t1.ShortName.StartsWith(prefix)))
+                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType && t2.IsActive && t3.IsActive  &&
+                     ((t1.ProductName.Contains(prefix)) || (t2.Name.Contains(prefix)) || (t3.Name.Contains(prefix)))
 
                      select new
                      {
