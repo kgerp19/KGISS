@@ -6225,6 +6225,7 @@ warning 6002: The table/view 'KGISSDB.Erp.RequisitionItemDetail' does not have a
           <Property Name="ModifiedBy" Type="varchar" MaxLength="32" />
           <Property Name="ModifiedDate" Type="datetime" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="LotNumber" Type="varchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="StockInfo">
           <Key>
@@ -10129,7 +10130,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="RequisitionItems" EntityType="ERPModel.RequisitionItem" />
           <EntitySet Name="RequisitionSignatoryApprovals" EntityType="ERPModel.RequisitionSignatoryApproval" />
           <EntitySet Name="SaleReturns" EntityType="ERPModel.SaleReturn" />
-          <EntitySet Name="StockAdjustDetails" EntityType="ERPModel.StockAdjustDetail" />
           <EntitySet Name="StockInfoes" EntityType="ERPModel.StockInfo" />
           <EntitySet Name="StockTransfers" EntityType="ERPModel.StockTransfer" />
           <EntitySet Name="StockTransferDetails" EntityType="ERPModel.StockTransferDetail" />
@@ -10713,10 +10713,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="RequisitionItemDetails" EntityType="ERPModel.RequisitionItemDetail" />
           <EntitySet Name="IssueMasterInfoes" EntityType="ERPModel.IssueMasterInfo" />
           <EntitySet Name="StockAdjusts" EntityType="ERPModel.StockAdjust" />
-          <AssociationSet Name="FK_StockAdjustDetail_StockAdjust" Association="ERPModel.FK_StockAdjustDetail_StockAdjust">
-            <End Role="StockAdjust" EntitySet="StockAdjusts" />
-            <End Role="StockAdjustDetail" EntitySet="StockAdjustDetails" />
-          </AssociationSet>
           <EntitySet Name="WorkStates" EntityType="ERPModel.WorkState" />
           <AssociationSet Name="FK_Work_WorkState" Association="ERPModel.FK_Work_WorkState">
             <End Role="WorkState" EntitySet="WorkStates" />
@@ -10973,6 +10969,11 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_OrderDetail_Product" Association="ERPModel.FK_OrderDetail_Product">
             <End Role="Product" EntitySet="Products" />
             <End Role="OrderDetail" EntitySet="OrderDetails" />
+          </AssociationSet>
+          <EntitySet Name="StockAdjustDetails" EntityType="ERPModel.StockAdjustDetail" />
+          <AssociationSet Name="FK_StockAdjustDetail_StockAdjust" Association="ERPModel.FK_StockAdjustDetail_StockAdjust">
+            <End Role="StockAdjust" EntitySet="StockAdjusts" />
+            <End Role="StockAdjustDetail" EntitySet="StockAdjustDetails" />
           </AssociationSet>
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
@@ -14793,23 +14794,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Vendor" Relationship="ERPModel.FK_SaleReturn_Vendor" FromRole="SaleReturn" ToRole="Vendor" />
           <NavigationProperty Name="OrderDeliver" Relationship="ERPModel.FK_SaleReturn_OrderDeliver" FromRole="SaleReturn" ToRole="OrderDeliver" />
         </EntityType>
-        <EntityType Name="StockAdjustDetail">
-          <Key>
-            <PropertyRef Name="StockAdjustDetailId" />
-          </Key>
-          <Property Name="StockAdjustDetailId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="StockAdjustId" Type="Int32" Nullable="false" />
-          <Property Name="ProductId" Type="Int32" Nullable="false" />
-          <Property Name="UnitPrice" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
-          <Property Name="ExcessQty" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
-          <Property Name="LessQty" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
-          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="StockAdjust" Relationship="ERPModel.FK_StockAdjustDetail_StockAdjust" FromRole="StockAdjustDetail" ToRole="StockAdjust" />
-        </EntityType>
         <EntityType Name="StockInfo">
           <Key>
             <PropertyRef Name="StockInfoId" />
@@ -18123,18 +18107,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="TypeId" Type="Int32" Nullable="false" />
           <NavigationProperty Name="StockAdjustDetails" Relationship="ERPModel.FK_StockAdjustDetail_StockAdjust" FromRole="StockAdjust" ToRole="StockAdjustDetail" />
         </EntityType>
-        <Association Name="FK_StockAdjustDetail_StockAdjust">
-          <End Type="ERPModel.StockAdjust" Role="StockAdjust" Multiplicity="1" />
-          <End Type="ERPModel.StockAdjustDetail" Role="StockAdjustDetail" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="StockAdjust">
-              <PropertyRef Name="StockAdjustId" />
-            </Principal>
-            <Dependent Role="StockAdjustDetail">
-              <PropertyRef Name="StockAdjustId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="WorkState">
           <Key>
             <PropertyRef Name="WorkStateId" />
@@ -20187,6 +20159,36 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="OrderDetail">
               <PropertyRef Name="ProductId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="StockAdjustDetail">
+          <Key>
+            <PropertyRef Name="StockAdjustDetailId" />
+          </Key>
+          <Property Name="StockAdjustDetailId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StockAdjustId" Type="Int32" Nullable="false" />
+          <Property Name="ProductId" Type="Int32" Nullable="false" />
+          <Property Name="UnitPrice" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="ExcessQty" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="LessQty" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="LotNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="StockAdjust" Relationship="ERPModel.FK_StockAdjustDetail_StockAdjust" FromRole="StockAdjustDetail" ToRole="StockAdjust" />
+        </EntityType>
+        <Association Name="FK_StockAdjustDetail_StockAdjust">
+          <End Type="ERPModel.StockAdjust" Role="StockAdjust" Multiplicity="1" />
+          <End Type="ERPModel.StockAdjustDetail" Role="StockAdjustDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="StockAdjust">
+              <PropertyRef Name="StockAdjustId" />
+            </Principal>
+            <Dependent Role="StockAdjustDetail">
+              <PropertyRef Name="StockAdjustId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -24002,23 +24004,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="StockAdjustDetails">
-            <EntityTypeMapping TypeName="ERPModel.StockAdjustDetail">
-              <MappingFragment StoreEntitySet="StockAdjustDetail">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="LessQty" ColumnName="LessQty" />
-                <ScalarProperty Name="ExcessQty" ColumnName="ExcessQty" />
-                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
-                <ScalarProperty Name="ProductId" ColumnName="ProductId" />
-                <ScalarProperty Name="StockAdjustId" ColumnName="StockAdjustId" />
-                <ScalarProperty Name="StockAdjustDetailId" ColumnName="StockAdjustDetailId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="StockInfoes">
             <EntityTypeMapping TypeName="ERPModel.StockInfo">
               <MappingFragment StoreEntitySet="StockInfo">
@@ -27206,6 +27191,24 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="OrderMasterId" ColumnName="OrderMasterId" />
                 <ScalarProperty Name="JobOrderNo" ColumnName="JobOrderNo" />
                 <ScalarProperty Name="OrderDetailId" ColumnName="OrderDetailId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="StockAdjustDetails">
+            <EntityTypeMapping TypeName="ERPModel.StockAdjustDetail">
+              <MappingFragment StoreEntitySet="StockAdjustDetail">
+                <ScalarProperty Name="LotNumber" ColumnName="LotNumber" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="LessQty" ColumnName="LessQty" />
+                <ScalarProperty Name="ExcessQty" ColumnName="ExcessQty" />
+                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+                <ScalarProperty Name="ProductId" ColumnName="ProductId" />
+                <ScalarProperty Name="StockAdjustId" ColumnName="StockAdjustId" />
+                <ScalarProperty Name="StockAdjustDetailId" ColumnName="StockAdjustDetailId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
