@@ -112,7 +112,7 @@
                                         @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Less Qty</label>
                                         <div class="input-group">
@@ -125,7 +125,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Excess Qty</label>
                                         <div class="input-group">
@@ -138,16 +138,22 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                               
+
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Remaining Stock</label>
                                         <div class="input-group">
-                                            @Html.TextBoxFor(model => model.RemainingStockInQty, new { id = "txtRemainingStockInQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Remaining Stock In Qty", disabled="disabled" })
+                                            @Html.TextBoxFor(model => model.RemainingStockInQty, new { id = "txtRemainingStockInQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Remaining Stock In Qty", disabled = "disabled" })
                                             @Html.ValidationMessageFor(model => model.RemainingStockInQty, "", new { @class = "text-danger" })
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Costing Price</label>
                                         <div class="input-group">
@@ -160,8 +166,16 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Lot Number  <span class="text-danger" id="perUnitDiscountValue"></span></label>
+                                        <select id="ddlLotNumbers" name="LotNumber" class="form-control">
+                                            <option value="">Select a lot number</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
+                           
 
                             <div class="box-footer">
                                 <div class="row">
@@ -385,7 +399,7 @@
             });
 
 
-              $("#txtProductName").autocomplete({
+              @*$("#txtProductName").autocomplete({
                 source: function (request, response) {
                     //console.log(request);
                     //console.log(response);
@@ -432,7 +446,7 @@
                             }
                         }
                     });
-                    
+
 
                 },
                 minLength: 1,
@@ -440,10 +454,105 @@
 
             }).focus(function () {
                 $(this).autocomplete("search");
-            });
+            });*@
 
 
 
+$("#txtProductName").autocomplete({
+    source: function (request, response) {
+        $.ajax({
+            url: "@Url.Action("AutoCompleteRawPackingMaterialsGet", "Configuration")",  // '/AccountHeads/AutoComplete/'
+            data: { companyId: "@Model.CompanyFK", prefix: request.term },
+            dataType: "json",
+            type: "get",
+            cache: true,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                response($.map(data, function (item) {
+                    return item;
+                }));
+            },
+            error: function (response) {
+                // Handle any error here if needed
+            },
+            failure: function (response) {
+                // Handle failure if needed
+            }
+        });
+    },
+
+    select: function (e, i) {
+        // Set the selected product in the dropdown
+        $("#ddlRProductFK").val(i.item.val);
+
+        // Fetch the unit and closing rate by Product ID
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("RMUnitAndClosingRateByProductId", "Configuration")",
+            datatype: "Json",
+            data: { productId: i.item.val },
+            success: function (data) {
+                console.log(data);
+                if (data) {
+                    // Populate the UI with the fetched data
+                    $('.txtUnitName').text(data.UnitName);
+                    $('#txtUnitPrice').val(data.CostingPrice);
+                    $('#txtRemainingStockInQty').val(data.RemainingStockInQty);
+                }
+            }
+        });
+
+        // Fetch lot numbers for the selected product
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetLotNymberRaw", "Configuration")",
+            datatype: "json",
+            data: {
+             
+                ProductId: i.item.val
+            },
+            success: function (data) {
+                console.log("Lot number data:", data);
+
+                // Clear current lot numbers in the dropdown
+                $('#ddlLotNumbers').empty();
+
+                // Populate the lot numbers dropdown
+                if (data.length > 0) {
+                    $.each(data, function (index, item) {
+                        $('#ddlLotNumbers').append(
+                            $('<option>', {
+                                value: item.label,
+                                text: item.label
+                            })
+                        );
+                    });
+
+                    // Set the first lot number as selected by default
+                    $('#ddlLotNumbers').val(data[0].label);
+                } else {
+                    // Handle case where no lot numbers are available
+                    $('#ddlLotNumbers').append(
+                        $('<option>', {
+                            value: '',
+                            text: 'No lots available'
+                        })
+                    );
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error in AJAX request:", status, error); // Log any AJAX error details
+            }
+        });
+    },
+
+    minLength: 1,
+    cache: true
+
+}).focus(function () {
+    // Trigger the autocomplete search when the input field is focused
+    $(this).autocomplete("search");
+});
 
 
         });

@@ -790,6 +790,7 @@ namespace KGERP.Services.WareHouse
         public IEnumerable<VMStockAdjustDetail> DataListSlave { get; set; }
         public string ProductSubCategory { get; set; }
         public string ProductName { get; set; }
+        public string LotNumber { get; set; }
 
         public string UnitName { get; set; }
         public decimal Amount { get; set; }

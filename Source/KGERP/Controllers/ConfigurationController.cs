@@ -1166,6 +1166,13 @@ namespace Pos.App.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetLotNymberRaw(int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLotRaw(ProductId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetAutoCompleteRawGoods(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawGoods(companyId, prefix);
