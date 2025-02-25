@@ -1018,8 +1018,30 @@ namespace KGERP.Service.Implementation
         }
 
 
+        public object GetAutoCompleteLotRaw( int productId)
+        {
+            var v = (from t1 in _db.MaterialReceiveDetails
+                     where t1.IsActive && t1.ProductId == productId
+                     select new
+                     {
+                         label = t1.LotNumber
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
 
 
+        public object GetAutoCompleteLotFinish(int productId)
+        {
+            var v = (from t1 in _db.Prod_ReferenceSlave
+                     where t1.IsActive && t1.FProductId == productId
+                     select new
+                     {
+                         label = t1.LotNumber
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
 
 
 
@@ -8217,15 +8239,38 @@ namespace KGERP.Service.Implementation
             return list;
         }
 
+        //public List<string> GetLotNumberFinish(int ProductId)
+        //{
+        //    var list = _db.Prod_ReferenceSlave
+        //        .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.FProductId == ProductId)
+        //        .Select(x => x.LotNumber)
+        //        .Distinct()  // Ensures that LotNumbers are unique
+        //        .ToList();
+
+        //    return list;
+        //}
+
+
         public List<string> GetLotNumberFinish(int ProductId)
         {
-            var list = _db.Prod_ReferenceSlave
+            // Query for lot numbers from Prod_ReferenceSlave
+            var referenceSlaveLotNumbers = _db.Prod_ReferenceSlave
                 .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.FProductId == ProductId)
                 .Select(x => x.LotNumber)
-                .Distinct()  // Ensures that LotNumbers are unique
+                .Distinct();
+
+            // Query for lot numbers from MaterialReceiveDetail
+            var materialReceiveDetailLotNumbers = _db.MaterialReceiveDetails
+                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.ProductId == ProductId)
+                .Select(x => x.LotNumber)
+                .Distinct();
+
+            // Combine both lists using Union to avoid duplicates
+            var combinedLotNumbers = referenceSlaveLotNumbers
+                .Union(materialReceiveDetailLotNumbers)
                 .ToList();
 
-            return list;
+            return combinedLotNumbers;
         }
 
 

@@ -3505,6 +3505,8 @@ namespace KGERP.Services.WareHouse
                                 DateTime.Now.ToString("yy") + deliverDetailCount.ToString().PadLeft(5, '0');
             #endregion
             StockAdjust stockAdjust = new StockAdjust
+
+             
             {
 
                 InvoiceNo = deliverDetailCID,
@@ -3812,7 +3814,8 @@ namespace KGERP.Services.WareHouse
 
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                LotNumber=vmModel.LotNumber
             };
             _db.StockAdjustDetails.Add(stockAdjustDetail);
             if (await _db.SaveChangesAsync() > 0)
@@ -3839,7 +3842,8 @@ namespace KGERP.Services.WareHouse
 
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                LotNumber=vmModel.LotNumber
             };
             _db.StockAdjustDetails.Add(stockAdjustDetail);
             if (await _db.SaveChangesAsync() > 0)
@@ -4519,7 +4523,8 @@ namespace KGERP.Services.WareHouse
                                                                           Amount = (t1.LessQty * t1.UnitPrice),
                                                                           OverAmount = (t1.ExcessQty * t1.UnitPrice),
                                                                           AccountingHeadId = t7.AccountingHeadId,
-                                                                          UnitName = t8.Name
+                                                                          UnitName = t8.Name,
+                                                                          LotNumber=t1.LotNumber
                                                                       }).OrderByDescending(x => x.StockAdjustDetailId).AsEnumerable());
 
 
@@ -4745,7 +4750,8 @@ namespace KGERP.Services.WareHouse
                                                                           Amount = (t1.LessQty * t1.UnitPrice),
                                                                           OverAmount = (t1.ExcessQty * t1.UnitPrice),
                                                                           AccountingHeadId = t5.AccountingHeadId,
-                                                                          UnitName = t8.Name
+                                                                          UnitName = t8.Name,
+                                                                          LotNumber=t1.LotNumber
                                                                       }).OrderByDescending(x => x.StockAdjustDetailId).AsEnumerable());
 
 

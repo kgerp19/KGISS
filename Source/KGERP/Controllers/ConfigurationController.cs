@@ -1166,6 +1166,13 @@ namespace Pos.App.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetLotNymberRaw(int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLotRaw(ProductId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetAutoCompleteRawGoods(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawGoods(companyId, prefix);
@@ -2714,7 +2721,12 @@ namespace Pos.App.Controllers
             var obj = await _service.DeleteUpazila(id);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+        public JsonResult GetLotNymberFinish(int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLotFinish(ProductId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
         [HttpGet]
         public async Task<JsonResult> GetUpazilaById(int id)
         {
