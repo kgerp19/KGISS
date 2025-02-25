@@ -2721,7 +2721,12 @@ namespace Pos.App.Controllers
             var obj = await _service.DeleteUpazila(id);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+        public JsonResult GetLotNymberFinish(int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLotFinish(ProductId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
         [HttpGet]
         public async Task<JsonResult> GetUpazilaById(int id)
         {

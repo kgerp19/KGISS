@@ -217,6 +217,7 @@
                                             <tr>
                                                 <th>SL</th>
                                                 <th class="center">Product Name </th>
+                                                <th class="center">Lot Number </th>
                                                 <th class="center">Short Quantity</th>
                                                 <th class="center">Over Quantity</th>
                                                 <th class="center">Unit Price </th>
@@ -234,6 +235,7 @@
                                                 <tr>
                                                     <td>@(++sl)</td>
                                                     <td>@item.ProductSubCategory @item.ProductName</td>
+                                                    <td>@item.LotNumber</td>
                                                     <td>@item.LessQty @item.UnitName</td>
                                                     <td>@item.ExcessQty @item.UnitName</td>
 
@@ -367,36 +369,38 @@
 
     <script type="text/javascript">
 
-        function makeStockAdjustIdSubmitable(rowId) {
-            $("#submitStockAdjustId").val(rowId)
-            $('#submitCompanyFK').val("@Model.CompanyFK");
-            $('#submitActionId').val(10);
+      function makeStockAdjustIdSubmitable(rowId) {
+    $("#submitStockAdjustId").val(rowId);
+    $('#submitCompanyFK').val("@Model.CompanyFK");
+    $('#submitActionId').val(10);
+}
+
+function makeDeletale(rowId) {
+    $('#hidDeleteOrderDetailId').val(rowId);
+    $('#deleteActionId').val(3);
+}
+
+function resetProcurementPurchaseRequisitionSlaveForm() {
+    $('#procurementSalesOrderSlaveFormId')[0].reset();
+    $('#ActionId').val(1);
+}
+
+$(document).ready(function () {
+    //$('.formValidator').bootstrapValidator();
+
+    $('#datePickerById').datepicker({
+        format: "yyyy-mm-dd",
+        todayHighlight: true,
+        autoclose: true,
+        clearBtn: true
+    }).on('changeDate', function (ev) {
+        if ($(this).parents('form') && $(this).attr('required')) {
+            $(this).parents('form').bootstrapValidator('revalidateField', $(this));
         }
+    }); // Fixed the missing semicolon here
 
+});
 
-        function makeDeletale(rowId) {
-            $('#hidDeleteOrderDetailId').val(rowId);
-            $('#deleteActionId').val(3);
-                                                    }
-        function resetProcurementPurchaseRequisitionSlaveForm() {
-            $('#procurementSalesOrderSlaveFormId')[0].reset();
-            $('#ActionId').val(1);
-        }
-
-
-        $(document).ready(function () {
-            //$('.formValidator').bootstrapValidator();
-
-            $('#datePickerById').datepicker({
-                format: "yyyy-mm-dd",
-                todayHighlight: true,
-                autoclose: true,
-                clearBtn: true
-            }).on('changeDate', function (ev) {
-                if ($(this).parents('form') && $(this).attr('required')) {
-                    $(this).parents('form').bootstrapValidator('revalidateField', $(this));
-                }
-            });
 
 
               @*$("#txtProductName").autocomplete({
@@ -457,11 +461,10 @@
             });*@
 
 
-
 $("#txtProductName").autocomplete({
     source: function (request, response) {
         $.ajax({
-            url: "@Url.Action("AutoCompleteRawPackingMaterialsGet", "Configuration")",  // '/AccountHeads/AutoComplete/'
+            url: "@Url.Action("AutoCompleteRawPackingMaterialsGet", "Configuration")", // Correct URL formatting
             data: { companyId: "@Model.CompanyFK", prefix: request.term },
             dataType: "json",
             type: "get",
@@ -473,19 +476,17 @@ $("#txtProductName").autocomplete({
                 }));
             },
             error: function (response) {
-                // Handle any error here if needed
+                // Handle error if needed
             },
             failure: function (response) {
                 // Handle failure if needed
             }
         });
     },
-
     select: function (e, i) {
-        // Set the selected product in the dropdown
         $("#ddlRProductFK").val(i.item.val);
 
-        // Fetch the unit and closing rate by Product ID
+        // Fetch product details
         $.ajax({
             type: "GET",
             url: "@Url.Action("RMUnitAndClosingRateByProductId", "Configuration")",
@@ -494,7 +495,6 @@ $("#txtProductName").autocomplete({
             success: function (data) {
                 console.log(data);
                 if (data) {
-                    // Populate the UI with the fetched data
                     $('.txtUnitName').text(data.UnitName);
                     $('#txtUnitPrice').val(data.CostingPrice);
                     $('#txtRemainingStockInQty').val(data.RemainingStockInQty);
@@ -502,15 +502,12 @@ $("#txtProductName").autocomplete({
             }
         });
 
-        // Fetch lot numbers for the selected product
+        // Fetch lot numbers based on the selected product
         $.ajax({
             type: "GET",
             url: "@Url.Action("GetLotNymberRaw", "Configuration")",
             datatype: "json",
-            data: {
-             
-                ProductId: i.item.val
-            },
+            data: { ProductId: i.item.val },
             success: function (data) {
                 console.log("Lot number data:", data);
 
@@ -541,22 +538,20 @@ $("#txtProductName").autocomplete({
                 }
             },
             error: function (xhr, status, error) {
-                console.error("Error in AJAX request:", status, error); // Log any AJAX error details
+                console.error("Error in AJAX request:", status, error);
             }
         });
-    },
 
+        $('#txtProductName').focus();
+    },
     minLength: 1,
     cache: true
-
 }).focus(function () {
-    // Trigger the autocomplete search when the input field is focused
     $(this).autocomplete("search");
 });
 
 
-        });
-            function makeEditble(rowId) {
+function makeEditble(rowId) {
                 console.log(rowId);
             $.ajax({
 

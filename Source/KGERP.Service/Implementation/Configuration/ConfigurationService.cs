@@ -1031,6 +1031,17 @@ namespace KGERP.Service.Implementation
         }
 
 
+        public object GetAutoCompleteLotFinish(int productId)
+        {
+            var v = (from t1 in _db.Prod_ReferenceSlave
+                     where t1.IsActive && t1.FProductId == productId
+                     select new
+                     {
+                         label = t1.LotNumber
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
 
 
 
