@@ -462,6 +462,7 @@ namespace KGERP.Service.Configuration
         public int RProductFK { get; set; }
         public int FCEnumId { get; set; }
         public string FCEnumName { get; set; }
+        [Range(0.01, double.MaxValue, ErrorMessage = "Required Quantity must be greater than 0.")]
         public decimal RequiredQuantity { get; set; }
         public double Qty { get; set; }
       
