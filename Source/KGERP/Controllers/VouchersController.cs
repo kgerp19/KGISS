@@ -602,9 +602,9 @@ namespace KGERP.Controllers
             return null;
         }
 
-        public async Task<ActionResult> AutoInsertVoucherDetails(int voucherId,int virtualHeadId, string virtualHeadParticular)
+        public async Task<ActionResult> AutoInsertVoucherDetails(int voucherId,int virtualHeadId, string virtualHeadParticular,int? productCategory)
         {
-            long voucherDetailsId = await Task.Run(() => _accountingService.AutoInsertVoucherDetails(voucherId, virtualHeadId, virtualHeadParticular));
+            long voucherDetailsId = await Task.Run(() => _accountingService.AutoInsertVoucherDetails(voucherId, virtualHeadId, virtualHeadParticular, productCategory));
             return Json(voucherDetailsId, JsonRequestBehavior.AllowGet);
         }
         public async Task<ActionResult> AutoInsertStockVoucherDetails(int companyId,int voucherId)
@@ -804,6 +804,7 @@ namespace KGERP.Controllers
                 vmJournalSlave = await Task.Run(() => _accountingService.GetVoucherDetails(companyId, voucherId));
             }
             vmJournalSlave.CostCenterList = new SelectList(_accountingService.CostCenterDropDownList(companyId), "Value", "Text");
+            vmJournalSlave.ProductCategoryList = new SelectList(_accountingService.ProductCategoryDropDownList(companyId), "Value", "Text");
             vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.CRVVoucherTypesDownList(companyId), "Value", "Text");
 
             var voucherTypes = _accountingService.CRVVoucherTypesDownList(companyId);
