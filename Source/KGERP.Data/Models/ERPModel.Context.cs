@@ -253,7 +253,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_AttendanceLog> PRoll_AttendanceLog { get; set; }
         public virtual DbSet<PRoll_AttendanceLogDetail> PRoll_AttendanceLogDetail { get; set; }
         public virtual DbSet<RecruitmentRequisitionApproval> RecruitmentRequisitionApprovals { get; set; }
-        public virtual DbSet<VoucherDetail> VoucherDetails { get; set; }
         public virtual DbSet<VendorOffer> VendorOffers { get; set; }
         public virtual DbSet<PaymentMaster> PaymentMasters { get; set; }
         public virtual DbSet<PRoll_AttendanceModifiedLog> PRoll_AttendanceModifiedLog { get; set; }
@@ -366,6 +365,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<StockAdjustDetail> StockAdjustDetails { get; set; }
+        public virtual DbSet<VoucherDetail> VoucherDetails { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

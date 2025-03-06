@@ -4179,6 +4179,7 @@ warning 6002: The table/view 'KGISSDB.dbo.ServerConfig' does not have a primary 
           <Property Name="Particular" Type="nvarchar(max)" />
           <Property Name="TransactionDate" Type="date" />
           <Property Name="ReferenceId" Type="int" />
+          <Property Name="ProductCategory" Type="int" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
           <Property Name="IsVirtual" Type="bit" Nullable="false" />
         </EntityType>
@@ -10522,12 +10523,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="PRoll_AttendanceLog" EntityType="ERPModel.PRoll_AttendanceLog" />
           <EntitySet Name="PRoll_AttendanceLogDetail" EntityType="ERPModel.PRoll_AttendanceLogDetail" />
           <EntitySet Name="RecruitmentRequisitionApprovals" EntityType="ERPModel.RecruitmentRequisitionApproval" />
-          <EntitySet Name="VoucherDetails" EntityType="ERPModel.VoucherDetail" />
           <EntitySet Name="VendorOffers" EntityType="ERPModel.VendorOffer" />
-          <AssociationSet Name="FK_VoucherDetail_Voucher" Association="ERPModel.FK_VoucherDetail_Voucher">
-            <End Role="Voucher" EntitySet="Vouchers" />
-            <End Role="VoucherDetail" EntitySet="VoucherDetails" />
-          </AssociationSet>
           <EntitySet Name="PaymentMasters" EntityType="ERPModel.PaymentMaster" />
           <EntitySet Name="PRoll_AttendanceModifiedLog" EntityType="ERPModel.PRoll_AttendanceModifiedLog" />
           <EntitySet Name="OrderMasterSignatories" EntityType="ERPModel.OrderMasterSignatory" />
@@ -10974,6 +10970,11 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_StockAdjustDetail_StockAdjust" Association="ERPModel.FK_StockAdjustDetail_StockAdjust">
             <End Role="StockAdjust" EntitySet="StockAdjusts" />
             <End Role="StockAdjustDetail" EntitySet="StockAdjustDetails" />
+          </AssociationSet>
+          <EntitySet Name="VoucherDetails" EntityType="ERPModel.VoucherDetail" />
+          <AssociationSet Name="FK_VoucherDetail_Voucher" Association="ERPModel.FK_VoucherDetail_Voucher">
+            <End Role="Voucher" EntitySet="Vouchers" />
+            <End Role="VoucherDetail" EntitySet="VoucherDetails" />
           </AssociationSet>
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
@@ -13784,10 +13785,10 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="IsIntegrated" Type="Boolean" Nullable="false" />
           <Property Name="TotalAmount" Type="Double" Nullable="false" />
           <NavigationProperty Name="VoucherType" Relationship="ERPModel.FK_Voucher_VoucherType" FromRole="Voucher" ToRole="VoucherType" />
-          <NavigationProperty Name="VoucherDetails" Relationship="ERPModel.FK_VoucherDetail_Voucher" FromRole="Voucher" ToRole="VoucherDetail" />
           <Property Name="IsApproved" Type="Boolean" Nullable="false" />
           <Property Name="ApprovedBy" Type="Int64" Nullable="false" />
           <Property Name="ApprovedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="VoucherDetails" Relationship="ERPModel.FK_VoucherDetail_Voucher" FromRole="Voucher" ToRole="VoucherDetail" />
         </EntityType>
         <EntityType Name="VoucherMap">
           <Key>
@@ -16594,22 +16595,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="ModifiedBy" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
         </EntityType>
-        <EntityType Name="VoucherDetail">
-          <Key>
-            <PropertyRef Name="VoucherDetailId" />
-          </Key>
-          <Property Name="VoucherDetailId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="VoucherId" Type="Int64" />
-          <Property Name="AccountHeadId" Type="Int32" />
-          <Property Name="DebitAmount" Type="Double" Nullable="false" />
-          <Property Name="CreditAmount" Type="Double" Nullable="false" />
-          <Property Name="Particular" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="TransactionDate" Type="DateTime" Precision="0" />
-          <Property Name="ReferenceId" Type="Int32" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <Property Name="IsVirtual" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Voucher" Relationship="ERPModel.FK_VoucherDetail_Voucher" FromRole="VoucherDetail" ToRole="Voucher" />
-        </EntityType>
         <EntityType Name="VendorOffer">
           <Key>
             <PropertyRef Name="VendorOfferId" />
@@ -16633,18 +16618,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Vendor" Relationship="ERPModel.FK_VendorOffer_Vendor" FromRole="VendorOffer" ToRole="Vendor" />
         </EntityType>
-        <Association Name="FK_VoucherDetail_Voucher">
-          <End Type="ERPModel.Voucher" Role="Voucher" Multiplicity="0..1" />
-          <End Type="ERPModel.VoucherDetail" Role="VoucherDetail" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Voucher">
-              <PropertyRef Name="VoucherId" />
-            </Principal>
-            <Dependent Role="VoucherDetail">
-              <PropertyRef Name="VoucherId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="PaymentMaster">
           <Key>
             <PropertyRef Name="PaymentMasterId" />
@@ -20189,6 +20162,35 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="StockAdjustDetail">
               <PropertyRef Name="StockAdjustId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="VoucherDetail">
+          <Key>
+            <PropertyRef Name="VoucherDetailId" />
+          </Key>
+          <Property Name="VoucherDetailId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="VoucherId" Type="Int64" />
+          <Property Name="AccountHeadId" Type="Int32" />
+          <Property Name="DebitAmount" Type="Double" Nullable="false" />
+          <Property Name="CreditAmount" Type="Double" Nullable="false" />
+          <Property Name="Particular" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="TransactionDate" Type="DateTime" Precision="0" />
+          <Property Name="ReferenceId" Type="Int32" />
+          <Property Name="ProductCategory" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="IsVirtual" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Voucher" Relationship="ERPModel.FK_VoucherDetail_Voucher" FromRole="VoucherDetail" ToRole="Voucher" />
+        </EntityType>
+        <Association Name="FK_VoucherDetail_Voucher">
+          <End Type="ERPModel.Voucher" Role="Voucher" Multiplicity="0..1" />
+          <End Type="ERPModel.VoucherDetail" Role="VoucherDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Voucher">
+              <PropertyRef Name="VoucherId" />
+            </Principal>
+            <Dependent Role="VoucherDetail">
+              <PropertyRef Name="VoucherId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -24672,22 +24674,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="VoucherDetails">
-            <EntityTypeMapping TypeName="ERPModel.VoucherDetail">
-              <MappingFragment StoreEntitySet="VoucherDetail">
-                <ScalarProperty Name="IsVirtual" ColumnName="IsVirtual" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ReferenceId" ColumnName="ReferenceId" />
-                <ScalarProperty Name="TransactionDate" ColumnName="TransactionDate" />
-                <ScalarProperty Name="Particular" ColumnName="Particular" />
-                <ScalarProperty Name="CreditAmount" ColumnName="CreditAmount" />
-                <ScalarProperty Name="DebitAmount" ColumnName="DebitAmount" />
-                <ScalarProperty Name="AccountHeadId" ColumnName="AccountHeadId" />
-                <ScalarProperty Name="VoucherId" ColumnName="VoucherId" />
-                <ScalarProperty Name="VoucherDetailId" ColumnName="VoucherDetailId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="VendorOffers">
             <EntityTypeMapping TypeName="ERPModel.VendorOffer">
               <MappingFragment StoreEntitySet="VendorOffer">
@@ -27209,6 +27195,23 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="ProductId" ColumnName="ProductId" />
                 <ScalarProperty Name="StockAdjustId" ColumnName="StockAdjustId" />
                 <ScalarProperty Name="StockAdjustDetailId" ColumnName="StockAdjustDetailId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VoucherDetails">
+            <EntityTypeMapping TypeName="ERPModel.VoucherDetail">
+              <MappingFragment StoreEntitySet="VoucherDetail">
+                <ScalarProperty Name="IsVirtual" ColumnName="IsVirtual" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ProductCategory" ColumnName="ProductCategory" />
+                <ScalarProperty Name="ReferenceId" ColumnName="ReferenceId" />
+                <ScalarProperty Name="TransactionDate" ColumnName="TransactionDate" />
+                <ScalarProperty Name="Particular" ColumnName="Particular" />
+                <ScalarProperty Name="CreditAmount" ColumnName="CreditAmount" />
+                <ScalarProperty Name="DebitAmount" ColumnName="DebitAmount" />
+                <ScalarProperty Name="AccountHeadId" ColumnName="AccountHeadId" />
+                <ScalarProperty Name="VoucherId" ColumnName="VoucherId" />
+                <ScalarProperty Name="VoucherDetailId" ColumnName="VoucherDetailId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
