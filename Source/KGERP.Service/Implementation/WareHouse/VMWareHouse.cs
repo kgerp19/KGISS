@@ -642,7 +642,8 @@ namespace KGERP.Services.WareHouse
         public decimal VATPercent { get;  set; }
         public decimal TDSPercent { get;  set; }
         public string LotNumber { get; set; }   
-        
+        public List<string> LotNumbers { get; set; }   
+         
         public string ProductType { get;  set; }
     }
 

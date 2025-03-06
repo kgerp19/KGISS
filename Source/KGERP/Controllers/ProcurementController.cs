@@ -1198,6 +1198,11 @@ namespace KG.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult ProductStockByProductDeliver(int companyId, int productId,string Lotnumber)
+        {
+            var model = _service.ProductStockByProductGetOrderDeliver(companyId, productId, Lotnumber);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult RMProductStockByProductGet(int companyId, int productId)
         {
             var model = _service.RMProductStockByProductGet(companyId, productId);

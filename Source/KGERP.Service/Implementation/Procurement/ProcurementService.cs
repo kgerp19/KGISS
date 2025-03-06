@@ -3760,6 +3760,38 @@ namespace KGERP.Services.Procurement
             return vmProduct;
         }
 
+
+        public VMCommonProduct ProductStockByProductGetOrderDeliver(int companyId, int productId,string Lotnumber)
+        {
+            VMCommonProduct vmProduct = new VMCommonProduct();
+
+            vmProduct = (from t1 in _db.Products.Where(x => x.IsActive && x.ProductId == productId)
+                         join t2 in _db.Units on t1.UnitId equals t2.UnitId
+
+                         select new VMCommonProduct
+                         {
+                             Name = t1.ProductName,
+                             UnitName = t2.Name,
+                             PackSize = t1.PackSize,
+                             CompanyFK = t1.CompanyId,
+                             FormulaQty = t1.FormulaQty,
+                             UnitPrice = t1.UnitPrice ?? 0
+
+                         }).FirstOrDefault();
+
+            VMProductStock vmProductStock = new VMProductStock();
+             vmProductStock = _db.Database.SqlQuery<VMProductStock>(
+                "EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}",
+                productId,
+                companyId,
+                string.IsNullOrEmpty(Lotnumber) ? "xyz" : Lotnumber
+            ).FirstOrDefault();
+            vmProduct.CurrentStock = vmProductStock.ClosingQty;
+
+
+            return vmProduct;
+        }
+
         public VMCommonProduct RMProductStockByProductGet(int companyId, int productId)
         {
             VMCommonProduct vmProduct = new VMCommonProduct();
@@ -3812,7 +3844,7 @@ namespace KGERP.Services.Procurement
                 CreateDate = DateTime.Now,
                 StyleNo = Convert.ToString(dateTime),
                 IsActive = true,
-                LotNumber=vmSalesOrderSlave.LotNumber
+                //LotNumber=vmSalesOrderSlave.LotNumber
             };
             _db.OrderDetails.Add(orderDetail);
             if (await _db.SaveChangesAsync() > 0)

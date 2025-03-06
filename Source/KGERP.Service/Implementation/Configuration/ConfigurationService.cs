@@ -3611,10 +3611,11 @@ namespace KGERP.Service.Implementation
                          ProcessLoss = t1.ProcessLoss,
                          FormulaQty = t1.FormulaQty,
                          LotNumbers = _db.MaterialReceiveDetails
-                                .Where(m => m.ProductId == id)
-                                .Select(m => m.LotNumber)
-                                .Distinct()
-                                .ToList()
+                 .Where(m => m.ProductId == id && m.LotNumber != null)
+                 .Select(m => m.LotNumber)
+                 .Distinct()
+                 .ToList()
+
                      }).FirstOrDefault();
             return v;
         }
