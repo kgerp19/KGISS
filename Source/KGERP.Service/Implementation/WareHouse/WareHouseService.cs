@@ -1,4 +1,5 @@
 ﻿
+using Azure.Core;
 using KGERP.Data.CustomModel;
 using KGERP.Data.Models;
 using KGERP.Service.Configuration;
@@ -1757,8 +1758,13 @@ namespace KGERP.Services.WareHouse
                             SpecialDiscount = t1.SpecialBaseCommission,
                             CompanyFK = t2.CompanyId,
                             ProductType=t2.ProductType,
-                            LotNumber=t1.LotNumber
-                            
+                            LotNumbers = (from pr in _db.Prod_ReferenceSlave
+                                                      where t1.IsActive && pr.FProductId == t1.ProductId && pr.CompanyId==t1.CompanyId
+                                                      select pr.LotNumber)
+                              .OrderBy(x => x)
+                              .Take(100)
+                              .ToList()
+
                         }).ToList();
 
             foreach (VMOrderDeliverDetailPartial item in list)
@@ -3656,7 +3662,9 @@ namespace KGERP.Services.WareHouse
             if (dataListSlavePartial.Any())
             {
                 for (int i = 0; i < dataListSlavePartial.Count(); i++)
+
                 {
+
                     var orderDeliverDetail = new OrderDeliverDetail
                     {
                         OrderDetailId = dataListSlavePartial[i].OrderDetailId,
@@ -3666,7 +3674,7 @@ namespace KGERP.Services.WareHouse
                         OrderDeliverId = vmModel.OrderDeliverId,
                         COGSPrice = dataListSlavePartial[i].ClosingRate,
                         BaseCommission = dataListSlavePartial[i].DiscountUnit,   // Unit Discount
-                        SpecialDiscount = (dataListSlavePartial[i].SpecialDiscount / Convert.ToDecimal( dataListSlavePartial[i].OrderQty ))* Convert.ToDecimal( dataListSlavePartial[i].DeliverQty),   // Special Discount
+                        SpecialDiscount = (dataListSlavePartial[i].SpecialDiscount / Convert.ToDecimal(dataListSlavePartial[i].OrderQty)) * Convert.ToDecimal(dataListSlavePartial[i].DeliverQty),   // Special Discount
 
                         CashCommission = 0,       // Cash Discount
 
@@ -3682,7 +3690,9 @@ namespace KGERP.Services.WareHouse
                         CreateDate = DateTime.Now,
                         IsActive = true,
                         LotNumber = dataListSlavePartial[i].LotNumber
-                       
+                        //ani
+                        
+
                     };
                     orderDeliverDetails.Add(orderDeliverDetail);
                 }
