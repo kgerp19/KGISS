@@ -3690,6 +3690,7 @@ namespace KGERP.Services.WareHouse
                         CreateDate = DateTime.Now,
                         IsActive = true,
                         LotNumber = dataListSlavePartial[i].LotNumber
+                        //ani
                         
 
                     };
