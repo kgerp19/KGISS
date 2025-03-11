@@ -3605,6 +3605,7 @@ namespace KGERP.Services.WareHouse
 
 
             #endregion
+            var orderType =await _db.OrderMasters.FirstOrDefaultAsync(x=>x.OrderMasterId== vmOrderDeliverDetail.OrderMasterId);
             OrderDeliver orderDeliver = new OrderDeliver
             {
 
@@ -3612,7 +3613,7 @@ namespace KGERP.Services.WareHouse
                 OrderMasterId = vmOrderDeliverDetail.OrderMasterId,
                 InvoiceNo = deliverBill,
                 DeliveryDate = vmOrderDeliverDetail.DeliveryDate,
-                ProductType = "F",
+                ProductType = orderType.ProductType,
                 DepoInvoiceNo = vmOrderDeliverDetail.Remarks,
                 StockInfoId = vmOrderDeliverDetail.StockInfoId,
                 TransportTypeId = vmOrderDeliverDetail.TransportTypeId,
