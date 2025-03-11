@@ -1005,7 +1005,7 @@ namespace KG.App.Controllers
                     vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterRawAdd(vmSalesOrderSlave);
 
                 }
-                await _service.OrderDetailAdd(vmSalesOrderSlave);
+                await _service.OrderDetailRawAdd(vmSalesOrderSlave);
             }
             if (vmSalesOrderSlave.PromotionalOfferId > 0)
             {

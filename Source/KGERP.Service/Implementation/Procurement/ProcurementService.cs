@@ -3855,6 +3855,44 @@ namespace KGERP.Services.Procurement
             return result;
         }
 
+        public async Task<long> OrderDetailRawAdd(VMSalesOrderSlave vmSalesOrderSlave)
+        {
+            long dateTime = DateTime.Now.Ticks;
+            long result = -1;
+            OrderDetail orderDetail = new OrderDetail
+            {
+                OrderMasterId = vmSalesOrderSlave.OrderMasterId,
+                ProductId = vmSalesOrderSlave.FProductId,
+                Qty = vmSalesOrderSlave.Qty,
+                UnitPrice = vmSalesOrderSlave.UnitPrice,
+                Amount = (vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice),
+                Comsumption = vmSalesOrderSlave.Consumption,
+                PackQuantity = vmSalesOrderSlave.PackSize,
+
+                DiscountUnit = vmSalesOrderSlave.ProductDiscountUnit,
+                SpecialBaseCommission = vmSalesOrderSlave.SpecialDiscount,
+
+
+
+                DiscountAmount = 0,
+                DiscountRate = 0,
+
+                CompanyId = vmSalesOrderSlave.CompanyFK,
+                CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
+                CreateDate = DateTime.Now,
+                StyleNo = Convert.ToString(dateTime),
+                IsActive = true,
+                //LotNumber=vmSalesOrderSlave.LotNumber
+            };
+            _db.OrderDetails.Add(orderDetail);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = orderDetail.OrderDetailId;
+            }
+            //long order = await GCCLOrderMastersDiscountEdit(vmSalesOrderSlave);
+            return result;
+        }
+
 
         public async Task<long> FeedOrderDetailAdd(FeedSalesOrderModel model)
         {
@@ -4409,11 +4447,11 @@ namespace KGERP.Services.Procurement
 
             var poMax = _db.OrderMasters.Where(x => x.CompanyId ==
             vmSalesOrderSlave.CompanyFK
-            && !x.IsOpening).Count() + 1;
+            && !x.IsOpening && x.ProductType=="F").Count() + 1;
 
             string poCid = "";
             var CompanyInfo = await _db.Companies.FirstOrDefaultAsync(x => x.CompanyId == vmSalesOrderSlave.CompanyFK.Value);
-            string shortName = CompanyInfo.ShortName;
+            string shortName = CompanyInfo.ShortName+"F";
             if (vmSalesOrderSlave.CompanyFK.Value>0)
             {
                 poCid = shortName+"#"+poMax.ToString();
@@ -4471,11 +4509,11 @@ namespace KGERP.Services.Procurement
 
             var poMax = _db.OrderMasters.Where(x => x.CompanyId ==
             vmSalesOrderSlave.CompanyFK
-            && !x.IsOpening).Count() + 1;
+            && !x.IsOpening && x.ProductType == "R").Count() + 1;
 
             string poCid = "";
             var CompanyInfo = await _db.Companies.FirstOrDefaultAsync(x => x.CompanyId == vmSalesOrderSlave.CompanyFK.Value);
-            string shortName = CompanyInfo.ShortName;
+            string shortName = CompanyInfo.ShortName+"R";
             if (vmSalesOrderSlave.CompanyFK.Value > 0)
             {
                 poCid = shortName + "#" + poMax.ToString();
