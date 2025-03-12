@@ -168,8 +168,8 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Lot Number  <span class="text-danger" id="perUnitDiscountValue"></span></label>
-                                        <select id="ddlLotNumbers" name="LotNumber" class="form-control">
+                                        <label>Lot Number  <span class="text-danger" id="lot-number-dropdown"></span></label>
+                                        <select id="ddlLotNumbers" name="LotNumber" class="form-control lot-number-dropdown">
                                             <option value="">Select a lot number</option>
                                         </select>
                                     </div>
@@ -514,6 +514,7 @@ $("#txtProductName").autocomplete({
                 // Clear current lot numbers in the dropdown
                 $('#ddlLotNumbers').empty();
 
+
                 // Populate the lot numbers dropdown
                 if (data.length > 0) {
                     $.each(data, function (index, item) {
@@ -576,6 +577,46 @@ function makeEditble(rowId) {
                   }
                  });
             }
+
+
+
+
+        $('.lot-number-dropdown').change(function () {
+       
+            var lotNumber = $('#ddlLotNumbers').find(":selected").val();
+
+    var orderDetailId = $(this).data('orderdetailid');
+            var productId = $('#ddlRProductFK').val();
+
+        
+
+    if (lotNumber) {
+
+        $.ajax({
+            url: '@Url.Action("RMUnitAndClosingRateByProductIdByLot", "Configuration")',  // Replace with your controller name
+            type: 'GET',
+            data: {
+                companyId: @Model.CompanyFK,
+                productId: productId,
+                lotnumber: lotNumber
+            },
+
+
+            success: function (data) {
+                
+                console.log(data);
+           
+                $('#txtRemainingStockInQty').val(data.RemainingStockInQty);
+         
+            },
+            error: function (xhr, status, error) {
+                alert('Error: ' + error);
+            }
+        });
+    }
+});
+       
+
 
 
     </script>

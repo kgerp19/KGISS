@@ -3582,6 +3582,25 @@ namespace KGERP.Service.Implementation
 
             return products;
         }
+
+        public VMCommonProduct GetRMUnitAndClosingRateByProductIdByLot(int companyId,int productId,string lotnumber)
+        {
+            var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
+                            join t4 in _db.Units on t1.UnitId equals t4.UnitId
+                            select new VMCommonProduct
+                            {
+                                ID = t1.ProductId,
+                                Name = t1.ProductName,
+                                UnitName = t4.Name,
+                                CompanyFK = t1.CompanyId
+                            }).FirstOrDefault();
+            VMProductStock vMProductStock = new VMProductStock();
+            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", productId, companyId, lotnumber).FirstOrDefault();
+            products.CostingPrice = vMProductStock.ClosingRate;
+            products.RemainingStockInQty = vMProductStock.ClosingQty;
+
+            return products;
+        }
         public VMRealStateProduct GetCommonProductByID(int id)
         {
             var v = (from t1 in _db.Products.Where(x => x.ProductId == id)

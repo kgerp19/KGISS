@@ -4397,6 +4397,25 @@ namespace KGERP.Services.Procurement
 
             return v;
         }
+
+        public object GetAutoCompleteCustomerBySz(int SubZoneId)
+        {
+            var v = (from t1 in _db.Vendors.Where(x =>  x.VendorTypeId == (int)Provider.Customer && x.SubZoneId==SubZoneId)
+                     join t2 in _db.HeadGLs on t1.HeadGLId equals t2.Id
+                     where t1.IsActive && t1.IsActive==true
+
+                     select new
+                     {
+                         label = "[" + t2.AccCode + "] " + t1.Name,
+                         val = t1.VendorId,
+                         CustomerTypeFK = t1.CustomerTypeFK
+                     }).OrderBy(x => x.label).Take(150).ToList();
+
+            return v;
+        }
+
+
+        
         //public async Task<VMCommonProduct> CommonProductSingle(int id)
         //{
         //    VMCommonProduct vmCommonProduct = new VMCommonProduct();
@@ -4417,7 +4436,21 @@ namespace KGERP.Services.Procurement
 
         //    return vmCommonProduct;
         //}
+        public object GetAutoSubZone(string prefix, int companyId)
+        {
+            var v = (from t1 in _db.SubZones.Where(x => x.CompanyId == companyId && x.IsActive==true)
+                     
+                     where t1.IsActive && ((t1.Name.StartsWith(prefix)) || (t1.Code.StartsWith(prefix)))
 
+                     select new
+                     {
+                         label =   t1.Name,
+                         val = t1.SubZoneId,
+                         
+                     }).OrderBy(x => x.label).Take(150).ToList();
+
+            return v;
+        }
 
         public async Task<List<VMCommonProduct>> ProductCategoryGet()
         {

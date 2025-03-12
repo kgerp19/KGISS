@@ -1038,6 +1038,11 @@ namespace Pos.App.Controllers
             var model = _service.GetRMUnitAndClosingRateByProductId(productId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult RMUnitAndClosingRateByProductIdByLot(int companyId,int productId,string lotnumber)
+        {
+            var model = _service.GetRMUnitAndClosingRateByProductIdByLot(companyId,productId,lotnumber);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult CommonProductByIDGet(int id)
         {
             var model = _service.GetCommonProductByID(id);
