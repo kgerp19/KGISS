@@ -2991,7 +2991,7 @@ namespace KGERP.Controllers
             client.Credentials = nwc;
 
 
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductId={5}&ProductCategoryId={6}&ProductSubCategoryId={7}&VendorId={8}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.ProductId ?? 0, model.ProductCategoryId ?? 0, model.ProductSubCategoryId ?? 0, model.VendorId ?? 0); //, model.CostCenterId ?? 0
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductId={5}&ProductCategoryId={6}&ProductSubCategoryId={7}&VendorId={8}&SubZoneId={9}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.ProductId ?? 0, model.ProductCategoryId ?? 0, model.ProductSubCategoryId ?? 0, model.CustomerId ?? 0,model.SubZoneId ?? 0); //, model.CostCenterId ?? 0
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {

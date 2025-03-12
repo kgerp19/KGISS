@@ -126,6 +126,17 @@ namespace KG.App.Controllers
             var products = _service.GetAutoCompleteCustomer(prefix, companyId);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult GetAutoCompleteSSubZone(string prefix, int companyId)
+        {
+            var products = _service.GetAutoSubZone(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetAutoCompleteSCustomerBySz(int SubZoneId)
+        {
+            var products = _service.GetAutoCompleteCustomerBySz(SubZoneId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<JsonResult> SingleDemandItem(int id)
         {
