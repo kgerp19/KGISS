@@ -3760,13 +3760,8 @@ namespace KGERP.Service.Implementation
             foreach (var item in vmFinishProductBOM.DataListProductBOM)
             {
 
-                string LotNumber = "xyzz";
-                if (!string.IsNullOrEmpty(LotNumber) && item.LotNumbers != "null")
-                {
-                    LotNumber = item.LotNumbers;
-                }
                 VMProductStock vMProductStock = new VMProductStock();
-                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", item.RProductFK, item.CompanyId, LotNumber).FirstOrDefault();
+                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", item.RProductFK, item.CompanyId, item.LotNumbers ?? "xyzz").FirstOrDefault();
                 item.CurrentStock = vMProductStock.ClosingQty;
                 //--GetRMUnitAndClosingRateByProductId-
             }
