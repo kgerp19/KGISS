@@ -76,6 +76,7 @@ namespace KGERP.Service.Implementation.Production
         public int? AdvanceHeadGLId { get; set; }
         public string AdvanceHeadGLName { get; set; }
         public long OrderDetailId { get; set; }
+        [Range(0.01, double.MaxValue, ErrorMessage = "Required Quantity must be greater than 0.")]
         public decimal Quantity { get; set; }
         public double OrderQty { get; set; }
         public double ProductionQty { get; set; }
