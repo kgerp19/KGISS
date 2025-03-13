@@ -3630,7 +3630,7 @@ namespace KGERP.Service.Implementation
                          ProcessLoss = t1.ProcessLoss,
                          FormulaQty = t1.FormulaQty,
                          LotNumbers = _db.MaterialReceiveDetails
-                 .Where(m => m.ProductId == id && m.LotNumber != null)
+                 .Where(m => m.ProductId == id && m.LotNumber != null && m.IsActive)
                  .Select(m => m.LotNumber)
                  .Distinct()
                  .ToList()
