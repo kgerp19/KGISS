@@ -719,14 +719,9 @@ namespace KGERP.Services.Production
                 List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
                 foreach (var bom in bomsOfProduct)
                 {
-                    string LotNumberMsg = "xyzz";
-                    if (!string.IsNullOrEmpty(LotNumberMsg) && bom.LotNumber != "null")
-                    {
-                        LotNumberMsg = bom.LotNumber;
-                    }
 
                     VMProductStock vMProductStock = new VMProductStock();
-                        vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, LotNumberMsg).FirstOrDefault();
+                        vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, bom.LotNumber?? "xyzz").FirstOrDefault();
                         bom.RequiredQuantity = bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm ? bom.RequiredQuantity / 1000 : bom.RequiredQuantity;
 
                         Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
