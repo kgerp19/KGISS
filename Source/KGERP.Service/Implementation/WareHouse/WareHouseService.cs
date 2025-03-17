@@ -1761,8 +1761,8 @@ namespace KGERP.Services.WareHouse
                             LotNumbers = (from pr in _db.Prod_ReferenceSlave
                                                       where t1.IsActive && pr.FProductId == t1.ProductId && pr.CompanyId==t1.CompanyId
                                                       select pr.LotNumber)
+                              .Distinct()
                               .OrderBy(x => x)
-                              .Take(100)
                               .ToList()
 
                         }).ToList();
