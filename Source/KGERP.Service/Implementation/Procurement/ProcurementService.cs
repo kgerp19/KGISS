@@ -2914,7 +2914,7 @@ namespace KGERP.Services.Procurement
             List<VMCommonCustomer> vmCommonCustomerList =
                 await Task.Run(() => (_db.Vendors
                 .Where(x => x.IsActive && x.SubZoneId == subZoneId))
-                .Select(x => new VMCommonCustomer() { ID = x.VendorId, Name = x.Code + " -" + x.Name })
+                .Select(x => new VMCommonCustomer() { ID = x.VendorId, Name = x.Code + " -" + x.Name+" -"+x.Address})
                 .ToListAsync());
 
 

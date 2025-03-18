@@ -913,7 +913,7 @@ namespace KG.App.Controllers
         {
 
             var vmCommonProductSubCategory = await Task.Run(() => _service.CustomerLisBySubZonetGet(subZoneId));
-            var list = vmCommonProductSubCategory.Select(x => new { Value = x.ID, Text = x.Name }).ToList();
+            var list = vmCommonProductSubCategory.Select(x => new { Value = x.ID, Text = x.Name}).ToList();
             return Json(list, JsonRequestBehavior.AllowGet);
         }
 
