@@ -715,9 +715,9 @@ namespace KGERP.Services.Production
             if (result > 0)
             {
 
-                var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive).AsEnumerable();
+                var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive && x.CompanyId== vmProdReferenceSlave.CompanyFK).AsEnumerable();
                 List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
-                foreach (var bom in bomsOfProduct)
+                foreach (var bom in bomsOfProduct.Where(x=>x.RProductFK>0))
                 {
 
                     VMProductStock vMProductStock = new VMProductStock();
