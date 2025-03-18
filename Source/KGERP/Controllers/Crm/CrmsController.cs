@@ -1,30 +1,16 @@
 ﻿using ClosedXML.Excel;
 using KGERP.Data.CustomModel;
-using KGERP.Data.Models;
 using KGERP.Service.Interface;
-using KGERP.Service.ServiceModel;
-using KGERP.Utility;
-using Newtonsoft.Json;
+using KGERP.Utility.Util;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
-using System.Data.Entity.Validation;
-using System.Data.OleDb;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.UI;
 using System.Web.UI.WebControls;
-using  KGERP.Utility.Util;
-using DocumentFormat.OpenXml.ExtendedProperties;
-using DocumentFormat.OpenXml.EMMA;
-using KGERP.Services.Procurement;
-using DocumentFormat.OpenXml.Wordprocessing;
-using DocumentFormat.OpenXml.VariantTypes;
-using OfficeOpenXml;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace KGERP.Controllers.Crm
@@ -42,7 +28,7 @@ namespace KGERP.Controllers.Crm
             _service = service;
             _permissionService = permissionService;
         }
-        
+
 
         [HttpGet]
         public async Task<ActionResult> Index(int companyId)
@@ -55,9 +41,9 @@ namespace KGERP.Controllers.Crm
         }
 
 
-        
+
         public PartialViewResult NavCrmPartial()
-        { 
+        {
             var menuVm = new MainMenuListVm();
             string companyIdParam = Request.Params["companyId"];
             int companyId;
@@ -90,14 +76,14 @@ namespace KGERP.Controllers.Crm
             return PartialView("_NavCrmPartial", menuVm);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> MakeSchedule(CrmScheduleVm model)
         {
             model = await _service.MakeSchedule(model);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> SwitchResponsibleOffice(int clientId, int companyId)
         {
@@ -106,7 +92,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> GetClientDetailsById(int clientId, int companyId)
         {
@@ -197,7 +183,7 @@ namespace KGERP.Controllers.Crm
             //  return Json(new { draw = draw, recordsTotal = totalResultsCount, recordsFiltered = filteredResultsCount, data = result }, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> AllClientList(int companyId)
         {
@@ -224,15 +210,15 @@ namespace KGERP.Controllers.Crm
 
 
         }
-        
+
         [HttpGet]
-        public async Task<ActionResult> UserClientList(int companyId, int pageNumber=0,int pagesize=100,string searchText="")
+        public async Task<ActionResult> UserClientList(int companyId, int pageNumber = 0, int pagesize = 100, string searchText = "")
         {
-            var  userId = HttpContext.Session["Id"];
+            var userId = HttpContext.Session["Id"];
             int uId = Convert.ToInt32(userId);
             var model = new CrmListVm();
             model = await _service.GetUserClient(companyId, uId, pageNumber, pagesize, searchText);
-        
+
             return View(model);
         }
         [HttpGet]
@@ -277,7 +263,7 @@ namespace KGERP.Controllers.Crm
             //}
             //if (_service.IsLeader(uId, model.CompanyId)) uId = 0;
 
-            var obj = await _service.FilteringClientlist(model, uuid,pageNumber,pagesize,searchText);
+            var obj = await _service.FilteringClientlist(model, uuid, pageNumber, pagesize, searchText);
             obj.GenderList = await _service.GetDropdownGender();
             obj.ReligionList = await _service.GetDropdownReligion();
             obj.DealingOfficerList = await _service.GetDropdownDealingOfficerForLead(model.CompanyId, uuid);
@@ -326,7 +312,7 @@ namespace KGERP.Controllers.Crm
             return View(model);
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> AddNewClient(CrmVm model)
         {
@@ -351,12 +337,12 @@ namespace KGERP.Controllers.Crm
                 return RedirectToAction(nameof(AddNewClient), "Crms", new { companyId = model.CompanyId });
             }
 
-           
-          
+
+
             return RedirectToAction(nameof(GetClientDetailsById), "Crms", new { clientId = model.ClientId, companyId = model.CompanyId });
         }
-        
-        
+
+
         [HttpGet]
         public async Task<ActionResult> UploadClientBatchHistory(int companyId)
         {
@@ -364,7 +350,7 @@ namespace KGERP.Controllers.Crm
             model = await _service.GetCrmClientBatchUpload(companyId);
             return View(model);
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> UploadClientBatch(int companyId)
         {
@@ -631,7 +617,7 @@ namespace KGERP.Controllers.Crm
 
 
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetClientStatusHistories(int clientId)
         {
@@ -640,7 +626,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetClientById(int clientId)
         {
@@ -648,7 +634,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAllCompany()
         {
@@ -658,7 +644,7 @@ namespace KGERP.Controllers.Crm
         }
 
 
-        
+
         [HttpGet]
         public async Task<ActionResult> TeamList(int companyId)
         {
@@ -667,7 +653,7 @@ namespace KGERP.Controllers.Crm
             return View(model);
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> SaveServiceStatus(int companyId)
         {
@@ -676,7 +662,7 @@ namespace KGERP.Controllers.Crm
             return View(model);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> SaveServiceStatus(ServiceStatusVm model)
         {
@@ -686,7 +672,7 @@ namespace KGERP.Controllers.Crm
 
 
 
-        
+
         [HttpGet]
         public async Task<ActionResult> ChoiceAreaIndex(int companyId)
         {
@@ -695,7 +681,7 @@ namespace KGERP.Controllers.Crm
 
             return View(model);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> ChoiceArea(ChoiceAreaVm model)
         {
@@ -703,7 +689,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> PromootionalOffer(int companyId)
         {
@@ -711,14 +697,14 @@ namespace KGERP.Controllers.Crm
             model = await _service.GetAllPromotionalOffer(companyId);
             return View(model);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> PromootionalOffer(PromotionalOfferVm model)
         {
             model = await _service.SavePromotionalOffer(model);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAllResponsibleOfficer(int companyId)
         {
@@ -727,7 +713,7 @@ namespace KGERP.Controllers.Crm
             model = await _service.GetAllResponsibleOfficer(companyId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAllproject(int companyId)
         {
@@ -739,7 +725,7 @@ namespace KGERP.Controllers.Crm
 
 
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAllServiceStatus(int companyId)
         {
@@ -748,11 +734,11 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAllProjectList(int companyId)
         {
-            var model=new ProjectListVm();
+            var model = new ProjectListVm();
 
             model = await _service.GetAllprojectForcrm(companyId);
             return Json(model, JsonRequestBehavior.AllowGet);
@@ -763,7 +749,7 @@ namespace KGERP.Controllers.Crm
 
 
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetServiceHistoryById(int KgreHistoryId)
         {
@@ -771,7 +757,7 @@ namespace KGERP.Controllers.Crm
             model = await _service.GetServiceHistoryById(KgreHistoryId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetClientScheduleById(int scheduleId)
         {
@@ -779,7 +765,7 @@ namespace KGERP.Controllers.Crm
             model = await _service.GetClientScheduleById(scheduleId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> RemoveServiceStatusById(ServiceStatusHistVm model)
         {
@@ -787,14 +773,14 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> RemoveScheduleById(CrmScheduleVm model)
         {
             model = await _service.RemoveClientSchedule(model);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> EditStatusNote(ServiceStatusHistVm model)
         {
@@ -802,14 +788,14 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> EditScheduleNote(CrmScheduleVm model)
         {
             model = await _service.UpdateScheduleNote(model);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAutoCompleteClientName(string prefix)
         {
@@ -817,7 +803,7 @@ namespace KGERP.Controllers.Crm
             var client = await _service.GetAutoCompleteClientName(prefix);
             return Json(client, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAutoCompleteClientMobile(string prefix)
         {
@@ -826,7 +812,7 @@ namespace KGERP.Controllers.Crm
         }
 
 
-        
+
         [HttpPost]
         public async Task<JsonResult> DeleteServiceStatus(int id)
         {
@@ -834,7 +820,7 @@ namespace KGERP.Controllers.Crm
             var obj = await _service.DeleteServiceStatus(id);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetServiceStatusById(int id)
         {
@@ -845,7 +831,7 @@ namespace KGERP.Controllers.Crm
 
 
 
-        
+
         [HttpPost]
         public async Task<JsonResult> UpdateResponsibleOfficer(SelectModelVm Model)
         {
@@ -855,14 +841,14 @@ namespace KGERP.Controllers.Crm
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> UpdateServiceStatus(SelectModelVm Model)
         {
             var obj = await _service.UpdateServstsId(Model);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> UpdateCompany(SelectModelVm Model)
         {
@@ -871,22 +857,22 @@ namespace KGERP.Controllers.Crm
             var obj = await _service.UpdateCompany(Model, uId);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> SwitchServiceStatus(SelectModelVm Model)
         {
             var obj = await _service.SwitchServiceStatus(Model);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetPromotionalOfferById(int id)
         {
             var obj = await _service.GetPromotionalOfferById(id);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
-        
+
+
         [HttpGet]
         public async Task<ActionResult> GetAllPremission(int? companyId, int? userId)
         {
@@ -900,7 +886,7 @@ namespace KGERP.Controllers.Crm
             model.CompanyList = await _service.GetDropdownCompany();
             return View(model);
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> GetAllPremission(PermissionModelListVm model)
         {
@@ -919,7 +905,7 @@ namespace KGERP.Controllers.Crm
                 userId = model.UserId
             });
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> SavePermission(int id, bool status, int companyId, int userId)
         {
@@ -929,7 +915,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetAutoCompleteEmployee(string prefix)
         {
@@ -937,7 +923,7 @@ namespace KGERP.Controllers.Crm
             return Json(client, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> UpdateClientById(int clientId, int companyId)
         {
@@ -956,7 +942,7 @@ namespace KGERP.Controllers.Crm
             return View(model);
         }
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetServiceByClientList(int StatusId, int companyId)
         {
@@ -970,7 +956,7 @@ namespace KGERP.Controllers.Crm
 
             return Json(Model, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> ExportClientExcel(int? GenderId, int? ReligionId,
            int? ResponsibleOfficerId, int? ProjectId,
@@ -1049,7 +1035,7 @@ namespace KGERP.Controllers.Crm
 
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> ExportClientUploadBatchHistoryExcel(int companyId, int uploadSerialNo, DateTime uploadDateTime)
         {
@@ -1135,7 +1121,7 @@ namespace KGERP.Controllers.Crm
         }
 
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetClientCopyById(int clientId)
         {
@@ -1144,7 +1130,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> CopyClientSave(int ClientId, int SelectedCompanyId)
         {
@@ -1153,7 +1139,7 @@ namespace KGERP.Controllers.Crm
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpPost]
         public async Task<JsonResult> SaveTask(int scheduleId, int SelectedCompanyId)
         {
@@ -1163,7 +1149,7 @@ namespace KGERP.Controllers.Crm
         }
 
 
-        
+
         [HttpPost]
         public async Task<ActionResult> UpdateSectionClient(CrmVm model)
         {
@@ -1179,7 +1165,7 @@ namespace KGERP.Controllers.Crm
             return RedirectToAction(nameof(GetClientDetailsById), "Crms", new { clientId = model.ClientId, companyId = model.CompanyId });
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> PendingScheduleList(int companyId)
         {
@@ -1196,7 +1182,7 @@ namespace KGERP.Controllers.Crm
 
             return View(model);
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> CompletedScheduleList(int companyId)
         {
@@ -1213,46 +1199,47 @@ namespace KGERP.Controllers.Crm
 
             return View(model);
         }
-        
+
         [HttpPost]
 
         public async Task<ActionResult> RemarksView(int ClientId)
         {
-           var obj=await _service.GetNoteList(ClientId);
+            var obj = await _service.GetNoteList(ClientId);
 
-         
+
             return Json(obj);
 
 
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> NoteBox(CrmVm Model)
         {
-            var    userId = HttpContext.Session["Id"];
+            var userId = HttpContext.Session["Id"];
             int uId = Convert.ToInt32(userId);
             if (_service.IsLeader(uId, Model.CompanyId)) uId = 0;
 
             Model = await _service.noteview(Model);
-        
+
             return Json(Model);
-            
+
 
 
         }
 
 
-        
+
         [HttpGet]
         public async Task<ActionResult> CountingCategory(int Companyid)
-        {   CrmVm vm= new CrmVm();
-           vm.DealingOfficerList = await _service.AllResponsibleoffficerrr(Companyid);
+        {
+            CrmVm vm = new CrmVm();
+            vm.DealingOfficerList = await _service.AllResponsibleoffficerrr(Companyid);
             return View(vm);
         }
 
 
-        
+
         [HttpGet]
         public async Task<ActionResult> Modifyhistory(int Companyid)
         {
@@ -1262,7 +1249,7 @@ namespace KGERP.Controllers.Crm
             vm.CompanyId = Companyid;
             return View(vm);
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> GetModifyhistory(CrmVm model)
         {
@@ -1272,7 +1259,7 @@ namespace KGERP.Controllers.Crm
 
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> GetCountingResponsible(CrmViewModel model)
         {
@@ -1282,7 +1269,7 @@ namespace KGERP.Controllers.Crm
 
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> GetExistClient(string MobileNumber, int CompanyId)
         {
@@ -1290,7 +1277,7 @@ namespace KGERP.Controllers.Crm
             return Json(obj);
 
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> Reassign(CrmVm model)
         {
@@ -1299,11 +1286,11 @@ namespace KGERP.Controllers.Crm
             return Json(obj);
 
         }
-        
+
         [HttpGet]
-        public async Task<ActionResult> CarRequisition(int CompanyId,int?id)
+        public async Task<ActionResult> CarRequisition(int CompanyId, int? id)
         {
-            VehicleVm vm= new VehicleVm();
+            VehicleVm vm = new VehicleVm();
             var userId = HttpContext.Session["Id"];
             int uId = Convert.ToInt32(userId);
 
@@ -1321,14 +1308,14 @@ namespace KGERP.Controllers.Crm
                 vm.Date = DateTime.Now;
                 vm.Strdate = vm.Date.ToString("dd/MM/yyyy");
             }
-           
 
 
-          
+
+
             return View(vm);
 
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> CarRequisition(VehicleVm model)
         {
@@ -1337,17 +1324,17 @@ namespace KGERP.Controllers.Crm
             return RedirectToAction(nameof(CarRequisitionListIdividual), "Crms", new { companyId = model.CompanyId });
         }
 
-        
+
         [HttpGet]
-        public async Task<ActionResult> CarRequisitionList(int CompanyId,DateTime? Dateee)
+        public async Task<ActionResult> CarRequisitionList(int CompanyId, DateTime? Dateee)
         {
             VehicleVm vm = new VehicleVm();
             if (Dateee == null)
             {
                 Dateee = DateTime.Now;
             }
-           
-            vm = await _service.GetCarRquisitinList(CompanyId,Dateee);
+
+            vm = await _service.GetCarRquisitinList(CompanyId, Dateee);
             vm.Strdate = Dateee.Value.ToString("dd/MM/yyyy");
             return View(vm);
 
@@ -1355,13 +1342,13 @@ namespace KGERP.Controllers.Crm
 
 
         [HttpPost]
-        
+
         public async Task<ActionResult> CarRequisitionList(VehicleVm vm)
-         {
+        {
             vm.Date = Convert.ToDateTime(vm.Strdate);
             return RedirectToAction(nameof(CarRequisitionList), new { companyId = vm.CompanyId, Dateee = vm.Date });
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> CarRequisitionListIdividual(int CompanyId)
         {
@@ -1369,13 +1356,13 @@ namespace KGERP.Controllers.Crm
             var userId = HttpContext.Session["Id"];
             int uId = Convert.ToInt32(userId);
             vm = await _service.GetCarRquisitinListIndividual(CompanyId, uId);
-     
+
             return View(vm);
 
         }
 
 
-        
+
         [HttpPost]
         public async Task<JsonResult> DeleteCarRequision(int id)
         {
@@ -1385,7 +1372,7 @@ namespace KGERP.Controllers.Crm
         }
 
 
-        
+
         [HttpPost]
         public async Task<ActionResult> SaveDriverName(VehicleVm model)
         {
@@ -1397,4 +1384,4 @@ namespace KGERP.Controllers.Crm
 
 
     }
-    }
+}
