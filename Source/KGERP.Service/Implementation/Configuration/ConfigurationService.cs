@@ -3673,6 +3673,7 @@ namespace KGERP.Service.Implementation
             {
                 VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", id, CompanyId).FirstOrDefault();
                 v.CostingPrice = products.ClosingRate;
+                v.CurrentStock = products.ClosingQty;
             }
 
             return v;
