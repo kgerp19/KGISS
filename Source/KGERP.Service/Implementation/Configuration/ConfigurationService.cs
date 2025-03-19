@@ -1038,7 +1038,7 @@ namespace KGERP.Service.Implementation
                      select new
                      {
                          label = t1.LotNumber
-                     }).OrderBy(x => x.label).Take(100).ToList();
+                     }).Distinct().OrderBy(x => x.label).Take(100).ToList();
 
             return v;
         }
