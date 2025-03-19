@@ -395,6 +395,26 @@ $(document).ready(function () {
             $(this).parents('form').bootstrapValidator('revalidateField', $(this));
         }
     }); // <-- Missing closing parenthesis
+
+    $("#ddlLotNumbers").change(() => {
+        let LotNo = $("#ddlLotNumbers").val();
+         let productid = $("#ddlRProductFK").val();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetCommonProductByProducId", "Configuration")",
+            datatype: "Json",
+            data: { id: productid, LotNo: LotNo, CompanyId: "@Model.CompanyFK" },
+            success: function (data) {
+
+                if (data) {
+                    $('.txtUnitName').text(data.UnitName);
+                    $('#txtUnitPrice').val(data.CostingPrice);
+                    $('#txtClosingStock').val(data.CurrentStock);
+                }
+            }
+        });
+    })
+
 }); // <-- Closing the $(document).ready function
 
 
@@ -491,7 +511,7 @@ $("#txtProductName").autocomplete({
         $("#ddlRProductFK").val(i.item.val);
 
         // Fetch product details
-        $.ajax({
+        @*$.ajax({
             type: "GET",
             url: "@Url.Action("GetCommonProductByProducId", "Configuration")",
             datatype: "Json",
@@ -504,7 +524,7 @@ $("#txtProductName").autocomplete({
                     $('#txtClosingStock').val(data.CurrentStock);
                 }
             }
-        });
+        });*@
 
         // Fetch lot numbers based on the selected product
         $.ajax({
@@ -518,6 +538,14 @@ $("#txtProductName").autocomplete({
                 // Clear current lot numbers in the dropdown
                 $('#ddlLotNumbers').empty();
 
+                $('#ddlLotNumbers').append(
+                    $('<option>', {
+                        value: '',  // No value for the placeholder  
+                        text: 'Select an option', // Placeholder text  
+                        selected: true, // Make it selected by default  
+                        disabled: true   // Disable it to prevent selection  
+                    })
+                ); 
                 // Populate the lot numbers dropdown
                 if (data.length > 0) {
                     $.each(data, function (index, item) {
@@ -528,9 +556,6 @@ $("#txtProductName").autocomplete({
                             })
                         );
                     });
-
-                    // Set the first lot number as selected by default
-                    $('#ddlLotNumbers').val(data[0].label);
                 } else {
                     // Handle case where no lot numbers are available
                     $('#ddlLotNumbers').append(

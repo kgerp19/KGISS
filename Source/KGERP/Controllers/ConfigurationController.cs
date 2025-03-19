@@ -1123,10 +1123,10 @@ namespace Pos.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetCommonProductByProducId(int id,int CompanyId=0)
+        public JsonResult GetCommonProductByProducId(int id, string LotNo,int CompanyId=0)
         {
 
-            var model = _service.GetCommonProductByProducId(id, CompanyId);
+            var model = _service.GetCommonProductByProducId(id,LotNo,CompanyId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 

@@ -3639,7 +3639,7 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-        public VMRealStateProduct GetCommonProductByProducId(int id, int CompanyId = 0)
+        public VMRealStateProduct GetCommonProductByProducId(int id, string LotNo, int CompanyId = 0)
         {
             var v = (from t1 in _db.Products.Where(x => x.ProductId == id)
                      join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
@@ -3671,7 +3671,7 @@ namespace KGERP.Service.Implementation
                      }).FirstOrDefault();
             if (CompanyId > 0)
             {
-                VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", id, CompanyId).FirstOrDefault();
+                VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, CompanyId,LotNo??"xyzz").FirstOrDefault();
                 v.CostingPrice = products.ClosingRate;
                 v.CurrentStock = products.ClosingQty;
             }
