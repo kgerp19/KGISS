@@ -715,31 +715,38 @@ namespace KGERP.Services.Production
             if (result > 0)
             {
 
-                var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive && x.CompanyId== vmProdReferenceSlave.CompanyFK).AsEnumerable();
+                //var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive && x.CompanyId== vmProdReferenceSlave.CompanyFK).AsEnumerable();
+                var bomsOfProduct = _db.FinishProductBOMs
+            .Where(x => x.FProductFK == vmProdReferenceSlave.FProductId
+                && x.IsActive
+                && x.CompanyId == vmProdReferenceSlave.CompanyFK)
+            .ToList();
+
+                decimal RequiredQuantity = 0;
                 List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
-                foreach (var bom in bomsOfProduct.Where(x=>x.RProductFK>0))
+                foreach (var bom in bomsOfProduct.Where(x => x.RProductFK > 0))
                 {
 
                     VMProductStock vMProductStock = new VMProductStock();
-                        vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, bom.LotNumber?? "xyzz").FirstOrDefault();
-                        bom.RequiredQuantity = bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm ? bom.RequiredQuantity / 1000 : bom.RequiredQuantity;
+                    vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, bom.LotNumber ?? "xyzz").FirstOrDefault();
+                    RequiredQuantity = bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm ? bom.RequiredQuantity / 1000 : bom.RequiredQuantity;
 
-                        Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
-                        {
-                            RProductId = bom.RProductFK,
-                            TotalConsumeQuantity = bom.RequiredQuantity * vmProdReferenceSlave.Quantity,
-                            COGS = vMProductStock.ClosingRate,
-                            ProdReferenceSlaveID = result,
-                            CompanyId = vmProdReferenceSlave.CompanyFK,
-                            CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                            CreatedDate = DateTime.Now,
-                            IsActive = true,
-                            LotNumber = bom.LotNumber,
-                        };
-                        List.Add(prod_ReferenceSlaveConsumption);
+                    Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
+                    {
+                        RProductId = bom.RProductFK,
+                        TotalConsumeQuantity = RequiredQuantity * vmProdReferenceSlave.Quantity,
+                        COGS = vMProductStock.ClosingRate,
+                        ProdReferenceSlaveID = result,
+                        CompanyId = vmProdReferenceSlave.CompanyFK,
+                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                        CreatedDate = DateTime.Now,
+                        IsActive = true,
+                        LotNumber = bom.LotNumber,
+                    };
+                    List.Add(prod_ReferenceSlaveConsumption);
 
-                        lot += bom.LotNumber;
-                    
+                    lot += bom.LotNumber;
+                    RequiredQuantity = 0;
                 }
                 _db.Prod_ReferenceSlaveConsumption.AddRange(List);
                 await _db.SaveChangesAsync();
