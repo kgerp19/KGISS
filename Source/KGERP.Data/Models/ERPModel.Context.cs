@@ -366,6 +366,8 @@ namespace KGERP.Data.Models
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<StockAdjustDetail> StockAdjustDetails { get; set; }
         public virtual DbSet<VoucherDetail> VoucherDetails { get; set; }
+        public virtual DbSet<SalesTransfer> SalesTransfers { get; set; }
+        public virtual DbSet<SalesTransferDetail> SalesTransferDetails { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
