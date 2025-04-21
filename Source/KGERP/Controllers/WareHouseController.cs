@@ -777,6 +777,8 @@ namespace KGERP.Controllers
         }
 
 
+
+
         [HttpGet]
         public async Task<ActionResult> WareHouseOrderDeliverDetail(int companyId, int orderDeliverId = 0)
         {
@@ -793,6 +795,9 @@ namespace KGERP.Controllers
 
             return View(vmOrderDeliverDetail);
         }
+
+
+
 
         [HttpPost]
         public async Task<ActionResult> WareHouseOrderDeliverDetail(VMOrderDeliverDetail vmModel, VMOrderDeliverDetailPartial vmModelList)
@@ -829,6 +834,24 @@ namespace KGERP.Controllers
             }
 
             return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId });
+        }
+
+
+        [HttpGet]
+        public async Task<ActionResult> Salestransfer(int companyId, int orderDeliverId = 0)
+        {
+            VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
+            if (orderDeliverId == 0)
+            {
+                vmOrderDeliverDetail.CompanyFK = companyId;
+            }
+            else if (orderDeliverId > 0)
+            {
+                vmOrderDeliverDetail = await _service.WareHouseOrderDeliverDetailGet(companyId, orderDeliverId);
+            }
+            vmOrderDeliverDetail.StockInfoList = new SelectList(_procurementService.StockInfoesDropDownList(companyId), "Value", "Text");
+
+            return View(vmOrderDeliverDetail);
         }
 
         [HttpPost]

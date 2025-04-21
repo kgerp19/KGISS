@@ -602,6 +602,29 @@ namespace KGERP.Services.WareHouse
 
         public string LotNunmber { get;  set; }
     }
+
+
+
+    public class Salestransfer: BaseVM
+    {
+        public long SalesTransferId { get; set; }
+        public DateTime SalesTransferDate { get; set; }
+        public string SalesTransferNo { get; set; }
+        public long OrderMasterId { get; set; }
+        public long OrderDeliverId { get; set; }
+        public DateTime CreateDate { get; set; }
+    }
+
+    public class SalesTransferDetail: Salestransfer
+    {
+        public long SalesTransferDetailsId { get; set; }
+        public long OrderDeliverDetailId { get; set; }
+        public int ProductId { get; set; }
+        public string LotNumber { get; set; }
+        public float? TransferQuantity { get; set; }
+    }
+
+
     public partial class VMOrderDeliverDetailPartial : BaseVM
     {
         public long OrderDetailId { get; set; }
