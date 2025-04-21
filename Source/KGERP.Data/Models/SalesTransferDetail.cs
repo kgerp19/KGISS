@@ -18,8 +18,8 @@ namespace KGERP.Data.Models
         public long SalesTransferId { get; set; }
         public long OrderDeliverDetailId { get; set; }
         public int ProductId { get; set; }
-        public byte[] LotNumber { get; set; }
-        public Nullable<double> TransferQuantity { get; set; }
+        public string LotNumber { get; set; }
+        public Nullable<decimal> TransferQuantity { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreateDate { get; set; }
         public string ModifiedBy { get; set; }
