@@ -19,6 +19,9 @@ namespace KGERP.Data.Models
         public string SalesTransferNo { get; set; }
         public long OrderMasterId { get; set; }
         public long OrderDeliverId { get; set; }
+        public int FromVendorId { get; set; }
+        public int ToVendoerId { get; set; }
+        public bool IsSubmited { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreateDate { get; set; }
         public string ModifiedBy { get; set; }
