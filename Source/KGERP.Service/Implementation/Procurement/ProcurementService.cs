@@ -2921,6 +2921,19 @@ namespace KGERP.Services.Procurement
             return vmCommonCustomerList;
         }
 
+        public async Task<List<SalesTransferDetailVM>> OrderDelivieryListByOrderMaster(long orderMasterId)
+        {
+
+            List<SalesTransferDetailVM> vmOrderDeliversList =
+                await Task.Run(() => (_db.OrderDelivers
+                .Where(x => x.IsActive && x.OrderMasterId == orderMasterId))
+                .Select(x => new SalesTransferDetailVM() { OrderDeliverId = x.OrderDeliverId, ChallanNo = x.ChallanNo })
+                .ToListAsync());
+
+
+            return vmOrderDeliversList;
+        }
+
         public async Task<List<VMCommonCustomer>> CustomerLisByZonetGet(int zoneId)
         {
 

@@ -745,6 +745,16 @@ namespace KGERP.Controllers
             return PartialView("_OrderDetailsDataPartial", model);
         }
 
+        public ActionResult GetOrderDeliveryDetailsDataPartial(long orderDeliveryId)
+        {
+            var model = new VMOrderDeliverDetailDataPartial();
+            if (orderDeliveryId > 0)
+            {
+                model.DataToList = _service.GetOrderDeliveryDetails(orderDeliveryId);
+            }
+            return PartialView("_OrderDeliverDetailDataPartial", model);
+        }
+
 
         public ActionResult GetFeedOrderDetailsPartial(int poId)
         {
@@ -838,20 +848,46 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> Salestransfer(int companyId, int orderDeliverId = 0)
+        public async Task<ActionResult> Salestransfer(int companyId, long salesTransfer = 0)
         {
-            VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
-            if (orderDeliverId == 0)
+            SalesTransferDetailVM SalesTransferDetail = new SalesTransferDetailVM();
+            if (salesTransfer == 0)
             {
-                vmOrderDeliverDetail.CompanyFK = companyId;
+                SalesTransferDetail.CompanyFK = companyId;
             }
-            else if (orderDeliverId > 0)
+            else if (salesTransfer > 0)
             {
-                vmOrderDeliverDetail = await _service.WareHouseOrderDeliverDetailGet(companyId, orderDeliverId);
+                SalesTransferDetail = await _service.WareHouseSalesTranserDetailGet(companyId, salesTransfer);
             }
-            vmOrderDeliverDetail.StockInfoList = new SelectList(_procurementService.StockInfoesDropDownList(companyId), "Value", "Text");
 
-            return View(vmOrderDeliverDetail);
+
+
+            return View(SalesTransferDetail);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Salestransfer(SalesTransferDetailVM vmModel, VMOrderDeliverDetailDataPartial vmModelList)
+        {
+            if (vmModel.ActionEum == ActionEnum.Add)
+            {
+                if (vmModel.SalesTransferId == 0)
+                {
+                    vmModel.SalesTransferId = await _service.WareHouseSalestransferAdd(vmModel, vmModelList);
+                }
+                
+
+            }
+
+            else if (vmModel.ActionEum == ActionEnum.Finalize)
+            {
+                //await _service.SubmitOrderDeliver(vmModel);
+            }
+            else
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            return RedirectToAction(nameof(Salestransfer), new { companyId = vmModel.CompanyFK, salesTransfer = vmModel.SalesTransferId });
         }
 
         [HttpPost]
