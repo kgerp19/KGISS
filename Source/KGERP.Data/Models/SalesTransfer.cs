@@ -21,6 +21,7 @@ namespace KGERP.Data.Models
         public long OrderDeliverId { get; set; }
         public int FromVendorId { get; set; }
         public int ToVendoerId { get; set; }
+        public int CompanyId { get; set; }
         public bool IsSubmited { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreateDate { get; set; }
