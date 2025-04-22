@@ -3711,9 +3711,9 @@ namespace KGERP.Services.WareHouse
                     salesTransfersCount = salesTransfersCount == 0 ? 1 : salesTransfersCount + 1;
 
                     string salesTransfersID = "ST" +
-                                             DateTime.Now.ToString("dd") +
-                                             DateTime.Now.ToString("MM") +
-                                             DateTime.Now.ToString("yy") +
+                                             salesTransferDetailVM.SalesTransferDate.ToString("dd") +
+                                             salesTransferDetailVM.SalesTransferDate.ToString("MM") +
+                                             salesTransferDetailVM.SalesTransferDate.ToString("yy") +
                                              salesTransfersCount.ToString().PadLeft(5, '0');
                     #endregion
 
@@ -3763,6 +3763,7 @@ namespace KGERP.Services.WareHouse
                                 TransferQuantity = (decimal?)item.DeliveredQty??0,
                                 CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
                                 CreateDate = DateTime.Now,
+                                UnitPrice=item.UnitPrice,
                                 IsActive = true
                             };
 
