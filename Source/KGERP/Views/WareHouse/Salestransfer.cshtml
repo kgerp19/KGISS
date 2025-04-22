@@ -5,14 +5,7 @@
     ViewBag.Title = "Salestransfer";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    double TotalPrice = 0;
-    decimal TotalDiscount = 0;
     decimal TotalAmount = 0;
-
-    decimal TotalUnitDiscount = 0;
-    double TotalGrossAmount = 0;
-
-    decimal? TotalSpetialDiscount = 0;
 
 }
 
@@ -26,26 +19,17 @@
 
 <section class="content-header">
     <h1>
-        @if (Model.OrderDeliverId > 0)
-        {
-            <span>
-                Sales Transfer  <a href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=Model.OrderDeliverId,companyId=Model.CompanyFK})" title="Challan Copy" target="_blank"> @Model.SalesTransferNo </a>
-            </span>
-        }
-        else
-        {
-            <span>
-                Sales Transfer
-            </span>
-        }
 
+        <span>
+            Sales Transfer
+        </span>
 
     </h1>
     <ol class="breadcrumb">
         <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
         <li class="active">Sales Transfer</li>
         <li class="active">
-            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetail?companyId=@Model.CompanyFK">Sales Transfer List</a>
+            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/WareHouse/SalestransferList?companyId=@Model.CompanyFK">Sales Transfer List</a>
 
         </li>
     </ol>
@@ -58,6 +42,7 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                 @Html.HiddenFor(x => x.CompanyFK, new { id = "CompanyFK" })
+                @Html.HiddenFor(x => x.FromCustomerId, new { id = "txtFromCustomerId" })
 
                 <div class="box-danger">
                     <div class="box-header">
@@ -73,18 +58,34 @@
                             <div class="col-md-1"> </div>
                             <div class="col-md-10">
                                 <table class="table">
+                                    <tr>
+                                        <td width="15%"><b>Transer No</b></td>
+                                        <td width="1%">:</td>
+                                        <th width="34%">@Model.SalesTransferNo</th>
 
-                                        <tr>
-                                            <td width="15%"><b>Challan No</b></td>
-                                            <td width="1%">:</td>
-                                            <th width="34%">@Model.ChallanNo</th>
+                                        <td width="15%"><b>Order No</b></td>
+                                        <td width="1%">:</td>
+                                        <td width="34%">@Model.OrderNoMsg</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="15%"><b>Challan No</b></td>
+                                        <td width="1%">:</td>
+                                        <th width="34%">@Model.ChallanNo</th>
 
-                                            <td width="15%"><b>Delivery Date</b></td>
-                                            <td width="1%">:</td>
-                                            <td width="34%">@Model.SalesTransferDate.ToString("dd-MM-yyyy")</td>
-                                        </tr>
-                                        
-                                    </table>
+                                        <td width="15%"><b>Delivery Date</b></td>
+                                        <td width="1%">:</td>
+                                        <td width="34%">@Model.SalesTransferDate.ToString("dd-MM-yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="15%"><b>From Customer</b></td>
+                                        <td width="1%">:</td>
+                                        <th width="34%">@Model.FromCustomerName</th>
+
+                                        <td width="15%"><b>To Customer</b></td>
+                                        <td width="1%">:</td>
+                                        <td width="34%">@Model.ToCustomerName</td>
+                                    </tr>
+                                </table>
                             </div>
                             <div class="col-md-1"> </div>
                         }
@@ -139,8 +140,14 @@
                                         </tr>
                                     </table>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Customer</label>
+                                        @Html.DropDownListFor(model => model.ToCustomerId, Model.CustomerList as SelectList, "==Select Customer==", new { id = "ddlCustomerId", @class = "form-control searchingDropdown", style = "width:100%", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.ToCustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
 
-                                
                             </div>
                             <br />
                             <div class="col-md-12">
@@ -156,7 +163,7 @@
 
                         <!--Body Will by Start Here-->
                         @{
-                            if (Model.OrderDeliverId > 0)
+                            if (Model.SalesTransferId > 0)
                             {
                                 <div class="box-header" style="clear:both">
                                     <h4><b>Item:</b> </h4>
@@ -168,16 +175,8 @@
                                                 <th>SL</th>
                                                 <th class="center">Product Name </th>
                                                 <th class="center">Lot Number </th>
-                                                <th class="center">Order Quantity</th>
-                                                <th class="center">Delivered Quantity</th>
-                                                <th class="center">Pack Size</th>
-                                                <th class="center">Quantity (KG)</th>
-                                                <th class="center">Qty in Pack</th>
+                                                <th class="center">Transfer Quantity</th>
                                                 <th class="center">Unit Price</th>
-
-                                                <th style="padding:5px;text-align:center;"> Unit Discount</th>
-
-                                                <th style="padding:5px;text-align:center;">Special Discount</th>
                                                 <th class="center">Total Price</th>
                                                 <th class="center">Action</th>
                                             </tr>
@@ -186,137 +185,34 @@
                                             int sl = 0;
                                         }
                                         <tbody>
-                                            @*@foreach (var item in Model.DataListDetail)
-                                            {
-                                                    decimal unitDiscount = Convert.ToDecimal(item.DeliveredQty) * item.DiscountUnit;
-
-
-                                                    TotalGrossAmount += item.DeliveredQty * item.UnitPrice;
-                                                    TotalUnitDiscount += unitDiscount;
-
-                                                    TotalSpetialDiscount += item.SpecialDiscount ?? 0;
-                                                    TotalAmount += Convert.ToDecimal(item.DeliveredQty * item.UnitPrice) - (unitDiscount + item.SpecialDiscount ?? 0);
-
-                                                    var OfferBtn = item.PromotionalOfferId != null ? $"<a target=\"_blank\" href=\"{Url.Action("PromtionalOfferDetail", "Procurement", new { companyId = Model.CompanyFK, promtionalOfferId = item.PromotionalOfferId })}\" class='btn btn-danger btn-xs'>Promotion Item</a>" : string.Empty;
-
-                                                    <tr>
-                                                        <td>@(++sl)</td>
-                                                        <td>@item.ProductSubCategory @item.ProductName @Html.Raw(OfferBtn) </td>
-                                                        <td>@item.LotNunmber </td>
-                                                        <td>@item.OrderQty @item.UnitName</td>
-                                                        <th>@item.DeliveredQty @item.UnitName</th>
-                                                        <td>@item.PackSize</td>
-                                                        <td>
-                                                            @{
-                                                                var totalGm = item.DeliveredQty * item.PackSize;
-                                                                double divisor = 1000;
-
-                                                                if (totalGm < divisor)
-                                                                {
-                                                                    <span>
-                                                                        @totalGm gm
-                                                                    </span>
-                                                                }
-                                                                else
-                                                                {
-                                                                    double dividend = totalGm ?? 0;
-                                                                    double remainder = dividend % divisor;
-                                                                    if (remainder == 0)
-                                                                    {
-                                                                        totalGm = totalGm / divisor;
-                                                                        <span>
-                                                                            @totalGm KG
-                                                                        </span>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        totalGm = (totalGm - remainder) / divisor;
-                                                                        <span>
-                                                                            @totalGm KG @remainder gm
-                                                                        </span>
-                                                                    }
-                                                                }
+                                            @foreach (var item in Model.DataListDetail)
+                                                {
+                                                        TotalAmount += Convert.ToDecimal((decimal)item.DeliveredQty * item.UnitPrice);
+                                                        <tr>
+                                                            <td>@(++sl)</td>
+                                                            <td>@item.ProductSubCategory @item.ProductName</td>
+                                                            <td>@item.LotNumber </td>
+                                                            <td>@item.DeliveredQty</td>
+                                                            <td style="padding: 5px;">@String.Format("{0:0.00}", item.UnitPrice)</td>
+                                                            <td style="text-align: right;">@((decimal)item.DeliveredQty * item.UnitPrice)</td>
+                                                            @if (!Model.IsSubmitted)
+                                                            {
+                                                                <td class="text-center">
+                                                                    <button class="btn btn-primary btn-sm" type="button" onclick="UpdateOrderDeliveryDetails('@item.SalesTransferDetailsId','@item.DeliveredQty');">Update</button>
+                                                                    &nbsp;
+                                                                    <button class="btn btn-danger btn-sm" type="button" onclick="DeleteSalesTransferDetails('@item.SalesTransferDetailsId');">Delete</button>
+                                                                </td>
                                                             }
-                                                        </td>
-                                                        <td>@String.Format("{0:0.00}", item.FormulaQty)</td>
-                                                        <td>@String.Format("{0:0.00}", item.UnitPrice)</td>
-
-
-
-                                                        <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", unitDiscount) (@String.Format("{0:0.00}", item.DiscountUnit))</td>
-                                                        <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.SpecialDiscount)</td>
-
-
-                                                        <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Amount)</td>
-                                                        @if (!Model.IsSubmitted)
-                                                        {
-                                                            <td class="text-center">
-                                                                <button class="btn btn-primary btn-sm" type="button" onclick="UpdateOrderDeliveryDetails('@item.OrderDeliverDetailId','@item.DeliveredQty');">Update</button>
-                                                                &nbsp;
-                                                                <button class="btn btn-danger btn-sm" type="button" onclick="DeleteOrderDeliveryDetails('@item.OrderDeliverDetailId');">Delete</button>
-                                                            </td>
-                                                        }
-                                                    </tr>
-                                            }*@
+                                                        </tr>
+                                                }
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td style="padding:5px"></td>
 
-                                                <th colspan="4" style="padding:5px;text-align:left;">Total Gross Amount</th>
-
-                                                <th style="padding: 5px; text-align: right;">@String.Format("{0:0.00}", TotalGrossAmount) </th>
-
-
-                                            </tr>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td style="padding:5px"></td>
-                                                <th colspan="4" style="padding:5px;text-align:left;">Total Unit Discount</th>
-
-                                                <th style="padding: 5px; text-align: right;">@String.Format("{0:0.00}", TotalUnitDiscount) </th>
-
-
-                                            </tr>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td style="padding:5px"></td>
-                                                <th colspan="4" style="padding:5px;text-align:left;">Amount After Unit Discount</th>
-
-                                                <th style="padding: 5px; text-align: right;">@String.Format("{0:0.00}", Convert.ToDecimal(TotalGrossAmount) - TotalUnitDiscount) </th>
-
-
-                                            </tr>
-
-
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td style="padding:5px"></td>
-                                                <th colspan="4" style="padding:5px;text-align:left;">Total Special Discount</th>
-
-
-
-                                                <th style="padding: 5px; text-align: right;">@String.Format("{0:0.00}", TotalSpetialDiscount)</th>
-                                            </tr>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td style="padding:5px"></td>
-                                                <th colspan="4" style="padding:5px;text-align:left;">Net Amount</th>
-
-
-
+                                                <th colspan="5" style="padding: 5px; text-align: center;">Net Amount</th>
                                                 <th style="padding:5px;text-align:right;">@String.Format("{0:0.00}", TotalAmount)</th>
+                                                <th></th>
+
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -324,7 +220,7 @@
                             }
                         }
                     </div>
-                    @if (Model.OrderDeliverId > 0)
+                    @if (Model.SalesTransferId > 0)
                     {
                         <div class="box-footer">
                             <div class="row">
@@ -332,19 +228,19 @@
 
                                 </div>
                                 <div class="col-md-3">
-                                    <a style="width:100%" href="@Url.Action("PackagingDeliverInvoiceReport","Report", new {companyId = Model.CompanyFK, orderDeliverId = Model.OrderDeliverId})" title="Bill Copy" target="_blank" class="btn btn-success">
+                                    @*<a style="width:100%" href="@Url.Action("PackagingDeliverInvoiceReport","Report", new {companyId = Model.CompanyFK, orderDeliverId = Model.OrderDeliverId})" title="Bill Copy" target="_blank" class="btn btn-success">
                                         Bill Copy
-                                    </a>
+                                    </a>*@
                                 </div>
                                 <div class="col-md-3">
-                                    <a style="width:100%" href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=Model.OrderDeliverId,companyId=Model.CompanyFK})" title="Challan Copy" target="_blank" class="btn btn-warning">
+                                    @*<a style="width:100%" href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=Model.OrderDeliverId,companyId=Model.CompanyFK})" title="Challan Copy" target="_blank" class="btn btn-warning">
                                         Challan Copy
-                                    </a>
+                                    </a>*@
                                 </div>
                                 <div class="col-md-4">
                                     @if (!Model.IsSubmitted)
                                     {
-                                        <a onclick="makeOrderDeliverSubmitable(@Model.OrderDeliverId);" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitProdReferenceModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
+                                        <a onclick="makeOrderDeliverSubmitable(@Model.SalesTransferId);" class="btn btn-success btn-block" style="width:100%" data-toggle="modal" data-target="#submitProdReferenceModal" title="Submit" data-placement="top"><i class="fa fa-fingerprint" aria-hidden="true"></i>Submit</a>
 
                                     }
                                     else
@@ -388,7 +284,7 @@
         </div>
     </div>
 }
-@using (Html.BeginForm("WareHouseOrderDeliverDetail", "WareHouse", FormMethod.Post, new { id = "submitGCCLPOReceivingSlaveFormId", @class = "formValidator" }))
+@using (Html.BeginForm("Salestransfer", "WareHouse", FormMethod.Post, new { id = "submitSalestransferFormId", @class = "formValidator" }))
 {
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="modal fade" id="submitProdReferenceModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
@@ -403,7 +299,7 @@
                 <div class="modal-body">
 
                     @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
-                    @Html.HiddenFor(model => model.OrderDeliverId, new { id = "submitOrderDeliverId" })
+                    @Html.HiddenFor(model => model.SalesTransferId, new { id = "submitSalesTransferId" })
                     @Html.HiddenFor(model => model.ActionId, new { id = "submitActionId" })
 
                     @Html.AntiForgeryToken()
@@ -415,7 +311,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="col-md-3">
-                        <button type="button" onclick="resetProcurementPurchaseRequisitionSlaveForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                        <button type="button"  class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
                     </div>
                     <div class="col-md-9">
                         <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Submit</button>
@@ -426,7 +322,7 @@
     </div>
 }
 
-@using (Html.BeginForm("OrderDeliverDetailIdDelete", "WareHouse", FormMethod.Post))
+@using (Html.BeginForm("SalesTransferDetailDelete", "WareHouse", FormMethod.Post))
 {
     <div class="modal fade" id="OrderDeliverDetailIdDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
 
@@ -438,8 +334,8 @@
                 </div>
                 <div class="modal-body">
                     @Html.HiddenFor(model => model.CompanyFK, new { @id = "hdnCompanyForDelete" })
-                    @Html.HiddenFor(model => model.OrderDeliverId, new { @id = "hdnOrderDeliverIdDelete" })
-                    @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailId" })
+                    @Html.HiddenFor(model => model.SalesTransferId, new { @id = "hdnSalesTransferIdDelete" })
+                    @Html.HiddenFor(model => model.SalesTransferDetailsId, new { @id = "hdnSalesTransferDetailsId" })
                     <h3 class="text-center">Are You Delete This?</h3>
                 </div>
                 <div class="modal-footer">
@@ -452,7 +348,7 @@
 
 }
 
-@using (Html.BeginForm("OrderDeliverDetailUpdate", "WareHouse", FormMethod.Post))
+@using (Html.BeginForm("SalesTransferDetailUpdate", "WareHouse", FormMethod.Post))
 {
     <div class="modal fade" id="OrderDeliverDetailIdUpdateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
 
@@ -464,8 +360,8 @@
                 </div>
                 <div class="modal-body">
                     @Html.HiddenFor(model => model.CompanyFK)
-                    @Html.HiddenFor(model => model.OrderDeliverId)
-                    @Html.HiddenFor(model => model.OrderDeliverDetailId, new { @id = "hdnOrderDeliverDetailIdUpdate" })
+                    @Html.HiddenFor(model => model.SalesTransferId)
+                    @Html.HiddenFor(model => model.SalesTransferDetailsId, new { @id = "hdnSalesTransferDetailsIdUpdate" })
                     <div class="col-md-12">
                         <div class="form-group" style="padding:0px">
                             @Html.LabelFor(model => model.TransferQuantity, new { htmlAttributes = new { @class = "col-form-label required" } })
@@ -490,12 +386,12 @@
 
     <script type="text/javascript">
 
-        const DeleteOrderDeliveryDetails = (orderDeliverDetailId) => {
-            $('#hdnOrderDeliverDetailId').val(orderDeliverDetailId);
+        const DeleteSalesTransferDetails = (salesTransferDetailId) => {
+            $('#hdnSalesTransferDetailsId').val(salesTransferDetailId);
             $("#OrderDeliverDetailIdDeleteModal").modal('toggle');
         }
         const UpdateOrderDeliveryDetails = (orderDeliverDetailId,DeliveryQty) => {
-            $('#hdnOrderDeliverDetailIdUpdate').val(orderDeliverDetailId);
+            $('#hdnSalesTransferDetailsIdUpdate').val(orderDeliverDetailId);
             $('#txtDeliveredQtyModal').val(DeliveryQty);
             $("#OrderDeliverDetailIdUpdateModal").modal('toggle');
         }
@@ -548,7 +444,7 @@
         }
 
         function makeOrderDeliverSubmitable(rowId) {
-            $("#submitOrderDeliverId").val(rowId)
+            $("#submitSalesTransferId").val(rowId)
             $('#submitCompanyFK').val("@Model.CompanyFK");
             $('#submitActionId').val(10);
         }
@@ -627,6 +523,7 @@
                          console.log(data);
                          $("#poDetailsTable").show();
                          $("#txtCustomerName").text(data.CustomerName);
+                         $("#txtFromCustomerId").val(data.CustomerId);
                          $("#txtCustomerAddress").text(data.CustonerAddress);
                          var orderDate = DateCustom(data.OrderDate);
                          $('#txtOrderDate').text(orderDate);

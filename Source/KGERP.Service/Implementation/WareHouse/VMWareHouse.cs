@@ -612,8 +612,11 @@ namespace KGERP.Services.WareHouse
         public string SalesTransferNo { get; set; }
         public long OrderMasterId { get; set; }
         public long OrderDeliverId { get; set; }
+        public int FromCustomerId { get; set; }
+        public int ToCustomerId { get; set; }
         public bool IsSubmitted { get; set; }
         public DateTime CreateDate { get; set; }
+        public SelectList CustomerList { get; set; } = new SelectList(new List<object>());
     }
 
     public class SalesTransferDetailVM: SalestransferVM
@@ -627,7 +630,6 @@ namespace KGERP.Services.WareHouse
         public float? TransferQuantity { get; set; }
 
         public List<SalesTransferDetailVM> DataListDetail { get; set; }
-        public List<VMOrderDeliverDetailDataPartial> OrderDeliverDetailData { get; set; }
         public SelectList OrderDeliveryList { get; set; } = new SelectList(new List<object>());
         public string ProductSubCategory { get;  set; }
         public string ProductName { get;  set; }
@@ -636,6 +638,16 @@ namespace KGERP.Services.WareHouse
         public double? PackSize { get;  set; }
         public decimal? FormulaQty { get;  set; }
         public decimal? DeliveredQty { get;  set; }
+        public string FromCustomerName { get;  set; }
+        public string ToCustomerName { get;  set; }
+        public decimal UnitPrice { get; set; }
+        public int? FromVenderHeadGLId { get;  set; }
+        public int? ToVenderHeadGLId { get;  set; }
+
+        public string StrFromDate { get; set; }
+        public string StrToDate { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
     }
 
 
@@ -692,6 +704,7 @@ namespace KGERP.Services.WareHouse
         public int ProductId { get; set; }
         public double UnitPrice { get; set; }
         public double DeliveredQty { get; set; }
+        public double DeliveredQtyMsg { get; set; }
         public decimal NetWeight { get; set; }
         public decimal GrossWeight { get; set; }
         public decimal NoofReels { get; set; }
@@ -762,7 +775,7 @@ namespace KGERP.Services.WareHouse
         public decimal? SpecialDiscount { get; set; }
 
         public List<VMOrderDeliverDetailDataPartial> DataToList { get; set; }
-        
+        public decimal TransferredQty { get; set; }
     }
 
     public partial class VMSaleReturn : BaseVM

@@ -1746,6 +1746,7 @@ namespace KGERP.Services.WareHouse
                         join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
                         join t8 in _db.Units on t5.UnitId equals t8.UnitId
 
+
                         where t1.OrderDeliverId == orderDeliverId && t1.IsActive && t2.IsActive
                         && t3.IsActive && !t1.IsReturn
 
@@ -1755,10 +1756,11 @@ namespace KGERP.Services.WareHouse
                             ProductSubCategory = t6.Name,
                             ProductName = t5.ProductName,
                             ProductCategory = t7.Name,
-                            OrderQty = t3.Qty,
+                            TransferredQty = (_db.SalesTransferDetails.Where(x => x.OrderDeliverDetailId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.TransferQuantity).DefaultIfEmpty(0).Sum()),
                             PackSize = t5.PackSize,
                             FormulaQty = t5.FormulaQty,
-                            DeliveredQty = t1.DeliveredQty,
+                            DeliveredQtyMsg = t1.DeliveredQty,
+                            DeliveredQty = t1.DeliveredQty- (double)(_db.SalesTransferDetails.Where(x => x.OrderDeliverDetailId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.TransferQuantity).DefaultIfEmpty(0).Sum()),
                             COGSPrice = t1.COGSPrice,
                             DiscountUnit = t1.BaseCommission,
                             SpecialDiscount = t1.SpecialDiscount,
@@ -3705,16 +3707,18 @@ namespace KGERP.Services.WareHouse
                 try
                 {
                     #region Generate Delivery No
-                    int salesTransfersCount = await _db.SalesTransfers
-                        .CountAsync(x => x.OrderDeliverId == salesTransferDetailVM.OrderDeliverId);
+                    var date = salesTransferDetailVM.SalesTransferDate;
+                    var monthStart = new DateTime(date.Year, date.Month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
 
-                    salesTransfersCount = salesTransfersCount == 0 ? 1 : salesTransfersCount + 1;
+                    int count = await _db.SalesTransfers
+                        .CountAsync(x => x.CompanyId == salesTransferDetailVM.CompanyFK
+                                      && x.SalesTransferDate >= monthStart
+                                      && x.SalesTransferDate <= monthEnd);
 
-                    string salesTransfersID = "ST" +
-                                             salesTransferDetailVM.SalesTransferDate.ToString("dd") +
-                                             salesTransferDetailVM.SalesTransferDate.ToString("MM") +
-                                             salesTransferDetailVM.SalesTransferDate.ToString("yy") +
-                                             salesTransfersCount.ToString().PadLeft(5, '0');
+                    count = (count == 0 ? 1 : count + 1);
+
+                    string salesTransfersID = $"ST{date:ddMMyy}{count.ToString().PadLeft(5, '0')}";
                     #endregion
 
                     // Create SalesTransfer entity
@@ -3724,7 +3728,10 @@ namespace KGERP.Services.WareHouse
                         OrderMasterId = salesTransferDetailVM.OrderMasterId,
                         SalesTransferNo = salesTransfersID,
                         OrderDeliverId = salesTransferDetailVM.OrderDeliverId,
+                        CompanyId= salesTransferDetailVM.CompanyFK??0,
                         CreateDate = DateTime.Now,
+                        FromVendorId= salesTransferDetailVM.FromCustomerId,
+                        ToVendoerId= salesTransferDetailVM.ToCustomerId,
                         CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
                         IsActive = true
                     };
@@ -3763,7 +3770,7 @@ namespace KGERP.Services.WareHouse
                                 TransferQuantity = (decimal?)item.DeliveredQty??0,
                                 CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
                                 CreateDate = DateTime.Now,
-                                UnitPrice=item.UnitPrice,
+                                UnitPrice= (decimal)item.UnitPrice,
                                 IsActive = true
                             };
 
@@ -4229,8 +4236,8 @@ namespace KGERP.Services.WareHouse
             vmOrderDeliverDetail = await Task.Run(() => (from t1 in _db.SalesTransfers
                                                          join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
                                                          join t3 in _db.OrderDelivers on t1.OrderDeliverId equals t3.OrderDeliverId
-                                                         join t7 in _db.Employees on t1.CreatedBy equals t7.EmployeeId into t7_Join
-                                                         from t7 in t7_Join.DefaultIfEmpty()
+                                                         join t7 in _db.Vendors on t1.FromVendorId equals t7.VendorId 
+                                                         join t8 in _db.Vendors on t1.ToVendoerId equals t8.VendorId 
                                                          where  t1.SalesTransferId == salesTransfer
                                                          select new SalesTransferDetailVM
                                                          {
@@ -4242,7 +4249,15 @@ namespace KGERP.Services.WareHouse
                                                              SalesTransferDate=t1.SalesTransferDate,
                                                              OrderNoMsg=t2.OrderNo,
                                                              ChallanNo=t3.ChallanNo,
-                                                             CreatedBy = t7.Name,
+                                                             FromCustomerName = t7.Name,
+                                                             ToCustomerName = t8.Name,
+                                                             FromVenderHeadGLId=t7.HeadGLId,
+                                                             ToVenderHeadGLId=t8.HeadGLId,
+                                                             CompanyFK=t1.CompanyId,
+                                                             CreatedBy=t1.CreatedBy,
+                                                             CreatedDate=t1.CreateDate,
+                                                             IsSubmitted=t1.IsSubmited,
+
 
                                                          }).FirstOrDefault());
 
@@ -4264,7 +4279,9 @@ namespace KGERP.Services.WareHouse
                                                                             PackSize = t5.PackSize,
                                                                             FormulaQty = t5.FormulaQty,
                                                                             DeliveredQty = t1.TransferQuantity,
-                                                                            LotNumber = t1.LotNumber
+                                                                            LotNumber = t1.LotNumber,
+                                                                            UnitPrice=t1.UnitPrice,
+                                                                            SalesTransferDetailsId=t1.SalesTransferDetailsId
 
                                                                         }).OrderByDescending(x => x.OrderDeliverDetailId).ToListAsync());
 
@@ -5011,6 +5028,42 @@ namespace KGERP.Services.WareHouse
             return vmOrderDeliver;
         }
 
+
+        public async Task<SalesTransferDetailVM> WareHouseSalesTransferGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            SalesTransferDetailVM vmOrderDeliver = new SalesTransferDetailVM();
+            vmOrderDeliver.CompanyFK = companyId;
+
+
+            vmOrderDeliver.DataListDetail = await Task.Run(() => (from t1 in _db.SalesTransfers.Where(x => x.SalesTransferDate >= fromDate && x.SalesTransferDate <= toDate)
+                                                            join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                                                            join t6 in _db.OrderDelivers on t1.OrderDeliverId equals t6.OrderDeliverId
+                                                                  join t3 in _db.Vendors on t1.FromVendorId equals t3.VendorId
+                                                            join t5 in _db.Vendors on t1.ToVendoerId equals t5.VendorId
+                                                            join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                                                            where t1.CompanyId == companyId && t1.IsActive
+                                                            select new SalesTransferDetailVM
+                                                            {
+                                                                SalesTransferId=t1.SalesTransferId,
+                                                                OrderNoMsg=t2.OrderNo,
+                                                                ChallanNo=t6.ChallanNo,
+                                                                OrderDeliverId = t1.OrderDeliverId,
+                                                                OrderMasterId = t2.OrderMasterId,
+                                                                CompanyFK = t1.CompanyId,
+                                                                CompanyName = t4.Name,
+                                                                SalesTransferNo=t1.SalesTransferNo,
+                                                                SalesTransferDate=t1.SalesTransferDate,
+                                                                FromCustomerName=t3.Name,
+                                                                ToCustomerName=t5.Name,
+                                                                IsSubmitted = t1.IsSubmited
+                                                            }).OrderByDescending(x => x.SalesTransferId).ToListAsync());
+
+
+
+
+            return vmOrderDeliver;
+        }
+
         public async Task<VMOrderDeliver> KFMALWareHouseOrderDeliverGet(int companyId)
         {
             VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
@@ -5562,6 +5615,24 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
+        public async Task<long> SubmitSalesTranser(SalesTransferDetailVM vmModel)
+        {
+
+            long result = -1;
+            SalesTransfer model = await _db.SalesTransfers.FindAsync(vmModel.SalesTransferId);
+            model.IsSubmited = true;
+
+            model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
+            model.ModifiedDate = DateTime.Now;
+
+            SalesTransferDetailVM AccData = await WareHouseSalesTranserDetailGet(vmModel.CompanyFK.Value, vmModel.SalesTransferId);
+            if (AccData.FromVenderHeadGLId>0 && AccData.ToVenderHeadGLId>0 && AccData.CompanyFK>0)
+            {
+                await _accountingService.SalesTranserVoucherPush(AccData);
+            }
+            
+            return result;
+        }
 
 
 
@@ -5583,6 +5654,25 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
+        public async Task<long> SalesTransferDetailDelete(long SalesTransferDetailsId)
+        {
+            long result = -1;
+            var EntityModel = await _db.SalesTransferDetails.FirstAsync(x => x.SalesTransferDetailsId == SalesTransferDetailsId);
+            if (EntityModel != null)
+            {
+                EntityModel.IsActive = false;
+                EntityModel.ModifiedDate = DateTime.Now;
+                EntityModel.ModifiedBy = Common.GetUserId();
+                _db.Entry(EntityModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = EntityModel.SalesTransferId;
+                }
+            }
+            return result;
+        }
+
+
         public async Task<long> OrderDeliveryUpdate(long OrderDeliveryDetailsId, double deliveryQty)
         {
             long result = -1;
@@ -5594,6 +5684,24 @@ namespace KGERP.Services.WareHouse
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = (long)((EntityModel.OrderDeliverId.HasValue && EntityModel.OrderDeliverId != null) ? EntityModel.OrderDeliverId : 0);
+                }
+            }
+            return result;
+        }
+
+        public async Task<long> SalesTransferDetailUpdate(long SalesTransferDetailsId, float deliveryQty)
+        {
+            long result = -1;
+            var EntityModel = await _db.SalesTransferDetails.FirstAsync(x => x.SalesTransferDetailsId == SalesTransferDetailsId);
+            if (EntityModel != null)
+            {
+                EntityModel.TransferQuantity = (decimal)deliveryQty;
+                EntityModel.ModifiedDate =DateTime.Now;
+                EntityModel.ModifiedBy = Common.GetUserId();
+                _db.Entry(EntityModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = EntityModel.SalesTransferId;
                 }
             }
             return result;
