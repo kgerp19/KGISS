@@ -1735,6 +1735,49 @@ namespace KGERP.Services.WareHouse
             return list;
         }
 
+        public List<VMOrderDeliverDetailDataPartial> GetOrderDeliveryDetails(long orderDeliverId)
+        {
+
+            var list = (from t1 in _db.OrderDeliverDetails
+                        join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId
+                        join t3 in _db.OrderDetails on t1.OrderDetailId equals t3.OrderDetailId
+                        join t5 in _db.Products on t3.ProductId equals t5.ProductId
+                        join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
+                        join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
+                        join t8 in _db.Units on t5.UnitId equals t8.UnitId
+
+
+                        where t1.OrderDeliverId == orderDeliverId && t1.IsActive && t2.IsActive
+                        && t3.IsActive && !t1.IsReturn
+
+                        select new VMOrderDeliverDetailDataPartial
+                        {
+                            OrderDeliverDetailId = t1.OrderDeliverDetailId,
+                            ProductSubCategory = t6.Name,
+                            ProductName = t5.ProductName,
+                            ProductCategory = t7.Name,
+                            TransferredQty = (_db.SalesTransferDetails.Where(x => x.OrderDeliverDetailId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.TransferQuantity).DefaultIfEmpty(0).Sum()),
+                            PackSize = t5.PackSize,
+                            FormulaQty = t5.FormulaQty,
+                            DeliveredQtyMsg = t1.DeliveredQty,
+                            DeliveredQty = t1.DeliveredQty- (double)(_db.SalesTransferDetails.Where(x => x.OrderDeliverDetailId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.TransferQuantity).DefaultIfEmpty(0).Sum()),
+                            COGSPrice = t1.COGSPrice,
+                            DiscountUnit = t1.BaseCommission,
+                            SpecialDiscount = t1.SpecialDiscount,
+                            AccountingHeadId = t7.AccountingHeadId,
+                            AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
+                            PromotionalOfferId = t3.PromotionalOfferId,
+                            UnitName = t8.Name,
+                            UnitPrice = t1.UnitPrice,
+                            Amount = t1.DeliveredQty * t1.UnitPrice,
+                            LotNunmber = t1.LotNumber,
+                            ProductId=t5.ProductId
+
+                        }).ToList();
+
+            return list;
+        }
+
         public List<VMOrderDeliverDetailPartial> GetOrderDetails(int orderMasterId)
         {
 
@@ -3667,6 +3710,117 @@ namespace KGERP.Services.WareHouse
 
             return result;
         }
+
+        public async Task<long> WareHouseSalestransferAdd(SalesTransferDetailVM salesTransferDetailVM, VMOrderDeliverDetailDataPartial vmModelList)
+        {
+            long result = -1;
+
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                try
+                {
+                    #region Generate Delivery No
+                    var date = salesTransferDetailVM.SalesTransferDate;
+                    var monthStart = new DateTime(date.Year, date.Month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
+
+                    int count = await _db.SalesTransfers
+                        .CountAsync(x => x.CompanyId == salesTransferDetailVM.CompanyFK
+                                      && x.SalesTransferDate >= monthStart
+                                      && x.SalesTransferDate <= monthEnd);
+
+                    count = (count == 0 ? 1 : count + 1);
+
+                    string salesTransfersID = $"ST{date:ddMMyy}{count.ToString().PadLeft(5, '0')}";
+                    #endregion
+
+                    // Create SalesTransfer entity
+                    SalesTransfer salesTransfer = new SalesTransfer
+                    {
+                        SalesTransferDate = salesTransferDetailVM.SalesTransferDate,
+                        OrderMasterId = salesTransferDetailVM.OrderMasterId,
+                        SalesTransferNo = salesTransfersID,
+                        OrderDeliverId = salesTransferDetailVM.OrderDeliverId,
+                        CompanyId= salesTransferDetailVM.CompanyFK??0,
+                        CreateDate = DateTime.Now,
+                        FromVendorId= salesTransferDetailVM.FromCustomerId,
+                        ToVendoerId= salesTransferDetailVM.ToCustomerId,
+                        CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
+                        IsActive = true
+                    };
+
+                    _db.SalesTransfers.Add(salesTransfer);
+                    await _db.SaveChangesAsync(); // Save SalesTransfer to get SalesTransferId
+
+                    // Process SalesTransferDetail
+                    var dataListSlavePartial = vmModelList.DataToList
+                        .Where(x => x.Flag && x.DeliveredQty > 0)
+                        .ToList();
+
+                    if (dataListSlavePartial.Any())
+                    {
+                        List<SalesTransferDetail> orderDeliverDetails = new List<SalesTransferDetail>();
+
+                        foreach (var item in dataListSlavePartial)
+                        {
+                            // Validate input data
+                            if (item.OrderDeliverDetailId <= 0 || item.ProductId <= 0)
+                            {
+                                throw new Exception($"Invalid OrderDeliverDetailId or ProductId for item: {item.ProductId}");
+                            }
+
+                            if (string.IsNullOrEmpty(item.LotNunmber) || item.LotNunmber.Length > 50) // Adjust length based on DB schema
+                            {
+                                throw new Exception($"Invalid LotNumber for ProductId: {item.ProductId}");
+                            }
+
+                            var salesTD = new SalesTransferDetail
+                            {
+                                SalesTransferId = salesTransfer.SalesTransferId,
+                                OrderDeliverDetailId = item.OrderDeliverDetailId,
+                                ProductId = item.ProductId,
+                                LotNumber = item.LotNunmber,
+                                TransferQuantity = (decimal?)item.DeliveredQty??0,
+                                CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
+                                CreateDate = DateTime.Now,
+                                UnitPrice= (decimal)item.UnitPrice,
+                                IsActive = true
+                            };
+
+                            orderDeliverDetails.Add(salesTD);
+                        }
+
+                        _db.SalesTransferDetails.AddRange(orderDeliverDetails);
+                        await _db.SaveChangesAsync(); // Save SalesTransferDetails
+                    }
+
+                    // Commit transaction if all saves succeed
+                    transaction.Commit();
+                    result = salesTransfer.SalesTransferId;
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    // Log validation errors
+                    var errorMessages = ex.EntityValidationErrors
+                        .SelectMany(x => x.ValidationErrors)
+                        .Select(x => $"Property: {x.PropertyName}, Error: {x.ErrorMessage}");
+
+                    var fullErrorMessage = string.Join("; ", errorMessages);
+                    throw new Exception($"Validation failed: {fullErrorMessage}", ex);
+                }
+                catch (Exception ex)
+                {
+                    // Roll back transaction on any error
+                    transaction.Rollback();
+                    throw new Exception($"Error saving sales transfer: {ex.Message}", ex);
+                }
+            }
+
+            return result;
+        }
+
+
+
         public async Task<long> WareHouseOrderDeliverDetailAdd(VMOrderDeliverDetail vmModel, VMOrderDeliverDetailPartial vmModelList)
         {
             long result = -1;
@@ -4083,6 +4237,66 @@ namespace KGERP.Services.WareHouse
                                                                             LotNunmber =t1.LotNumber
                                                                            
                                                                         }).OrderByDescending(x => x.OrderDeliverDetailId).AsEnumerable());
+
+
+
+            return vmOrderDeliverDetail;
+        }
+
+        public async Task<SalesTransferDetailVM> WareHouseSalesTranserDetailGet(int companyId, long salesTransfer)
+        {
+            SalesTransferDetailVM vmOrderDeliverDetail = new SalesTransferDetailVM();
+            vmOrderDeliverDetail = await Task.Run(() => (from t1 in _db.SalesTransfers
+                                                         join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                                                         join t3 in _db.OrderDelivers on t1.OrderDeliverId equals t3.OrderDeliverId
+                                                         join t7 in _db.Vendors on t1.FromVendorId equals t7.VendorId 
+                                                         join t8 in _db.Vendors on t1.ToVendoerId equals t8.VendorId 
+                                                         where  t1.SalesTransferId == salesTransfer
+                                                         select new SalesTransferDetailVM
+                                                         {
+
+                                                             OrderDeliverId = t1.OrderDeliverId,
+                                                             OrderMasterId = t2.OrderMasterId,
+                                                             SalesTransferId=t1.SalesTransferId,
+                                                             SalesTransferNo=t1.SalesTransferNo,
+                                                             SalesTransferDate=t1.SalesTransferDate,
+                                                             OrderNoMsg=t2.OrderNo,
+                                                             ChallanNo=t3.ChallanNo,
+                                                             FromCustomerName = t7.Name,
+                                                             ToCustomerName = t8.Name,
+                                                             FromVenderHeadGLId=t7.HeadGLId,
+                                                             ToVenderHeadGLId=t8.HeadGLId,
+                                                             CompanyFK=t1.CompanyId,
+                                                             CreatedBy=t1.CreatedBy,
+                                                             CreatedDate=t1.CreateDate,
+                                                             IsSubmitted=t1.IsSubmited,
+
+
+                                                         }).FirstOrDefault());
+
+
+            vmOrderDeliverDetail.DataListDetail = await Task.Run(() => (from t1 in _db.SalesTransferDetails
+                                                                        join t3 in _db.OrderDeliverDetails on t1.OrderDeliverDetailId equals t3.OrderDeliverDetailId
+                                                                        join t5 in _db.Products on t3.ProductId equals t5.ProductId
+                                                                        join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
+                                                                        join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
+                                                                        join t8 in _db.Units on t5.UnitId equals t8.UnitId
+                                                                        where t1.SalesTransferId == salesTransfer && t1.IsActive 
+                                                                        
+                                                                        select new SalesTransferDetailVM
+                                                                        {
+                                                                            OrderDeliverDetailId = t1.OrderDeliverDetailId,
+                                                                            ProductSubCategory = t6.Name,
+                                                                            ProductName = t5.ProductName,
+                                                                            ProductCategory = t7.Name,
+                                                                            PackSize = t5.PackSize,
+                                                                            FormulaQty = t5.FormulaQty,
+                                                                            DeliveredQty = t1.TransferQuantity,
+                                                                            LotNumber = t1.LotNumber,
+                                                                            UnitPrice=t1.UnitPrice,
+                                                                            SalesTransferDetailsId=t1.SalesTransferDetailsId
+
+                                                                        }).OrderByDescending(x => x.OrderDeliverDetailId).ToListAsync());
 
 
 
@@ -4827,6 +5041,42 @@ namespace KGERP.Services.WareHouse
             return vmOrderDeliver;
         }
 
+
+        public async Task<SalesTransferDetailVM> WareHouseSalesTransferGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            SalesTransferDetailVM vmOrderDeliver = new SalesTransferDetailVM();
+            vmOrderDeliver.CompanyFK = companyId;
+
+
+            vmOrderDeliver.DataListDetail = await Task.Run(() => (from t1 in _db.SalesTransfers.Where(x => x.SalesTransferDate >= fromDate && x.SalesTransferDate <= toDate)
+                                                            join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                                                            join t6 in _db.OrderDelivers on t1.OrderDeliverId equals t6.OrderDeliverId
+                                                                  join t3 in _db.Vendors on t1.FromVendorId equals t3.VendorId
+                                                            join t5 in _db.Vendors on t1.ToVendoerId equals t5.VendorId
+                                                            join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                                                            where t1.CompanyId == companyId && t1.IsActive
+                                                            select new SalesTransferDetailVM
+                                                            {
+                                                                SalesTransferId=t1.SalesTransferId,
+                                                                OrderNoMsg=t2.OrderNo,
+                                                                ChallanNo=t6.ChallanNo,
+                                                                OrderDeliverId = t1.OrderDeliverId,
+                                                                OrderMasterId = t2.OrderMasterId,
+                                                                CompanyFK = t1.CompanyId,
+                                                                CompanyName = t4.Name,
+                                                                SalesTransferNo=t1.SalesTransferNo,
+                                                                SalesTransferDate=t1.SalesTransferDate,
+                                                                FromCustomerName=t3.Name,
+                                                                ToCustomerName=t5.Name,
+                                                                IsSubmitted = t1.IsSubmited
+                                                            }).OrderByDescending(x => x.SalesTransferId).ToListAsync());
+
+
+
+
+            return vmOrderDeliver;
+        }
+
         public async Task<VMOrderDeliver> KFMALWareHouseOrderDeliverGet(int companyId)
         {
             VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
@@ -5378,6 +5628,24 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
+        public async Task<long> SubmitSalesTranser(SalesTransferDetailVM vmModel)
+        {
+
+            long result = -1;
+            SalesTransfer model = await _db.SalesTransfers.FindAsync(vmModel.SalesTransferId);
+            model.IsSubmited = true;
+
+            model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
+            model.ModifiedDate = DateTime.Now;
+
+            SalesTransferDetailVM AccData = await WareHouseSalesTranserDetailGet(vmModel.CompanyFK.Value, vmModel.SalesTransferId);
+            if (AccData.FromVenderHeadGLId>0 && AccData.ToVenderHeadGLId>0 && AccData.CompanyFK>0)
+            {
+                await _accountingService.SalesTranserVoucherPush(AccData);
+            }
+            
+            return result;
+        }
 
 
 
@@ -5399,6 +5667,25 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
+        public async Task<long> SalesTransferDetailDelete(long SalesTransferDetailsId)
+        {
+            long result = -1;
+            var EntityModel = await _db.SalesTransferDetails.FirstAsync(x => x.SalesTransferDetailsId == SalesTransferDetailsId);
+            if (EntityModel != null)
+            {
+                EntityModel.IsActive = false;
+                EntityModel.ModifiedDate = DateTime.Now;
+                EntityModel.ModifiedBy = Common.GetUserId();
+                _db.Entry(EntityModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = EntityModel.SalesTransferId;
+                }
+            }
+            return result;
+        }
+
+
         public async Task<long> OrderDeliveryUpdate(long OrderDeliveryDetailsId, double deliveryQty)
         {
             long result = -1;
@@ -5410,6 +5697,24 @@ namespace KGERP.Services.WareHouse
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = (long)((EntityModel.OrderDeliverId.HasValue && EntityModel.OrderDeliverId != null) ? EntityModel.OrderDeliverId : 0);
+                }
+            }
+            return result;
+        }
+
+        public async Task<long> SalesTransferDetailUpdate(long SalesTransferDetailsId, float deliveryQty)
+        {
+            long result = -1;
+            var EntityModel = await _db.SalesTransferDetails.FirstAsync(x => x.SalesTransferDetailsId == SalesTransferDetailsId);
+            if (EntityModel != null)
+            {
+                EntityModel.TransferQuantity = (decimal)deliveryQty;
+                EntityModel.ModifiedDate =DateTime.Now;
+                EntityModel.ModifiedBy = Common.GetUserId();
+                _db.Entry(EntityModel).State = EntityState.Modified;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = EntityModel.SalesTransferId;
                 }
             }
             return result;

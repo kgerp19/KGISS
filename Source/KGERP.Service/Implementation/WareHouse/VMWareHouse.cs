@@ -602,6 +602,55 @@ namespace KGERP.Services.WareHouse
 
         public string LotNunmber { get;  set; }
     }
+
+
+
+    public class SalestransferVM: BaseVM
+    {
+        public long SalesTransferId { get; set; }
+        public DateTime SalesTransferDate { get; set; }
+        public string SalesTransferNo { get; set; }
+        public long OrderMasterId { get; set; }
+        public long OrderDeliverId { get; set; }
+        public int FromCustomerId { get; set; }
+        public int ToCustomerId { get; set; }
+        public bool IsSubmitted { get; set; }
+        public DateTime CreateDate { get; set; }
+        public SelectList CustomerList { get; set; } = new SelectList(new List<object>());
+    }
+
+    public class SalesTransferDetailVM: SalestransferVM
+    {
+        public long SalesTransferDetailsId { get; set; }
+        public long OrderDeliverDetailId { get; set; }
+        public int ProductId { get; set; }
+        public string LotNumber { get; set; }
+        public string ChallanNo { get; set; }
+        public string OrderNoMsg { get; set; }
+        public float? TransferQuantity { get; set; }
+
+        public List<SalesTransferDetailVM> DataListDetail { get; set; }
+        public SelectList OrderDeliveryList { get; set; } = new SelectList(new List<object>());
+        public string ProductSubCategory { get;  set; }
+        public string ProductName { get;  set; }
+        public string ProductCategory { get;  set; }
+        public object OrderQty { get;  set; }
+        public double? PackSize { get;  set; }
+        public decimal? FormulaQty { get;  set; }
+        public decimal? DeliveredQty { get;  set; }
+        public string FromCustomerName { get;  set; }
+        public string ToCustomerName { get;  set; }
+        public decimal UnitPrice { get; set; }
+        public int? FromVenderHeadGLId { get;  set; }
+        public int? ToVenderHeadGLId { get;  set; }
+
+        public string StrFromDate { get; set; }
+        public string StrToDate { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+    }
+
+
     public partial class VMOrderDeliverDetailPartial : BaseVM
     {
         public long OrderDetailId { get; set; }
@@ -645,6 +694,88 @@ namespace KGERP.Services.WareHouse
         public List<string> LotNumbers { get; set; }   
          
         public string ProductType { get;  set; }
+    }
+
+    public partial class VMOrderDeliverDetailDataPartial : BaseVM
+    {
+        public long VoucherId { get; set; }
+        public long OrderDeliverDetailId { get; set; }
+        public long OrderDetailId { get; set; }
+        public int ProductId { get; set; }
+        public double UnitPrice { get; set; }
+        public double DeliveredQty { get; set; }
+        public double DeliveredQtyMsg { get; set; }
+        public decimal NetWeight { get; set; }
+        public decimal GrossWeight { get; set; }
+        public decimal NoofReels { get; set; }
+        public decimal NoofBags { get; set; }
+
+        public double OverQty { get; set; }
+
+        public double Amount { get; set; }
+        public double OverAmount { get; set; }
+        public decimal VATPercent { get; set; }
+        public double VATAmount { get; set; }
+        public decimal TDSPercent { get; set; }
+        public double TDSAmount { get; set; }
+        public decimal BaseCommission { get; set; }
+        public decimal CashCommission { get; set; }
+        public decimal CarryingRate { get; set; }
+        public decimal CreditCommission { get; set; }
+        public decimal EBaseCommission { get; set; }
+        public decimal ECarryingCommission { get; set; }
+        public decimal ECashCommission { get; set; }
+        public decimal COGSPrice { get; set; }
+        public double CogsUnitPrice { get; set; }
+        public decimal CogsVATPercent { get; set; }
+        public bool CogsIsVATInclude { get; set; }
+        public int? AccountingHeadId { get; set; }
+        public int? AccountingIncomeHeadId { get; set; }
+
+        public decimal SaleCommissionRate { get; set; }
+        public decimal AdditionPrice { get; set; }
+        public string EngineNo { get; set; }
+        public string ChassisNo { get; set; }
+        public string BatteryNo { get; set; }
+        public string Description { get; set; }
+        public string RearTyreRH { get; set; }
+        public string RearTyreLH { get; set; }
+        public double OrderQty { get; set; }
+        public double? PackSize { get; set; }
+        public string ProductSubCategory { get; set; }
+        public string ProductCategory { get; set; }
+        public int? PromotionalOfferId { get; set; }
+        public string ProductName { get; set; }
+        public string UnitName { get; set; }
+        public string CompanyPhone { get; set; }
+        public string CompanyEmail { get; set; }
+        public double TotalDelivered { get; set; }
+        public double? Consumption { get; set; }
+        public double? PackQuantity { get; set; }
+
+        public int PaymentMethod { get; set; }
+        public string CourierNo { get; set; }
+        public double CourierCharge { get; set; }
+        public string InvoiceDate { get; set; }
+        public string InvoiceTime { get; set; }
+        public string Warehouse { get; set; }
+        public string SubZoneMobilePersonal { get; set; }
+        public string ZoneMobileOffice { get; set; }
+        public string Territory { get; set; }
+        public string TerritoryIncharge { get; set; }
+        public string CompanyLogo { get; set; }
+        public int VendorId { get; set; }
+        public bool IsVATInclude { get; set; }
+
+        public string IntegratedFrom { get; set; }
+        public decimal DiscountUnit { get; set; }
+        public decimal? FormulaQty { get; set; }
+        public bool Flag { get; set; }
+        public string LotNunmber { get; set; }
+        public decimal? SpecialDiscount { get; set; }
+
+        public List<VMOrderDeliverDetailDataPartial> DataToList { get; set; }
+        public decimal TransferredQty { get; set; }
     }
 
     public partial class VMSaleReturn : BaseVM

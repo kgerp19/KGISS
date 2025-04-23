@@ -918,6 +918,14 @@ namespace KG.App.Controllers
         }
 
 
+        public async Task<ActionResult> OrderDelivieryListByOrderMaster(long orderMasterId)
+        {
+
+            var vmCommonProductSubCategory = await Task.Run(() => _service.OrderDelivieryListByOrderMaster(orderMasterId));
+            var list = vmCommonProductSubCategory.Select(x => new { Value = x.OrderDeliverId, Text = x.ChallanNo }).ToList();
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
 
         public async Task<ActionResult> CustomerLisByZonetGet(int zoneId)
         {

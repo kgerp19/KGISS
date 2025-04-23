@@ -4115,6 +4115,60 @@ namespace KGERP.Service.Implementation
 
             return resultData.VoucherId;
         }
+
+        public async Task<long> SalesTranserVoucherPush(SalesTransferDetailVM salesTransferDetailVM)
+        {
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == salesTransferDetailVM.CompanyFK && x.Code == "SDV" && x.IsActive == true).FirstOrDefault();
+
+            VMJournalSlave vMJournalSlave = new VMJournalSlave
+            {
+                JournalType = voucherType.VoucherTypeId,
+                Title = salesTransferDetailVM.SalesTransferNo + " Date: " + salesTransferDetailVM.SalesTransferDate.ToString("MM/dd/yyyy"),
+                Narration = salesTransferDetailVM.CreatedBy + " Date: " + salesTransferDetailVM.CreatedDate.ToString("MM/dd/yyyy"),
+                CompanyFK = salesTransferDetailVM.CompanyFK,
+                Date = salesTransferDetailVM.SalesTransferDate,
+                IsSubmit = true,
+            };
+
+            double totalSalesTranserAmount = (double)salesTransferDetailVM.DataListDetail.Sum(x => x.DeliveredQty * x.UnitPrice);
+
+
+            List<string> strList = new List<string>();
+            foreach (var item in salesTransferDetailVM.DataListDetail)
+            {
+                string s = "Product: " + item.ProductCategory + " " + item.ProductSubCategory + " " + item.ProductName + "Delivered Qty: " + item.DeliveredQty + " Unit Price: " + item.UnitPrice;
+                strList.Add(s);
+            }
+            string perticular = (String.Join(", ", strList.ToArray()));
+
+            vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = perticular,
+                Debit = 0,
+                Credit = totalSalesTranserAmount,
+                Accounting_HeadFK = (int)salesTransferDetailVM.ToVenderHeadGLId
+            });
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = perticular,
+                Debit = totalSalesTranserAmount,
+                Credit = 0,
+                Accounting_HeadFK = (int)salesTransferDetailVM.FromVenderHeadGLId
+            });
+
+
+            var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            if (resultData.VoucherId > 0)
+            {
+                var voucherMap = VoucherMapping(resultData.VoucherId, salesTransferDetailVM.CompanyFK.Value, salesTransferDetailVM.SalesTransferId, "Salestransfer");
+            }
+
+            return resultData.VoucherId;
+        }
+
         public async Task<long> AccountingSalesPushSEED(int CompanyFK, VMOrderDeliverDetail vmOrderDeliverDetail, int journalType)
         {
 
