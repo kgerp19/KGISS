@@ -1760,11 +1760,24 @@ namespace KGERP.Services.WareHouse
                             CompanyFK = t2.CompanyId,
                             ProductType=t2.ProductType,
                             LotNumbers = (from pr in _db.Prod_ReferenceSlave
-                                                      where t1.IsActive && pr.IsActive && pr.FProductId == t1.ProductId && pr.CompanyId==t1.CompanyId
-                                                      select pr.LotNumber)
+                                          
+                                          where pr.IsActive
+                                                && pr.FProductId==t1.ProductId
+                                                && pr.CompanyId == t1.CompanyId
+                                          select pr.LotNumber)
+
+                              .Union(
+                               from mrd in _db.MaterialReceiveDetails
+                               join md in _db.MaterialReceives on mrd.MaterialReceiveId equals md.MaterialReceiveId
+                               where mrd.IsActive
+                                     && mrd.ProductId == t1.ProductId
+                                     && md.CompanyId == t1.CompanyId
+                               select mrd.LotNumber)
                               .Distinct()
                               .OrderBy(x => x)
                               .ToList()
+
+
 
                         }).ToList();
 
