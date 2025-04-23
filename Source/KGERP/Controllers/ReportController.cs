@@ -429,6 +429,22 @@ namespace KGERP.Controllers
             return File(client.DownloadData(reportURL), "application/pdf");
         }
 
+        [HttpGet]
+
+        public ActionResult GetSalesTransferReport(long salesTransferId, int companyId)
+        {
+            string reportName = string.Empty;
+
+
+            reportName = "ISSSalesTransfer";
+
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&salesTransferId={1}&companyId={2}", reportName, salesTransferId, companyId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+
         // GET: Report
         [HttpGet]
 
