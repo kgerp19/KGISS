@@ -9,7 +9,7 @@
       <am:Name>SSDTRS</am:Name>
       <am:Version>17.13.35931.197</am:Version>
     </am:UpdatedBy>
-    <am:LastModifiedTimestamp>2025-04-23T08:25:07.6527313Z</am:LastModifiedTimestamp>
+    <am:LastModifiedTimestamp>2025-04-23T09:39:31.8597444Z</am:LastModifiedTimestamp>
   </am:AuthoringMetadata>
   <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
   <AutoRefresh>0</AutoRefresh>
@@ -32,7 +32,14 @@
             <Value>=Parameters!companyId.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>select     c.Name  as Company,
+        <CommandText>DECLARE @NetAmount DECIMAL(18,2);
+SELECT @NetAmount = SUM(subOdd.TransferQuantity * subOdd.UnitPrice)    
+    FROM SalesTransferDetail subOdd
+	JOIN SalesTransfer st ON subOdd.SalesTransferId = st.SalesTransferId
+    WHERE st.SalesTransferId = @salesTransferId    
+      AND subOdd.IsActive = 1;
+
+select     c.Name  as Company,
            (select Url from UrlInfo where UrlType=1)+'Images/Logo/'+(c.CompanyLogo) as CompanyLogo,
            c.[Address]  as CompanyAddress,
            c.Phone  as CompanyPhone,
@@ -40,6 +47,7 @@
 		   v.Name  as FromVendorName, 
 		   vs.Name as ToVendorName,
 		   CONCAT (pc.Name , ' ', psc.Name , ' ', p.ProductName, ' ' ) as ProductName,
+		   (SELECT dbo.AmountToWords(@NetAmount) + ' Taka Only') as TotalAsWord, 
 		   om.OrderNo, 
 		   om.OrderDate,	
 		   od.ChallanNo,
@@ -65,8 +73,7 @@ Join Erp.Unit u on p.UnitId = u.UnitId
 left join Employee creat on st.CreatedBy = creat.EmployeeId
 LEFT join Erp.Vendor v on st.FromVendorId = v.VendorId
 LEFT join Erp.Vendor vs on st.ToVendoerId = vs.VendorId
-where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 AND std.IsActive=1 AND st.IsActive=1 AND st.CompanyId=@companyId
-</CommandText>
+where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 AND std.IsActive=1 AND st.IsActive=1 AND st.CompanyId=@companyId</CommandText>
       </Query>
       <Fields>
         <Field Name="Company">
@@ -99,6 +106,10 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
         </Field>
         <Field Name="ProductName">
           <DataField>ProductName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TotalAsWord">
+          <DataField>TotalAsWord</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="SalesTransferBy">
@@ -610,7 +621,7 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                                 </TextRun>
                               </TextRuns>
                               <Style>
-                                <TextAlign>Center</TextAlign>
+                                <TextAlign>Left</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
@@ -627,18 +638,26 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                             <PaddingBottom>1pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <ColSpan>3</ColSpan>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.25in</Height>
+                  <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox38">
+                        <Textbox Name="Textbox7">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>Total Price=</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -646,11 +665,11 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                                 </TextRun>
                               </TextRuns>
                               <Style>
-                                <TextAlign>Center</TextAlign>
+                                <TextAlign>Right</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox38</rd:DefaultName>
+                          <rd:DefaultName>Textbox7</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -663,18 +682,20 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                             <PaddingBottom>1pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <ColSpan>2</ColSpan>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell />
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox39">
+                        <Textbox Name="Textbox16">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Sum(Fields!TotalPrice.Value, "SalesTransferDSet")</Value>
                                   <Style>
                                     <FontFamily>Times New Roman</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -682,11 +703,11 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                                 </TextRun>
                               </TextRuns>
                               <Style>
-                                <TextAlign>Center</TextAlign>
+                                <TextAlign>Left</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox39</rd:DefaultName>
+                          <rd:DefaultName>Textbox16</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>DimGray</Color>
@@ -699,8 +720,11 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                             <PaddingBottom>1pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <ColSpan>3</ColSpan>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
                   </TablixCells>
                 </TablixRow>
               </TablixRows>
@@ -725,12 +749,15 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
                 <TablixMember>
                   <KeepWithGroup>Before</KeepWithGroup>
                 </TablixMember>
+                <TablixMember>
+                  <KeepWithGroup>Before</KeepWithGroup>
+                </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>SalesTransferDSet</DataSetName>
             <Top>1.1675in</Top>
-            <Height>0.72501in</Height>
-            <Width>9.43015in</Width>
+            <Height>0.97501in</Height>
+            <Width>9.43014in</Width>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1652,7 +1679,7 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
             <Top>0.05083in</Top>
             <Left>0.05292in</Left>
             <Height>0.95916in</Height>
-            <Width>9.37723in</Width>
+            <Width>9.37722in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
@@ -1925,6 +1952,38 @@ where st.SalesTransferId=@salesTransferId AND odd.IsActive=1 AND od.IsActive=1 A
               </Border>
             </Style>
           </Tablix>
+          <Textbox Name="Textbox25">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>="Amount In Word: " + First(Fields!TotalAsWord.Value, "SalesTransferDSet")</Value>
+                    <Style>
+                      <FontFamily>Times New Roman</FontFamily>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox23</rd:DefaultName>
+            <Top>2.40181in</Top>
+            <Left>0.05292in</Left>
+            <Height>0.25347in</Height>
+            <Width>7.88341in</Width>
+            <ZIndex>3</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
         </ReportItems>
         <Height>3.50708in</Height>
         <Style />
