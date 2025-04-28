@@ -1749,12 +1749,29 @@ namespace KGERP.Service.Implementation
         public async Task<HeadGL> IntegratedAccountsHeadEditCustomer(string AccName, int headGLId,int ParentId)
         {
             long result = -1;
+            string newAccountCode = "";
+            int orderNo = 0;
+            Head5 parentHead = _db.Head5.Where(x => x.Id == ParentId).FirstOrDefault();
 
+            IQueryable<HeadGL> childHeads = _db.HeadGLs.Where(x => x.ParentId == ParentId);
 
-
+            if (childHeads.Count() > 0)
+            {
+                string lastAccCode = childHeads.OrderByDescending(x => x.AccCode).FirstOrDefault().AccCode;
+                string parentPart = lastAccCode.Substring(0, 10);
+                string childPart = lastAccCode.Substring(10, 3);
+                newAccountCode = parentPart + (Convert.ToInt32(childPart) + 1).ToString().PadLeft(3, '0');
+                orderNo = childHeads.Count();
+            }
+            else
+            {
+                newAccountCode = parentHead.AccCode + "001";
+                orderNo = orderNo + 1;
+            }
             HeadGL headGL = _db.HeadGLs.Find(headGLId);
             headGL.AccName = AccName;
             headGL.ParentId = ParentId;
+            headGL.AccCode = newAccountCode;
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = headGL.Id;
