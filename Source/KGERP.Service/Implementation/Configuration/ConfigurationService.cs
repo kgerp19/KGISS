@@ -1734,8 +1734,27 @@ namespace KGERP.Service.Implementation
         public async Task<HeadGL> IntegratedAccountsHeadEdit(string AccName, int headGLId)
         {
             long result = -1;
+           
+
+
             HeadGL headGL = _db.HeadGLs.Find(headGLId);
             headGL.AccName = AccName;
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = headGL.Id;
+            }
+            return headGL;
+        }
+
+        public async Task<HeadGL> IntegratedAccountsHeadEditCustomer(string AccName, int headGLId,int ParentId)
+        {
+            long result = -1;
+
+
+
+            HeadGL headGL = _db.HeadGLs.Find(headGLId);
+            headGL.AccName = AccName;
+            headGL.ParentId = ParentId;
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = headGL.Id;
@@ -5334,6 +5353,11 @@ namespace KGERP.Service.Implementation
         public async Task<int> CustomerEdit(VMCommonSupplier vmCommonCustomer)
         {
             var result = -1;
+
+            int ParentId = 0;
+
+            var subZones = _db.SubZones.Find(vmCommonCustomer.SubZoneId);
+            ParentId = subZones.AccountHeadId;
             Vendor commonCustomer = _db.Vendors.Find(vmCommonCustomer.ID);
             commonCustomer.SalesOfficerEmpId = vmCommonCustomer.SalesOfficerEmpId;
             commonCustomer.Name = vmCommonCustomer.Name;
@@ -5397,7 +5421,7 @@ namespace KGERP.Service.Implementation
                 //}
             }
 
-            await IntegratedAccountsHeadEdit(commonCustomer.Name, commonCustomer.HeadGLId.Value);
+            await IntegratedAccountsHeadEditCustomer(commonCustomer.Name, commonCustomer.HeadGLId.Value,ParentId);
 
             return result;
         }
