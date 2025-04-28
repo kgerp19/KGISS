@@ -1753,7 +1753,7 @@ namespace KGERP.Service.Implementation
             int orderNo = 0;
             Head5 parentHead = _db.Head5.Where(x => x.Id == ParentId).FirstOrDefault();
 
-            IQueryable<HeadGL> childHeads = _db.HeadGLs.Where(x => x.ParentId == ParentId);
+            IQueryable<HeadGL> childHeads = _db.HeadGLs.Where(x => x.ParentId == ParentId && x.IsActive);
 
             if (childHeads.Count() > 0)
             {
