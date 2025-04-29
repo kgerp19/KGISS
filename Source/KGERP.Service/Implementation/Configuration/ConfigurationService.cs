@@ -5508,6 +5508,8 @@ namespace KGERP.Service.Implementation
             {
                 Vendor commonCustomer = _db.Vendors.Find(id);
                 commonCustomer.IsActive = false;
+                commonCustomer.ModifiedDate = DateTime.Now;
+                commonCustomer.ModifiedBy = HttpContext.Current.Request.Cookies["UserNameCookie"]?.Value ?? System.Web.HttpContext.Current.User.Identity.Name;
 
                 try
                 {
