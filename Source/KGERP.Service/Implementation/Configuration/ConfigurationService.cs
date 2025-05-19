@@ -3583,8 +3583,10 @@ namespace KGERP.Service.Implementation
             }
             return UnitList;
         }
-        public VMCommonProduct GetRMUnitAndClosingRateByProductId(int productId)
+        public VMCommonProduct GetRMUnitAndClosingRateByProductId(int productId,string lotNo)
         {
+            var LotNumber = String.IsNullOrEmpty(lotNo) ? "xyzz" : lotNo;
+
             var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
                             join t4 in _db.Units on t1.UnitId equals t4.UnitId
                             select new VMCommonProduct
@@ -3595,7 +3597,7 @@ namespace KGERP.Service.Implementation
                                 CompanyFK = t1.CompanyId
                             }).FirstOrDefault();
             VMProductStock vMProductStock = new VMProductStock();
-            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1}", products.ID, products.CompanyFK).FirstOrDefault();
+            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", products.ID, products.CompanyFK, LotNumber).FirstOrDefault();
             products.CostingPrice = vMProductStock.ClosingRate;
             products.RemainingStockInQty = vMProductStock.ClosingQty;
 
@@ -3690,7 +3692,8 @@ namespace KGERP.Service.Implementation
                      }).FirstOrDefault();
             if (CompanyId > 0)
             {
-                VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, CompanyId,LotNo??"xyzz").FirstOrDefault();
+                string lotValue = string.IsNullOrEmpty(LotNo) ? "xyzz" : LotNo;
+                VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, CompanyId, lotValue).FirstOrDefault();
                 v.CostingPrice = products.ClosingRate;
                 v.CurrentStock = products.ClosingQty;
             }
