@@ -1013,22 +1013,38 @@ namespace KGERP.Service.Implementation
                      {
                          label = t1.LotNumber
                      }).OrderBy(x => x.label).Take(100).ToList();
-
+           
             return v;
         }
 
 
-        public object GetAutoCompleteLotRaw( int productId)
+        public object GetAutoCompleteLotRaw(int productId)
         {
             var v = (from t1 in _db.MaterialReceiveDetails
                      where t1.IsActive && t1.ProductId == productId
                      select new
                      {
+                         value = t1.LotNumber.ToString(),
                          label = t1.LotNumber
                      }).OrderBy(x => x.label).Take(100).ToList();
 
-            return v;
+            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "xyzz" : x.value)
+                           .Select(g => new
+                           {
+                               value = g.Key == "xyzz" ? "xyzz" : g.Key,
+                               label = g.Key == "xyzz" ? "NoLot" : g.Key
+                           })
+                           .OrderBy(x => x.label)
+                           .Take(100)
+                           .ToList();
+
+            // Insert default option at the beginning
+            grouped.Insert(0, new { value = (string)null, label = "Select Lot" });
+
+            return grouped;
         }
+
+
 
 
         public object GetAutoCompleteLotFinish(int productId)
@@ -1037,10 +1053,32 @@ namespace KGERP.Service.Implementation
                      where t1.IsActive && t1.FProductId == productId
                      select new
                      {
+                         value=t1.LotNumber.ToString(),
                          label = t1.LotNumber
                      }).Distinct().OrderBy(x => x.label).Take(100).ToList();
 
-            return v;
+            var v2 = (from t1 in _db.MaterialReceiveDetails
+                     where t1.IsActive && t1.ProductId == productId
+                     select new
+                     {
+                         value = t1.LotNumber.ToString(),
+                         label = t1.LotNumber
+                     }).Distinct().OrderBy(x => x.label).Take(100).ToList();
+
+            var v3 = v.Union(v2).ToList();
+
+
+            var grouped = v3.GroupBy(x => string.IsNullOrEmpty(x.value) ? "xyzz" : x.value)
+                   .Select(g => new
+                   {
+                       value = g.Key == "xyzz" ? "xyzz" : g.Key,
+                       label = g.Key == "xyzz" ? "NoLot" : g.Key
+                   })
+                   .OrderBy(x => x.label)
+                   .Take(100)
+                   .ToList();
+
+            return grouped;
         }
 
 

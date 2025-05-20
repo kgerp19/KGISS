@@ -102,6 +102,8 @@ namespace KGERP.Services.WareHouse
 
             long result = -1;
             string poReceivingCID = "";
+            var dataListSlavePartial = vmModelList.DataListSlavePartial.Where(x => x.ReceivedQuantity > 0).ToList();
+
             #region Genarate Store-In ID
             int poReceivingCount = _db.MaterialReceives.Where(x => x.CompanyId == vmWareHousePOReceivingSlave.CompanyFK).Count();
 

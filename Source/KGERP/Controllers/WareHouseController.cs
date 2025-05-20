@@ -1808,7 +1808,6 @@ namespace KGERP.Controllers
                 }
 
                 await _service.PackagingPOReceivingSlaveAdd(vmModel, vmModelList);
-                
 
             }
             else if (vmModel.ActionEum == ActionEnum.Finalize)
