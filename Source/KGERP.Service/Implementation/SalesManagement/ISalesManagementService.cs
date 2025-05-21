@@ -18,7 +18,7 @@ namespace KGERP.Service.Implementation.SalesManagement
         Task<List<SalesManagementVM>> GetAllAchievementsAsync();
         Task DeleteAchievementAsync(long achievementId);
         IEnumerable<SelectListItem> GetDDLSalesAchievements();
-        IEnumerable<SelectListItem> GetDDLCompany();
+        IEnumerable<SelectListItem> GetDDLCompany(int companyId);
         Task<SalesManagementVM> GetSaleswiseTarget(int achievementId);       
         Task<SalesManagementVM> GetMonthlyTarget(int KGCompanySaleTergetId);
  

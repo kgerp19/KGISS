@@ -118,11 +118,11 @@ namespace KGERP.Controllers.SalesManagement
 
         #region KG Company Sales Target
         [HttpGet]
-        public async Task<ActionResult> KGCompanySalesTarget(long? salesId)
+        public async Task<ActionResult> KGCompanySalesTarget(int companyId,long? salesId)
         {
             SalesManagementVM model = new SalesManagementVM();
             model.SalesAcheivements = _salesManagementService.GetDDLSalesAchievements();
-            model.Companies = _salesManagementService.GetDDLCompany();
+            model.Companies = _salesManagementService.GetDDLCompany(companyId);
             model.AchievementId = salesId ?? 0;
 
             return View(model);

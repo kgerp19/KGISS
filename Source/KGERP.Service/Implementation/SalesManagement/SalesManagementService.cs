@@ -167,9 +167,9 @@ namespace KGERP.Service.Implementation.SalesManagement
                 Text = p.Title
             }).ToList();
         }
-        public IEnumerable<SelectListItem> GetDDLCompany()
+        public IEnumerable<SelectListItem> GetDDLCompany(int companyId)
         {
-            return _dbContext.Companies.Where(x => x.IsActive == true).Select(p => new SelectListItem
+            return _dbContext.Companies.Where(x => x.IsActive == true && x.CompanyId== companyId).Select(p => new SelectListItem
             {
                 Value = p.CompanyId.ToString(),
                 Text = p.Name
