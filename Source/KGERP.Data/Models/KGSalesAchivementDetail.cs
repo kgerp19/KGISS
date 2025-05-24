@@ -23,6 +23,7 @@ namespace KGERP.Data.Models
         public decimal RecoveryAchievementAmount { get; set; }
         public decimal SalesTargetAmount { get; set; }
         public decimal SalesTargetQty { get; set; }
+        public int CompanyId { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
