@@ -317,11 +317,9 @@ namespace KGERP.Data.Models
         public virtual DbSet<QualityExceptionComplaint> QualityExceptionComplaints { get; set; }
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
         public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
-        public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
         public virtual DbSet<KGSalesCollectedAchivement> KGSalesCollectedAchivements { get; set; }
         public virtual DbSet<WorkBoard> WorkBoards { get; set; }
         public virtual DbSet<KGCompanyMonthlySaleTerget> KGCompanyMonthlySaleTergets { get; set; }
-        public virtual DbSet<KGSalesAchivementDetail> KGSalesAchivementDetails { get; set; }
         public virtual DbSet<AnnualPerformance> AnnualPerformances { get; set; }
         public virtual DbSet<AnnualPerformanceDetail> AnnualPerformanceDetails { get; set; }
         public virtual DbSet<PRoll_Advance> PRoll_Advance { get; set; }
@@ -368,6 +366,8 @@ namespace KGERP.Data.Models
         public virtual DbSet<VoucherDetail> VoucherDetails { get; set; }
         public virtual DbSet<SalesTransferDetail> SalesTransferDetails { get; set; }
         public virtual DbSet<SalesTransfer> SalesTransfers { get; set; }
+        public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
+        public virtual DbSet<KGSalesAchivementDetail> KGSalesAchivementDetails { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
