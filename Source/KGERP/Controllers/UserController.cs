@@ -126,6 +126,18 @@ namespace KGERP.Controllers
             {
                 try
                 {
+                    var Company = (from c in context.Companies
+                                   join u in context.Employees on c.CompanyId equals u.CompanyId
+                                   where c.IsActive && u.EmployeeId==userLogin.UserName
+                                   select new
+                                   {
+                                       IsAcive = c.IsActive
+                                   }).FirstOrDefault();
+                    if (Company is null)
+                    {
+                        ViewBag.message = "Your software license is expired!";
+                        return View();
+                    }
                     var user = (from userInfo in context.Users
                                 where userInfo.UserName.ToLower() == userLogin.UserName.ToLower() && userInfo.Active
                                 select new { userInfo.UserName, userInfo.Password, userInfo.IsEmailVerified }).First();

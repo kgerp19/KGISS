@@ -29,7 +29,7 @@ namespace KGERP.Controllers.SalesManagement
 
         #region KG Sales Acheivement Page
         [HttpGet]
-        public async Task<ActionResult> SalesAchievement(DateTime? fromDate, DateTime? toDate)
+        public async Task<ActionResult> SalesAchievement(int companyid, DateTime? fromDate, DateTime? toDate)
         {
             int year = DateTime.Now.Year;
             if (DateTime.Now.Month < 7)
@@ -47,6 +47,7 @@ namespace KGERP.Controllers.SalesManagement
             SalesManagementVM model = new SalesManagementVM();
             model.StrFromDate = fromDate.Value.ToString("dd/MM/yyyy");
             model.StrToDate = toDate.Value.ToString("dd/MM/yyyy");
+            model.CompanyId = companyid;
             return View(model);
         }
         [HttpPost]
@@ -70,7 +71,7 @@ namespace KGERP.Controllers.SalesManagement
 
                 if (result > 0)
                 {
-                    return RedirectToAction("SalesAchievement", "SalesManagement");
+                    return RedirectToAction(nameof(SalesAchievement), new { companyid = model.CompanyId});
                 }
                 else
                 {
