@@ -254,6 +254,7 @@ namespace KGERP.Controllers.SalesManagement
         {
             KGSalesAchivementDetailVm model = await _salesManagementService.fixTarget(KGCompanyMonthlySaleTergetId, CompanyId);
             model.KGCompanyMonthlySaleTergetId = KGCompanyMonthlySaleTergetId;
+            model.CompanyId = CompanyId;
             return View(model);
 
         }

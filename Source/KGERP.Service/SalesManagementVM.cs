@@ -68,12 +68,12 @@ namespace KGERP.Service
         public string ModifiedBy { get; set; }
         public string ModifiedDate { get; set; }
         public bool IsActive { get; set; }
-  
+
         public decimal TergetedAmount { get; set; }
         public string Title { get; set; }
-         public decimal SalesAchievementAmount { get; set; }
-         public decimal SalesAchievementQty{ get; set; }
-         public decimal recovery{ get; set; }
+        public decimal SalesAchievementAmount { get; set; }
+        public decimal SalesAchievementQty { get; set; }
+        public decimal recovery { get; set; }
 
 
 
@@ -84,7 +84,7 @@ namespace KGERP.Service
         public int Month { get; set; }
         public decimal MonthlySalesTergetedAmount { get; set; }
         public decimal MonthlyCollectionTergetedAmount { get; set; }
-        public decimal TergetedQty{ get; set; }
+        public decimal TergetedQty { get; set; }
         public long KGCompanySaleTergetId { get; set; }
         public int UnitId { get; set; }
     }
@@ -114,7 +114,7 @@ namespace KGERP.Service
         public string ModifiedDate { get; set; }
         public bool IsActive { get; set; }
         public string UnitName { get; set; }
-       
+
         public List<KGSalesAchivementDetailVm> DataList { get; set; }
         public string Title { get; set; }
         public string KgId { get; set; }
@@ -122,7 +122,7 @@ namespace KGERP.Service
         public int Month { get; set; }
         public decimal MonthlySalesTergetedAmount { get; set; }
         public decimal MonthlyCollectionTergetedAmount { get; set; }
-  
+
         public decimal Salary { get; set; }
         public decimal EmpTarget { get; set; }
         public List<OffcierAssignVm> offcierAssignsList { get; set; }
@@ -140,15 +140,17 @@ namespace KGERP.Service
         public decimal TargetCollection { get; set; }
     }
 
-    
-        public class EmployeeTargetViewModel
-        {
-            public int EmployeeId { get; set; }
-            public decimal EmpTarget { get; set; }
-            public decimal SalaryAmount { get; set; }
-            public long KGCompanyMonthlySaleTergetId { get; set; }
+
+    public class EmployeeTargetViewModel
+    {
+        public int EmployeeId { get; set; }
+        public decimal EmpTarget { get; set; }
+        public int CompanyId { get; set; }
+        public decimal SalaryAmount { get; set; }
+        public long KGCompanyMonthlySaleTergetId { get; set; }
         public decimal TargetQty { get; set; }
         public decimal TargetCollection { get; set; }
+        
 
     }
 

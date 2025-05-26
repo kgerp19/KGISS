@@ -435,7 +435,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                                     join t3 in _dbContext.KGCompanySaleTergets on t2.KGCompanySaleTergetId equals t3.KGCompanySaleTergetId
                                     join t4 in _dbContext.KGSalesAchivements on t3.KGSalesId equals t4.KGSalesId
                                     join t5 in _dbContext.Employees on t1.EmployeeId equals t5.Id
-                                    join t6 in _dbContext.PRoll_SalaryConfiguration on t1.EmployeeId equals t6.EmployeeId
+                                    //join t6 in _dbContext.PRoll_SalaryConfiguration on t1.EmployeeId equals t6.EmployeeId
                                     join t7 in _dbContext.Units on t2.UnitId equals t7.UnitId
                                     where t1.KGCompanyMonthlySaleTergetId == KGCompanyMonthlySaleTergetId && t1.IsActive
                                     select new KGSalesAchivementDetailVm
@@ -444,7 +444,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                                         EmployeeId = t1.EmployeeId,
                                         KgId = t5.EmployeeId,
                                         EmName = t5.Name,
-                                        Salary = t6.Gross,
+                                        //Salary = t6.Gross,
                                         SalesTargetQuantity = t1.SalesTargetQty,
                                         SalesTargetAount = t1.SalesTargetAmount,
                                         SalesAchievementAmount = t1.SalesAchievementAmount,
@@ -598,8 +598,9 @@ namespace KGERP.Service.Implementation.SalesManagement
                             CreatedDate = DateTime.Now,
                             SalesTargetAmount = empTarget.EmpTarget,
                             SalesTargetQty = empTarget.TargetQty,
-                            TargetCollectionAmount=empTarget.TargetCollection
-                            
+                            TargetCollectionAmount=empTarget.TargetCollection,
+                            CompanyId= empTarget.CompanyId
+
 
                         };
 

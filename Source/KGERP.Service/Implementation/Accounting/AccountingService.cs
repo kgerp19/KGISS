@@ -1543,22 +1543,57 @@ namespace KGERP.Service.Implementation
 
         public object GetAutoCompleteVendorHeadGL(string prefix, int companyId, int vendorTypeId)
         {
-            //te
-            var v = (from hgl in _db.HeadGLs
-                     join h5 in _db.Head5 on hgl.ParentId equals h5.Id
-                     join h4 in _db.Head4 on h5.ParentId equals h4.Id
-                     join ven in _db.Vendors.Where(x => x.CompanyId == companyId) on hgl.Id equals ven.HeadGLId
-                     where hgl.CompanyId == companyId && hgl.IsActive && h5.IsActive && h4.IsActive
-                     && ((hgl.AccName.Contains(prefix)) || (hgl.AccCode.Contains(prefix)))
-                     select new
-                     {
-                         label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
-                         val = hgl.Id
-                     }).OrderBy(x => x.label).Take(200).ToList();
+            var userId = Common.GetIntUserId();
+            if (userId<=0)
+            {
+                return new {};
+            }
 
+            // Pre-filter prefix to avoid case-sensitive comparisons and improve index usage
+            var lowerPrefix = prefix?.ToLower() ?? string.Empty;
 
-            return v;
+            var query = from hgl in _db.HeadGLs
+                        join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                        join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                        join ven in _db.Vendors on hgl.Id equals ven.HeadGLId
+                        join tt in _db.SubZones on ven.SubZoneId equals tt.SubZoneId
+                        join e in _db.Employees on tt.SalesOfficerId equals e.Id
+                        where hgl.CompanyId == companyId
+                            && hgl.IsActive
+                            && h5.IsActive
+                            && h4.IsActive
+                            && ven.CompanyId == companyId
+                            && tt.IsActive
+                            && tt.CompanyId == companyId
+                            && e.Active
+                            && e.CompanyId == companyId
+                            && e.Id == userId
+                            && (hgl.AccName.ToLower().Contains(lowerPrefix) || hgl.AccCode.ToLower().Contains(lowerPrefix))
+                        select new
+                        {
+                            AccCode = hgl.AccCode,
+                            AccName = hgl.AccName,
+                            H4AccName = h4.AccName,
+                            H5AccName = h5.AccName,
+                            Id = hgl.Id
+                        };
+
+            // Execute query and process results in memory for better performance
+            var results = query
+                .OrderBy(x => x.AccCode) // Order by simpler field first
+                .Take(200)
+                .ToList()
+                .Select(x => new
+                {
+                    label = $"[{x.AccCode}] {(x.H4AccName == x.H5AccName ? x.H5AccName : $"{x.H4AccName} {x.H5AccName}")} {x.AccName}",
+                    val = x.Id
+                })
+                .OrderBy(x => x.label)
+                .ToList();
+
+            return results;
         }
+
 
         public async Task<long> AutoInsertVoucherDetails(int voucherId, int virtualHeadId, string virtualHeadParticular,int? productCategory=null)
         {

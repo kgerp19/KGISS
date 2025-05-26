@@ -901,15 +901,15 @@ namespace KGERP.Controllers
 
         public ActionResult CustomerGeneralLedgerReport(ReportCustomModel model)
         {
-            string reportName = "";
-            if (model.CompanyId == 10)
-            {
-                reportName = "KfmalCustomerGeneralLedger";
-            }
-            else if (model.CompanyId == 24)
-            {
-                reportName = "GcclCustomerGeneralLedger";
-            }
+            string reportName = "IssKfmalCustomerGeneralLedger";
+            //if (model.CompanyId == 10)
+            //{
+            //    reportName = "KfmalCustomerGeneralLedger";
+            //}
+            //else if (model.CompanyId == 24)
+            //{
+            //    reportName = "GcclCustomerGeneralLedger";
+            //}
 
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
