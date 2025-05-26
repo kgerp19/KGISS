@@ -8313,10 +8313,10 @@ namespace KGERP.Service.Implementation
 
 
 
-        public List<SelectModelSaleTitle> GetActiveSalesTitles()
+        public List<SelectModelSaleTitle> GetActiveSalesTitles(int companyId)
         {
             var list = _db.KGSalesAchivements
-                .Where(x => x.IsActive)
+                .Where(x => x.IsActive && x.CompanyId== companyId)
                 .Select(s => new SelectModelSaleTitle
                 {
                     Value = s.KGSalesId,
