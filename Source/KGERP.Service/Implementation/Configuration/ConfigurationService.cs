@@ -87,7 +87,7 @@ namespace KGERP.Service.Implementation
             vmMenuAssignment.DataList = await Task.Run(() => CompanyUserMenuDataLoad(vmUserMenuAssignment));
             vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
             vmMenuAssignment.UserId = vmUserMenuAssignment.UserId;
-            vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(vmMenuAssignment.CompanyFK??0), "Value", "Text");
+            vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(vmMenuAssignment.CompanyFK ?? 0), "Value", "Text");
 
             return vmMenuAssignment;
         }
@@ -675,17 +675,17 @@ namespace KGERP.Service.Implementation
             vmCommonSignatory.CompanyFK = companyId;
             vmCommonSignatory.DataList = await Task.Run(() => (from t1 in _db.ReportSignatories
                                                                join t2 in _db.ReportHeads on t1.ReportHeadId equals t2.ReportHeadId
-                                                          where t1.IsActive==true
-                                                          && t1.CompanyId == companyId
-                                                          select new CommonReportSignatoryVM
-                                                          {
-                                                              ID = t1.ReportSignatoryId,
-                                                              Name = t1.ReportPropertyName,
-                                                              CompanyFK = t1.CompanyId,
-                                                              ReportHeadId=t1.ReportHeadId,
-                                                              ReportName=t2.ReportHeadName
+                                                               where t1.IsActive == true
+                                                               && t1.CompanyId == companyId
+                                                               select new CommonReportSignatoryVM
+                                                               {
+                                                                   ID = t1.ReportSignatoryId,
+                                                                   Name = t1.ReportPropertyName,
+                                                                   CompanyFK = t1.CompanyId,
+                                                                   ReportHeadId = t1.ReportHeadId,
+                                                                   ReportName = t2.ReportHeadName
 
-                                                          }).OrderByDescending(x => x.ID).AsEnumerable());
+                                                               }).OrderByDescending(x => x.ID).AsEnumerable());
 
             vmCommonSignatory.ReportList = await Task.Run(() => (from t1 in _db.ReportHeads
                                                                  where t1.IsActive == true
@@ -699,7 +699,7 @@ namespace KGERP.Service.Implementation
             return vmCommonSignatory;
         }
 
-        
+
 
         public async Task<int> ReportSignatoryAdd(CommonReportSignatoryVM commonReportSignatory)
         {
@@ -708,8 +708,8 @@ namespace KGERP.Service.Implementation
             {
                 ReportPropertyName = commonReportSignatory.Name,
                 CompanyId = commonReportSignatory.CompanyFK,
-                CreatedBy = (int?)Common.GetIntUserId()??0,
-                ReportHeadId= commonReportSignatory.ReportHeadId,
+                CreatedBy = (int?)Common.GetIntUserId() ?? 0,
+                ReportHeadId = commonReportSignatory.ReportHeadId,
                 CreatedDate = DateTime.Now,
                 IsActive = true
             };
@@ -725,7 +725,7 @@ namespace KGERP.Service.Implementation
         {
             var result = -1;
             ReportSignatory commonRS = _db.ReportSignatories.Find(commonReportSignatory.ID);
-            if (commonRS!=null)
+            if (commonRS != null)
             {
                 commonRS.ReportPropertyName = commonReportSignatory.Name;
                 commonRS.ReportHeadId = commonReportSignatory.ReportHeadId;
@@ -738,7 +738,7 @@ namespace KGERP.Service.Implementation
                 }
                 return result;
             }
-            
+
             return result;
         }
 
@@ -908,9 +908,9 @@ namespace KGERP.Service.Implementation
                      join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
                      join t4 in _db.Units on t1.UnitId equals t4.UnitId into Lt4
                      from t4 in Lt4.DefaultIfEmpty()
-                     //join t5 in _db.OrderDeliverDetails on t1.ProductId equals t5.ProductId
+                         //join t5 in _db.OrderDeliverDetails on t1.ProductId equals t5.ProductId
 
-                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType && t2.IsActive && t3.IsActive  &&
+                     where t1.CompanyId == companyId && t1.IsActive && t1.ProductType == productType && t2.IsActive && t3.IsActive &&
                      ((t1.ProductName.Contains(prefix)) || (t2.Name.Contains(prefix)) || (t3.Name.Contains(prefix)))
 
                      select new
@@ -1013,7 +1013,7 @@ namespace KGERP.Service.Implementation
                      {
                          label = t1.LotNumber
                      }).OrderBy(x => x.label).Take(100).ToList();
-           
+
             return v;
         }
 
@@ -1028,11 +1028,11 @@ namespace KGERP.Service.Implementation
                          label = t1.LotNumber
                      }).OrderBy(x => x.label).Take(100).ToList();
 
-            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "xyzz" : x.value)
+            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
                            .Select(g => new
                            {
-                               value = g.Key == "xyzz" ? "xyzz" : g.Key,
-                               label = g.Key == "xyzz" ? "NoLot" : g.Key
+                               value = g.Key == "nolot" ? "nolot" : g.Key,
+                               label = g.Key == "nolot" ? "NoLot" : g.Key
                            })
                            .OrderBy(x => x.label)
                            .Take(100)
@@ -1053,26 +1053,26 @@ namespace KGERP.Service.Implementation
                      where t1.IsActive && t1.FProductId == productId
                      select new
                      {
-                         value=t1.LotNumber.ToString(),
-                         label = t1.LotNumber
-                     }).Distinct().OrderBy(x => x.label).Take(100).ToList();
-
-            var v2 = (from t1 in _db.MaterialReceiveDetails
-                     where t1.IsActive && t1.ProductId == productId
-                     select new
-                     {
                          value = t1.LotNumber.ToString(),
                          label = t1.LotNumber
                      }).Distinct().OrderBy(x => x.label).Take(100).ToList();
 
+            var v2 = (from t1 in _db.MaterialReceiveDetails
+                      where t1.IsActive && t1.ProductId == productId
+                      select new
+                      {
+                          value = t1.LotNumber.ToString(),
+                          label = t1.LotNumber
+                      }).Distinct().OrderBy(x => x.label).Take(100).ToList();
+
             var v3 = v.Union(v2).ToList();
 
 
-            var grouped = v3.GroupBy(x => string.IsNullOrEmpty(x.value) ? "xyzz" : x.value)
+            var grouped = v3.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
                    .Select(g => new
                    {
-                       value = g.Key == "xyzz" ? "xyzz" : g.Key,
-                       label = g.Key == "xyzz" ? "NoLot" : g.Key
+                       value = g.Key == "nolot" ? "nolot" : g.Key,
+                       label = g.Key == "nolot" ? "NoLot" : g.Key
                    })
                    .OrderBy(x => x.label)
                    .Take(100)
@@ -1772,7 +1772,7 @@ namespace KGERP.Service.Implementation
         public async Task<HeadGL> IntegratedAccountsHeadEdit(string AccName, int headGLId)
         {
             long result = -1;
-           
+
 
 
             HeadGL headGL = _db.HeadGLs.Find(headGLId);
@@ -1784,10 +1784,10 @@ namespace KGERP.Service.Implementation
             return headGL;
         }
 
-        public async Task<HeadGL> IntegratedAccountsHeadEditCustomer(string AccName, int headGLId,int ParentId, string newAccountCode)
+        public async Task<HeadGL> IntegratedAccountsHeadEditCustomer(string AccName, int headGLId, int ParentId, string newAccountCode)
         {
             long result = -1;
-            
+
             HeadGL headGL = _db.HeadGLs.Find(headGLId);
             headGL.AccName = AccName;
             headGL.ParentId = ParentId;
@@ -1817,7 +1817,7 @@ namespace KGERP.Service.Implementation
             commonSupplier.ACName = vmCommonSupplier.ACName;
             commonSupplier.ACNo = vmCommonSupplier.ACNo;
             commonSupplier.BankName = vmCommonSupplier.BankName;
-            
+
 
             if (await _db.SaveChangesAsync() > 0)
             {
@@ -2696,10 +2696,10 @@ namespace KGERP.Service.Implementation
                 ).ToList();
             return list;
         }
-        public List<object> CompaniesDropDownList(int companyid=0)
+        public List<object> CompaniesDropDownList(int companyid = 0)
         {
             var list = new List<object>();
-            var v = _db.Companies.Where(x=>(companyid==0 || x.CompanyId==companyid)).ToList();
+            var v = _db.Companies.Where(x => (companyid == 0 || x.CompanyId == companyid)).ToList();
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.CompanyId });
@@ -2973,7 +2973,7 @@ namespace KGERP.Service.Implementation
             // Fetch the products using the LINQ query, including the ProductType filter
             var products = await (from t1 in _db.Products
                                   where t1.CompanyId == companyId
-                                         // Use ProductType parameter here
+                                        // Use ProductType parameter here
                                         && t1.IsActive
                                   join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
                                   where t2.IsActive
@@ -3621,9 +3621,9 @@ namespace KGERP.Service.Implementation
             }
             return UnitList;
         }
-        public VMCommonProduct GetRMUnitAndClosingRateByProductId(int productId,string lotNo)
+        public VMCommonProduct GetRMUnitAndClosingRateByProductId(int productId, string lotNo)
         {
-            var LotNumber = String.IsNullOrEmpty(lotNo) ? "xyzz" : lotNo;
+            var LotNumber = String.IsNullOrEmpty(lotNo) ? "nolot" : lotNo;
 
             var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
                             join t4 in _db.Units on t1.UnitId equals t4.UnitId
@@ -3642,7 +3642,7 @@ namespace KGERP.Service.Implementation
             return products;
         }
 
-        public VMCommonProduct GetRMUnitAndClosingRateByProductIdByLot(int companyId,int productId,string lotnumber)
+        public VMCommonProduct GetRMUnitAndClosingRateByProductIdByLot(int companyId, int productId, string lotnumber)
         {
             var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
                             join t4 in _db.Units on t1.UnitId equals t4.UnitId
@@ -3730,7 +3730,7 @@ namespace KGERP.Service.Implementation
                      }).FirstOrDefault();
             if (CompanyId > 0)
             {
-                string lotValue = string.IsNullOrEmpty(LotNo) ? "xyzz" : LotNo;
+                string lotValue = string.IsNullOrEmpty(LotNo) ? "nolot" : LotNo;
                 VMProductStock products = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, CompanyId, lotValue).FirstOrDefault();
                 v.CostingPrice = products.ClosingRate;
                 v.CurrentStock = products.ClosingQty;
@@ -3755,7 +3755,7 @@ namespace KGERP.Service.Implementation
                          RawProductName = t2.ProductName,
                          UnitName = t4.Name,
                          CompanyFK = t1.CompanyId,
-                         LotNumbers=t1.LotNumber
+                         LotNumbers = t1.LotNumber
 
                      }).FirstOrDefault();
             return v;
@@ -3783,7 +3783,7 @@ namespace KGERP.Service.Implementation
                                                            Common_UnitFk = t1.UnitId,
                                                            Common_ProductCategoryFk = t2.ProductCategoryId,
                                                            CompanyFK = t1.CompanyId,
-                                                          
+
 
                                                        }).FirstOrDefault());
 
@@ -3812,8 +3812,8 @@ namespace KGERP.Service.Implementation
                                                                               Common_UnitFk = t2.UnitId,
                                                                               Common_ProductCategoryFk = t2.ProductCategoryId,
                                                                               CompanyFK = t1.CompanyId,
-                                                                              LotNumbers=t1.LotNumber
-                                                                           
+                                                                              LotNumbers = t1.LotNumber
+
 
                                                                           }).ToListAsync());
 
@@ -3911,8 +3911,8 @@ namespace KGERP.Service.Implementation
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                LotNumber=vmFinishProductBOM.LotNumbers
-                
+                LotNumber = vmFinishProductBOM.LotNumbers
+
 
             };
             _db.FinishProductBOMs.Add(finishProductBOM);
@@ -5486,7 +5486,7 @@ namespace KGERP.Service.Implementation
                 //}
             }
 
-            await IntegratedAccountsHeadEditCustomer(commonCustomer.Name, commonCustomer.HeadGLId.Value,ParentId, newAccountCode);
+            await IntegratedAccountsHeadEditCustomer(commonCustomer.Name, commonCustomer.HeadGLId.Value, ParentId, newAccountCode);
 
             return result;
         }
@@ -8316,7 +8316,7 @@ namespace KGERP.Service.Implementation
         public List<SelectModelSaleTitle> GetActiveSalesTitles(int companyId)
         {
             var list = _db.KGSalesAchivements
-                .Where(x => x.IsActive && x.CompanyId== companyId)
+                .Where(x => x.IsActive && x.CompanyId == companyId)
                 .Select(s => new SelectModelSaleTitle
                 {
                     Value = s.KGSalesId,
@@ -8342,13 +8342,23 @@ namespace KGERP.Service.Implementation
 
         public List<string> GetLotNumber(int ProductId)
         {
-            var list = _db.MaterialReceiveDetails
-                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.ProductId== ProductId)
-                .Select(x => x.LotNumber)
-                .Distinct()  // Ensures that LotNumbers are unique
-                .ToList();
+            var v = (from t1 in _db.MaterialReceiveDetails
+                     where t1.IsActive && t1.ProductId == ProductId
+                     select new
+                     {
+                         value = t1.LotNumber.ToString(),
+                         label = t1.LotNumber
+                     }).Distinct().OrderBy(x => x.label).ToList();
+            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
+        .Select(g => new
+        {
+            value = g.Key == "nolot" ? "nolot" : g.Key,
+            label = g.Key == "nolot" ? "nolot" : g.Key
+        })
+        .OrderBy(x => x.label)
+        .ToList();
 
-            return list;
+            return grouped.Select(g => g.value).ToList();
         }
 
         //public List<string> GetLotNumberFinish(int ProductId)
@@ -8365,24 +8375,35 @@ namespace KGERP.Service.Implementation
 
         public List<string> GetLotNumberFinish(int ProductId)
         {
-            // Query for lot numbers from Prod_ReferenceSlave
-            var referenceSlaveLotNumbers = _db.Prod_ReferenceSlave
-                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.FProductId == ProductId)
-                .Select(x => x.LotNumber)
-                .Distinct();
+            var v = (from t1 in _db.Prod_ReferenceSlave
+                     where t1.IsActive && t1.FProductId == ProductId
+                     select new
+                     {
+                         value = t1.LotNumber.ToString(),
+                         label = t1.LotNumber
+                     }).Distinct().OrderBy(x => x.label).ToList();
 
-            // Query for lot numbers from MaterialReceiveDetail
-            var materialReceiveDetailLotNumbers = _db.MaterialReceiveDetails
-                .Where(y => y.IsActive && !string.IsNullOrEmpty(y.LotNumber) && y.LotNumber != "Null" && y.ProductId == ProductId)
-                .Select(x => x.LotNumber)
-                .Distinct();
+            var v2 = (from t1 in _db.MaterialReceiveDetails
+                      where t1.IsActive && t1.ProductId == ProductId
+                      select new
+                      {
+                          value = t1.LotNumber.ToString(),
+                          label = t1.LotNumber
+                      }).Distinct().OrderBy(x => x.label).ToList();
 
-            // Combine both lists using Union to avoid duplicates
-            var combinedLotNumbers = referenceSlaveLotNumbers
-                .Union(materialReceiveDetailLotNumbers)
-                .ToList();
+            var v3 = v.Union(v2).ToList();
 
-            return combinedLotNumbers;
+            var grouped = v3.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
+                    .Select(g => new
+                    {
+                        value = g.Key == "nolot" ? "nolot" : g.Key,
+                        label = g.Key == "nolot" ? "nolot" : g.Key
+                    })
+                    .OrderBy(x => x.label)
+                    .ToList();
+
+            // Return only the keys as a list of strings
+            return grouped.Select(g => g.value).ToList();
         }
 
 
