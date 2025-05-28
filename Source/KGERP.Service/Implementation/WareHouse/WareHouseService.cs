@@ -3984,6 +3984,15 @@ namespace KGERP.Services.WareHouse
         {
             int result = -1;
             int stockInfoId = 2;
+            string lotNo;
+            if (string.IsNullOrEmpty(vmModel.LotNumber) || vmModel.LotNumber=="nolot")
+            {
+                lotNo = null;
+            }
+            else
+            {
+                lotNo = vmModel.LotNumber;
+            }
             StockAdjustDetail stockAdjustDetail = new StockAdjustDetail
             {
                 StockAdjustId = vmModel.StockAdjustId,
@@ -3995,7 +4004,7 @@ namespace KGERP.Services.WareHouse
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                LotNumber=vmModel.LotNumber
+                LotNumber= lotNo
             };
             _db.StockAdjustDetails.Add(stockAdjustDetail);
             if (await _db.SaveChangesAsync() > 0)
@@ -4011,7 +4020,16 @@ namespace KGERP.Services.WareHouse
         public async Task<int> StockAdjustDetailAdd(VMStockAdjustDetail vmModel)
         {
             int result = -1;
-
+            string LotNo;
+            if (string.IsNullOrEmpty(vmModel.LotNumber) || vmModel.LotNumber == "nolot")
+            {
+                LotNo = null;
+            }
+            else
+            {
+                LotNo = vmModel.LotNumber;
+            }
+            
             StockAdjustDetail stockAdjustDetail = new StockAdjustDetail
             {
                 StockAdjustId = vmModel.StockAdjustId,
@@ -4023,7 +4041,7 @@ namespace KGERP.Services.WareHouse
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                LotNumber=vmModel.LotNumber
+                LotNumber= LotNo
             };
             _db.StockAdjustDetails.Add(stockAdjustDetail);
             if (await _db.SaveChangesAsync() > 0)
