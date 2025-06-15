@@ -297,7 +297,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<MaterialReceive> MaterialReceives { get; set; }
         public virtual DbSet<RequisitionSignatory> RequisitionSignatories { get; set; }
         public virtual DbSet<RequisitionItemDetail> RequisitionItemDetails { get; set; }
-        public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
         public virtual DbSet<StockAdjust> StockAdjusts { get; set; }
         public virtual DbSet<WorkState> WorkStates { get; set; }
         public virtual DbSet<WorkSpacesMember> WorkSpacesMembers { get; set; }
@@ -327,7 +326,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_FineDeducation> PRoll_FineDeducation { get; set; }
         public virtual DbSet<PRoll_KMCSLDeduction> PRoll_KMCSLDeduction { get; set; }
         public virtual DbSet<PRoll_SpecialAddition> PRoll_SpecialAddition { get; set; }
-        public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
         public virtual DbSet<ProductBookingInfo> ProductBookingInfoes { get; set; }
         public virtual DbSet<PurchaseReturnDetail> PurchaseReturnDetails { get; set; }
         public virtual DbSet<OrderMaster> OrderMasters { get; set; }
@@ -368,6 +366,8 @@ namespace KGERP.Data.Models
         public virtual DbSet<SalesTransfer> SalesTransfers { get; set; }
         public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
         public virtual DbSet<KGSalesAchivementDetail> KGSalesAchivementDetails { get; set; }
+        public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
+        public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

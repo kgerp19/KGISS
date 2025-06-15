@@ -1100,7 +1100,7 @@ namespace KGERP.Service.Implementation
 
                 issuedMasterData.IssueDate = model.IssueDate;
                 issuedMasterData.IssuedBy = model.IssueById;
-                issuedMasterData.FromDepartmentId = model.FromDepartmentIssueId;
+                //issuedMasterData.FromDepartmentId = model.FromDepartmentIssueId;
                 issuedMasterData.ModifedBy = model.ModifiedBy;
                 issuedMasterData.ModifiedDate = DateTime.Now;
 

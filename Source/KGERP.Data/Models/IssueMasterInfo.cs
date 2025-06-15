@@ -24,10 +24,9 @@ namespace KGERP.Data.Models
         public string IssueNo { get; set; }
         public System.DateTime IssueDate { get; set; }
         public long IssuedBy { get; set; }
-        public int FromDepartmentId { get; set; }
-        public int ToDepartmentId { get; set; }
-        public long RequisitionId { get; set; }
+        public int VendorId { get; set; }
         public int CompanyId { get; set; }
+        public string Remarks { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifedBy { get; set; }

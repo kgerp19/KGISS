@@ -5129,56 +5129,56 @@ namespace KGERP.Services.Procurement
         public List<VMPackagingPurchaseRequisition> PackagingProductionStoreDataList(int RequisitionId)
         {
             VMPackagingPurchaseRequisition vmSalesOrder = new VMPackagingPurchaseRequisition();
-            var list = (from t1 in _db.RequisitionItemDetails.Where(x => x.RequisitionId == RequisitionId)
-                            //join t2 in _db.FinishProductBOMs.Where(x => x.IsActive) on t1.FinishProductBOMId equals t2.ID
-                        join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
-                        join t5 in _db.ProductSubCategories.Where(x => x.IsActive) on t4.ProductSubCategoryId equals t5.ProductSubCategoryId
-                        join t6 in _db.Requisitions.Where(x => x.IsActive) on t1.RequisitionId equals t6.RequisitionId
-                        select new VMPackagingPurchaseRequisition
-                        {
-                            CompanyId = t6.CompanyId.Value,
-                            RequisitionId = t1.RequisitionItemId,
-                            RequistionItemDetailId = t1.RequistionItemDetailId,
-                            ProductId = t1.RProductId.Value,
-                            ProductName = t5.Name + " " + t4.ProductName,
-                            Qty = t1.RQty,
-                            RemainingQuantity = t1.RQty - (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId && x.IsActive == true).Select(x => x.RMQ).DefaultIfEmpty(0).Sum()),
-                            PriviousIssueQty = (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId && x.IsActive == true).Select(x => x.RMQ).DefaultIfEmpty(0).Sum())
-                        }).ToList();
+            //var list = (from t1 in _db.RequisitionItemDetails.Where(x => x.RequisitionId == RequisitionId)
+            //                //join t2 in _db.FinishProductBOMs.Where(x => x.IsActive) on t1.FinishProductBOMId equals t2.ID
+            //            join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
+            //            join t5 in _db.ProductSubCategories.Where(x => x.IsActive) on t4.ProductSubCategoryId equals t5.ProductSubCategoryId
+            //            join t6 in _db.Requisitions.Where(x => x.IsActive) on t1.RequisitionId equals t6.RequisitionId
+            //            select new VMPackagingPurchaseRequisition
+            //            {
+            //                CompanyId = t6.CompanyId.Value,
+            //                RequisitionId = t1.RequisitionItemId,
+            //                RequistionItemDetailId = t1.RequistionItemDetailId,
+            //                ProductId = t1.RProductId.Value,
+            //                ProductName = t5.Name + " " + t4.ProductName,
+            //                Qty = t1.RQty,
+            //                RemainingQuantity = t1.RQty - (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId && x.IsActive == true).Select(x => x.RMQ).DefaultIfEmpty(0).Sum()),
+            //                PriviousIssueQty = (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId && x.IsActive == true).Select(x => x.RMQ).DefaultIfEmpty(0).Sum())
+            //            }).ToList();
 
 
-            foreach (VMPackagingPurchaseRequisition item in list)
-            {
-                VMProductStock vMProductStock = new VMProductStock();
-                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, item.CompanyId).FirstOrDefault();
+            //foreach (VMPackagingPurchaseRequisition item in list)
+            //{
+            //    VMProductStock vMProductStock = new VMProductStock();
+            //    vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, item.CompanyId).FirstOrDefault();
 
 
-                item.CurrenntStock = vMProductStock.ClosingQty;
+            //    item.CurrenntStock = vMProductStock.ClosingQty;
 
-            }
-            return list;
+            //}
+            return vmSalesOrder.DataListPro;
         }
 
         public List<VMPackagingPurchaseRequisition> PackagingGeneralProductionStoreDataList(int RequisitionId)
         {
             VMPackagingPurchaseRequisition vmSalesOrder = new VMPackagingPurchaseRequisition();
-            var list = (from t1 in _db.RequisitionItemDetails.Where(x => x.RequisitionId == RequisitionId)
-                        join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
-                        join t5 in _db.ProductCategories.Where(x => x.IsActive) on t4.ProductCategoryId equals t5.ProductCategoryId
+            //var list = (from t1 in _db.RequisitionItemDetails.Where(x => x.RequisitionId == RequisitionId)
+            //            join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
+            //            join t5 in _db.ProductCategories.Where(x => x.IsActive) on t4.ProductCategoryId equals t5.ProductCategoryId
 
-                        select new VMPackagingPurchaseRequisition
-                        {
-                            RequisitionId = t1.RequisitionItemId,
-                            RequistionItemDetailId = t1.RequistionItemDetailId,
-                            RequisitionStatus = "Y",
-                            ProductId = t1.RProductId.Value,
-                            ProductName = t5.Name + " " + t4.ProductName,
-                            Qty = t1.RQty,
+            //            select new VMPackagingPurchaseRequisition
+            //            {
+            //                RequisitionId = t1.RequisitionItemId,
+            //                RequistionItemDetailId = t1.RequistionItemDetailId,
+            //                RequisitionStatus = "Y",
+            //                ProductId = t1.RProductId.Value,
+            //                ProductName = t5.Name + " " + t4.ProductName,
+            //                Qty = t1.RQty,
 
-                            RemainingQuantity = t1.RQty - (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId).Select(x => x.RMQ).DefaultIfEmpty(0).Sum()),
-                            PriviousIssueQty = (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId).Select(x => x.RMQ).DefaultIfEmpty(0).Sum())
-                        }).Distinct().ToList();
-            return list;
+            //                RemainingQuantity = t1.RQty - (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId).Select(x => x.RMQ).DefaultIfEmpty(0).Sum()),
+            //                PriviousIssueQty = (_db.IssueDetailInfoes.Where(x => x.RequisitionItemDetailId == t1.RequistionItemDetailId).Select(x => x.RMQ).DefaultIfEmpty(0).Sum())
+            //            }).Distinct().ToList();
+            return vmSalesOrder.DataListPro;
         }
 
         public async Task<long> PackagingIssueProductFromStore(VMPackagingPurchaseRequisition vmPackagingIssue)
@@ -5193,27 +5193,27 @@ namespace KGERP.Services.Procurement
                     poCid = @"IS-" + DateTime.Now.ToString("yy") + DateTime.Now.ToString("MM") +
                                     DateTime.Now.ToString("dd") + "-" + poMax.ToString();
 
-                    IssueMasterInfo Procurement_Issue = new IssueMasterInfo
-                    {
-                        RequisitionId = vmPackagingIssue.RequisitionId,
-                        IssueNo = poCid,
-                        IssueDate = vmPackagingIssue.IssueDate,
-                        FromDepartmentId = vmPackagingIssue.FromDepartmentIssueId,
-                        ToDepartmentId = vmPackagingIssue.ToDepartmentIssueId,
+                    //IssueMasterInfo Procurement_Issue = new IssueMasterInfo
+                    //{
+                    //    RequisitionId = vmPackagingIssue.RequisitionId,
+                    //    IssueNo = poCid,
+                    //    IssueDate = vmPackagingIssue.IssueDate,
+                    //    FromDepartmentId = vmPackagingIssue.FromDepartmentIssueId,
+                    //    ToDepartmentId = vmPackagingIssue.ToDepartmentIssueId,
 
-                        CreatedBy = Common.GetUserId(),
-                        CreatedDate = DateTime.Now,
-                        CompanyId = vmPackagingIssue.CompanyFK.Value,
-                        IsActive = true,
-                        IssuedBy = vmPackagingIssue.IssueById,
-                        Achknolagement = false,
-                        AchknologeBy = 0,
-                        AcknologeDate = null
+                    //    CreatedBy = Common.GetUserId(),
+                    //    CreatedDate = DateTime.Now,
+                    //    CompanyId = vmPackagingIssue.CompanyFK.Value,
+                    //    IsActive = true,
+                    //    IssuedBy = vmPackagingIssue.IssueById,
+                    //    Achknolagement = false,
+                    //    AchknologeBy = 0,
+                    //    AcknologeDate = null
 
 
-                    };
+                    //};
 
-                    _db.IssueMasterInfoes.Add(Procurement_Issue);
+                    //_db.IssueMasterInfoes.Add(Procurement_Issue);
                     if (await _db.SaveChangesAsync() > 0)
                     {
                         var dataList = vmPackagingIssue.DataListPro.Where(x => x.IssueQty > 0);
@@ -5223,37 +5223,37 @@ namespace KGERP.Services.Procurement
                             vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, vmPackagingIssue.CompanyFK).FirstOrDefault();
 
 
-                            IssueDetailInfo IssueDetais = new IssueDetailInfo
-                            {
-                                IssueMasterId = Procurement_Issue.IssueMasterId,
-                                RProductId = item.ProductId,
-                                RMQ = item.IssueQty,
-                                RequisitionItemDetailId = item.RequistionItemDetailId,
-                                CostingPrice = vMProductStock.ClosingRate,
-                                IsActive = true
-                            };
-                            _db.IssueDetailInfoes.Add(IssueDetais);
+                            //IssueDetailInfo IssueDetais = new IssueDetailInfo
+                            //{
+                            //    IssueMasterId = Procurement_Issue.IssueMasterId,
+                            //    RProductId = item.ProductId,
+                            //    RMQ = item.IssueQty,
+                            //    RequisitionItemDetailId = item.RequistionItemDetailId,
+                            //    CostingPrice = vMProductStock.ClosingRate,
+                            //    IsActive = true
+                            //};
+                            //_db.IssueDetailInfoes.Add(IssueDetais);
                         }
 
-                        if (await _db.SaveChangesAsync() > 0)
-                        {
-                            //After Complete Issue Update Requisition Table
-                            var RequisitionData = await _db.Requisitions.FirstOrDefaultAsync(x => x.RequisitionId == vmPackagingIssue.RequisitionId);
-                            if (RequisitionData != null)
-                            {
-                                RequisitionData.RequisitionStatus = "I";
-                                RequisitionData.DeliveredBy = Common.GetUserId();
-                                RequisitionData.DeliveredDate = DateTime.Now;
-                                RequisitionData.DeliveryNo = poCid;
+                        //if (await _db.SaveChangesAsync() > 0)
+                        //{
+                        //    //After Complete Issue Update Requisition Table
+                        //    var RequisitionData = await _db.Requisitions.FirstOrDefaultAsync(x => x.RequisitionId == vmPackagingIssue.RequisitionId);
+                        //    if (RequisitionData != null)
+                        //    {
+                        //        RequisitionData.RequisitionStatus = "I";
+                        //        RequisitionData.DeliveredBy = Common.GetUserId();
+                        //        RequisitionData.DeliveredDate = DateTime.Now;
+                        //        RequisitionData.DeliveryNo = poCid;
 
-                                _db.Entry(RequisitionData).State = EntityState.Modified;
-                                if (await _db.SaveChangesAsync() > 0)
-                                {
-                                    scope.Commit();
-                                    result = Procurement_Issue.IssueMasterId;
-                                }
-                            }
-                        }
+                        //        _db.Entry(RequisitionData).State = EntityState.Modified;
+                        //        if (await _db.SaveChangesAsync() > 0)
+                        //        {
+                        //            scope.Commit();
+                        //            result = Procurement_Issue.IssueMasterId;
+                        //        }
+                        //    }
+                        //}
 
                     }
                 }
@@ -5281,24 +5281,24 @@ namespace KGERP.Services.Procurement
                     poCid = @"IS-" + DateTime.Now.ToString("yy") + DateTime.Now.ToString("MM") +
                                     DateTime.Now.ToString("dd") + "-" + poMax.ToString();
 
-                    IssueMasterInfo Procurement_Issue = new IssueMasterInfo
-                    {
-                        RequisitionId = vmPackagingIssue.RequisitionId,
-                        IssueNo = poCid,
-                        IssueDate = vmPackagingIssue.IssueDate,
-                        FromDepartmentId = vmPackagingIssue.FromDepartmentIssueId,
-                        ToDepartmentId = vmPackagingIssue.ToDepartmentIssueId,
+                    //IssueMasterInfo Procurement_Issue = new IssueMasterInfo
+                    //{
+                    //    RequisitionId = vmPackagingIssue.RequisitionId,
+                    //    IssueNo = poCid,
+                    //    IssueDate = vmPackagingIssue.IssueDate,
+                    //    FromDepartmentId = vmPackagingIssue.FromDepartmentIssueId,
+                    //    ToDepartmentId = vmPackagingIssue.ToDepartmentIssueId,
 
-                        CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
-                        CreatedDate = DateTime.Now,
-                        CompanyId = vmPackagingIssue.CompanyFK.Value,
-                        IsActive = true,
-                        IssuedBy = vmPackagingIssue.IssueById,
-                        Achknolagement = false,
-                        AchknologeBy = 0,
-                        AcknologeDate = null
-                    };
-                    _db.IssueMasterInfoes.Add(Procurement_Issue);
+                    //    CreatedBy = System.Web.HttpContext.Current.Session["EmployeeName"].ToString(),
+                    //    CreatedDate = DateTime.Now,
+                    //    CompanyId = vmPackagingIssue.CompanyFK.Value,
+                    //    IsActive = true,
+                    //    IssuedBy = vmPackagingIssue.IssueById,
+                    //    Achknolagement = false,
+                    //    AchknologeBy = 0,
+                    //    AcknologeDate = null
+                    //};
+                    //_db.IssueMasterInfoes.Add(Procurement_Issue);
                     if (await _db.SaveChangesAsync() > 0)
                     {
 
@@ -5309,37 +5309,37 @@ namespace KGERP.Services.Procurement
                             vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, vmPackagingIssue.CompanyFK).FirstOrDefault();
 
 
-                            IssueDetailInfo IssueDetais = new IssueDetailInfo
-                            {
-                                IssueMasterId = Procurement_Issue.IssueMasterId,
-                                RProductId = item.ProductId,
-                                RMQ = item.IssueQty,
-                                RequisitionItemDetailId = item.RequistionItemDetailId,
-                                CostingPrice = vMProductStock.ClosingRate,
-                                IsActive = true
-                            };
-                            _db.IssueDetailInfoes.Add(IssueDetais);
+                            //IssueDetailInfo IssueDetais = new IssueDetailInfo
+                            //{
+                            //    IssueMasterId = Procurement_Issue.IssueMasterId,
+                            //    RProductId = item.ProductId,
+                            //    RMQ = item.IssueQty,
+                            //    RequisitionItemDetailId = item.RequistionItemDetailId,
+                            //    CostingPrice = vMProductStock.ClosingRate,
+                            //    IsActive = true
+                            //};
+                            //_db.IssueDetailInfoes.Add(IssueDetais);
                         }
 
-                        if (await _db.SaveChangesAsync() > 0)
-                        {
-                            //After Complete Issue Update Requisition Table
-                            var RequisitionData = await _db.Requisitions.FirstOrDefaultAsync(x => x.RequisitionId == vmPackagingIssue.RequisitionId);
-                            if (RequisitionData != null)
-                            {
-                                RequisitionData.RequisitionStatus = "I";
-                                RequisitionData.DeliveredBy = Common.GetUserId();
-                                RequisitionData.DeliveredDate = DateTime.Now;
-                                RequisitionData.DeliveryNo = poCid;
+                        //if (await _db.SaveChangesAsync() > 0)
+                        //{
+                        //    //After Complete Issue Update Requisition Table
+                        //    var RequisitionData = await _db.Requisitions.FirstOrDefaultAsync(x => x.RequisitionId == vmPackagingIssue.RequisitionId);
+                        //    if (RequisitionData != null)
+                        //    {
+                        //        RequisitionData.RequisitionStatus = "I";
+                        //        RequisitionData.DeliveredBy = Common.GetUserId();
+                        //        RequisitionData.DeliveredDate = DateTime.Now;
+                        //        RequisitionData.DeliveryNo = poCid;
 
-                                _db.Entry(RequisitionData).State = EntityState.Modified;
-                                if (await _db.SaveChangesAsync() > 0)
-                                {
-                                    scope.Commit();
-                                    result = Procurement_Issue.IssueMasterId;
-                                }
-                            }
-                        }
+                        //        _db.Entry(RequisitionData).State = EntityState.Modified;
+                        //        if (await _db.SaveChangesAsync() > 0)
+                        //        {
+                        //            scope.Commit();
+                        //            result = Procurement_Issue.IssueMasterId;
+                        //        }
+                        //    }
+                        //}
 
                     }
                 }
@@ -5366,20 +5366,20 @@ namespace KGERP.Services.Procurement
                 vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, vmPackagingPurchaseRequisition.CompanyFK).FirstOrDefault();
 
 
-                IssueDetailInfo IssueDetais = new IssueDetailInfo
-                {
-                    IssueMasterId = vmPackagingPurchaseRequisition.IssueMasterId,
-                    RProductId = item.ProductId,
-                    RMQ = item.IssueQty,
-                    RequisitionItemDetailId = item.RequistionItemDetailId,
-                    CostingPrice = vMProductStock.ClosingRate,
-                    IsActive = true
-                };
-                _db.IssueDetailInfoes.Add(IssueDetais);
-                if (await _db.SaveChangesAsync() > 0)
-                {
-                    result = IssueDetais.IssueDetailId;
-                }
+                //IssueDetailInfo IssueDetais = new IssueDetailInfo
+                //{
+                //    IssueMasterId = vmPackagingPurchaseRequisition.IssueMasterId,
+                //    RProductId = item.ProductId,
+                //    RMQ = item.IssueQty,
+                //    RequisitionItemDetailId = item.RequistionItemDetailId,
+                //    CostingPrice = vMProductStock.ClosingRate,
+                //    IsActive = true
+                //};
+                //_db.IssueDetailInfoes.Add(IssueDetais);
+                //if (await _db.SaveChangesAsync() > 0)
+                //{
+                //    result = IssueDetais.IssueDetailId;
+                //}
 
             }
 
@@ -5391,51 +5391,51 @@ namespace KGERP.Services.Procurement
         public async Task<VMPackagingPurchaseRequisition> GetIssueDetail(int companyId, long issueMasterId, CancellationToken cancellationToken = default)
         {
             VMPackagingPurchaseRequisition vmPackagingPurchaseRequisition = new VMPackagingPurchaseRequisition();
-            vmPackagingPurchaseRequisition = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IssueMasterId == issueMasterId)
-                                                                   join c in _db.Companies on t1.CompanyId equals c.CompanyId
-                                                                   join t2 in _db.Requisitions on t1.RequisitionId equals t2.RequisitionId
-                                                                   join s in _db.StockInfoes on t1.ToDepartmentId equals s.StockInfoId
-                                                                   join s1 in _db.StockInfoes on t1.FromDepartmentId equals s1.StockInfoId
-                                                                   join e in _db.Employees on t1.IssuedBy equals e.Id
-                                                                   join e1 in _db.Employees on t2.RequisitionBy equals e1.EmployeeId
-                                                                   join e2 in _db.Employees on t1.AchknologeBy equals e2.Id into emp
-                                                                   from e3 in emp.DefaultIfEmpty()
-                                                                   select new VMPackagingPurchaseRequisition
-                                                                   {
-                                                                       IssueMasterId = t1.IssueMasterId,
-                                                                       RequisitionNo = t2.RequisitionNo,
-                                                                       RequisitionDate = t2.RequisitionDate.Value,
-                                                                       RequisitionBy = e1.Name,
-                                                                       IssueDate = t1.IssueDate,
-                                                                       ToDepartmentIssueName = s.Name,
-                                                                       FromDepartmentIssueName = s1.Name,
-                                                                       ToDepartmentIssueId = t1.ToDepartmentId,
-                                                                       IssueNo = t1.IssueNo,
-                                                                       IssueBy = e.Name,
-                                                                       AchknolagementIs = t1.Achknolagement == true ? "Achknowlaged" : "Pending",
-                                                                       AchknologeByName = e3.Name,
-                                                                       AcknologeDate = t1.AcknologeDate,
-                                                                       CompanyName = c.Name,
-                                                                       IntregrationFrom = "IssueMasterInfo"
+            //vmPackagingPurchaseRequisition = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IssueMasterId == issueMasterId)
+            //                                                       join c in _db.Companies on t1.CompanyId equals c.CompanyId
+            //                                                       join t2 in _db.Requisitions on t1.RequisitionId equals t2.RequisitionId
+            //                                                       join s in _db.StockInfoes on t1.ToDepartmentId equals s.StockInfoId
+            //                                                       join s1 in _db.StockInfoes on t1.FromDepartmentId equals s1.StockInfoId
+            //                                                       join e in _db.Employees on t1.IssuedBy equals e.Id
+            //                                                       join e1 in _db.Employees on t2.RequisitionBy equals e1.EmployeeId
+            //                                                       join e2 in _db.Employees on t1.AchknologeBy equals e2.Id into emp
+            //                                                       from e3 in emp.DefaultIfEmpty()
+            //                                                       select new VMPackagingPurchaseRequisition
+            //                                                       {
+            //                                                           IssueMasterId = t1.IssueMasterId,
+            //                                                           RequisitionNo = t2.RequisitionNo,
+            //                                                           RequisitionDate = t2.RequisitionDate.Value,
+            //                                                           RequisitionBy = e1.Name,
+            //                                                           IssueDate = t1.IssueDate,
+            //                                                           ToDepartmentIssueName = s.Name,
+            //                                                           FromDepartmentIssueName = s1.Name,
+            //                                                           ToDepartmentIssueId = t1.ToDepartmentId,
+            //                                                           IssueNo = t1.IssueNo,
+            //                                                           IssueBy = e.Name,
+            //                                                           AchknolagementIs = t1.Achknolagement == true ? "Achknowlaged" : "Pending",
+            //                                                           AchknologeByName = e3.Name,
+            //                                                           AcknologeDate = t1.AcknologeDate,
+            //                                                           CompanyName = c.Name,
+            //                                                           IntregrationFrom = "IssueMasterInfo"
 
 
-                                                                   }).FirstOrDefaultAsync(cancellationToken));
+            //                                                       }).FirstOrDefaultAsync(cancellationToken));
 
-            vmPackagingPurchaseRequisition.DataList = await Task.Run(() => (from t1 in _db.IssueDetailInfoes.Where(x => x.IssueMasterId == issueMasterId)
-                                                                            join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
-                                                                            join t5 in _db.ProductSubCategories.Where(x => x.IsActive) on t4.ProductSubCategoryId equals t5.ProductSubCategoryId
-                                                                            join t2 in _db.ProductCategories.Where(x => x.IsActive) on t5.ProductCategoryId equals t2.ProductCategoryId
-                                                                            join t3 in _db.RequisitionItemDetails.Where(x => x.IsActive) on t1.RequisitionItemDetailId equals t3.RequistionItemDetailId
+            //vmPackagingPurchaseRequisition.DataList = await Task.Run(() => (from t1 in _db.IssueDetailInfoes.Where(x => x.IssueMasterId == issueMasterId)
+            //                                                                join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
+            //                                                                join t5 in _db.ProductSubCategories.Where(x => x.IsActive) on t4.ProductSubCategoryId equals t5.ProductSubCategoryId
+            //                                                                join t2 in _db.ProductCategories.Where(x => x.IsActive) on t5.ProductCategoryId equals t2.ProductCategoryId
+            //                                                                join t3 in _db.RequisitionItemDetails.Where(x => x.IsActive) on t1.RequisitionItemDetailId equals t3.RequistionItemDetailId
 
-                                                                            select new VMPackagingPurchaseRequisition
-                                                                            {
-                                                                                AccountingHeadId = t2.AccountingHeadId,
-                                                                                IssueDetailsId = t1.IssueDetailId,
-                                                                                ProductName = t5.Name + " " + t4.ProductName,
-                                                                                IssueQty = t1.RMQ,
-                                                                                AllocatedQuantity = t3.RQty,
-                                                                                CostingPrice = t1.CostingPrice,
-                                                                            }).OrderByDescending(x => x.IssueDetailsId).ToList());
+            //                                                                select new VMPackagingPurchaseRequisition
+            //                                                                {
+            //                                                                    AccountingHeadId = t2.AccountingHeadId,
+            //                                                                    IssueDetailsId = t1.IssueDetailId,
+            //                                                                    ProductName = t5.Name + " " + t4.ProductName,
+            //                                                                    IssueQty = t1.RMQ,
+            //                                                                    AllocatedQuantity = t3.RQty,
+            //                                                                    CostingPrice = t1.CostingPrice,
+            //                                                                }).OrderByDescending(x => x.IssueDetailsId).ToList());
 
 
 
@@ -5445,53 +5445,53 @@ namespace KGERP.Services.Procurement
         public async Task<VMPackagingPurchaseRequisition> GetGeneralIssueList(int companyId, long issueMasterId, CancellationToken cancellationToken = default)
         {
             VMPackagingPurchaseRequisition vmPackagingPurchaseRequisition = new VMPackagingPurchaseRequisition();
-            vmPackagingPurchaseRequisition = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IssueMasterId == issueMasterId)
-                                                                   join c in _db.Companies on t1.CompanyId equals c.CompanyId
-                                                                   join t2 in _db.Requisitions on t1.RequisitionId equals t2.RequisitionId
-                                                                   join s in _db.StockInfoes on t1.ToDepartmentId equals s.StockInfoId
-                                                                   join s1 in _db.StockInfoes on t1.FromDepartmentId equals s1.StockInfoId
-                                                                   join e in _db.Employees on t1.IssuedBy equals e.Id
-                                                                   join e1 in _db.Employees on t2.RequisitionBy equals e1.EmployeeId
-                                                                   join e2 in _db.Employees on t1.AchknologeBy equals e2.Id into emp
-                                                                   from e3 in emp.DefaultIfEmpty()
-                                                                   select new VMPackagingPurchaseRequisition
-                                                                   {
-                                                                       IssueMasterId = t1.IssueMasterId,
-                                                                       RequisitionNo = t2.RequisitionNo,
-                                                                       RequisitionDate = t2.RequisitionDate.Value,
-                                                                       RequisitionBy = e1.Name,
-                                                                       IssueDate = t1.IssueDate,
-                                                                       ToDepartmentIssueName = s.Name,
-                                                                       FromDepartmentIssueName = s1.Name,
-                                                                       ToDepartmentIssueId = t1.ToDepartmentId,
-                                                                       IssueNo = t1.IssueNo,
-                                                                       IssueBy = e.Name,
-                                                                       AchknolagementIs = t1.Achknolagement == true ? "Achknowlaged" : "Pending",
-                                                                       AchknologeByName = e3.Name,
-                                                                       AcknologeDate = t1.AcknologeDate,
-                                                                       CompanyName = c.Name,
-                                                                       CompanyId = t1.CompanyId,
-                                                                       IntregrationFrom = "IssueMasterInfo"
+            //vmPackagingPurchaseRequisition = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IssueMasterId == issueMasterId)
+            //                                                       join c in _db.Companies on t1.CompanyId equals c.CompanyId
+            //                                                       join t2 in _db.Requisitions on t1.RequisitionId equals t2.RequisitionId
+            //                                                       join s in _db.StockInfoes on t1.ToDepartmentId equals s.StockInfoId
+            //                                                       join s1 in _db.StockInfoes on t1.FromDepartmentId equals s1.StockInfoId
+            //                                                       join e in _db.Employees on t1.IssuedBy equals e.Id
+            //                                                       join e1 in _db.Employees on t2.RequisitionBy equals e1.EmployeeId
+            //                                                       join e2 in _db.Employees on t1.AchknologeBy equals e2.Id into emp
+            //                                                       from e3 in emp.DefaultIfEmpty()
+            //                                                       select new VMPackagingPurchaseRequisition
+            //                                                       {
+            //                                                           IssueMasterId = t1.IssueMasterId,
+            //                                                           RequisitionNo = t2.RequisitionNo,
+            //                                                           RequisitionDate = t2.RequisitionDate.Value,
+            //                                                           RequisitionBy = e1.Name,
+            //                                                           IssueDate = t1.IssueDate,
+            //                                                           ToDepartmentIssueName = s.Name,
+            //                                                           FromDepartmentIssueName = s1.Name,
+            //                                                           ToDepartmentIssueId = t1.ToDepartmentId,
+            //                                                           IssueNo = t1.IssueNo,
+            //                                                           IssueBy = e.Name,
+            //                                                           AchknolagementIs = t1.Achknolagement == true ? "Achknowlaged" : "Pending",
+            //                                                           AchknologeByName = e3.Name,
+            //                                                           AcknologeDate = t1.AcknologeDate,
+            //                                                           CompanyName = c.Name,
+            //                                                           CompanyId = t1.CompanyId,
+            //                                                           IntregrationFrom = "IssueMasterInfo"
 
 
-                                                                   }).FirstOrDefaultAsync(cancellationToken));
+            //                                                       }).FirstOrDefaultAsync(cancellationToken));
 
-            vmPackagingPurchaseRequisition.DataList = await Task.Run(() => (from t1 in _db.IssueDetailInfoes.Where(x => x.IssueMasterId == issueMasterId)
-                                                                            join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
-                                                                            join t5 in _db.ProductSubCategories.Where(x => x.IsActive) on t4.ProductSubCategoryId equals t5.ProductSubCategoryId
-                                                                            join t2 in _db.ProductCategories.Where(x => x.IsActive) on t5.ProductCategoryId equals t2.ProductCategoryId
-                                                                            join t3 in _db.RequisitionItemDetails.Where(x => x.IsActive) on t1.RequisitionItemDetailId equals t3.RequistionItemDetailId
+            //vmPackagingPurchaseRequisition.DataList = await Task.Run(() => (from t1 in _db.IssueDetailInfoes.Where(x => x.IssueMasterId == issueMasterId)
+            //                                                                join t4 in _db.Products.Where(x => x.IsActive) on t1.RProductId equals t4.ProductId
+            //                                                                join t5 in _db.ProductSubCategories.Where(x => x.IsActive) on t4.ProductSubCategoryId equals t5.ProductSubCategoryId
+            //                                                                join t2 in _db.ProductCategories.Where(x => x.IsActive) on t5.ProductCategoryId equals t2.ProductCategoryId
+            //                                                                join t3 in _db.RequisitionItemDetails.Where(x => x.IsActive) on t1.RequisitionItemDetailId equals t3.RequistionItemDetailId
 
 
-                                                                            select new VMPackagingPurchaseRequisition
-                                                                            {
-                                                                                AccountingHeadId = t2.AccountingHeadId,
-                                                                                IssueDetailsId = t1.IssueDetailId,
-                                                                                ProductName = t5.Name + " " + t4.ProductName,
-                                                                                AllocatedQuantity = t3.RQty,
-                                                                                IssueQty = t1.RMQ,
-                                                                                CostingPrice = t1.CostingPrice
-                                                                            }).OrderByDescending(x => x.IssueDetailsId).ToList());
+            //                                                                select new VMPackagingPurchaseRequisition
+            //                                                                {
+            //                                                                    AccountingHeadId = t2.AccountingHeadId,
+            //                                                                    IssueDetailsId = t1.IssueDetailId,
+            //                                                                    ProductName = t5.Name + " " + t4.ProductName,
+            //                                                                    AllocatedQuantity = t3.RQty,
+            //                                                                    IssueQty = t1.RMQ,
+            //                                                                    CostingPrice = t1.CostingPrice
+            //                                                                }).OrderByDescending(x => x.IssueDetailsId).ToList());
 
 
 
@@ -5505,33 +5505,33 @@ namespace KGERP.Services.Procurement
         {
             VMPackagingPurchaseRequisition vmSalesOrder = new VMPackagingPurchaseRequisition();
 
-            vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IsActive == true)
-                                                          join r in _db.Requisitions on t1.RequisitionId equals r.RequisitionId
-                                                          join e in _db.Employees on t1.IssuedBy equals e.Id
-                                                          join s in _db.StockInfoes on t1.FromDepartmentId equals s.StockInfoId
-                                                          join s1 in _db.StockInfoes on t1.ToDepartmentId equals s1.StockInfoId
-                                                          join ach in _db.Employees on t1.AchknologeBy equals ach.Id into achno
-                                                          from ach in achno.DefaultIfEmpty()
-                                                          where r.OrderDetailsId > 0 // General Requisition
-                                                          select new VMPackagingPurchaseRequisition
-                                                          {
-                                                              IssueMasterId = t1.IssueMasterId,
-                                                              IssueNo = t1.IssueNo,
-                                                              IssueDate = t1.IssueDate,
-                                                              FromDepartmentIssueId = t1.FromDepartmentId,
-                                                              ToDepartmentIssueId = t1.ToDepartmentId,
-                                                              FromDepartmentIssueName = s.Name,
-                                                              ToDepartmentIssueName = s1.Name,
-                                                              IssueBy = e.Name,
-                                                              IssueById = t1.IssuedBy,
-                                                              RequisitionNo = r.RequisitionNo,
-                                                              RequisitionId = r.RequisitionId,
-                                                              CompanyId = t1.CompanyId,
-                                                              Achknolagement = t1.Achknolagement,
-                                                              AchknologeBy = ach.Name,
-                                                              AcknologeDate = t1.AcknologeDate
+            //vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IsActive == true)
+            //                                              join r in _db.Requisitions on t1.RequisitionId equals r.RequisitionId
+            //                                              join e in _db.Employees on t1.IssuedBy equals e.Id
+            //                                              join s in _db.StockInfoes on t1.FromDepartmentId equals s.StockInfoId
+            //                                              join s1 in _db.StockInfoes on t1.ToDepartmentId equals s1.StockInfoId
+            //                                              join ach in _db.Employees on t1.AchknologeBy equals ach.Id into achno
+            //                                              from ach in achno.DefaultIfEmpty()
+            //                                              where r.OrderDetailsId > 0 // General Requisition
+            //                                              select new VMPackagingPurchaseRequisition
+            //                                              {
+            //                                                  IssueMasterId = t1.IssueMasterId,
+            //                                                  IssueNo = t1.IssueNo,
+            //                                                  IssueDate = t1.IssueDate,
+            //                                                  FromDepartmentIssueId = t1.FromDepartmentId,
+            //                                                  ToDepartmentIssueId = t1.ToDepartmentId,
+            //                                                  FromDepartmentIssueName = s.Name,
+            //                                                  ToDepartmentIssueName = s1.Name,
+            //                                                  IssueBy = e.Name,
+            //                                                  IssueById = t1.IssuedBy,
+            //                                                  RequisitionNo = r.RequisitionNo,
+            //                                                  RequisitionId = r.RequisitionId,
+            //                                                  CompanyId = t1.CompanyId,
+            //                                                  Achknolagement = t1.Achknolagement,
+            //                                                  AchknologeBy = ach.Name,
+            //                                                  AcknologeDate = t1.AcknologeDate
 
-                                                          }).OrderByDescending(x => x.IssueMasterId).AsEnumerable());
+            //                                              }).OrderByDescending(x => x.IssueMasterId).AsEnumerable());
             return vmSalesOrder;
         }
         public async Task<VMPackagingPurchaseRequisition> PackagingNotIssueItemList(int companyId)
@@ -5618,33 +5618,33 @@ namespace KGERP.Services.Procurement
         {
             VMPackagingPurchaseRequisition vmSalesOrder = new VMPackagingPurchaseRequisition();
 
-            vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IsActive == true)
-                                                          join r in _db.Requisitions on t1.RequisitionId equals r.RequisitionId
-                                                          join e in _db.Employees on t1.IssuedBy equals e.Id
-                                                          join s in _db.StockInfoes on t1.FromDepartmentId equals s.StockInfoId
-                                                          join s1 in _db.StockInfoes on t1.ToDepartmentId equals s1.StockInfoId
-                                                          join ach in _db.Employees on t1.AchknologeBy equals ach.Id into achno
-                                                          from ach in achno.DefaultIfEmpty()
-                                                          where r.OrderDetailsId == 0 // General Requisition
-                                                          select new VMPackagingPurchaseRequisition
-                                                          {
-                                                              IssueMasterId = t1.IssueMasterId,
-                                                              IssueNo = t1.IssueNo,
-                                                              IssueDate = t1.IssueDate,
-                                                              FromDepartmentIssueId = t1.FromDepartmentId,
-                                                              ToDepartmentIssueId = t1.ToDepartmentId,
-                                                              FromDepartmentIssueName = s.Name,
-                                                              ToDepartmentIssueName = s1.Name,
-                                                              IssueBy = e.Name,
-                                                              IssueById = t1.IssuedBy,
-                                                              RequisitionNo = r.RequisitionNo,
-                                                              RequisitionId = r.RequisitionId,
-                                                              CompanyId = t1.CompanyId,
-                                                              Achknolagement = t1.Achknolagement,
-                                                              AchknologeBy = ach.Name,
-                                                              AcknologeDate = t1.AcknologeDate
+            //vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IsActive == true)
+            //                                              join r in _db.Requisitions on t1.RequisitionId equals r.RequisitionId
+            //                                              join e in _db.Employees on t1.IssuedBy equals e.Id
+            //                                              join s in _db.StockInfoes on t1.FromDepartmentId equals s.StockInfoId
+            //                                              join s1 in _db.StockInfoes on t1.ToDepartmentId equals s1.StockInfoId
+            //                                              join ach in _db.Employees on t1.AchknologeBy equals ach.Id into achno
+            //                                              from ach in achno.DefaultIfEmpty()
+            //                                              where r.OrderDetailsId == 0 // General Requisition
+            //                                              select new VMPackagingPurchaseRequisition
+            //                                              {
+            //                                                  IssueMasterId = t1.IssueMasterId,
+            //                                                  IssueNo = t1.IssueNo,
+            //                                                  IssueDate = t1.IssueDate,
+            //                                                  FromDepartmentIssueId = t1.FromDepartmentId,
+            //                                                  ToDepartmentIssueId = t1.ToDepartmentId,
+            //                                                  FromDepartmentIssueName = s.Name,
+            //                                                  ToDepartmentIssueName = s1.Name,
+            //                                                  IssueBy = e.Name,
+            //                                                  IssueById = t1.IssuedBy,
+            //                                                  RequisitionNo = r.RequisitionNo,
+            //                                                  RequisitionId = r.RequisitionId,
+            //                                                  CompanyId = t1.CompanyId,
+            //                                                  Achknolagement = t1.Achknolagement,
+            //                                                  AchknologeBy = ach.Name,
+            //                                                  AcknologeDate = t1.AcknologeDate
 
-                                                          }).OrderByDescending(x => x.IssueMasterId).AsEnumerable());
+            //                                              }).OrderByDescending(x => x.IssueMasterId).AsEnumerable());
             return vmSalesOrder;
         }
 
@@ -5652,33 +5652,33 @@ namespace KGERP.Services.Procurement
         {
             VMPackagingPurchaseRequisition vmSalesOrder = new VMPackagingPurchaseRequisition();
 
-            vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IsActive == true)
-                                                          join r in _db.Requisitions on t1.RequisitionId equals r.RequisitionId
-                                                          join e in _db.Employees on t1.IssuedBy equals e.Id
-                                                          join s in _db.StockInfoes on t1.FromDepartmentId equals s.StockInfoId
-                                                          join s1 in _db.StockInfoes on t1.ToDepartmentId equals s1.StockInfoId
-                                                          join ach in _db.Employees on t1.AchknologeBy equals ach.Id into achno
-                                                          from ach in achno.DefaultIfEmpty()
-                                                          where !t1.Achknolagement
-                                                          select new VMPackagingPurchaseRequisition
-                                                          {
-                                                              IssueMasterId = t1.IssueMasterId,
-                                                              IssueNo = t1.IssueNo,
-                                                              IssueDate = t1.IssueDate,
-                                                              FromDepartmentIssueId = t1.FromDepartmentId,
-                                                              ToDepartmentIssueId = t1.ToDepartmentId,
-                                                              FromDepartmentIssueName = s.Name,
-                                                              ToDepartmentIssueName = s1.Name,
-                                                              IssueBy = e.Name,
-                                                              IssueById = t1.IssuedBy,
-                                                              RequisitionNo = r.RequisitionNo,
-                                                              RequisitionId = r.RequisitionId,
-                                                              CompanyId = t1.CompanyId,
-                                                              Achknolagement = t1.Achknolagement,
-                                                              AchknologeBy = ach.Name,
-                                                              AcknologeDate = t1.AcknologeDate
+            //vmSalesOrder.DataList = await Task.Run(() => (from t1 in _db.IssueMasterInfoes.Where(x => x.CompanyId == companyId && x.IsActive == true)
+            //                                              join r in _db.Requisitions on t1.RequisitionId equals r.RequisitionId
+            //                                              join e in _db.Employees on t1.IssuedBy equals e.Id
+            //                                              join s in _db.StockInfoes on t1.FromDepartmentId equals s.StockInfoId
+            //                                              join s1 in _db.StockInfoes on t1.ToDepartmentId equals s1.StockInfoId
+            //                                              join ach in _db.Employees on t1.AchknologeBy equals ach.Id into achno
+            //                                              from ach in achno.DefaultIfEmpty()
+            //                                              where !t1.Achknolagement
+            //                                              select new VMPackagingPurchaseRequisition
+            //                                              {
+            //                                                  IssueMasterId = t1.IssueMasterId,
+            //                                                  IssueNo = t1.IssueNo,
+            //                                                  IssueDate = t1.IssueDate,
+            //                                                  FromDepartmentIssueId = t1.FromDepartmentId,
+            //                                                  ToDepartmentIssueId = t1.ToDepartmentId,
+            //                                                  FromDepartmentIssueName = s.Name,
+            //                                                  ToDepartmentIssueName = s1.Name,
+            //                                                  IssueBy = e.Name,
+            //                                                  IssueById = t1.IssuedBy,
+            //                                                  RequisitionNo = r.RequisitionNo,
+            //                                                  RequisitionId = r.RequisitionId,
+            //                                                  CompanyId = t1.CompanyId,
+            //                                                  Achknolagement = t1.Achknolagement,
+            //                                                  AchknologeBy = ach.Name,
+            //                                                  AcknologeDate = t1.AcknologeDate
 
-                                                          }).OrderByDescending(x => x.IssueMasterId).AsEnumerable());
+            //                                              }).OrderByDescending(x => x.IssueMasterId).AsEnumerable());
             return vmSalesOrder;
         }
 
