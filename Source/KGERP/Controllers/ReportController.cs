@@ -2656,6 +2656,20 @@ namespace KGERP.Controllers
             return View();
         }
 
+        public ActionResult SeedCategoryAndTerritoryWiseCollectionReport(int companyId)
+        {
+            Session["CompanyId"] = companyId;
+            ReportCustomModel cm = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+            };
+            return View(cm);
+        }
+
 
         [HttpGet]
 
@@ -2683,6 +2697,30 @@ namespace KGERP.Controllers
             WebClient client = new WebClient();
             client.Credentials = nwc;
             model.ReportName = "ISSProductionReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", model.ReportName + ".doc");
+            }
+            return View();
+        }
+
+        [HttpGet]
+
+        public ActionResult SeedCategoryAndTerritoryWiseCollectionView(ReportCustomModel model)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            model.ReportName = "ISSSeedCategoryAndTerritoryWiseCollectionReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
             if (model.ReportType.Equals(ReportType.EXCEL))
             {

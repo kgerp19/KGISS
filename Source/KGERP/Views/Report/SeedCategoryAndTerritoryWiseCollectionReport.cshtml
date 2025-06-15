@@ -1,0 +1,231 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+@{
+    ViewBag.Title = "Seed Category And Territory Wise Collection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <h1>
+        <i class="fa fa-file-text"></i> Seed Category And Territory Wise Collection
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li><a href="#"><i class="fa fa-file"></i> Reports</a></li>
+        <li class="active">Seed Category Collection</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">Report Parameters</h3>
+        </div>
+        <div class="box-body">
+            @using (Html.BeginForm("SeedCategoryAndTerritoryWiseCollectionView", "Report", FormMethod.Get, new { @id = "idForm" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.CompanyId, new { @id = "hfCompanyId" })
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">From Date <span class="text-danger">*</span></label>
+                                <div class="input-group date">
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off", required = "required" } })
+                                   
+                                </div>
+                                @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">To Date <span class="text-danger">*</span></label>
+                                <div class="input-group date">
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off", required = "required" } })
+                                   
+                                </div>
+                                @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Export Format</label>
+                                <div class="input-group">
+                                    <select class="form-control" name="ReportType" id="ReportType">
+                                        <option value="PDF">PDF</option>
+                                        <option value="EXCEL">Excel</option>
+                                        <option value="WORD">Word</option>
+                                    </select>
+                                    <span class="input-group-btn">
+                                        <button type="submit" id="btnExport" name="EXPORT" class="btn btn-success" formtarget="_blank">
+                                            <i class="fa fa-download"></i> Export
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<div id="loadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <i class="fa fa-spinner fa-spin fa-3x"></i>
+        <div class="loading-text">Generating Report...</div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/cssjqryUi")
+    <style>
+        .box {
+            position: relative;
+            border-radius: 3px;
+            background: #ffffff;
+            border-top: 3px solid #3c8dbc;
+            margin-bottom: 20px;
+            width: 100%;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .box-header {
+            color: #444;
+            display: block;
+            padding: 10px;
+            position: relative;
+            border-bottom: 1px solid #f4f4f4;
+        }
+
+        .box-header.with-border {
+            border-bottom: 1px solid #f4f4f4;
+        }
+
+        .box-title {
+            display: inline-block;
+            font-size: 18px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .box-body {
+            border-radius: 0 0 3px 3px;
+            padding: 20px;
+        }
+
+
+
+        .form-control {
+            border-radius: 0;
+            box-shadow: none;
+            border-color: #ddd;
+        }
+
+        .form-control:focus {
+            border-color: #3c8dbc;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background-color: #00a65a;
+            border-color: #008d4c;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .loading-text {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        @@media (max-width: 767px) {
+            .col-md-4 {
+                margin-bottom: 15px;
+            }
+
+            .input-group-btn {
+                display: block;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    <script>
+        $(document).ready(function () {
+            // Initialize datepicker with improved styling
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50",
+                beforeShow: function (input, inst) {
+                    inst.dpDiv.css({
+                        marginTop: '10px',
+                        marginLeft: '-10px'
+                    });
+                }
+            });
+
+            @*// Form validation and loading overlay
+            $('#idForm').on('submit', function(e) {
+                var fromDate = $('#@Html.IdFor(m => m.StrFromDate)').val();
+                var toDate = $('#@Html.IdFor(m => m.StrToDate)').val();
+
+                if (!fromDate || !toDate) {
+                    e.preventDefault();
+                    alert('Please select both From Date and To Date');
+                    return false;
+                }
+
+                $('#loadingOverlay').fadeIn(200);
+                setTimeout(function() {
+                    $('#loadingOverlay').fadeOut(200);
+                }, 2000);
+            });
+
+            // Date validation
+            $('#@Html.IdFor(m => m.StrToDate)').change(function() {
+                var fromDate = $('#@Html.IdFor(m => m.StrFromDate)').datepicker('getDate');
+                var toDate = $(this).datepicker('getDate');
+
+                if (fromDate && toDate && toDate < fromDate) {
+                    alert('To Date must be greater than or equal to From Date');
+                    $(this).val('');
+                }
+            });*@
+        });
+    </script>
+}
