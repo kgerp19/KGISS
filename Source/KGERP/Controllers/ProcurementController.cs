@@ -122,6 +122,7 @@ namespace KG.App.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
         public JsonResult GetAutoCompleteSCustomer(string prefix, int companyId)
         {
             var products = _service.GetAutoCompleteCustomer(prefix, companyId);
@@ -1632,6 +1633,42 @@ namespace KG.App.Controllers
             }
             return View(vmPurchaseOrderSlave);
         }
+
+        [HttpGet]
+        public async Task<ActionResult> PromotionalItemInvoice(int companyId = 0, int IssueMasterId = 0)
+        {
+            IssueDetailInfoVM IssueDetailInfoVM = new IssueDetailInfoVM();
+
+            if (IssueMasterId > 0)
+            {
+                IssueDetailInfoVM = await _service.PromotionalItemInvoiceGet(companyId, IssueMasterId);
+            }
+            IssueDetailInfoVM.CompanyFK = companyId;
+            return View(IssueDetailInfoVM);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PromotionalItemInvoice(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            if (issueDetailInfoVM.ActionEum == ActionEnum.Add)
+            {
+                if (issueDetailInfoVM.IssueMasterId == 0)
+                {
+                    issueDetailInfoVM.IssueMasterId = await _service.PromotionalItemInvoiceAdd(issueDetailInfoVM);
+                }
+                else
+                {
+                    await _service.PromotionalItemInvoiceChildAdd(issueDetailInfoVM);
+                }
+            }
+            else if (issueDetailInfoVM.ActionEum == ActionEnum.Edit)
+            {
+                await _service.PromotionalItemInvoiceChildEdit(issueDetailInfoVM);
+            }
+
+            return RedirectToAction(nameof(PromotionalItemInvoice), new { companyId = issueDetailInfoVM.CompanyFK, IssueMasterId = issueDetailInfoVM.IssueMasterId });
+        }
+
         [HttpPost]
         [ValidateInput(false)]
         public async Task<ActionResult> PackagingPurchaseOrderSlave(VMPurchaseOrderSlave vmPurchaseOrderSlave)

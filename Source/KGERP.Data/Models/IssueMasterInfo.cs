@@ -27,6 +27,7 @@ namespace KGERP.Data.Models
         public int VendorId { get; set; }
         public int CompanyId { get; set; }
         public string Remarks { get; set; }
+        public bool IsSubmit { get; set; }
         public string CreatedBy { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string ModifedBy { get; set; }
