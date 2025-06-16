@@ -219,6 +219,7 @@ namespace KGERP.Data.CustomModel
         }
         public string SupplierName { get; set; }
         public string CustomerName { get; set; }
+        public string SubzoneName { get; set; }
         public string CompanyName { get; set; }
 
         public int? SubZoneFk { get; set; }

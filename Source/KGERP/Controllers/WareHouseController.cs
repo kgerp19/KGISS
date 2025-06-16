@@ -745,6 +745,16 @@ namespace KGERP.Controllers
             return PartialView("_OrderDetailsDataPartial", model);
         }
 
+        public ActionResult GetOrderDeliveryDetailsDataPartial(long orderDeliveryId)
+        {
+            var model = new VMOrderDeliverDetailDataPartial();
+            if (orderDeliveryId > 0)
+            {
+                model.DataToList = _service.GetOrderDeliveryDetails(orderDeliveryId);
+            }
+            return PartialView("_OrderDeliverDetailDataPartial", model);
+        }
+
 
         public ActionResult GetFeedOrderDetailsPartial(int poId)
         {
@@ -777,6 +787,8 @@ namespace KGERP.Controllers
         }
 
 
+
+
         [HttpGet]
         public async Task<ActionResult> WareHouseOrderDeliverDetail(int companyId, int orderDeliverId = 0)
         {
@@ -793,6 +805,9 @@ namespace KGERP.Controllers
 
             return View(vmOrderDeliverDetail);
         }
+
+
+
 
         [HttpPost]
         public async Task<ActionResult> WareHouseOrderDeliverDetail(VMOrderDeliverDetail vmModel, VMOrderDeliverDetailPartial vmModelList)
@@ -831,6 +846,53 @@ namespace KGERP.Controllers
             return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId });
         }
 
+
+        [HttpGet]
+        public async Task<ActionResult> Salestransfer(int companyId, long salesTransfer = 0)
+        {
+            SalesTransferDetailVM SalesTransferDetail = new SalesTransferDetailVM();
+            if (salesTransfer == 0)
+            {
+                
+                SalesTransferDetail.CustomerList = new SelectList(_procurementService.CustomerLisByCompany(companyId), "Value", "Text");
+            }
+            else if (salesTransfer > 0)
+            {
+                SalesTransferDetail = await _service.WareHouseSalesTranserDetailGet(companyId, salesTransfer);
+            }
+            SalesTransferDetail.CompanyFK = companyId;
+
+
+
+
+            return View(SalesTransferDetail);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Salestransfer(SalesTransferDetailVM vmModel, VMOrderDeliverDetailDataPartial vmModelList)
+        {
+            if (vmModel.ActionEum == ActionEnum.Add)
+            {
+                if (vmModel.SalesTransferId == 0)
+                {
+                    vmModel.SalesTransferId = await _service.WareHouseSalestransferAdd(vmModel, vmModelList);
+                }
+                
+
+            }
+
+            else if (vmModel.ActionEum == ActionEnum.Finalize)
+            {
+                await _service.SubmitSalesTranser(vmModel);
+            }
+            else
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            return RedirectToAction(nameof(Salestransfer), new { companyId = vmModel.CompanyFK, salesTransfer = vmModel.SalesTransferId });
+        }
+
         [HttpPost]
         public async Task<ActionResult> OrderDeliverDetailIdDelete(VMOrderDeliverDetail vMOrderDeliverDetail)
         {
@@ -839,10 +901,24 @@ namespace KGERP.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> SalesTransferDetailDelete(SalesTransferDetailVM salesTransferDetailVM)
+        {
+            salesTransferDetailVM.SalesTransferId = await _service.SalesTransferDetailDelete(salesTransferDetailVM.SalesTransferDetailsId);
+            return RedirectToAction(nameof(Salestransfer), new { companyId = salesTransferDetailVM.CompanyFK, salesTransfer = salesTransferDetailVM.SalesTransferId });
+        }
+
+        [HttpPost]
         public async Task<ActionResult> OrderDeliverDetailUpdate(VMOrderDeliverDetail vMOrderDeliverDetail)
         {
             vMOrderDeliverDetail.OrderDeliverId = await _service.OrderDeliveryUpdate(vMOrderDeliverDetail.OrderDeliverDetailId, vMOrderDeliverDetail.DeliveredQty);
             return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vMOrderDeliverDetail.CompanyFK, orderDeliverId = vMOrderDeliverDetail.OrderDeliverId });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SalesTransferDetailUpdate(SalesTransferDetailVM salesTransferDetailVM)
+        {
+            salesTransferDetailVM.SalesTransferId = await _service.SalesTransferDetailUpdate(salesTransferDetailVM.SalesTransferDetailsId, salesTransferDetailVM.TransferQuantity.Value);
+            return RedirectToAction(nameof(Salestransfer), new { companyId = salesTransferDetailVM.CompanyFK, salesTransfer = salesTransferDetailVM.SalesTransferId });
         }
 
         [HttpGet]
@@ -921,6 +997,31 @@ namespace KGERP.Controllers
 
 
             return View(vmOrderDeliver);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> SalestransferList(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+            SalesTransferDetailVM vmOrderDeliver = new SalesTransferDetailVM();
+            vmOrderDeliver = await _service.WareHouseSalesTransferGet(companyId, fromDate, toDate);
+
+
+            vmOrderDeliver.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            vmOrderDeliver.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+
+
+            return View(vmOrderDeliver);
+        }
+
+        [HttpPost]
+        public ActionResult SalestransferList(SalesTransferDetailVM vmOrderDeliver)
+        {
+            vmOrderDeliver.FromDate = Convert.ToDateTime(vmOrderDeliver.StrFromDate);
+            vmOrderDeliver.ToDate = Convert.ToDateTime(vmOrderDeliver.StrToDate);
+            return RedirectToAction(nameof(SalestransferList), new { companyId = vmOrderDeliver.CompanyFK, fromDate = vmOrderDeliver.FromDate, toDate = vmOrderDeliver.ToDate });
         }
 
         [HttpPost]
@@ -1707,7 +1808,6 @@ namespace KGERP.Controllers
                 }
 
                 await _service.PackagingPOReceivingSlaveAdd(vmModel, vmModelList);
-                
 
             }
             else if (vmModel.ActionEum == ActionEnum.Finalize)

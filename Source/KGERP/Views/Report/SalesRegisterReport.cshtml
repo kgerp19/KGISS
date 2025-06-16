@@ -7,7 +7,7 @@
 
 }
 <style type="text/css">
-   
+
     input, select, textarea {
         max-width: 100%;
     }
@@ -15,9 +15,10 @@
 
 
 <style type="text/css">
-    .calender-width{
+    .calender-width {
         width: 80%;
     }
+
     input, select, textarea {
         max-width: 100%;
     }
@@ -48,37 +49,49 @@
                             @Html.HiddenFor(model => model.ReportName, new { id = "ReportName" })
 
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
                                         <br />
                                         <div style="display:flex">
-                                        @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
-                                        @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                                            @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                                            @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
                                         </div>
 
                                     </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            @Html.Label("ToDate", htmlAttributes: new { @class = "control-label" })
-                                            <br />
-                                            @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker form-control calender-width", @autocomplete = "off" } })
-                                            @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
-                                        </div>  
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group" style="padding:0px">
-                                            <label>Customer</label>
-                                            @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Customer Name", @id = "txtCustomerName" } })
-
-                                            @Html.HiddenFor(model => model.VendorId, new { id = "ddlCommon_CustomerFK" })
-                                            @Html.ValidationMessageFor(model => model.VendorId, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        @Html.Label("ToDate", htmlAttributes: new { @class = "control-label" })
+                                        <br />
+                                        @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker form-control calender-width", @autocomplete = "off" } })
+                                        @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Subzone</label>
+                                        @Html.EditorFor(model => model.SubzoneName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Subzone Name", @id = "txtSubzoneName" } })
+                                        @Html.HiddenFor(model => model.SubZoneId, new { id = "subzoneId" }) <!-- Hidden field for SubzoneId -->
+                                        @Html.HiddenFor(model => model.VendorId, new { id = "ddlCommon_CustomerFK" })
+                                        @Html.ValidationMessageFor(model => model.VendorId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group" style="padding:0px">
+                                        <label>Customer</label>
+                                        <!-- Use a select dropdown for customers -->
+                                        <select id="ddlCustomer" name="CustomerId" class="form-control">
+                                            <option value="">Select a Customer</option>
+                                        </select>
+                                        @Html.HiddenFor(model => model.VendorId, new { id = "ddlCustomer" })
+                                        @Html.ValidationMessageFor(model => model.VendorId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-4">
@@ -140,120 +153,191 @@
 @Styles.Render("~/Content/cssjqryUi")
 
 <script>
-
-
     $(document).ready(function () {
-
+        $("#ddlCustomer").select2();
+        // Datepicker initialization
         $('.datepicker').datepicker({
             dateFormat: "mm/dd/yy",
-                    showOn: 'both',
-                    changeMonth: true,
-                    changeYear: true,
+            showOn: 'both',
+            changeMonth: true,
+            changeYear: true,
             yearRange: "2001:+50"
         });
-            });
- 
 
-        $(document).ready(function () {
-
-             //$('.formValidator').bootstrapValidator();
-
-             $("#ddlCommon_ProductCategoryFk").change(function () {
-
-                var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
-                     $.ajax({
+        // Product Category change event
+        $("#ddlCommon_ProductCategoryFk").change(function () {
+            var productCategoryFk = $("#ddlCommon_ProductCategoryFk").val();
+            $.ajax({
                 type: "GET",
                 url: "@Url.Action("GetCommonProductSubCategory", "WareHouse")",
                 datatype: "Json",
-                         data: { id: productCategoryFk},
-                    success: function (data) {
-                    var items = "";
-                        if (data) {
-                            $("#ddlCommonProductSubCategoryFk").empty();
-                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
-                            $(data).each(function (index, item) {
-                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
-                            });
-
-                        }
+                data: { id: productCategoryFk },
+                success: function (data) {
+                    if (data) {
+                        $("#ddlCommonProductSubCategoryFk").empty();
+                        $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                        $(data).each(function (index, item) {
+                            $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                        });
                     }
-                });
-            })
-
-
-            $("#ddlCommonProductSubCategoryFk").change(function () {
-
-                var productSubCategoryFk = $("#ddlCommonProductSubCategoryFk").val();
-                     $.ajax({
-                type: "GET",
-                url: "@Url.Action("GetCommonProduct", "WareHouse")",
-                datatype: "Json",
-                         data: {  id : productSubCategoryFk},
-                    success: function (data) {
-                    var items = "";
-                        if (data) {
-                            $("#ddlCommonProductFk").empty();
-                            $("#ddlCommonProductFk").append("<option value=''>==Select Item==</option>");
-                            $(data).each(function (index, item) {
-                                $("#ddlCommonProductFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
-                            });
-
-                        }
-                    }
-                });
-            })
-
-
-$("#txtCustomerName").autocomplete({
-                source: function (request, response) {
-                    //console.log(request);
-                    //console.log(response);
-
-                    $.ajax({
-                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
-                        //data: "{ 'prefix': '" + request.term + "'}",
-                        data: { prefix: request.term, companyId: "@Model.CompanyId" },
-                        dataType: "json",
-                        type: "get",
-                        cache: true,
-                        contentType: "application/json; charset=utf-8",
-                        success: function (data) {
-                           response($.map(data, function (item) {
-                               return item;
-                           }))
-                        },
-                        error: function (response) {
-                                                                        //alert(response.responseText);
-                        },
-                        failure: function (response) {
-                                                                        //alert(response.responseText);
-                        }
-                    });
                 },
-
-                select: function (e, i) {
-                    $("#ddlCommon_CustomerFK").val(i.item.val);
-
-                    },
-                minLength: 1,
-                cache: true
-
-            }).focus(function () {
-                $(this).autocomplete("search");
+                error: function () {
+                    console.error("Error occurred while fetching subcategories");
+                }
             });
+        });
 
+        @*$("#txtCustomerName").autocomplete({
+            source: function (request, response) {
+                //console.log(request);
+                //console.log(response);
 
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                    //data: "{ 'prefix': '" + request.term + "'}",
+                    data: { prefix: request.term, companyId: "@Model.CompanyId" },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }))
+                    },
+                    error: function (response) {
+                        //alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        //alert(response.responseText);
+                    }
+                });
+            },
 
+            select: function (e, i) {
+                $("#ddlCommon_CustomerFK").val(i.item.val);
+
+            },
+            minLength: 1,
+            cache: true
+
+        }).focus(function () {
+            $(this).autocomplete("search");
         });
 
 
+
+    });*@
+
+        // Product Subcategory change event
+        $("#ddlCommonProductSubCategoryFk").change(function () {
+            var productSubCategoryFk = $("#ddlCommonProductSubCategoryFk").val();
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetCommonProduct", "WareHouse")",
+                datatype: "Json",
+                data: { id: productSubCategoryFk },
+                success: function (data) {
+                    if (data) {
+                        $("#ddlCommonProductFk").empty();
+                        $("#ddlCommonProductFk").append("<option value=''>==Select Item==</option>");
+                        $(data).each(function (index, item) {
+                            $("#ddlCommonProductFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                        });
+                    }
+                },
+                error: function () {
+                    console.error("Error occurred while fetching products for the selected subcategory");
+                }
+            });
+        });
+
+
+        $("#txtSubzoneName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteSSubZone", "Procurement")",  // Ensure the action name is wrapped correctly
+                    data: {
+                        prefix: request.term,  // Subzone search term
+                        companyId: "@Model.CompanyId"  // Company ID from your model
+                    },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.label,  // Display name in the autocomplete dropdown
+                                value: item.label,  // Value to be set on selection
+                                val: item.val  // Unique identifier for Subzone
+                            };
+                        }));
+                    },
+                    error: function () {
+                        console.error("Error occurred while fetching subzones");
+                    }
+                });
+            },
+            select: function (e, i) {
+                // When a subzone is selected, populate the hidden field with SubzoneId
+                $("#subzoneId").val(i.item.val);
+
+                // Now, filter the customers based on the selected SubzoneId
+                filterCustomersBySubzone(i.item.val);
+            },
+            minLength: 1,  // Minimum number of characters before starting autocomplete
+            cache: true
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+
+        // Function to filter customers based on selected subzone
+function filterCustomersBySubzone(subzoneId) {
+    $.ajax({
+        url: "@Url.Action("GetAutoCompleteSCustomerBySz", "Procurement")",  // Ensure the action name is wrapped correctly
+        data: {
+            SubZoneId: subzoneId  // Pass the selected SubZoneId
+        },
+        dataType: "json",
+        type: "get",
+        success: function (data) {
+
+            // Clear the existing options
+            $("#ddlCustomer").empty();
+
+            // Add a default "Select a Customer" option
+            $("#ddlCustomer").append('<option value="">Select a Customer</option>');
+
+            // Populate the dropdown with customer options
+            $.each(data, function (index, item) {
+                $("#ddlCustomer").append('<option value="' + item.val + '">' + item.label + '</option>');
+                console.log(item.val); // Logs the value of each customer (useful for debugging)
+            });
+
+        },
+        error: function () {
+            console.error("Error occurred while fetching customers for the selected subzone");
+        }
+    });
+}
+
+// Capture the selected customer value when the user makes a selection
+$("#ddlCustomer").change(function () {
+    var selectedCustomerId = $(this).val();  // Get the selected customer ID
+    console.log("Selected Customer ID: " + selectedCustomerId);  // Log it (or handle it accordingly)
+
+    // Optionally, you could set a hidden field or update other fields based on the selected customer
+    // Example: Set a hidden input field to the selected value
+    $('#ddlCustomerddlCustomer').val(selectedCustomerId);
+});
+
+
+        // Reset form
         function resetForm() {
             $('#salesReportformId')[0].reset();
         }
-
-
-
-
+    });
 </script>
 
 

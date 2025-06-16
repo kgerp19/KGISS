@@ -126,6 +126,17 @@ namespace KG.App.Controllers
             var products = _service.GetAutoCompleteCustomer(prefix, companyId);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult GetAutoCompleteSSubZone(string prefix, int companyId)
+        {
+            var products = _service.GetAutoSubZone(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetAutoCompleteSCustomerBySz(int SubZoneId)
+        {
+            var products = _service.GetAutoCompleteCustomerBySz(SubZoneId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<JsonResult> SingleDemandItem(int id)
         {
@@ -902,10 +913,18 @@ namespace KG.App.Controllers
         {
 
             var vmCommonProductSubCategory = await Task.Run(() => _service.CustomerLisBySubZonetGet(subZoneId));
-            var list = vmCommonProductSubCategory.Select(x => new { Value = x.ID, Text = x.Name }).ToList();
+            var list = vmCommonProductSubCategory.Select(x => new { Value = x.ID, Text = x.Name}).ToList();
             return Json(list, JsonRequestBehavior.AllowGet);
         }
 
+
+        public async Task<ActionResult> OrderDelivieryListByOrderMaster(long orderMasterId)
+        {
+
+            var vmCommonProductSubCategory = await Task.Run(() => _service.OrderDelivieryListByOrderMaster(orderMasterId));
+            var list = vmCommonProductSubCategory.Select(x => new { Value = x.OrderDeliverId, Text = x.ChallanNo }).ToList();
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
 
 
         public async Task<ActionResult> CustomerLisByZonetGet(int zoneId)
@@ -1005,7 +1024,7 @@ namespace KG.App.Controllers
                     vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterRawAdd(vmSalesOrderSlave);
 
                 }
-                await _service.OrderDetailAdd(vmSalesOrderSlave);
+                await _service.OrderDetailRawAdd(vmSalesOrderSlave);
             }
             if (vmSalesOrderSlave.PromotionalOfferId > 0)
             {
@@ -1198,6 +1217,11 @@ namespace KG.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult ProductStockByProductDeliver(int companyId, int productId,string Lotnumber)
+        {
+            var model = _service.ProductStockByProductGetOrderDeliver(companyId, productId, Lotnumber);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult RMProductStockByProductGet(int companyId, int productId)
         {
             var model = _service.RMProductStockByProductGet(companyId, productId);

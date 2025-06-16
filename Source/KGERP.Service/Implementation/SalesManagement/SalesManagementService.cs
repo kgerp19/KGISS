@@ -41,6 +41,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                     Title = model.AchievementTitle,
                     FromDate = model.FromDate,
                     ToDate = model.ToDate,
+                    CompanyId=model.CompanyId,
                     CreatedDate = DateTime.Now,
                     IsActive = true,
                     CreatedBy = Common.GetUserId()
@@ -79,6 +80,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                     achievement.FromDate = model.FromDate;
                     achievement.ToDate = model.ToDate;
                     achievement.ModifiedBy = Common.GetUserId();
+                    achievement.ModifiedDate = DateTime.Now.ToString();
                     await _dbContext.SaveChangesAsync();
                     return achievement.KGSalesId;
                 }
@@ -167,9 +169,9 @@ namespace KGERP.Service.Implementation.SalesManagement
                 Text = p.Title
             }).ToList();
         }
-        public IEnumerable<SelectListItem> GetDDLCompany()
+        public IEnumerable<SelectListItem> GetDDLCompany(int companyId)
         {
-            return _dbContext.Companies.Where(x => x.IsActive == true).Select(p => new SelectListItem
+            return _dbContext.Companies.Where(x => x.IsActive == true && x.CompanyId== companyId).Select(p => new SelectListItem
             {
                 Value = p.CompanyId.ToString(),
                 Text = p.Name
@@ -415,7 +417,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                            join t2 in _dbContext.KGCompanySaleTergets on t1.KGSalesId equals t2.KGSalesId
                            join t3 in _dbContext.KGCompanyMonthlySaleTergets on t2.KGCompanySaleTergetId equals t3.KGCompanySaleTergetId
                            join t4 in _dbContext.Units on t3.UnitId equals t4.UnitId
-                           where t3.KGCompanyMonthlySaleTergetId == KGCompanyMonthlySaleTergetId && t1.IsActive == true
+                           where t3.KGCompanyMonthlySaleTergetId == KGCompanyMonthlySaleTergetId && t1.IsActive == true && t1.CompanyId== CompanyId
                            select new KGSalesAchivementDetailVm
                            {
                                MonthlySalesTergetedAmount = t3.MonthlySalesTergetedAmount,
@@ -433,7 +435,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                                     join t3 in _dbContext.KGCompanySaleTergets on t2.KGCompanySaleTergetId equals t3.KGCompanySaleTergetId
                                     join t4 in _dbContext.KGSalesAchivements on t3.KGSalesId equals t4.KGSalesId
                                     join t5 in _dbContext.Employees on t1.EmployeeId equals t5.Id
-                                    join t6 in _dbContext.PRoll_SalaryConfiguration on t1.EmployeeId equals t6.EmployeeId
+                                    //join t6 in _dbContext.PRoll_SalaryConfiguration on t1.EmployeeId equals t6.EmployeeId
                                     join t7 in _dbContext.Units on t2.UnitId equals t7.UnitId
                                     where t1.KGCompanyMonthlySaleTergetId == KGCompanyMonthlySaleTergetId && t1.IsActive
                                     select new KGSalesAchivementDetailVm
@@ -442,7 +444,7 @@ namespace KGERP.Service.Implementation.SalesManagement
                                         EmployeeId = t1.EmployeeId,
                                         KgId = t5.EmployeeId,
                                         EmName = t5.Name,
-                                        Salary = t6.Gross,
+                                        //Salary = t6.Gross,
                                         SalesTargetQuantity = t1.SalesTargetQty,
                                         SalesTargetAount = t1.SalesTargetAmount,
                                         SalesAchievementAmount = t1.SalesAchievementAmount,
@@ -511,14 +513,14 @@ namespace KGERP.Service.Implementation.SalesManagement
             model.offcierAssignsList = await (
                 from t1 in _dbContext.OfficerAssigns
                 join t2 in _dbContext.Employees on t1.EmpId equals t2.Id
-                join t3 in _dbContext.PRoll_SalaryConfiguration on t1.EmpId equals t3.EmployeeId
+                //join t3 in _dbContext.PRoll_SalaryConfiguration on t1.EmpId equals t3.EmployeeId
                 where t1.CompanyId == CompanyId && t1.IsActive
                 select new OffcierAssignVm
                 {
                     EmployeeId = t2.EmployeeId,
                     EmployeeName = t2.Name,
                     Id = t2.Id,
-                    Salary = t3.Gross
+                    //Salary = t3.Gross
                 }).ToListAsync();
 
 
@@ -538,29 +540,29 @@ namespace KGERP.Service.Implementation.SalesManagement
 
 
 
-            var totalsalary = model.offcierAssignsList.Sum(item => item.Salary);
-            foreach (var item in model.offcierAssignsList)
-            {
-                if (totalsalary != 0)
-                {
-                    var multiply = item.Salary * model.MonthlySalesTergetedAmount;
-                    item.EmpTarget = multiply / totalsalary;
-                    item.EmpTarget = Math.Round(item.EmpTarget, 2);
-                    var multyplyqty=item.Salary * model.SalesTargetQuantity;
-                    item.TargetQty = multyplyqty/ totalsalary;
-                    item.TargetQty = Math.Round(item.TargetQty, 2);
-                    var targetcollectionamount=item.Salary * model.MonthlyCollectionTergetedAmount;
-                    item.TargetCollection=targetcollectionamount/ totalsalary;
-                    item.TargetCollection= Math.Round(item.TargetCollection, 2);
+            //var totalsalary = model.offcierAssignsList.Sum(item => item.Salary);
+            //foreach (var item in model.offcierAssignsList)
+            //{
+            //    if (totalsalary != 0)
+            //    {
+            //        var multiply = item.Salary * model.MonthlySalesTergetedAmount;
+            //        item.EmpTarget = multiply / totalsalary;
+            //        item.EmpTarget = Math.Round(item.EmpTarget, 2);
+            //        var multyplyqty=item.Salary * model.SalesTargetQuantity;
+            //        item.TargetQty = multyplyqty/ totalsalary;
+            //        item.TargetQty = Math.Round(item.TargetQty, 2);
+            //        var targetcollectionamount=item.Salary * model.MonthlyCollectionTergetedAmount;
+            //        item.TargetCollection=targetcollectionamount/ totalsalary;
+            //        item.TargetCollection= Math.Round(item.TargetCollection, 2);
 
 
-                }
-                else
-                {
-                    item.EmpTarget = 0;
-                    item.TargetQty= 0;
-                }
-            }
+            //    }
+            //    else
+            //    {
+            //        item.EmpTarget = 0;
+            //        item.TargetQty= 0;
+            //    }
+            //}
             return model;
 
         }
@@ -596,8 +598,9 @@ namespace KGERP.Service.Implementation.SalesManagement
                             CreatedDate = DateTime.Now,
                             SalesTargetAmount = empTarget.EmpTarget,
                             SalesTargetQty = empTarget.TargetQty,
-                            TargetCollectionAmount=empTarget.TargetCollection
-                            
+                            TargetCollectionAmount=empTarget.TargetCollection,
+                            CompanyId= empTarget.CompanyId
+
 
                         };
 

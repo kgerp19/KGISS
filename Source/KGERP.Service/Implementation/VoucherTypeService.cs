@@ -96,7 +96,7 @@ namespace KGERP.Service.Implementation
             };
             selectModelLiat.Add(selectModel);
 
-            var v = context.ProductCategories.Where(x => x.CompanyId == companyId).ToList()
+            var v = context.ProductCategories.Where(x => x.CompanyId == companyId && x.IsActive).ToList()
                 .Select(x => new SelectModel()
                 {
                     Text = x.Name,

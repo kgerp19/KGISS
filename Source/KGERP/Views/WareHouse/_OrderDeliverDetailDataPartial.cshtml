@@ -1,0 +1,249 @@
+﻿@model KGERP.Services.WareHouse.VMOrderDeliverDetailDataPartial
+@using KG.Core.Services
+
+@{
+
+    decimal TotalGrossAmount = 0;
+    decimal TotalUnitDiscount = 0;
+    decimal TotalSpecialDiscount = 0;
+    decimal TotalAmount = 0;
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        @{
+            int styleScheduleCount = Model.DataToList.Count();
+            if (styleScheduleCount > 0)
+            {
+                <div class="table-responsive">
+                    <table id="datatableid" class="table table-bordered text-nowrap">
+                        <thead>
+                                    <tr class="bg-success">
+                                        <th>SL</th>
+                                        <th><input type="checkbox" id="select_all" />&nbsp;Check All</th>
+                                        <th>Product Name</th>
+                                        <th>Lot Number</th>
+
+                                        <th class="center">
+                                            Transferred Qty.
+                                        </th>
+
+                                        <th class="center">
+                                            Transer Qty.
+                                        </th>
+                                        <th class="center">
+                                            Delivery Qty.
+                                        </th>
+                                        <th class="center">
+                                            Pack Size
+                                        </th>
+                                        <th class="center">
+                                            Quantity (KG)
+                                        </th>
+                                        <th class="center">
+                                            Qty in Pack
+                                        </th>
+                                        <th class="center">
+                                            Unit Price
+                                        </th>
+                                        <th class="center">
+                                            Unit Discount
+                                        </th>
+                                        <th class="center">
+                                            Special Discount
+                                        </th>
+                                        <th class="center">
+                                            Total Price
+                                        </th>
+
+
+                                    </tr>
+                        </thead>
+                        <tbody>
+
+                            @for (int i = 0; i < Model.DataToList.Count(); i++)
+                            {
+                                var item = Model.DataToList[i];
+
+                                // Calculate unit discount
+                                decimal unitDiscount = Convert.ToDecimal(item.DeliveredQty) * item.DiscountUnit;
+
+                                // Update totals
+                                TotalGrossAmount += Convert.ToDecimal(item.DeliveredQty * item.UnitPrice);
+                                TotalUnitDiscount += unitDiscount;
+                                TotalSpecialDiscount += item.SpecialDiscount ?? 0;
+                                TotalAmount += Convert.ToDecimal(item.DeliveredQty * item.UnitPrice) - (unitDiscount + (item.SpecialDiscount ?? 0));
+                                <tr>
+                                    <th>
+                                        @Html.HiddenFor(model => model.DataToList[i].OrderDeliverDetailId)
+                                        @Html.HiddenFor(model => model.DataToList[i].ProductId)
+                                        @Html.HiddenFor(model => model.DataToList[i].LotNunmber)
+                                        @Html.HiddenFor(model => model.DataToList[i].UnitPrice)
+
+                                        @(i + 1)
+                                    </th>
+                                    <td>
+                                        @Html.CheckBoxFor(model => model.DataToList[i].Flag, new { @class = "checkbox checkToInstruction" })
+                                    </td>
+
+                                    <td>@item.ProductSubCategory @item.ProductName</td>
+
+
+                                    <td>
+                                        @Html.DisplayFor(model => model.DataToList[i].LotNunmber)
+                                    </td>
+                                    <td>@item.TransferredQty @item.UnitName</td>
+                                    <th>
+                                        @Html.TextBoxFor(model => model.DataToList[i].DeliveredQty, new { @type = "number", @class = "form-control", @style = "width: 100px; display: inline-block;", @min = "0" })
+
+                                    </th>
+                                    <td>@item.DeliveredQtyMsg @item.UnitName</td>
+                                    <td>@item.PackSize</td>
+                                    <td>
+                                        @{
+                                            var totalGm = item.DeliveredQty * item.PackSize;
+                                            double divisor = 1000;
+
+                                            if (totalGm < divisor)
+                                            {
+                                                <span>
+                                                    @totalGm gm
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                double dividend = totalGm ?? 0;
+                                                double remainder = dividend % divisor;
+                                                if (remainder == 0)
+                                                {
+                                                    totalGm = totalGm / divisor;
+                                                    <span>
+                                                        @totalGm KG
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    totalGm = (totalGm - remainder) / divisor;
+                                                    <span>
+                                                        @totalGm KG @remainder gm
+                                                    </span>
+                                                }
+                                            }
+                                        }
+                                    </td>
+                                    <td>@String.Format("{0:0.00}", item.FormulaQty)</td>
+                                    <td>@String.Format("{0:0.00}", item.UnitPrice)</td>
+
+
+
+                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", unitDiscount) (@String.Format("{0:0.00}", item.DiscountUnit))</td>
+                                    <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.SpecialDiscount)</td>
+
+
+                                    <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.Amount)</td>
+
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <button type="submit" id="btnTransfer" class="btn btn-primary btn-block"><i class='fa fa-plus'></i> Ttransfer</button>
+                    </div>
+
+                </div>
+
+            }
+            else
+            {
+                <div class="col-md-12">
+                    <div class="box box-success box-solid">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+
+                            <div class="form-group" style="text-align:center;">
+                                <h3>
+                                    There are no Item yet.
+                                </h3>
+                            </div>
+
+
+
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+
+        $("#select_all").change(function () {  //"select all" change
+            $(".checkToInstruction").prop('checked', $(this).prop("checked")); //change all ".checkbox" checked status
+        });
+
+        $('.checkToInstruction').change(function () {
+            if (false == $(this).prop("checked")) {
+                $("#select_all").prop('checked', false);
+            }
+            if ($('.checkToDownload:checked').length == $('.checkToDownload').length) {
+                $("#select_all").prop('checked', false);
+            }
+        });
+
+
+    });
+
+
+    @*$('.lot-number-dropdown').change(function () {
+    var lotNumber = $(this).val(); // Get the selected LotNumber
+    var orderDetailId = $(this).data('orderdetailid');
+    var productId = $(this).data('productid');
+    var companyId = $(this).data('companyid');
+        var index = $(this).closest('tr').index();
+
+        var hiddenInput = $('input[name="DataToList[' + index + '].LotNumber"]');
+        console.log("Hidden Input Selector: input[name='DataToList[" + index + "].LotNumber']");
+        hiddenInput.val(lotNumber);
+    // Check if LotNumber is selected
+    if (lotNumber) {
+        // Make the AJAX call to the controller action
+        $.ajax({
+            url: '@Url.Action("ProductStockByProductDeliver", "Procurement")',  // Replace with your controller name
+            type: 'GET',
+            data: {
+                companyId: companyId,
+                productId: productId,
+                lotnumber: lotNumber
+            },
+            success: function (data) {
+                // Do something with the data returned from the server
+                console.log(data);
+                // Update the current stock display using the row index
+                $('#currentStock-' + index).text(data.CurrentStock);
+                // You can update the row with the returned data (e.g., update stock information)
+                // Example:
+                // $('#stock-info-' + orderDetailId).text(data.Stock);
+            },
+            error: function (xhr, status, error) {
+                alert('Error: ' + error);
+            }
+        });
+    }
+});*@
+
+
+</script>

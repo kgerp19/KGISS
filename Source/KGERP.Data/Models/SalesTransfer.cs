@@ -12,17 +12,21 @@ namespace KGERP.Data.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class KGSalesAchivement
+    public partial class SalesTransfer
     {
-        public long KGSalesId { get; set; }
-        public string Title { get; set; }
-        public System.DateTime FromDate { get; set; }
-        public System.DateTime ToDate { get; set; }
+        public long SalesTransferId { get; set; }
+        public System.DateTime SalesTransferDate { get; set; }
+        public string SalesTransferNo { get; set; }
+        public long OrderMasterId { get; set; }
+        public long OrderDeliverId { get; set; }
+        public int FromVendorId { get; set; }
+        public int ToVendoerId { get; set; }
         public int CompanyId { get; set; }
+        public bool IsSubmited { get; set; }
         public string CreatedBy { get; set; }
-        public System.DateTime CreatedDate { get; set; }
+        public System.DateTime CreateDate { get; set; }
         public string ModifiedBy { get; set; }
-        public string ModifiedDate { get; set; }
+        public Nullable<System.DateTime> ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     }
 }

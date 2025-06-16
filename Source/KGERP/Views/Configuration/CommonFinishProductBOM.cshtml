@@ -306,7 +306,7 @@
 
             select: function (e, i) {
     console.log(i);
-    $("#ddlRProductFK").val(i.item.val);
+                $("#ddlRProductFK").val(i.item.val);
 
     $.ajax({
         type: "GET",
@@ -346,40 +346,145 @@
             });
 
 
+@*function makeEditble(id) {
+    if (id !== null) {
+        $.ajax({
+            type: "get",
+            url: "@Url.Action("FinishProductBOMsByIDGet", "Configuration")", // ensure the URL is correct
+            data: { id: id },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                console.log(data);
+
+                // Updating form elements
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#finishProductBOMId').val(data.ID);
+                $('#FProductFK').val(data.FProductFK);
+                $('#ActionId').val(2);
+                $('#CompanyFK').val(data.CompanyFK);
+                $('#txtProductName').val(data.RawProductName);
+                $('#ddlRProductFK').val(data.RProductFK);
+                $('#txtRequiredQuantity').val(data.RequiredQuantity);
+                $('.txtUnitName').text(data.UnitName);
+                $("#ddlFCEnumId").val(data.FCEnumId).trigger('change');
+
+
+
+                // Handling Lot Numbers
+                var lotNumber = data.LotNumbers; // Assuming it's a string value
+
+                if (lotNumber) {
+                    // Check if the lotNumber exists as an option value
+                    var optionExists = $('#ddlLotNumbers option').filter(function() {
+                        return $(this).val() === lotNumber;
+                    }).length > 0;
+
+                    if (optionExists) {
+                        // Select the matching option in ddlLotNumbers
+                        $('#ddlLotNumbers').val(lotNumber).trigger('change');
+                    } else {
+                        // If the option doesn't exist, you may want to reset the dropdown or handle accordingly
+                        $('#ddlLotNumbers').val('').trigger('change');
+                    }
+                } else {
+                    // If there's no LotNumber, reset the dropdown to its initial state
+                    $('#ddlLotNumbers').val('').trigger('change');
+                }
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
+}*@
+
+
         function makeEditble(id) {
-            if (id !== null) {
+    if (id !== null) {
+        // First AJAX request to get the product data (including LotNumbers)
+        $.ajax({
+            type: "GET",  // Use GET request type
+            url: "@Url.Action("FinishProductBOMsByIDGet", "Configuration")", // Ensure correct URL
+            data: { id: id },
+            datatype: "json",  // Expecting JSON data
+            traditional: true,  // Use traditional encoding for parameters
+            success: function (data) {
+                console.log("Product Data:", data);
+
+                // Update the form fields with the fetched product data
+                $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
+                $('#finishProductBOMId').val(data.ID);
+                $('#FProductFK').val(data.FProductFK);
+                $('#ActionId').val(2);
+                $('#CompanyFK').val(data.CompanyFK);
+                $('#txtProductName').val(data.RawProductName);
+                $('#ddlRProductFK').val(data.RProductFK);
+                $('#txtRequiredQuantity').val(data.RequiredQuantity);
+                $('.txtUnitName').text(data.UnitName);
+                $("#ddlFCEnumId").val(data.FCEnumId).trigger('change');
+
+                // Store the LotNumbers from the product data to match later
+                var productLotNumbers = data.LotNumbers;  // Assuming this is a string or array
+
+                // Second AJAX request to load available LotNumbers
                 $.ajax({
-                type: "get",
-                url: "@Url.Action("FinishProductBOMsByIDGet", "Configuration")",
-                    data: { id: id },
+                    type: "GET",  // Use GET request to fetch available LotNumbers
+                    url: "@Url.Action("CommonProductByID", "Configuration")",  // Correct URL for fetching lot numbers
                     datatype: "json",
-                    traditional: true,
-                    success: function (data) {
-                        console.log(data);
+                    data: { id: data.RProductFK },
+                    success: function (lotData) {
+                        console.log("Available Lot Numbers:", lotData);
 
-                        $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
-                        $('#finishProductBOMId').val(data.ID);
-                        $('#FProductFK').val(data.FProductFK)
-                        $('#ActionId').val(2);
-                        $('#CompanyFK').val(data.CompanyFK);
-                        $('#txtProductName').val(data.RawProductName);
-                        $('#ddlRProductFK').val(data.RProductFK);
-                        $('#txtRequiredQuantity').val(data.RequiredQuantity);
-                        $('.txtUnitName').text(data.UnitName);
-                        $("#ddlFCEnumId").val(data.FCEnumId).trigger('change');
-                        $("#ddlLotNumbers").val(data.FCEnumId).trigger('change');
+                        // Clear existing LotNumbers options in the dropdown
+                        var $lotDropdown = $('#ddlLotNumbers');
+                        $lotDropdown.empty();
 
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // Populate the dropdown with available LotNumbers
+                        if (lotData.LotNumbers && lotData.LotNumbers.length > 0) {
+                            $.each(lotData.LotNumbers, function (index, lot) {
+                                $lotDropdown.append(new Option(lot, lot)); // Add each LotNumber as an option
+                            });
+
+                            // Now, let's match the LotNumbers from the product data with the available ones
+                            if (productLotNumbers) {
+                                // If productLotNumbers is a string or comma-separated, split it into an array
+                                if (typeof productLotNumbers === "string") {
+                                    productLotNumbers = productLotNumbers.split(',');
+                                }
+
+                                // Try to select the first matching LotNumber
+                                $.each(productLotNumbers, function (index, lot) {
+                                    var optionExists = $lotDropdown.find('option').filter(function () {
+                                        return $(this).val() === lot;
+                                    }).length > 0;
+
+                                    if (optionExists) {
+                                        // If a matching LotNumber is found, select it and break the loop
+                                        $lotDropdown.val(lot).trigger('change');
+                                        return false;  // Break the loop once the match is found
+                                    }
+                                });
+                            }
+                        } else {
+                            // If no LotNumbers are available, show a default message
+                            $lotDropdown.append(new Option("No Lots Available", ""));
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading Lot Numbers:", error);
                     }
                 });
+
+                // Scroll to top after form is populated
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading product data:", error);
             }
-        }
-        //.load(function () {
-        //                    $('#ddlCommonProductCategoryFk').val(data.common_ProductCategoryFk);
-
-        //});
-
-
+        });
+    }
+}
 
 
         function resetForm() {

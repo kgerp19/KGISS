@@ -22,6 +22,7 @@ namespace KGERP.Data.Models
         public string Particular { get; set; }
         public Nullable<System.DateTime> TransactionDate { get; set; }
         public Nullable<int> ReferenceId { get; set; }
+        public Nullable<int> ProductCategory { get; set; }
         public bool IsActive { get; set; }
         public bool IsVirtual { get; set; }
     

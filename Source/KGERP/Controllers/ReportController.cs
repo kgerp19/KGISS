@@ -429,6 +429,22 @@ namespace KGERP.Controllers
             return File(client.DownloadData(reportURL), "application/pdf");
         }
 
+        [HttpGet]
+
+        public ActionResult GetSalesTransferReport(long salesTransferId, int companyId)
+        {
+            string reportName = string.Empty;
+
+
+            reportName = "ISSSalesTransfer";
+
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&salesTransferId={1}&companyId={2}", reportName, salesTransferId, companyId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+
         // GET: Report
         [HttpGet]
 
@@ -885,15 +901,15 @@ namespace KGERP.Controllers
 
         public ActionResult CustomerGeneralLedgerReport(ReportCustomModel model)
         {
-            string reportName = "";
-            if (model.CompanyId == 10)
-            {
-                reportName = "KfmalCustomerGeneralLedger";
-            }
-            else if (model.CompanyId == 24)
-            {
-                reportName = "GcclCustomerGeneralLedger";
-            }
+            string reportName = "IssKfmalCustomerGeneralLedger";
+            //if (model.CompanyId == 10)
+            //{
+            //    reportName = "KfmalCustomerGeneralLedger";
+            //}
+            //else if (model.CompanyId == 24)
+            //{
+            //    reportName = "GcclCustomerGeneralLedger";
+            //}
 
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
@@ -2640,6 +2656,20 @@ namespace KGERP.Controllers
             return View();
         }
 
+        public ActionResult SeedCategoryAndTerritoryWiseCollectionReport(int companyId)
+        {
+            Session["CompanyId"] = companyId;
+            ReportCustomModel cm = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+            };
+            return View(cm);
+        }
+
 
         [HttpGet]
 
@@ -2667,6 +2697,30 @@ namespace KGERP.Controllers
             WebClient client = new WebClient();
             client.Credentials = nwc;
             model.ReportName = "ISSProductionReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", model.ReportName + ".doc");
+            }
+            return View();
+        }
+
+        [HttpGet]
+
+        public ActionResult SeedCategoryAndTerritoryWiseCollectionView(ReportCustomModel model)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            model.ReportName = "ISSSeedCategoryAndTerritoryWiseCollectionReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -2991,7 +3045,7 @@ namespace KGERP.Controllers
             client.Credentials = nwc;
 
 
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductId={5}&ProductCategoryId={6}&ProductSubCategoryId={7}&VendorId={8}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.ProductId ?? 0, model.ProductCategoryId ?? 0, model.ProductSubCategoryId ?? 0, model.VendorId ?? 0); //, model.CostCenterId ?? 0
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductId={5}&ProductCategoryId={6}&ProductSubCategoryId={7}&VendorId={8}&SubZoneId={9}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.ProductId ?? 0, model.ProductCategoryId ?? 0, model.ProductSubCategoryId ?? 0, model.CustomerId ?? 0,model.SubZoneId ?? 0); //, model.CostCenterId ?? 0
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -8725,14 +8779,15 @@ namespace KGERP.Controllers
         }
 
         [HttpGet]
-        public ActionResult SalesReport()
+        public ActionResult SalesReport(int companyId)
         {
 
             ReportCustomModel cm = new ReportCustomModel()
             {
-                SaleTitle = _configrationService.GetActiveSalesTitles()
-
+                SaleTitle = _configrationService.GetActiveSalesTitles(companyId),
+               
             };
+            cm.CompanyId = companyId;
             return View(cm);
         }
         [HttpPost]
@@ -8742,8 +8797,8 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "SalesReport";
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&KGSalesId={2}", model.ReportName, model.ReportType, model.SaleTitleId);
+            model.ReportName = "IssSalesReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&KGSalesId={2}&CompanyId={3}", model.ReportName, model.ReportType, model.SaleTitleId,model.CompanyId);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
@@ -8764,14 +8819,14 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-        public ActionResult KGSalesTargetReport(int SaleTitleId)
+        public ActionResult KGSalesTargetReport(int SaleTitleId,int CompanyId)
         {
 
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string ReportName = "KgSalesTargetReport";
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&KGSalesId={2}", ReportName, "PDF", SaleTitleId);
+            string ReportName = "IssKgSalesTargetReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&KGSalesId={2}&CompanyId={3}", ReportName, "PDF", SaleTitleId, CompanyId);
 
             return File(client.DownloadData(reportURL), "application/pdf");
             return View();
@@ -8785,7 +8840,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string ReportName = "KgMonthlySalesTargetReport";
+            string ReportName = "IssKgMonthlySalesTargetReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&KGSalesId={2}&KGCompanySaleTergetId={3}&CompanyId={4}", ReportName, "PDF", SaleTitleId, KgCompanySaleTergetId, companyId);
 
 
@@ -8802,7 +8857,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            string ReportName = "KgSalesAchivementReport";
+            string ReportName = "IssKgSalesAchivementReport";
             string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&KGSalesId={2}&KGCompanySaleTergetId={3}&KGCompanyMonthlySaleTergetId={4}&CompanyId={5}", ReportName, "PDF", SaleTitleId, KGCompanySaleTergetId, KgMonthlySaleTargetId, CompanyId);
 
             return File(client.DownloadData(reportURL), "application/pdf");

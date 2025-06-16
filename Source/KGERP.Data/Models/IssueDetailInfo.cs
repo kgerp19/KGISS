@@ -18,9 +18,8 @@ namespace KGERP.Data.Models
         public Nullable<long> IssueMasterId { get; set; }
         public Nullable<int> RProductId { get; set; }
         public Nullable<decimal> RMQ { get; set; }
-        public Nullable<System.Guid> RequisitionItemDetailId { get; set; }
-        public Nullable<bool> IsActive { get; set; }
         public decimal CostingPrice { get; set; }
+        public Nullable<bool> IsActive { get; set; }
     
         public virtual IssueMasterInfo IssueMasterInfo { get; set; }
     }

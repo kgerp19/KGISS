@@ -31,6 +31,7 @@ namespace KGERP.Service.Implementation.Accounting
         public decimal dollarRate { get; set; }
 
         public int? Accounting_CostCenterFK { get; set; }
+        public int? ProductCategory { get; set; }
         public int Accounting_BankOrCashParantId { get; set; }
 
         public int? Accounting_BankOrCashId { get; set; }
@@ -85,17 +86,14 @@ namespace KGERP.Service.Implementation.Accounting
         public string ChqNo { get; set; }
         public bool IsStock { get; set; }
         public bool IsSubmit { get; set; }
-
+        public string ProductCategoryName { get; set; }
         public DateTime? ChqDate { get; set; }
         public bool isDocumentPayment { get; set; }
         public SelectList VoucherTypesList { get; set; } = new SelectList(new List<object>());
         public SelectList CostCenterList { get; set; } = new SelectList(new List<object>());
+        public SelectList ProductCategoryList { get; set; } = new SelectList(new List<object>());
         public SelectList BankOrCashParantList { get; set; } = new SelectList(new List<object>());
         public SelectList BankOrCashGLList { get; set; } = new SelectList(new List<object>());
-
-
-
-
-
+        
     }
 }

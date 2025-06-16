@@ -30,6 +30,7 @@ namespace KGERP.Service.Implementation.Marketing
         public SelectList ProductCategoryList { get; set; } = new SelectList(new List<object>());
 
         public IEnumerable<VMOrderMaster> DataList { get; set; }
+        public string CustonerAddress { get; set; }
 
 
 

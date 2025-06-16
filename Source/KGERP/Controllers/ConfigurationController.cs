@@ -1,10 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using KGERP;
-using KGERP.Data.CustomModel;
+﻿using KGERP;
 using KGERP.Data.Models;
 using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
@@ -15,7 +9,6 @@ using KGERP.Service.Implementation.Realestate;
 using KGERP.Service.Implementation.VendorProfessions;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel.FTP_Models;
-using KGERP.Services.Procurement;
 using KGERP.Utility;
 using KGERP.Utility.Interface;
 using System;
@@ -503,7 +496,7 @@ namespace Pos.App.Controllers
         {
 
             VMCommonProductSubCategory vmCommonProductSubCategory = new VMCommonProductSubCategory();
-      
+
             vmCommonProductSubCategory = await Task.Run(() => _service.GetProductSubCategory(companyId, categoryId, "F"));
             //vmCommonProductSubCategory.BrandList = _service.GetBrandList(companyId);
             return View(vmCommonProductSubCategory);
@@ -529,7 +522,7 @@ namespace Pos.App.Controllers
                 //Delete
                 await _service.ProductSubCategoryDelete(vmCommonProductSubCategory.ID);
             }
-            
+
             else
             {
                 return RedirectToAction("Error");
@@ -546,7 +539,7 @@ namespace Pos.App.Controllers
 
             VMCommonProduct vmCommonProduct = new VMCommonProduct();
             vmCommonProduct = await Task.Run(() => _service.GetProduct(companyId, 0, 0, "F"));
-             
+
             return View(vmCommonProduct);
         }
 
@@ -614,7 +607,7 @@ namespace Pos.App.Controllers
             else if (vmCommonProduct.ActionEum == ActionEnum.Delete)
             {
                 //Delete
-               var result= await _service.ProductDelete(vmCommonProduct.ID);
+                var result = await _service.ProductDelete(vmCommonProduct.ID);
                 vmCommonProduct.Common_ProductSubCategoryFk = result.Common_ProductSubCategoryFk;
                 vmCommonProduct.Common_ProductFk = result.Common_ProductFk;
             }
@@ -1033,9 +1026,14 @@ namespace Pos.App.Controllers
 
 
         #endregion
-        public JsonResult RMUnitAndClosingRateByProductId(int productId)
+        public JsonResult RMUnitAndClosingRateByProductId(int productId, string lotNo)
         {
-            var model = _service.GetRMUnitAndClosingRateByProductId(productId);
+            var model = _service.GetRMUnitAndClosingRateByProductId(productId, lotNo);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult RMUnitAndClosingRateByProductIdByLot(int companyId, int productId, string lotnumber)
+        {
+            var model = _service.GetRMUnitAndClosingRateByProductIdByLot(companyId, productId, lotnumber);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
         public JsonResult CommonProductByIDGet(int id)
@@ -1118,10 +1116,10 @@ namespace Pos.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetCommonProductByProducId(int id,int CompanyId=0)
+        public JsonResult GetCommonProductByProducId(int id, string LotNo, int CompanyId = 0)
         {
 
-            var model = _service.GetCommonProductByProducId(id, CompanyId);
+            var model = _service.GetCommonProductByProducId(id, LotNo, CompanyId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
@@ -1145,7 +1143,7 @@ namespace Pos.App.Controllers
             var products = _service.GetAutoCompleteProduct(companyId, prefix, productType);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
-        
+
         public JsonResult AutoCompleteRawPackingMaterialsGet(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawPackingMaterials(companyId, prefix);
@@ -1166,12 +1164,19 @@ namespace Pos.App.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetLotNymberRaw(int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLotRaw(ProductId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetAutoCompleteRawGoods(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawGoods(companyId, prefix);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult GetAutoCompleteSalesPerson( string prefix, int companyId)
+        public JsonResult GetAutoCompleteSalesPerson(string prefix, int companyId)
         {
             var products = _service.GetAutoCompleteSaleperson(companyId, prefix);
             return Json(products, JsonRequestBehavior.AllowGet);
@@ -1252,11 +1257,11 @@ namespace Pos.App.Controllers
             if (vmCommonSupplier.ActionEum == ActionEnum.Add)
             {
                 //Add 
-               
-                    await _service.SEEDSupplierAdd(vmCommonSupplier);
 
-                
-               
+                await _service.SEEDSupplierAdd(vmCommonSupplier);
+
+
+
             }
             else if (vmCommonSupplier.ActionEum == ActionEnum.Edit)
             {
@@ -1315,7 +1320,7 @@ namespace Pos.App.Controllers
             return View(vmCommonCustomer);
         }
 
-        public async Task<ActionResult> RSCommonCustomerBooking(int companyId, int vendorId=0, int ProductSubCategoryId=0)
+        public async Task<ActionResult> RSCommonCustomerBooking(int companyId, int vendorId = 0, int ProductSubCategoryId = 0)
         {
             VMCommonSupplier vmCommonCustomer = new VMCommonSupplier();
             if (vendorId > 0)
@@ -1406,7 +1411,7 @@ namespace Pos.App.Controllers
             vmCommonCustomer.DistrictList = new SelectList(_service.CommonDistrictsDropDownList(), "Value", "Text");
             vmCommonCustomer.UpazilasList = new SelectList(_service.CommonUpazilasDropDownList(), "Value", "Text");
             vmCommonCustomer.PaymentTypeList = new SelectList(_service.CommonCustomerPaymentType(), "Value", "Text");
-             return View(vmCommonCustomer);
+            return View(vmCommonCustomer);
         }
 
 
@@ -1454,7 +1459,7 @@ namespace Pos.App.Controllers
             {
                 return RedirectToAction("Error");
             }
-          
+
             return RedirectToAction(nameof(PackagingCustomer), new { companyId = vmCommonCustomer.CompanyFK });
         }
 
@@ -1505,8 +1510,8 @@ namespace Pos.App.Controllers
             vmCommonCustomer.EmployeeList = new SelectList(_service.EmployeesDropDownList(companyId), "Value", "Text");
 
             vmCommonCustomer.Months = _vendorService.GetMonthSelectModes();
-            vmCommonCustomer.VendorTypeId =(int)Provider.Customer;
-           
+            vmCommonCustomer.VendorTypeId = (int)Provider.Customer;
+
             vmCommonCustomer.Condition = "Condition : If customer fails to 100% closing, any incentive, carrying and any other adjustment will not be adjusted.";
 
 
@@ -1525,9 +1530,9 @@ namespace Pos.App.Controllers
             vmCommonCustomer.NomineeRelationList = new SelectList(_service.CommonRelationList(), "Value", "Text");
             vmCommonCustomer.ZoneListList = new SelectList(_service.CommonZonesDropDownList(companyId), "Value", "Text");
             vmCommonCustomer.TerritoryList = new SelectList(_service.CommonSubZonesDropDownList(companyId), "Value", "Text");
-         
+
             vmCommonCustomer.VendorTypeId = (int)Provider.Customer;
-            
+
 
             return View(vmCommonCustomer);
         }
@@ -1582,17 +1587,17 @@ namespace Pos.App.Controllers
         [HttpPost]
         public async Task<JsonResult> CGFileDelete(long docId, long CGId)
         {
-           
+
             return Json(false);
         }
 
         [HttpGet]
         public async Task<ActionResult> CustomerUplode(int customerId)
         {
-            VMCommonSupplier vmCommonCustomer=new VMCommonSupplier();
+            VMCommonSupplier vmCommonCustomer = new VMCommonSupplier();
             vmCommonCustomer = await Task.Run(() => _service.GetCustomerBuID2(customerId));
-            return View(vmCommonCustomer);  
-         }
+            return View(vmCommonCustomer);
+        }
         [HttpPost]
         public async Task<ActionResult> CommonCustomeruplode(VMCommonSupplier model)
         {
@@ -1624,7 +1629,7 @@ namespace Pos.App.Controllers
             itemlist = await _ftpservice.UploadFileBulk(itemlist, model.ID.ToString());
             long CGId = Convert.ToInt64(model.ID);
             var result = await gLDLCustomerService.FileMapping(itemlist, CGId);
-            return RedirectToAction("CustomerUplode", new { customerId = model.ID});
+            return RedirectToAction("CustomerUplode", new { customerId = model.ID });
         }
 
         [HttpPost]
@@ -1679,7 +1684,7 @@ namespace Pos.App.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> CommonCustomer(VMCommonSupplier vmCommonCustomer,HttpPostedFileBase file2)
+        public async Task<ActionResult> CommonCustomer(VMCommonSupplier vmCommonCustomer, HttpPostedFileBase file2)
         {
             if (Request.Files.Count > 0)
             {
@@ -2015,7 +2020,7 @@ namespace Pos.App.Controllers
             return View(vmCommonBank);
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> CommonBank(VMCommonBank vMCommonBank)
         {
@@ -2309,11 +2314,11 @@ namespace Pos.App.Controllers
         }
 
         [HttpGet]
-        public  JsonResult ProductPlotOrFlatName(int companyId, int categoryId = 0, int subCategoryId = 0, string productName = "")
+        public JsonResult ProductPlotOrFlatName(int companyId, int categoryId = 0, int subCategoryId = 0, string productName = "")
         {
             realStateProducts vm = new realStateProducts();
-            vm =  _service.checkProduct(companyId, categoryId, subCategoryId,productName);
-            if (vm==null)
+            vm = _service.checkProduct(companyId, categoryId, subCategoryId, productName);
+            if (vm == null)
             {
                 return Json(false, JsonRequestBehavior.AllowGet);
             }
@@ -2446,11 +2451,11 @@ namespace Pos.App.Controllers
         }
         [HttpPost]
         public async Task<ActionResult> SaveDivision(Division Model)
-        { 
+        {
             var vmPoliceStations = await Task.Run(() => _service.SaveDivision(Model));
             return Json(vmPoliceStations, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<JsonResult> GetDivisionById(int id)
         {
@@ -2465,7 +2470,7 @@ namespace Pos.App.Controllers
         }
 
 
-        
+
         [HttpGet]
         public async Task<JsonResult> GetDistrictById(int id)
         {
@@ -2478,46 +2483,46 @@ namespace Pos.App.Controllers
             var vmPoliceStations = await Task.Run(() => _service.SaveDistrict(Model));
             return Json(vmPoliceStations, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public async Task<JsonResult> DeleteDistrict(int id)
         {
             var obj = await _service.DeleteDistrict(id);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> CurrencyIndex()
         {
             CurrencyVm model = new CurrencyVm();
-            model =await _service.GetCurrency();
+            model = await _service.GetCurrency();
             return View(model);
         }
 
-     
 
-        
+
+
         [HttpGet]
         public async Task<ActionResult> AddOrEditCurrency(int? Id)
         {
             CurrencyVm model = new CurrencyVm();
-            if(Id != null)
+            if (Id != null)
             {
-                model =await _service.GetCurencyForUpdate(Id);
+                model = await _service.GetCurencyForUpdate(Id);
                 return View(model);
             }
             return View(model);
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> AddOrEditCurrency(CurrencyVm model)
         {
-            var obj =await _service.SaveOrUpdateCurrency(model);
+            var obj = await _service.SaveOrUpdateCurrency(model);
 
             return RedirectToAction("CurrencyIndex");
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> AddOrEditPortofCountry(PortOfCountryVm model)
         {
@@ -2526,7 +2531,7 @@ namespace Pos.App.Controllers
             return RedirectToAction("PortCountryIndex");
         }
 
-        
+
         [HttpGet]
         public ActionResult DeletePortOfCountryItem(int Id)
         {
@@ -2536,7 +2541,7 @@ namespace Pos.App.Controllers
 
 
 
-        
+
         [HttpGet]
         public ActionResult DeleteCurrencyItem(int Id)
         {
@@ -2544,7 +2549,7 @@ namespace Pos.App.Controllers
             return RedirectToAction("CurrencyIndex");
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> PortCountryIndex()
         {
@@ -2553,7 +2558,7 @@ namespace Pos.App.Controllers
             return View(model);
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> AddOrEditPortCountry(int? Id)
         {
@@ -2563,22 +2568,22 @@ namespace Pos.App.Controllers
                 model = await _service.GetPortCountryForUpdate(Id);
                 return View(model);
             }
-            model =await  _service.GetCountry();
+            model = await _service.GetCountry();
 
             return View(model);
         }
 
         //noticeboard
-        
+
         [HttpGet]
         public async Task<ActionResult> NoticeBoard()
         {
-            
-          
+
+
             return View();
-           
+
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> ErpWorkingUpDate()
         {
@@ -2587,7 +2592,7 @@ namespace Pos.App.Controllers
             return View();
 
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> ErpWorkingUpDate(FileViewModel data)
         {
@@ -2612,7 +2617,7 @@ namespace Pos.App.Controllers
             return RedirectToAction(nameof(ERPNoticeBoardList));
         }
 
-        
+
         [HttpPost]
         public async Task<ActionResult> NoticeBoard(FileViewModel data)
         {
@@ -2637,19 +2642,19 @@ namespace Pos.App.Controllers
             return RedirectToAction(nameof(NoticeBoardList));
         }
 
-        
-        [HttpGet]
-        public async Task<ActionResult> NoticeBoardList(DateTime? StartDate,DateTime?ToDate,string selectTitle)
-        {
-            
 
-            var list = await _service.GetAllFilesByCatagory(StartDate,ToDate, selectTitle);
+        [HttpGet]
+        public async Task<ActionResult> NoticeBoardList(DateTime? StartDate, DateTime? ToDate, string selectTitle)
+        {
+
+
+            var list = await _service.GetAllFilesByCatagory(StartDate, ToDate, selectTitle);
             return View(list);
 
         }
 
 
-        
+
         [HttpGet]
         public async Task<ActionResult> NoticeBoardListNormal(DateTime? StartDate, DateTime? ToDate, string selectTitle)
         {
@@ -2679,7 +2684,7 @@ namespace Pos.App.Controllers
                 return Json("No Such File", JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpGet]
         public async Task<ActionResult> ERPNoticeBoardList(DateTime? StartDate, DateTime? ToDate)
         {
@@ -2714,7 +2719,12 @@ namespace Pos.App.Controllers
             var obj = await _service.DeleteUpazila(id);
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
-        
+        public JsonResult GetLotNymberFinish(int ProductId)
+        {
+
+            var products = _service.GetAutoCompleteLotFinish(ProductId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
         [HttpGet]
         public async Task<JsonResult> GetUpazilaById(int id)
         {
@@ -2759,7 +2769,7 @@ namespace Pos.App.Controllers
         }
 
 
-        
+
 
 
 
@@ -2906,7 +2916,7 @@ namespace Pos.App.Controllers
 
             VMCommonProduct vmCommonProduct = new VMCommonProduct();
             vmCommonProduct = await _service.GetProduct(companyId, categoryId, subCategoryId, "G");
-            vmCommonProduct.ProductSubCategoryList= new SelectList(_service.ProductSubCategoryDropDownList(companyId,categoryId), "Value", "Text");
+            vmCommonProduct.ProductSubCategoryList = new SelectList(_service.ProductSubCategoryDropDownList(companyId, categoryId), "Value", "Text");
             vmCommonProduct.UnitList = new SelectList(_service.UnitDropDownList(companyId), "Value", "Text");
             return View(vmCommonProduct);
         }

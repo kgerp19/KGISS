@@ -253,7 +253,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_AttendanceLog> PRoll_AttendanceLog { get; set; }
         public virtual DbSet<PRoll_AttendanceLogDetail> PRoll_AttendanceLogDetail { get; set; }
         public virtual DbSet<RecruitmentRequisitionApproval> RecruitmentRequisitionApprovals { get; set; }
-        public virtual DbSet<VoucherDetail> VoucherDetails { get; set; }
         public virtual DbSet<VendorOffer> VendorOffers { get; set; }
         public virtual DbSet<PaymentMaster> PaymentMasters { get; set; }
         public virtual DbSet<PRoll_AttendanceModifiedLog> PRoll_AttendanceModifiedLog { get; set; }
@@ -298,7 +297,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<MaterialReceive> MaterialReceives { get; set; }
         public virtual DbSet<RequisitionSignatory> RequisitionSignatories { get; set; }
         public virtual DbSet<RequisitionItemDetail> RequisitionItemDetails { get; set; }
-        public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
         public virtual DbSet<StockAdjust> StockAdjusts { get; set; }
         public virtual DbSet<WorkState> WorkStates { get; set; }
         public virtual DbSet<WorkSpacesMember> WorkSpacesMembers { get; set; }
@@ -318,11 +316,9 @@ namespace KGERP.Data.Models
         public virtual DbSet<QualityExceptionComplaint> QualityExceptionComplaints { get; set; }
         public virtual DbSet<QualityExceptionComplaintDetail> QualityExceptionComplaintDetails { get; set; }
         public virtual DbSet<SaleReturnDetail> SaleReturnDetails { get; set; }
-        public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
         public virtual DbSet<KGSalesCollectedAchivement> KGSalesCollectedAchivements { get; set; }
         public virtual DbSet<WorkBoard> WorkBoards { get; set; }
         public virtual DbSet<KGCompanyMonthlySaleTerget> KGCompanyMonthlySaleTergets { get; set; }
-        public virtual DbSet<KGSalesAchivementDetail> KGSalesAchivementDetails { get; set; }
         public virtual DbSet<AnnualPerformance> AnnualPerformances { get; set; }
         public virtual DbSet<AnnualPerformanceDetail> AnnualPerformanceDetails { get; set; }
         public virtual DbSet<PRoll_Advance> PRoll_Advance { get; set; }
@@ -330,7 +326,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PRoll_FineDeducation> PRoll_FineDeducation { get; set; }
         public virtual DbSet<PRoll_KMCSLDeduction> PRoll_KMCSLDeduction { get; set; }
         public virtual DbSet<PRoll_SpecialAddition> PRoll_SpecialAddition { get; set; }
-        public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
         public virtual DbSet<ProductBookingInfo> ProductBookingInfoes { get; set; }
         public virtual DbSet<PurchaseReturnDetail> PurchaseReturnDetails { get; set; }
         public virtual DbSet<OrderMaster> OrderMasters { get; set; }
@@ -366,6 +361,13 @@ namespace KGERP.Data.Models
         public virtual DbSet<FinishProductBOM> FinishProductBOMs { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<StockAdjustDetail> StockAdjustDetails { get; set; }
+        public virtual DbSet<VoucherDetail> VoucherDetails { get; set; }
+        public virtual DbSet<SalesTransferDetail> SalesTransferDetails { get; set; }
+        public virtual DbSet<SalesTransfer> SalesTransfers { get; set; }
+        public virtual DbSet<KGSalesAchivement> KGSalesAchivements { get; set; }
+        public virtual DbSet<KGSalesAchivementDetail> KGSalesAchivementDetails { get; set; }
+        public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
+        public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

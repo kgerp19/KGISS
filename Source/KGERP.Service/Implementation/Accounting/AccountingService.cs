@@ -307,6 +307,8 @@ namespace KGERP.Service.Implementation
 
             vmJournalSlave.DataListDetails = await Task.Run(() => (from t1 in _db.VoucherDetails.Where(x => x.IsActive && x.VoucherId == voucherId && !x.IsVirtual)
                                                                    join t2 in _db.HeadGLs on t1.AccountHeadId equals t2.Id
+                                                                   join t3 in _db.ProductCategories.Where(x=>x.IsActive) on t1.ProductCategory equals t3.ProductCategoryId into Lt3
+                                                                   from t3 in Lt3.DefaultIfEmpty()
                                                                    select new VMJournalSlave
                                                                    {
                                                                        VoucherDetailId = t1.VoucherDetailId,
@@ -314,7 +316,8 @@ namespace KGERP.Service.Implementation
                                                                        Code = t2.AccCode,
                                                                        Credit = t1.CreditAmount,
                                                                        Debit = t1.DebitAmount,
-                                                                       Particular = t1.Particular
+                                                                       Particular = t1.Particular,
+                                                                       ProductCategoryName=t3.Name
                                                                    }).OrderByDescending(x => x.VoucherDetailId).AsEnumerable());
             if (vmJournalSlave.DataListDetails.Any())
             {
@@ -406,7 +409,7 @@ namespace KGERP.Service.Implementation
                     Particular = vmJournalSlave.Particular,
                     TransactionDate = DateTime.Now,
                     VoucherId = vmJournalSlave.VoucherId,
-
+                    ProductCategory= vmJournalSlave.ProductCategory,
                     IsActive = true
                 };
                 _db.VoucherDetails.Add(voucherDetail);
@@ -431,6 +434,7 @@ namespace KGERP.Service.Implementation
             model.CreditAmount = vmJournalSlave.Credit;
             model.DebitAmount = vmJournalSlave.Debit;
             model.Particular = vmJournalSlave.Particular;
+            model.ProductCategory = vmJournalSlave.ProductCategory;
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = model.VoucherDetailId;
@@ -509,6 +513,26 @@ namespace KGERP.Service.Implementation
         }));
             return List;
 
+        }
+
+        public List<object> ProductCategoryDropDownList(int companyId)
+        {
+            var list = new List<object>
+            {
+                new { Value = 0, Text = "Please select" } // Adding a default option  
+            };
+
+            _db.ProductCategories
+                .Where(x => x.IsActive && x.CompanyId == companyId)
+                .Select(x => new
+                {
+                    Value = x.ProductCategoryId,
+                    Text = x.Name
+                })
+                .ToList()
+                .ForEach(x => list.Add(x)); // Add the actual product categories to the list  
+
+            return list;
         }
 
         public List<object> VoucherTypesCashAndBankDropDownList()
@@ -1442,9 +1466,9 @@ namespace KGERP.Service.Implementation
                      join h4 in _db.Head4 on h5.ParentId equals h4.Id
 
                      where hgl.CompanyId == companyId
-                     && ((h4.AccCode == "1301001") ||( h5.AccCode== "2401001001"))
-                     && hgl.IsActive 
-                     && h5.IsActive 
+                     && ((h4.AccCode == "1301001") || (h5.AccCode == "2401001001"))
+                     && hgl.IsActive
+                     && h5.IsActive
                      && h4.IsActive
                      && ((hgl.AccName.Contains(prefix)) || (hgl.AccCode.Contains(prefix)))
                      select new
@@ -1463,9 +1487,9 @@ namespace KGERP.Service.Implementation
                      join h4 in _db.Head4 on h5.ParentId equals h4.Id
                      join h3 in _db.Head3 on h4.ParentId equals h3.Id
                      where hgl.CompanyId == companyId
-                     && ((h3.AccCode=="1304") || (h4.AccCode=="1301001"))
-                     && hgl.IsActive 
-                     && h5.IsActive 
+                     && ((h3.AccCode == "1304") || (h4.AccCode == "1301001"))
+                     && hgl.IsActive
+                     && h5.IsActive
                      && h4.IsActive
                      && ((hgl.AccName.Contains(prefix)) || (hgl.AccCode.Contains(prefix)))
                      select new
@@ -1504,7 +1528,7 @@ namespace KGERP.Service.Implementation
                      join h5 in _db.Head5 on hgl.ParentId equals h5.Id
                      join h4 in _db.Head4 on h5.ParentId equals h4.Id
                      join h3 in _db.Head3 on h4.ParentId equals h3.Id
-                     where hgl.Id==headGLId
+                     where hgl.Id == headGLId
                      && hgl.IsActive
                      && h5.IsActive
                      && h4.IsActive
@@ -1519,24 +1543,59 @@ namespace KGERP.Service.Implementation
 
         public object GetAutoCompleteVendorHeadGL(string prefix, int companyId, int vendorTypeId)
         {
-            //te
-            var v = (from hgl in _db.HeadGLs
-                     join h5 in _db.Head5 on hgl.ParentId equals h5.Id
-                     join h4 in _db.Head4 on h5.ParentId equals h4.Id
-                     join ven in _db.Vendors.Where(x => x.CompanyId == companyId) on hgl.Id equals ven.HeadGLId
-                     where hgl.CompanyId == companyId && hgl.IsActive && h5.IsActive && h4.IsActive
-                     && ((hgl.AccName.Contains(prefix)) || (hgl.AccCode.Contains(prefix)))
-                     select new
-                     {
-                         label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
-                         val = hgl.Id
-                     }).OrderBy(x => x.label).Take(200).ToList();
+            var userId = Common.GetIntUserId();
+            if (userId<=0)
+            {
+                return new {};
+            }
 
+            // Pre-filter prefix to avoid case-sensitive comparisons and improve index usage
+            var lowerPrefix = prefix?.ToLower() ?? string.Empty;
 
-            return v;
+            var query = from hgl in _db.HeadGLs
+                        join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                        join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                        join ven in _db.Vendors on hgl.Id equals ven.HeadGLId
+                        join tt in _db.SubZones on ven.SubZoneId equals tt.SubZoneId
+                        join e in _db.Employees on tt.SalesOfficerId equals e.Id
+                        where hgl.CompanyId == companyId
+                            && hgl.IsActive
+                            && h5.IsActive
+                            && h4.IsActive
+                            && ven.CompanyId == companyId
+                            && tt.IsActive
+                            && tt.CompanyId == companyId
+                            && e.Active
+                            && e.CompanyId == companyId
+                            && e.Id == userId
+                            && (hgl.AccName.ToLower().Contains(lowerPrefix) || hgl.AccCode.ToLower().Contains(lowerPrefix))
+                        select new
+                        {
+                            AccCode = hgl.AccCode,
+                            AccName = hgl.AccName,
+                            H4AccName = h4.AccName,
+                            H5AccName = h5.AccName,
+                            Id = hgl.Id
+                        };
+
+            // Execute query and process results in memory for better performance
+            var results = query
+                .OrderBy(x => x.AccCode) // Order by simpler field first
+                .Take(200)
+                .ToList()
+                .Select(x => new
+                {
+                    label = $"[{x.AccCode}] {(x.H4AccName == x.H5AccName ? x.H5AccName : $"{x.H4AccName} {x.H5AccName}")} {x.AccName}",
+                    val = x.Id
+                })
+                .OrderBy(x => x.label)
+                .ToList();
+
+            return results;
         }
 
-        public async Task<long> AutoInsertVoucherDetails(int voucherId, int virtualHeadId, string virtualHeadParticular)
+
+        public async Task<long> AutoInsertVoucherDetails(int voucherId, int virtualHeadId, string virtualHeadParticular,int? productCategory=null)
         {
             long result = -1;
 
@@ -1563,7 +1622,8 @@ namespace KGERP.Service.Implementation
                     DebitAmount = totalCreditAmount > totalDebitAmount ? newAmount : 0,
                     TransactionDate = DateTime.Now,
                     IsActive = true,
-                    Particular = virtualHeadParticular
+                    Particular = virtualHeadParticular,
+                    ProductCategory= productCategory
                 };
                 _db.VoucherDetails.Add(voucherDetail);
                 if (await _db.SaveChangesAsync() > 0)
@@ -2465,7 +2525,7 @@ namespace KGERP.Service.Implementation
             }
             //if (data == null)
             //{
-               
+
             //    //int erpSM = await SMSPush(voucher);
             //}
             //else
@@ -2894,15 +2954,15 @@ namespace KGERP.Service.Implementation
                 var totalQuantity = group.Sum(x => x.Quantity);
                 var costingPrice = firstItem.CostingPrice;
 
- 
-                if (costingPrice>0 && firstItem.AccountingHeadId.HasValue)
+
+                if (costingPrice > 0 && firstItem.AccountingHeadId.HasValue)
                 {
                     vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                     {
-                        Particular = firstItem.ProductName, 
+                        Particular = firstItem.ProductName,
                         Debit = Convert.ToDouble(totalQuantity * costingPrice),
-                        Credit = 0,  
-                        Accounting_HeadFK = firstItem.AccountingHeadId.Value  
+                        Credit = 0,
+                        Accounting_HeadFK = firstItem.AccountingHeadId.Value
                     });
                 }
             }
@@ -2921,7 +2981,7 @@ namespace KGERP.Service.Implementation
             #endregion
 
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
-            result= resultData.VoucherId;
+            result = resultData.VoucherId;
             return result;
         }
 
@@ -2940,7 +3000,7 @@ namespace KGERP.Service.Implementation
 
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
 
-            
+
 
             #region Production Manager Cr Factory Expenses Dr
             foreach (var item in vmProdReferenceSlave.DataListSlave)
@@ -2965,9 +3025,9 @@ namespace KGERP.Service.Implementation
             #endregion
 
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
-            if (resultData.VoucherId>0)
+            if (resultData.VoucherId > 0)
             {
-                var ProductionDetailVoucherStatusUpdate =await _db.ProductionDetails.FirstAsync(x => x.ProductionDetailId == vmProdReferenceSlave.ID);
+                var ProductionDetailVoucherStatusUpdate = await _db.ProductionDetails.FirstAsync(x => x.ProductionDetailId == vmProdReferenceSlave.ID);
 
                 ProductionDetailVoucherStatusUpdate.IsVoucher = true;
                 _db.Entry(ProductionDetailVoucherStatusUpdate).State = EntityState.Modified;
@@ -4005,7 +4065,7 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public async Task<long> AccountingSalesPushISS( VMOrderDeliverDetail vmOrderDeliverDetail)
+        public async Task<long> AccountingSalesPushISS(VMOrderDeliverDetail vmOrderDeliverDetail)
         {
             var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == vmOrderDeliverDetail.CompanyFK && x.Code == "SDV" && x.IsActive == true).FirstOrDefault();
 
@@ -4020,7 +4080,7 @@ namespace KGERP.Service.Implementation
             };
 
             double unitDiscount = vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * Convert.ToDouble(x.DiscountUnit));
-             double spetialDiscount = vmOrderDeliverDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
+            double spetialDiscount = vmOrderDeliverDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
 
             List<string> strList = new List<string>();
             foreach (var item in vmOrderDeliverDetail.DataListDetail)
@@ -4028,13 +4088,13 @@ namespace KGERP.Service.Implementation
                 string s = "Product: " + item.ProductCategory + " " + item.ProductSubCategory + " " + item.ProductName + "Delivered Qty: " + item.DeliveredQty + " Unit Price: " + item.UnitPrice;
                 strList.Add(s);
             }
-            string perticular = (String.Join(", ", strList.ToArray())) + " Unit Discount: " + unitDiscount +   " Spetial Discount: " + spetialDiscount;
+            string perticular = (String.Join(", ", strList.ToArray())) + " Unit Discount: " + unitDiscount + " Spetial Discount: " + spetialDiscount;
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
-                Debit = vmOrderDeliverDetail.DataListDetail.Any() ? ((vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * x.UnitPrice)) - (unitDiscount  + spetialDiscount)) : 0,
+                Debit = vmOrderDeliverDetail.DataListDetail.Any() ? ((vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * x.UnitPrice)) - (unitDiscount + spetialDiscount)) : 0,
                 Credit = 0,
                 Accounting_HeadFK = vmOrderDeliverDetail.AccountingHeadId.Value //Customer/ LC
             });
@@ -4054,7 +4114,7 @@ namespace KGERP.Service.Implementation
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Unit Discount: " + unitDiscount + " Spetial Discount: " + spetialDiscount,
-                Debit = unitDiscount  + spetialDiscount,
+                Debit = unitDiscount + spetialDiscount,
                 Credit = 0,
                 Accounting_HeadFK = salesCommition.Id //Sales Commissiom
 
@@ -4090,6 +4150,60 @@ namespace KGERP.Service.Implementation
 
             return resultData.VoucherId;
         }
+
+        public async Task<long> SalesTranserVoucherPush(SalesTransferDetailVM salesTransferDetailVM)
+        {
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == salesTransferDetailVM.CompanyFK && x.Code == "SDV" && x.IsActive == true).FirstOrDefault();
+
+            VMJournalSlave vMJournalSlave = new VMJournalSlave
+            {
+                JournalType = voucherType.VoucherTypeId,
+                Title = salesTransferDetailVM.SalesTransferNo + " Date: " + salesTransferDetailVM.SalesTransferDate.ToString("MM/dd/yyyy"),
+                Narration = salesTransferDetailVM.CreatedBy + " Date: " + salesTransferDetailVM.CreatedDate.ToString("MM/dd/yyyy"),
+                CompanyFK = salesTransferDetailVM.CompanyFK,
+                Date = salesTransferDetailVM.SalesTransferDate,
+                IsSubmit = true,
+            };
+
+            double totalSalesTranserAmount = (double)salesTransferDetailVM.DataListDetail.Sum(x => x.DeliveredQty * x.UnitPrice);
+
+
+            List<string> strList = new List<string>();
+            foreach (var item in salesTransferDetailVM.DataListDetail)
+            {
+                string s = "Product: " + item.ProductCategory + " " + item.ProductSubCategory + " " + item.ProductName + "Delivered Qty: " + item.DeliveredQty + " Unit Price: " + item.UnitPrice;
+                strList.Add(s);
+            }
+            string perticular = (String.Join(", ", strList.ToArray()));
+
+            vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = perticular,
+                Debit = 0,
+                Credit = totalSalesTranserAmount,
+                Accounting_HeadFK = (int)salesTransferDetailVM.ToVenderHeadGLId
+            });
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = perticular,
+                Debit = totalSalesTranserAmount,
+                Credit = 0,
+                Accounting_HeadFK = (int)salesTransferDetailVM.FromVenderHeadGLId
+            });
+
+
+            var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            if (resultData.VoucherId > 0)
+            {
+                var voucherMap = VoucherMapping(resultData.VoucherId, salesTransferDetailVM.CompanyFK.Value, salesTransferDetailVM.SalesTransferId, "Salestransfer");
+            }
+
+            return resultData.VoucherId;
+        }
+
         public async Task<long> AccountingSalesPushSEED(int CompanyFK, VMOrderDeliverDetail vmOrderDeliverDetail, int journalType)
         {
 
@@ -6835,7 +6949,7 @@ namespace KGERP.Service.Implementation
             {
                 JournalType = voucherType.VoucherTypeId,
                 //Title = "<a href='" + _urlInfo + "Report/ISSPurchseInvoiceReport?companyId=" + CompanyFK + "&materialReceiveId=" + vmPOReceiving.MaterialReceiveId + "&reportName=GCCLPurchaseInvoiceReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
-                Title= "<a target='_blank' href='" + _urlInfo + "Report/PackagingPurchaseOrderReports?purchaseOrderId=" + vmPOReceiving.Procurement_PurchaseOrderFk + "&companyId=" + CompanyFK + "&reportName=ISSPurchaseOrderReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
+                Title = "<a target='_blank' href='" + _urlInfo + "Report/PackagingPurchaseOrderReports?purchaseOrderId=" + vmPOReceiving.Procurement_PurchaseOrderFk + "&companyId=" + CompanyFK + "&reportName=ISSPurchaseOrderReports'>" + vmPOReceiving.POCID + "</a>" + " Date: " + vmPOReceiving.PODate.ToString(),
 
                 Narration = vmPOReceiving.ChallanCID + " " + vmPOReceiving.Challan + " Date: " + vmPOReceiving.ChallanDate.ToString(),
                 CompanyFK = CompanyFK,
@@ -6893,7 +7007,7 @@ namespace KGERP.Service.Implementation
                 Credit = 0,
                 Accounting_HeadFK = purchaseOverHeadAccount.Id  // 4101001003001-Purchase Overhead Expenses
             });
-             
+
 
 
             foreach (var item in vmPOReceiving.DataListSlave)
@@ -7188,7 +7302,7 @@ namespace KGERP.Service.Implementation
 
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                 {
-                    Particular = item.ProductName +  " Processing Cost: " + item.Amount,
+                    Particular = item.ProductName + " Processing Cost: " + item.Amount,
                     Debit = Convert.ToDouble(item.Amount),
                     Credit = 0,
                     Accounting_HeadFK = item.AccountingHeadId.Value
@@ -7220,7 +7334,7 @@ namespace KGERP.Service.Implementation
 
             var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == vmReferenceSlave.CompanyFK && x.Code == "PACV" && x.IsActive == true).FirstOrDefault();
 
-        
+
             VMJournalSlave vMJournalSlave = new VMJournalSlave
             {
                 JournalType = voucherType.VoucherTypeId,
@@ -7230,7 +7344,7 @@ namespace KGERP.Service.Implementation
                 Date = vmReferenceSlave.ReferenceDate,
                 IsSubmit = true
             };
-             
+
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
 
             #region Integration Cr Finish Item Dr
@@ -7238,12 +7352,12 @@ namespace KGERP.Service.Implementation
 
             foreach (var item in vmReferenceSlave.DataListSlave)
             {
-              
+
 
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                 {
                     Particular = item.ProductName + " Quantity: " + item.Quantity + " Costing Price: " + item.CostingPrice + " Total: " + item.Quantity * item.CostingPrice,
-                    Debit = Convert.ToDouble(item.Quantity * item.CostingPrice) ,
+                    Debit = Convert.ToDouble(item.Quantity * item.CostingPrice),
                     Credit = 0,
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
@@ -7261,7 +7375,7 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
-             
+
             #endregion
 
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
