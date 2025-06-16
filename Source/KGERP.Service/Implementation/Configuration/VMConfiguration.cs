@@ -33,7 +33,7 @@ namespace KGERP.Service.Configuration
         public int? CompanyFK { get; set; }
         public int OrderNo { get; set; }
         public string Remarks { get; set; }
-       
+
         public string Code { get; set; }
         public string CompanyName { get; set; }
         //public string Message { get; set; }
@@ -208,7 +208,7 @@ namespace KGERP.Service.Configuration
 
         public IEnumerable<CommonReportSignatoryVM> DataList { get; set; }
         public List<SelectListItem> ReportList { get; set; }
-}
+    }
 
     public class NOticeBoardViewModel
     {
@@ -234,8 +234,8 @@ namespace KGERP.Service.Configuration
         public string Name { get; set; }
         public int VendorReferenceId { get; set; }
         public int? vendorProfessionId { get; set; }
-        public  Nullable<System.DateTime> DateOfBirth { get; set; }
-        public  Nullable<System.DateTime> MarriageDate { get; set; }
+        public Nullable<System.DateTime> DateOfBirth { get; set; }
+        public Nullable<System.DateTime> MarriageDate { get; set; }
         public int ZoneId { get; set; }
         public long SalesOfficerEmpId { get; set; }
         [Required]
@@ -307,9 +307,9 @@ namespace KGERP.Service.Configuration
         public string ContactPerson { get; set; }
         [Required]
         //[RegularExpression("^[0-9]{11}$",ErrorMessage = "Phone Number Must be 11 digit")]
-       
+
         public string Phone { get; set; }
-        
+
         public string Email { get; set; }
         public string Address { get; set; }
         public bool IsForeign { get; set; }
@@ -328,23 +328,23 @@ namespace KGERP.Service.Configuration
         public long? HeadGLId { get; set; }
         public int HId { get; set; }
         public long CGId { get; set; }
-        public string FileNo { get;  set; }
-        public string BookingNo { get;  set; }
-        public string ProductName { get;  set; }
+        public string FileNo { get; set; }
+        public string BookingNo { get; set; }
+        public string ProductName { get; set; }
         public decimal MonthlyIncentive { get; set; }
         public string Condition { get; set; }
         public decimal? YearlyTarget { get; set; } = 0;
-        public int CreditRatioFrom { get;  set; }
+        public int CreditRatioFrom { get; set; }
         public decimal? MonthlyTarget { get; set; } = 0;
-        public int CreditRatioTo { get;  set; }
-        public int? NoOfCheck { get;  set; }
-        public string CheckNo { get;  set; }
-        public string ClosingTime { get;  set; }
+        public int CreditRatioTo { get; set; }
+        public int? NoOfCheck { get; set; }
+        public string CheckNo { get; set; }
+        public string ClosingTime { get; set; }
         public decimal? CreditCommission { get; set; }
         public int VendorDeedId { get; set; }
-        public string ETinNo { get;  set; }
-        public string TradeLicense { get;  set; }
-        public int CustomerProductTypeFk { get;  set; }
+        public string ETinNo { get; set; }
+        public string TradeLicense { get; set; }
+        public int CustomerProductTypeFk { get; set; }
         public int CheckTypeId { get; set; }
         public int CheckDetailId { get; set; }
         public string NidImage { get; set; }
@@ -354,7 +354,7 @@ namespace KGERP.Service.Configuration
         public string TinUrl { get; set; }
         public string BankChkUrl { get; set; }
         public string TradeLicenceUrl { get; set; }
- public string Imageurl { get; set; }
+        public string Imageurl { get; set; }
 
         public List<string> UploadedFileUrls { get; set; }
         public string SubZoneName { get; set; }
@@ -402,7 +402,7 @@ namespace KGERP.Service.Configuration
         public string Description { get; set; }
 
         public string ProductType { get; set; }
-      
+
         public bool IsCrm { get; set; }
         public int LandSizeInKatha { get; set; }
         public string NoOfFloors { get; set; }
@@ -421,16 +421,16 @@ namespace KGERP.Service.Configuration
         public string IncentiveType { get; set; }
         public int CompanyId { get; set; }
         public DateTime? MDate { get; set; }
-       
+
         public IEnumerable<VMIncentive> DataList { get; set; }
     }
 
     public class VMIncentiveDetails : VMIncentive
     {
-        public int IncentiveDetailId { get; set; }       
+        public int IncentiveDetailId { get; set; }
         public decimal? MinQty { get; set; }
         public decimal? MaxQty { get; set; }
-        public decimal? Rate { get; set; }      
+        public decimal? Rate { get; set; }
 
         public IEnumerable<VMIncentiveDetails> DataListDetails { get; set; }
     }
@@ -444,7 +444,7 @@ namespace KGERP.Service.Configuration
         public string ProductType { get; set; }
         public bool IsLock { get; set; }
         public decimal? BaseCommissionRate { get; set; }
-        public List<SelectModelType> ProductCategoryList { get; set; } 
+        public List<SelectModelType> ProductCategoryList { get; set; }
         public IEnumerable<VMCommonProductSubCategory> DataList { get; set; }
         public List<SelectVm> BrandList { get; set; }
         public int BrandId { get; set; }
@@ -465,7 +465,7 @@ namespace KGERP.Service.Configuration
         [Range(0.01, double.MaxValue, ErrorMessage = "Required Quantity must be greater than 0.")]
         public decimal RequiredQuantity { get; set; }
         public double Qty { get; set; }
-      
+
         public double FinishUnitPrice { get; set; }
         public double FinishTotalPrice { get; set; }
 
@@ -508,7 +508,7 @@ namespace KGERP.Service.Configuration
         public FlatProperties FlatProp { get; set; } = new FlatProperties();
         public PlotProperties PlotProp { get; set; }
         public List<SelectModelType> FacingDropDown { get; set; }
-        public List<string> LotNumbers { get;  set; }
+        public List<string> LotNumbers { get; set; }
     }
 
     public class VMrealStateProductsForList
@@ -663,7 +663,7 @@ namespace KGERP.Service.Configuration
         public decimal PurchasePrice { get; set; }
         public decimal? CreditSalePrice { get; set; }
         public decimal DamageQuantity { get; set; }
-         
+
         public double DeliveredQty { get; set; }
         public decimal RawConsumeQuantity { get; set; }
         public string Description { get; set; }
@@ -870,7 +870,7 @@ namespace KGERP.Service.Configuration
 
     }
 
-   
+
 
     public class VMCommonThana : BaseVM
     {
@@ -900,6 +900,8 @@ namespace KGERP.Service.Configuration
         public SelectList CompanyList { get; set; } = new SelectList(new List<object>());
         public List<SelectListItem> DDLEmployee { get; set; }
     }
+
+    
 
     public partial class VMPackagingPurchaseRequisition : BaseVM
     {
@@ -932,14 +934,14 @@ namespace KGERP.Service.Configuration
         public int CompanyId { get; set; }
         public int RequisitionType { get; set; }
         public string CustomerId { get; set; }
-      
+
         [Required]
         public int FromDepartmentReqId { get; set; }
         public int FromDepartmentIssueId { get; set; }
         public string FromDepartmentIssueName { get; set; }
         [Required]
         public int ToDepartmentReqId { get; set; }
-        
+
         public int ToDepartmentIssueId { get; set; }
         public string ToDepartmentIssueName { get; set; }
         //DetailsItem
@@ -959,26 +961,26 @@ namespace KGERP.Service.Configuration
         public List<SelectListItem> DDLStockDepartmetn { get; set; }
 
         public List<SelectListItem> DDLStockDepartment { get; set; }
-        public bool Achknolagement { get;  set; }
-        public string AchknolagementIs { get;  set; }
-        public string AchknologeByName { get;  set; }
-        public DateTime? AcknologeDate { get;  set; }
-        public string AcknologeDateMsg { get;  set; }
-        public string AchknologeBy { get;  set; }
-        public long AchknologeById { get;  set; }
+        public bool Achknolagement { get; set; }
+        public string AchknolagementIs { get; set; }
+        public string AchknologeByName { get; set; }
+        public DateTime? AcknologeDate { get; set; }
+        public string AcknologeDateMsg { get; set; }
+        public string AchknologeBy { get; set; }
+        public long AchknologeById { get; set; }
         public string CustomerName { get; set; }
         public string IntregrationFrom { get; set; }
         public string JobOrderNo { get; set; }
-        public bool IsSubmited { get;  set; }
-        public string FromRequisitionName { get;  set; }
-        public string ToRequisitionName { get;  set; }
-        public DateTime OrderDate { get;  set; }
-        public DateTime? ExpectedDeliveryDate { get;  set; }
-        public string StockName { get;  set; }
-        public string ProductNames { get;  set; }
-        public decimal AllocatedQty { get;  set; }
-        public decimal? RQty { get;  set; }
-        public int RProductId { get;  set; }
+        public bool IsSubmited { get; set; }
+        public string FromRequisitionName { get; set; }
+        public string ToRequisitionName { get; set; }
+        public DateTime OrderDate { get; set; }
+        public DateTime? ExpectedDeliveryDate { get; set; }
+        public string StockName { get; set; }
+        public string ProductNames { get; set; }
+        public decimal AllocatedQty { get; set; }
+        public decimal? RQty { get; set; }
+        public int RProductId { get; set; }
     }
 
 
@@ -1033,7 +1035,7 @@ namespace KGERP.Service.Configuration
     #region Bank
     public class VMCommonDesignation : BaseVM
     {
-        
+
         public string Name { get; set; }
         public IEnumerable<VMCommonDesignation> DataList { get; set; }
     }
@@ -1124,7 +1126,7 @@ namespace KGERP.Service.Configuration
         public IEnumerable<VMWorkLabelAndSpace> LabelDataList { get; set; }
         public long WorkStateId { get; set; }
         public long WorkspaceName { get; set; }
-      
+
         public IEnumerable<VMWorkLabelAndSpace> SpaceDataList { get; set; }
     }
 
@@ -1132,6 +1134,6 @@ namespace KGERP.Service.Configuration
 
 
 
- 
+
     #endregion
 }

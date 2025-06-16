@@ -115,6 +115,42 @@ namespace KGERP.Services.Procurement
         #endregion
     }
 
+    public class IssueMasterInfoVM : BaseVM
+    {
+        public long IssueMasterId { get; set; }
+        public string IssueNo { get; set; }
+        public DateTime IssueDate { get; set; }
+        public long IssuedBy { get; set; }
+        public int VendorId { get; set; }
+        public int CompanyId { get; set; }
+        public string ModifedBy { get; set; }
+        public bool Achknolagement { get; set; }
+        public long AchknologeBy { get; set; }
+        
+        public DateTime? AcknologeDate { get; set; }
+    }
+
+    public class IssueDetailInfoVM : IssueMasterInfoVM
+    {
+        public long IssueDetailId { get; set; }
+        public int? RProductId { get; set; }
+        public decimal? RMQ { get; set; }
+        public decimal CostingPrice { get; set; }
+        public string IssueBy { get; set; }
+        public string CustomerBy { get; set; }
+        public string ProductName { get; set; }
+        public string CustomerAddress { get; set; }
+        public string CustomerMobile { get; set; }
+        public string EmployeeMobile { get; set; }
+        public string CompanyAddress { get; set; }
+        public string CompanyEmail { get; set; }
+        public string CompanyPhone { get; set; }
+        public string UnitName { get; set; }
+        public string AchknologeName { get; set; }
+        public List<IssueDetailInfoVM> DataListSlave { get; set; }
+    }
+
+
     public class VMPurchaseOrderSlave : VMPurchaseOrder
     {
         public DateTime lcDate { get; set; }
