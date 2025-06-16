@@ -5719,6 +5719,30 @@ namespace KGERP.Service.Implementation
             return vmAccountingSignatory;
         }
 
+
+
+        public async Task<VmOrderApprovalSignatory> GetOrderApprovalSignatory(int companyId)
+        {
+            VmOrderApprovalSignatory vmOrderApprovalSignatory = new VmOrderApprovalSignatory();
+            vmOrderApprovalSignatory.CompanyFK = companyId;
+            vmOrderApprovalSignatory.DataList = await Task.Run(() => (from t1 in _db.OrderMasterSignatories
+                                                                   join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
+                                                                   join t3 in _db.Employees on t1.EmployeeId equals t3.Id
+                                                                   where t1.CompanyId == companyId && t1.IsActive
+
+                                                                   select new VmOrderApprovalSignatory
+                                                                   {
+                                                                       SalesOrderSignatoryId = t1.SalesOrderSignatoryId,
+                                                                       CompanyFK = t1.CompanyId,
+                                                                       EmployeeId = t1.EmployeeId,
+                                                                       Precedence=t1.Precedence,
+                                                                       SignatoryName=t3.Name,
+                                                                   }).OrderByDescending(x => x.SalesOrderSignatoryId).AsEnumerable());
+            return vmOrderApprovalSignatory;
+        }
+
+
+
         public async Task<int> AccountingSignatoryAdd(VMAccountingSignatory vmAccountingSignatory)
         {
             var result = -1;
@@ -5742,6 +5766,28 @@ namespace KGERP.Service.Implementation
             }
             return result;
         }
+
+        public async Task<int> OrderApproovalSignatoryAdd(VmOrderApprovalSignatory vmOrderApprovalSignatory)
+        {
+            var result = -1;
+            OrderMasterSignatory commo = new OrderMasterSignatory
+            {
+
+               
+                EmployeeId = vmOrderApprovalSignatory.EmployeeId,
+                Precedence = vmOrderApprovalSignatory.Precedence,
+                CompanyId = vmOrderApprovalSignatory.CompanyFK.Value,
+                IsActive = true,
+        
+            };
+            _db.OrderMasterSignatories.Add(commo);
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = commo.SalesOrderSignatoryId;
+            }
+            return result;
+        }
+
         public async Task<int> AccountingSignatoryEdit(VMAccountingSignatory vmAccountingSignatory)
         {
 
@@ -5757,6 +5803,23 @@ namespace KGERP.Service.Implementation
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = accountingSignatory.SignatoryId;
+            }
+            return result;
+        }
+
+
+
+        public async Task<int> OrderApprovalSignatoryEdit(VmOrderApprovalSignatory vmOrderApprovalSignatory)
+        {
+
+            var result = -1;
+            OrderMasterSignatory ordermasterSignatory = _db.OrderMasterSignatories.Find(vmOrderApprovalSignatory.SalesOrderSignatoryId);
+            ordermasterSignatory.EmployeeId = vmOrderApprovalSignatory.EmployeeId;
+            ordermasterSignatory.Precedence = vmOrderApprovalSignatory.Precedence;
+     
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                result = ordermasterSignatory.SalesOrderSignatoryId;
             }
             return result;
         }
@@ -5777,6 +5840,23 @@ namespace KGERP.Service.Implementation
             return result;
         }
 
+
+        public async Task<int> OrderAprovalSignatoryDelete(int id)
+        {
+            int result = -1;
+
+            if (id != 0)
+            {
+                OrderMasterSignatory ordermasterSignatory = _db.OrderMasterSignatories.Find(id);
+                ordermasterSignatory.IsActive = false;
+
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = ordermasterSignatory.SalesOrderSignatoryId;
+                }
+            }
+            return result;
+        }
 
         //New Compamy Setup
         public async Task<VMCompany> GetCompany()

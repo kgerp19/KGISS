@@ -901,6 +901,29 @@ namespace KGERP.Service.Configuration
         public List<SelectListItem> DDLEmployee { get; set; }
     }
 
+
+
+
+
+    public partial class VmOrderApprovalSignatory : BaseVM
+    {
+
+        public int SalesOrderSignatoryId { get; set; }
+        public Nullable<long> EmployeeId { get; set; }
+        public int Precedence { get; set; }
+        public int CompanyId { get; set; }
+        public bool IsActive { get; set; }
+        public IEnumerable<VmOrderApprovalSignatory> DataList { get; set; }
+        public List<SelectListItem> DDLEmployee { get; set; }
+        public string SignatoryName { get; set; }
+    }
+
+
+
+
+
+
+
     public partial class VMPackagingPurchaseRequisition : BaseVM
     {
         public decimal TotalQty { get; set; }

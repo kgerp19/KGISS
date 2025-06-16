@@ -2,6 +2,7 @@
 using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
 using KGERP.Service.Implementation.LcInfoServices;
+using KGERP.Service.Implementation.OrderApproval.ViewModels;
 using KGERP.Utility;
 using System;
 using System.Collections.Generic;
@@ -384,7 +385,7 @@ namespace KGERP.Services.Procurement
     public class VMSalesOrderSlave : VMSalesOrder
     {
         public int ProductId;
-
+        public long CurrentEmployeeIntId { get; set; }
         public string ProductName { get; set; }
         public string ComLogo { get; set; }
         public int DemandId { get; set; } = 0;
@@ -412,6 +413,7 @@ namespace KGERP.Services.Procurement
         public SelectList SubZoneList { get; set; } = new SelectList(new List<object>());
         public SelectList ZoneList { get; set; } = new SelectList(new List<object>());
         public SelectList StockInfoList { get; set; } = new SelectList(new List<object>());
+        public IEnumerable<OrderMasterSignatoryApprovalVM> SignatoryApprovalList { get; set; }
 
         public IEnumerable<VMSalesOrderSlave> DataListSlave { get; set; }
         public int ProductSubCategoryId { get; set; }

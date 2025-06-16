@@ -1942,6 +1942,12 @@ namespace Pos.App.Controllers
             vmAccountingSignatory.DDLEmployee = _dropdownService.RenderDDL(await _dropDownItemService.GetDDLAllEmployeeByCompanyId(companyId), true);
             return View(vmAccountingSignatory);
         }
+
+       
+
+
+
+
         [HttpPost]
         public async Task<ActionResult> AccountingSignatory(VMAccountingSignatory vmAccountingSignatory)
         {
@@ -1968,6 +1974,60 @@ namespace Pos.App.Controllers
             }
             return RedirectToAction(nameof(AccountingSignatory), new { companyId = vmAccountingSignatory.CompanyFK });
         }
+
+        public async Task<ActionResult> orderApprovalSignatory(int companyId)
+        {
+
+
+            VmOrderApprovalSignatory vmOrderApprovalSignatory = new VmOrderApprovalSignatory();
+            vmOrderApprovalSignatory = await Task.Run(() => _service.GetOrderApprovalSignatory(companyId));
+
+            vmOrderApprovalSignatory.DDLEmployee = _dropdownService.RenderDDL(await _dropDownItemService.GetDDLAllEmployeeByCompanyId(companyId), true);
+            return View(vmOrderApprovalSignatory);
+        }
+
+
+
+
+        [HttpPost]
+        public async Task<ActionResult> OrderApprovalSignatory(VmOrderApprovalSignatory vmOrderApprovalSignatory)
+        {
+            
+            if (vmOrderApprovalSignatory.ActionEum == ActionEnum.Add)
+            {
+
+
+                await _service.OrderApproovalSignatoryAdd(vmOrderApprovalSignatory);
+            }
+            else if (vmOrderApprovalSignatory.ActionEum == ActionEnum.Edit)
+            {
+                //Edit
+                await _service.OrderApprovalSignatoryEdit(vmOrderApprovalSignatory);
+            }
+            else if (vmOrderApprovalSignatory.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                await _service.OrderAprovalSignatoryDelete(vmOrderApprovalSignatory.SalesOrderSignatoryId);
+            }
+            else
+            {
+                return RedirectToAction("Error");
+            }
+            return RedirectToAction(nameof(OrderApprovalSignatory), new { companyId = vmOrderApprovalSignatory.CompanyFK });
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         public async Task<ActionResult> Company()

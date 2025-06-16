@@ -19,6 +19,7 @@ using System.Threading;
 using KGERP.CustomModel;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
+using System.Web.UI.WebControls;
 
 namespace KGERP.Services.Procurement
 {
@@ -773,6 +774,89 @@ namespace KGERP.Services.Procurement
 
             return result;
         }
+
+        public DateTime? ReceivedDate { get; set; }
+        public async Task<bool> AddAllMappingSignatoryApproval(int orderMasterId,int companyId)
+        {
+            var order = await _db.OrderMasters.FindAsync(orderMasterId);
+
+            if (order == null)
+            {
+                return false;
+            }
+             
+
+
+            var signatories = await (from a in _db.OrderMasterSignatories
+                                     join e in _db.Employees on a.EmployeeId equals e.Id
+                                     join c in _db.Companies on e.CompanyId equals c.CompanyId
+                                     join d in _db.Departments on e.DepartmentId equals d.DepartmentId
+                                     join ds in _db.Designations on e.DesignationId equals ds.DesignationId
+                                     where a.IsActive && a.CompanyId == companyId
+                                     select new OrderMasterSignatoryVM()
+                                     {
+                                         SignatoryId = a.SalesOrderSignatoryId,
+                                         Precedence = a.Precedence
+
+                                     }).OrderBy(x => x.Precedence).ToListAsync();
+
+            if (signatories == null)
+            {
+                return false;
+            }
+            int status = 0;
+         
+            Dictionary<int, int> precedenceMap = new Dictionary<int, int>();
+            int sequentialPrecedence = 1; 
+
+            foreach (var item in signatories)
+            {
+                
+                if (!precedenceMap.ContainsKey(item.Precedence))
+                {
+                 
+                    precedenceMap[item.Precedence] = sequentialPrecedence;
+                    sequentialPrecedence++; 
+                }
+
+ 
+                int mappedPrecedence = precedenceMap[item.Precedence];
+
+          
+                if (mappedPrecedence == 1)
+                {
+                    ReceivedDate = DateTime.Now;
+                }
+
+                ApprovalOrderMaster approval = new ApprovalOrderMaster()
+                {
+                    ApprovalStatus = (mappedPrecedence == 1) ? 0 : -1, 
+                    OrderMasterId = orderMasterId,
+                    Comments = "",
+                    IsActive = true,
+                    SalesOrderSignatoryId = item.SignatoryId,
+                    Precedence = mappedPrecedence, 
+                    ReceivedDate = ReceivedDate,
+                };
+
+                _db.ApprovalOrderMasters.Add(approval);
+                status += await _db.SaveChangesAsync();
+            }
+
+
+
+            return false;
+        }
+
+
+
+
+
+
+
+
+
+
 
         public async Task<long> OrderMastersSubmit(long? id = 0)
         {
@@ -3009,7 +3093,76 @@ namespace KGERP.Services.Procurement
             return VMPayment;
         }
 
-        //hjhj
+        public async Task<long> UpdateSignatoryApproval(int signatoryApprovalId, SignatoryStatusEnum statusEnum, string comments)
+        {
+            var exist = _db.ApprovalOrderMasters.Find(signatoryApprovalId);
+            if (exist == null)
+            {
+                return 0;
+            }
+
+            // Set the approval date and comments
+            exist.ApprovalDate = DateTime.Now;
+            exist.Comments = comments;
+            exist.ApprovalStatus = (int)statusEnum;
+
+            // Save the approval change
+            if (await _db.SaveChangesAsync() > 0)
+            {
+                var orderMaster = _db.OrderMasters.FirstOrDefault(x => x.OrderMasterId == exist.OrderMasterId);
+                if (orderMaster != null)
+                {
+                    // Get all active approval orders for this OrderMaster
+                    var approvals = _db.ApprovalOrderMasters
+                                        .Where(x => x.OrderMasterId == orderMaster.OrderMasterId && x.IsActive)
+                                        .ToList();
+
+                    // Process approval logic based on precedence
+                    if (statusEnum == SignatoryStatusEnum.Approved)
+                    {
+                        // Get all records with the same precedence as the one that was approved
+                        var precedenceGroup = approvals.Where(x => x.Precedence == exist.Precedence).ToList();
+                        foreach (var item in precedenceGroup)
+                        {
+                            // Mark all the records of this precedence as approved
+                            item.ApprovalStatus = (int)SignatoryStatusEnum.Approved;
+                        }
+
+                        // Set records with the next precedence level (precedence + 1) to Pending
+                        var nextPrecedenceGroup = approvals.Where(x => x.Precedence == exist.Precedence + 1).ToList();
+                        foreach (var item in nextPrecedenceGroup)
+                        {
+                            item.ApprovalStatus = (int)SignatoryStatusEnum.Pending;
+                        }
+
+                        // Save changes for updated records
+                        await _db.SaveChangesAsync();
+                    }
+
+                    // Handle rejection scenario
+                    else if (statusEnum == SignatoryStatusEnum.Rejected)
+                    {
+                        // If rejected, deactivate all related approvals for this order
+                        var appvals = _db.ApprovalOrderMasters.Where(x => x.OrderMasterId == exist.OrderMasterId && x.IsActive).ToList();
+                        appvals.ForEach(x => x.IsActive = false);
+
+                        // Set OrderMaster status to Draft
+                        if (orderMaster != null)
+                        {
+                            orderMaster.Status = (int)EnumFeedSalesStatus.Draft;
+                            await _db.SaveChangesAsync();
+                        }
+                    }
+
+                    return exist.OrderMasterId;
+                }
+            }
+
+            return 0;
+        }
+
+
+
 
         public async Task<FeedSalesOrderModel> FeedSalesOrderDetailsGet(int companyId, long orderMasterId)
         {
@@ -3327,6 +3480,10 @@ namespace KGERP.Services.Procurement
 
                                                       }).FirstOrDefault());
 
+
+          
+
+
             vmSalesOrderSlave.DataListSlave = await Task.Run(() => (from t1 in _db.OrderDetails.Where(x => x.IsActive && x.OrderMasterId == orderMasterId)
                                                                     join t3 in _db.Products.Where(x => x.IsActive) on t1.ProductId equals t3.ProductId
                                                                     join t4 in _db.ProductSubCategories.Where(x => x.IsActive) on t3.ProductSubCategoryId equals t4.ProductSubCategoryId
@@ -3356,6 +3513,53 @@ namespace KGERP.Services.Procurement
                                                                         // SpecialDiscount   
 
                                                                     }).OrderByDescending(x => x.OrderDetailId).AsEnumerable());
+
+            vmSalesOrderSlave.SignatoryApprovalList = await (from approval in _db.ApprovalOrderMasters
+                                                             join a in _db.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
+                                                             join o in _db.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
+                                                             join v in _db.Vendors on o.CustomerId equals v.VendorId
+                                                             join e in _db.Employees on a.EmployeeId equals e.Id
+                                                             join c in _db.Companies on e.CompanyId equals c.CompanyId
+                                                             join d in _db.Departments on e.DepartmentId equals d.DepartmentId
+                                                             join ds in _db.Designations on e.DesignationId equals ds.DesignationId
+                                                             where approval.IsActive
+                                                             && approval.OrderMasterId == orderMasterId
+
+
+                                                             select new OrderMasterSignatoryApprovalVM()
+                                                             {
+                                                                 CompanyId = o.CompanyId,
+                                                                 ProductType = o.ProductType,
+                                                                 Id = approval.Id,
+                                                                 EmployeeId = e.EmployeeId,
+                                                                 ApproverEmployeeIntId = a.EmployeeId.Value,
+
+                                                                 EmployeeName = e.Name,
+                                                                 CompanyName = c.Name,
+                                                                 DepartmentName = d.Name,
+                                                                 DesignationName = ds.Name,
+                                                                 OrderNo = o.OrderNo,
+                                                                 OrderMasterId = o.OrderMasterId,
+                                                                 OrderDate = o.OrderDate,
+                                                                 CoustomerName = v.Name,
+                                                                 ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
+                                                                 ApprovalDate = approval.ApprovalDate,
+                                                                 Comments = approval.Comments,
+                                                                 SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
+                                                                 IsPreviousApproved = _db.ApprovalOrderMasters.Where(x => x.IsActive)
+                                                                              .Any(x => x.OrderMasterId == approval.OrderMasterId &&
+                                                                                        x.Id != approval.Id && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved) &&
+                                                                                        _db.OrderMasterSignatories.Where(o => o.IsActive)
+                                                                                                .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId &&
+                                                                                                          y.Precedence < a.Precedence &&
+                                                                                                          y.IsActive))
+
+                                                             }).AsQueryable().OrderBy(x => x.SignatoryStatus).ToListAsync();
+
+
+
+
+
 
 
             return vmSalesOrderSlave;

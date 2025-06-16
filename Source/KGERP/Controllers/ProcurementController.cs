@@ -11,6 +11,7 @@ using KGERP.Service.Configuration;
 using KGERP.Service.Contracts.KGERP.Requisitions.Command.RequestResponseModel;
 using KGERP.Service.Contracts.KGERP.Requisitions.Queries.RequestModel;
 using KGERP.Service.Implementation;
+using KGERP.Service.Implementation.OrderApproval;
 using KGERP.Service.Implementation.RealStateMoneyReceipt;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
@@ -954,6 +955,8 @@ namespace KG.App.Controllers
             else
             {
                 vmSalesOrderSlave = await Task.Run(() => _service.ProcurementSalesOrderDetailsGet(companyId, orderMasterId));
+                long userId = Common.GetIntUserId();
+                vmSalesOrderSlave.CurrentEmployeeIntId = userId;
 
             }
             vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
@@ -1266,6 +1269,8 @@ namespace KG.App.Controllers
         public async Task<ActionResult> SubmitOrderMastersFromSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
             vmSalesOrderSlave.OrderMasterId = await _service.OrderMastersSubmit(vmSalesOrderSlave.OrderMasterId);
+            var approvalStatus = await _service.AddAllMappingSignatoryApproval((int)vmSalesOrderSlave.OrderMasterId,vmSalesOrderSlave.CompanyFK.Value);
+
             return RedirectToAction(nameof(ProcurementSalesOrderSlave), "Procurement", new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
         }
 
@@ -2595,6 +2600,15 @@ namespace KG.App.Controllers
             }
             return RedirectToAction(nameof(FeedProcurementSalesOrderSlave), new { companyId = feedSalesOrderModel.CompanyId, orderMasterId = feedSalesOrderModel.OrderMasterId });
         }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateSignatoryStatusFromDetail(EmployeeClearanceVM model)
+        {
+
+            var result = await _service.UpdateSignatoryApproval((int)model.Id, model.SignatoryStatus, model.Comment);
+            return RedirectToAction("FeedProcurementSalesOrderSlave", "Procurement", new { companyId = model.UserCompanyId, productType = "F", result });
+        }
+
 
         [HttpGet]
         public async Task<ActionResult> GCCLProcurementSalesOrderSlaveByPRF(int companyId = 0, int orderMasterId = 0)
