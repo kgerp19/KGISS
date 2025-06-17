@@ -561,7 +561,13 @@ namespace KG.App.Controllers
             return RedirectToAction(nameof(ProcurementPurchaseOrderSlave), new { companyId = vmPurchaseOrderSlave.CompanyFK, purchaseOrderId = vmPurchaseOrderSlave.PurchaseOrderId });
         }
 
-        
+        [HttpPost]
+        public async Task<ActionResult> PromotionalItemInvoiceChildDelete(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            issueDetailInfoVM.IssueMasterId = await _service.PromotionalItemInvoiceChildDelete(issueDetailInfoVM.IssueDetailId);
+            return RedirectToAction(nameof(PromotionalItemInvoice), new { companyId = issueDetailInfoVM.CompanyFK, IssueMasterId = issueDetailInfoVM.IssueMasterId });
+        }
+
 
         public JsonResult GetTermNCondition(int id)
         {
@@ -795,6 +801,13 @@ namespace KG.App.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> PromotionalItemInvoiceSubmit(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            issueDetailInfoVM.IssueMasterId = await _service.PromotionalItemInvoiceSubmit(issueDetailInfoVM);
+            return RedirectToAction(nameof(PromotionalItemInvoice), new { companyId = issueDetailInfoVM.CompanyFK, IssueMasterId = issueDetailInfoVM.IssueMasterId });
+        }
+
+        [HttpPost]
         public async Task<ActionResult> SubmitProcurementPurchaseOrder(VMPurchaseOrder vmPurchaseOrder)
         {
             vmPurchaseOrder.PurchaseOrderId = await _service.ProcurementPurchaseOrderSubmit(vmPurchaseOrder.PurchaseOrderId);
@@ -853,6 +866,12 @@ namespace KG.App.Controllers
         public async Task<JsonResult> KFMALSingleProcurementPurchaseOrderSlave(int id)
         {
             var model = await _service.KFMALGetSingleProcurementPurchaseOrderSlave(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<JsonResult> SinglePromotionalItemInvoice(int id)
+        {
+            var model = await _service.SinglePromotionalItemInvoice(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
@@ -2930,6 +2949,14 @@ namespace KG.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+
+        [HttpGet]
+        public async Task<JsonResult> PromotionalItemInvoiceSingleItem(int id)
+        {
+            IssueDetailInfoVM model = new IssueDetailInfoVM();
+            model = await _service.PromotionalItemInvoiceSingleItem(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<ActionResult> KFMALProcurementPurchaseOrderUpdate(VMPurchaseOrder vmPurchaseOrder)
         {

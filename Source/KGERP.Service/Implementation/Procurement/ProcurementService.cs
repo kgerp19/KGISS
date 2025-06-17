@@ -1092,6 +1092,21 @@ namespace KGERP.Services.Procurement
 
             return v;
         }
+
+
+        public async Task<IssueDetailInfoVM> PromotionalItemInvoiceSingleItem(int id)
+        {
+            var v = await  (from t1 in _db.IssueMasterInfoes
+                                          join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                                          where t1.IssueMasterId == id
+                                          select new IssueDetailInfoVM
+                                          {
+                                              IssueNo=t1.IssueNo,
+                                              IsSubmit=t1.IsSubmit
+                                          }).FirstOrDefaultAsync();
+
+            return v;
+        }
         public async Task<VMPurchaseOrder> KFMALGetSingleProcurementPurchaseOrder(int id)
         {
             var v = await Task.Run(() => (from t1 in _db.PurchaseOrders
@@ -1779,6 +1794,29 @@ namespace KGERP.Services.Procurement
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = procurementPurchaseOrder.PurchaseOrderId;
+                }
+            }
+            return result;
+        }
+
+        public async Task<long> PromotionalItemInvoiceSubmit(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            long result = -1;
+
+
+            IssueMasterInfo issueMasterInfo = await _db.IssueMasterInfoes.FindAsync(issueDetailInfoVM.IssueMasterId);
+            await _db.SaveChangesAsync();
+
+            if (issueMasterInfo != null)
+            {
+                
+                issueMasterInfo.ModifedBy = System.Web.HttpContext.Current.User.Identity.Name;
+                issueMasterInfo.ModifiedDate = DateTime.Now;
+                issueMasterInfo.IsSubmit = true;
+
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = issueMasterInfo.IssueMasterId;
                 }
             }
             return result;
@@ -2628,7 +2666,8 @@ namespace KGERP.Services.Procurement
                                              CreatedDate = t1.CreatedDate,
                                              AchknologeName = t5.Name,
                                              AcknologeDate=t1.AcknologeDate,
-                                             Achknolagement=t1.Achknolagement
+                                             Achknolagement=t1.Achknolagement,
+                                             IsSubmit = t1.IsSubmit
 
 
                                          }).FirstOrDefaultAsync();
@@ -2814,6 +2853,26 @@ namespace KGERP.Services.Procurement
                                           }).FirstOrDefault());
             return v;
         }
+
+        public async Task<IssueDetailInfoVM> SinglePromotionalItemInvoice(int id)
+        {
+            var v = await (from t1 in _db.IssueDetailInfoes
+                                          join t2 in _db.Products on t1.RProductId equals t2.ProductId
+                                          join t3 in _db.Units on t2.UnitId equals t3.UnitId
+
+                                          where t1.IssueDetailId == id
+                                          select new IssueDetailInfoVM
+                                          {
+                                              ProductName = t2.ProductName,
+                                              RProductId = t2.ProductId,
+                                              IssueMasterId = (int)t1.IssueMasterId,
+                                              IssueDetailId = t1.IssueDetailId,
+                                              RMQ = t1.RMQ,
+                                              CostingPrice = t1.CostingPrice,
+                                              UnitName = t3.Name
+                                          }).FirstOrDefaultAsync();
+            return v;
+        }
         public async Task<long> KFMALProcurementPurchaseOrderSlaveAdd(VMPurchaseOrderSlave vmPurchaseOrderSlave)
         {
             long result = -1;
@@ -2923,16 +2982,11 @@ namespace KGERP.Services.Procurement
             var result = -1;
             IssueDetailInfo model = await _db.IssueDetailInfoes.FindAsync(issueDetailInfoVM.IssueDetailId);
             if (model is null) return result;
-            if (issueDetailInfoVM.IsActive)
-            {
-                model.RProductId = issueDetailInfoVM.RProductId;
-                model.RMQ = issueDetailInfoVM.RMQ;
-                model.CostingPrice = issueDetailInfoVM.CostingPrice;
-            }
-            else
-            {
-                model.IsActive = issueDetailInfoVM.IsActive;
-            }
+
+            model.RProductId = issueDetailInfoVM.RProductId;
+            model.RMQ = issueDetailInfoVM.RMQ;
+            model.CostingPrice = issueDetailInfoVM.CostingPrice;
+
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = (int)model.IssueMasterId;
@@ -2989,6 +3043,20 @@ namespace KGERP.Services.Procurement
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = procurementPurchaseOrderSlave.PurchaseOrderDetailId;
+                }
+            }
+            return result;
+        }
+        public async Task<long> PromotionalItemInvoiceChildDelete(long id)
+        {
+            long result = -1;
+            IssueDetailInfo issueDetail = await _db.IssueDetailInfoes.FindAsync(id);
+            if (issueDetail != null)
+            {
+                issueDetail.IsActive = false;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = (int)issueDetail.IssueMasterId;
                 }
             }
             return result;

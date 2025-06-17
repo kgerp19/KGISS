@@ -1,0 +1,426 @@
+﻿@model KGERP.Data.CustomModel.ReportCustomModel
+@{
+    ViewBag.Title = "PromotionalStockReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .box {
+        position: relative;
+        border-radius: 3px;
+        background: #ffffff;
+        border-top: 3px solid #3c8dbc;
+        margin-bottom: 20px;
+        width: 100%;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    }
+
+    .box-header {
+        color: #444;
+        display: block;
+        padding: 10px;
+        position: relative;
+        border-bottom: 1px solid #f4f4f4;
+    }
+
+        .box-header.with-border {
+            border-bottom: 1px solid #f4f4f4;
+        }
+
+    .box-title {
+        display: inline-block;
+        font-size: 18px;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .box-body {
+        border-radius: 0 0 3px 3px;
+        padding: 20px;
+    }
+
+
+
+    .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #ddd;
+    }
+
+        .form-control:focus {
+            border-color: #3c8dbc;
+            box-shadow: none;
+        }
+
+    .btn-success {
+        background-color: #00a65a;
+        border-color: #008d4c;
+    }
+
+    #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+        display: none;
+    }
+
+    .loading-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .loading-text {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #444;
+    }
+
+    @@media (max-width: 767px) {
+        .col-md-4 {
+            margin-bottom: 15px;
+        }
+
+        .input-group-btn {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <span style="font-size:20px;color:#000000">Promotional Stock Report @*@Model.Title*@</span>
+    </div>
+</div>
+<br />
+@using (Html.BeginForm("GetPackagingRMStockReport", "Report", FormMethod.Get, new { @id = "idForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CompanyId)
+    @Html.HiddenFor(model => model.ProductType)
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="form-group">
+                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                    <br />
+                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker form-control", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">Category:</label>
+                    @Html.EditorFor(model => model.CategoryName, new { htmlAttributes = new { @class = "form-control", @id = "txtCategoryName" } })
+                    @Html.HiddenFor(model => model.Common_ProductCategoryFk, new { id = "ddlCommonProductCategoryFk" })
+
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">Subcategory:</label>
+                    @Html.DropDownListFor(model => model.Common_ProductSubCategoryFk, Model.ProductSubCategoryList as SelectList, "---Select Subcategory---", new { id = "ddlCommonProductSubCategoryFk", @class = "form-control searchingDropdown" })
+                    @Html.HiddenFor(model => model.Common_ProductSubCategoryFk, new { id = "ddlCommonProductSubCategoryFk" })
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">Product:</label>
+                    <select id="txtProductName" class="form-control searchingDropdown" name="ProductId">
+                        <option value="">-- Select Product --</option>
+                        <!-- Product options will be populated here -->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">Lot Number :</label>
+                    <select id="txtLotNumber" class="form-control" name="SelectedLotNumber">
+                        <option value="">-- Select Lot Number --</option>
+                        <!-- Product options will be populated here -->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">Select Report:</label>
+                    <br />
+                    @Html.RadioButtonFor(m => m.ReportName, Model.ReportName) Stock Report
+                    @*@Html.RadioButtonFor(m => m.ReportName, Model.NoteReportName) Stock Summary Report*@
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">Export Format</label>
+                    <div class="input-group">
+                        <select class="form-control" name="ReportType" id="ReportType">
+                            <option value="PDF">PDF</option>
+                            <option value="EXCEL">Excel</option>
+                            <option value="WORD">Word</option>
+                        </select>
+                        <span class="input-group-btn">
+                            <button type="submit" id="btnExport" name="EXPORT" class="btn btn-success" formtarget="_blank">
+                                <i class="fa fa-download"></i> Export
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                dateFormat: "mm/dd/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+        });
+        $('#btnAdd').unbind("click").bind("click", function () {
+            var form = $('#idForm');
+            var url = "/Vouchers/CreateTempVoucher";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "html",
+                data: form.serialize(),
+                beforeSend: function () {
+
+                },
+                success: function (resp) {
+                    $('#divVoucherGrid').html(resp);
+                },
+                error: function (request, status, error) {
+                    alert("Error");
+                }
+            });
+
+        });
+
+
+
+        $(function () {
+            $("#accountName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/HeadGLs/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: '{"prefix":"' + request.term + '"}',
+                        dataType: "json",
+                        type: "POST",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+                select: function (e, i) {
+                    $("#accountHeadId").val(i.item.val);
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+        });
+
+
+
+             $("#txtCategoryName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("AutoCompleteProductCategoryGet", "Configuration")",
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { companyId: "@Model.CompanyId", prefix: request.term, productType : "P" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return item;
+                            }))
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCommonProductCategoryFk").val(i.item.val);
+                     $.ajax({
+                type: "GET",
+                url: "@Url.Action("CommonProductSubCategoryGet","Configuration")",
+                datatype: "Json",
+                         data: { companyId: "@Model.CompanyId", categoryId: i.item.val},
+                    success: function (data) {
+                    var items = "";
+                        if (data) {
+                            $("#ddlCommonProductSubCategoryFk").empty();
+                            $("#ddlCommonProductSubCategoryFk").append("<option value=''>==Select Subcategory==</option>");
+                            $(data).each(function (index, item) {
+                                $("#ddlCommonProductSubCategoryFk").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                            });
+
+                        }
+                    }
+                });
+
+                },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+
+
+
+        // On change of Subcategory Dropdown
+$("#ddlCommonProductSubCategoryFk").change(function () {
+    // Get the selected subcategory value and category value
+    var categoryId = $("#ddlCommonProductCategoryFk").val();
+    var subCategoryId = $(this).val();
+    var companyId = "@Model.CompanyId"; // Assuming CompanyId is part of the model
+
+    if (categoryId && subCategoryId) {
+        // Trigger the AJAX request to get products based on category and subcategory
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("CommonRawProductR", "Configuration")", // Ensure the method name is correct
+            dataType: "json", // Expecting a JSON response
+            data: {
+                companyId: companyId,
+                categoryId: categoryId,
+                subCategoryId: subCategoryId
+            },
+            success: function (data) {
+                if (data && data.length > 0) {
+                    // Populate the Product Name field (txtProductName) with products
+                    var options = "<option value=''>==Select Product==</option>";
+                    $(data).each(function (index, item) {
+                        options += "<option value='" + item.ProductId + "'>" + item.ProductName + "</option>";
+                    });
+
+                    // Append the product options to the product name dropdown
+                    $("#txtProductName").empty().append(options);
+                } else {
+                    // If no products are found, reset the product name field
+                    $("#txtProductName").empty().append("<option value=''>No Products Found</option>");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching product data:", error);
+            }
+        });
+    }
+});
+
+  $("#txtProductName").change(function () {
+    // Get the selected product value
+    var productId = $(this).val();
+
+    if (productId) {
+        // Trigger the AJAX request to get lot numbers for the selected product
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetLotNumberM", "Configuration")", // Ensure the method name and controller are correct
+            dataType: "json", // Expecting a JSON response
+            data: {
+                productid: productId
+            },
+            success: function (data) {
+                if (data && data.length > 0) {
+                    // Populate the Lot Number field (assuming you have a dropdown for lot numbers)
+                    var lotOptions = "<option value=''>==Select Lot Number==</option>";
+                    $(data).each(function (index, item) {
+                        lotOptions += "<option value='" + item + "'>" + item + "</option>";
+                    });
+
+                    // Append the lot number options to the lot number dropdown (or any other field)
+                    $("#txtLotNumber").empty().append(lotOptions);
+                } else {
+                    // If no lot numbers are found, reset the lot number field
+                    $("#txtLotNumber").empty().append("<option value=''>No Lot Numbers Found</option>");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching lot numbers:", error);
+            }
+        });
+    }
+});
+
+
+
+
+
+
+
+
+    </script>
+}
+
+
+
+
+
+
+

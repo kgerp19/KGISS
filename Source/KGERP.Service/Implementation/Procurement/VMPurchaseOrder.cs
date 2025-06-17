@@ -136,6 +136,7 @@ namespace KGERP.Services.Procurement
         public int? RProductId { get; set; }
         public decimal? RMQ { get; set; }
         public decimal CostingPrice { get; set; }
+        public decimal RemainingStock { get; set; }
         public string IssueBy { get; set; }
         public string CustomerBy { get; set; }
         public string ProductName { get; set; }
@@ -147,7 +148,9 @@ namespace KGERP.Services.Procurement
         public string CompanyPhone { get; set; }
         public string UnitName { get; set; }
         public string AchknologeName { get; set; }
+        public bool IsSubmit { get; set; }
         public List<IssueDetailInfoVM> DataListSlave { get; set; }
+       
     }
 
 

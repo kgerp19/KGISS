@@ -1031,6 +1031,13 @@ namespace Pos.App.Controllers
             var model = _service.GetRMUnitAndClosingRateByProductId(productId, lotNo);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+
+        public JsonResult PromotionalAndClosingRateByProductId(int productId, string lotNo)
+        {
+            var model = _service.PromotionalAndClosingRateByProductId(productId, lotNo);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult RMUnitAndClosingRateByProductIdByLot(int companyId, int productId, string lotnumber)
         {
             var model = _service.GetRMUnitAndClosingRateByProductIdByLot(companyId, productId, lotnumber);
@@ -1147,6 +1154,12 @@ namespace Pos.App.Controllers
         public JsonResult AutoCompleteRawPackingMaterialsGet(int companyId, string prefix)
         {
             var products = _service.GetAutoCompleteRawPackingMaterials(companyId, prefix);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult AutoCompletePromotionalItemGet(int companyId, string prefix)
+        {
+            var products = _service.AutoCompletePromotionalItemGet(companyId, prefix);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
