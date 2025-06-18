@@ -121,6 +121,7 @@ namespace KGERP.Services.Procurement
         public long IssueMasterId { get; set; }
         public string IssueNo { get; set; }
         public DateTime IssueDate { get; set; }
+        public string IssueDateMsg { get { return IssueDate.ToString("yyyy-MM-dd"); } }
         public long IssuedBy { get; set; }
         public int VendorId { get; set; }
         public int CompanyId { get; set; }
@@ -135,6 +136,8 @@ namespace KGERP.Services.Procurement
     {
         public long IssueDetailId { get; set; }
         public int? RProductId { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
         public decimal? RMQ { get; set; }
         public decimal CostingPrice { get; set; }
         public decimal RemainingStock { get; set; }
@@ -150,6 +153,10 @@ namespace KGERP.Services.Procurement
         public string UnitName { get; set; }
         public string AchknologeName { get; set; }
         public bool IsSubmit { get; set; }
+        public int? AccountingHeadId { get; set; }
+        public string CustomerName { get; set; }
+        public string StrFromDate { get; set; }
+        public string StrToDate { get; set; }
         public List<IssueDetailInfoVM> DataListSlave { get; set; }
        
     }

@@ -442,6 +442,32 @@ namespace KGERP.Services.Procurement
             return vmSalesOrder;
         }
 
+        public async Task<IssueDetailInfoVM> PromotionalItemListGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            IssueDetailInfoVM detailInfoVM = new IssueDetailInfoVM();
+            detailInfoVM.CompanyFK = companyId;
+
+            detailInfoVM.DataListSlave = await (from t1 in _db.IssueMasterInfoes
+                                                          .Where(x => x.IsActive
+                                                          && x.CompanyId == companyId
+                                                          && x.IssueDate >= fromDate && x.IssueDate <= toDate)
+                                                join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+
+                                                select new IssueDetailInfoVM
+                                                {
+                                                    IssueMasterId = t1.IssueMasterId,
+                                                    IssueNo = t1.IssueNo,
+                                                    CustomerName = t2.Name,
+                                                    CreatedBy = t1.CreatedBy,
+                                                    IsSubmit = t1.IsSubmit,
+                                                    IssueDate = t1.IssueDate,
+                                                    Remarks = t1.Remarks
+
+                                                }).OrderByDescending(x => x.IssueMasterId).ToListAsync();
+
+            return detailInfoVM;
+        }
+
         public async Task<VMSalesOrder> ProcurementOrderMastersRMListGet(int companyId, DateTime? fromDate, DateTime? toDate, int? vStatus)
         {
             VMSalesOrder vmSalesOrder = new VMSalesOrder();
@@ -708,6 +734,35 @@ namespace KGERP.Services.Procurement
                                               StockInfoNameMsg = t5.Name
 
                                           }).FirstOrDefault());
+            return v;
+        }
+
+        public async Task<IssueDetailInfoVM> GetSinglIssueMastersGet(int orderMasterId)
+        {
+
+            var v = await (from t1 in _db.IssueMasterInfoes.Where(x => x.IsActive && x.IssueMasterId == orderMasterId)
+                           join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                           join t3 in _db.Companies on t1.CompanyId equals t3.CompanyId
+                           join t4 in _db.Employees on t1.IssuedBy equals t4.Id
+                           select new IssueDetailInfoVM
+                           {
+                               CompanyId = t1.CompanyId,
+                               IssueMasterId = t1.IssueMasterId,
+                               IssueNo = t1.IssueNo,
+                               IssueDate = t1.IssueDate,
+                               CreatedBy = t1.CreatedBy,
+                               VendorId = t1.VendorId,
+                               IssuedBy = t4.Id,
+                               IssueBy = t4.Name,
+                               CustomerName = t2.Name,
+                               CompanyName = t3.Name,
+                               CompanyAddress = t3.Address,
+                               CompanyEmail = t3.Email,
+                               CompanyPhone = t3.Phone,
+                               Remarks = t1.Remarks
+
+
+                           }).FirstOrDefaultAsync();
             return v;
         }
         public async Task<List<VMFinishProductBOM>> GetDetailsBOM(int orderDetailsId)
@@ -1180,14 +1235,14 @@ namespace KGERP.Services.Procurement
 
         public async Task<IssueDetailInfoVM> PromotionalItemInvoiceSingleItem(int id)
         {
-            var v = await  (from t1 in _db.IssueMasterInfoes
-                                          join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
-                                          where t1.IssueMasterId == id
-                                          select new IssueDetailInfoVM
-                                          {
-                                              IssueNo=t1.IssueNo,
-                                              IsSubmit=t1.IsSubmit
-                                          }).FirstOrDefaultAsync();
+            var v = await (from t1 in _db.IssueMasterInfoes
+                           join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                           where t1.IssueMasterId == id
+                           select new IssueDetailInfoVM
+                           {
+                               IssueNo = t1.IssueNo,
+                               IsSubmit = t1.IsSubmit
+                           }).FirstOrDefaultAsync();
 
             return v;
         }
@@ -1889,17 +1944,19 @@ namespace KGERP.Services.Procurement
 
 
             IssueMasterInfo issueMasterInfo = await _db.IssueMasterInfoes.FindAsync(issueDetailInfoVM.IssueMasterId);
-            await _db.SaveChangesAsync();
 
             if (issueMasterInfo != null)
             {
-                
+
                 issueMasterInfo.ModifedBy = System.Web.HttpContext.Current.User.Identity.Name;
                 issueMasterInfo.ModifiedDate = DateTime.Now;
                 issueMasterInfo.IsSubmit = true;
 
-                if (await _db.SaveChangesAsync() > 0)
+                IssueDetailInfoVM AccData = await PromotionalItemInvoiceGet(issueDetailInfoVM.CompanyFK.Value, (int)issueDetailInfoVM.IssueMasterId);
+                var vResult = await _accountingService.AccountingPromotionalPushISS(AccData);
+                if (vResult > 0)
                 {
+                    await _db.SaveChangesAsync();
                     result = issueMasterInfo.IssueMasterId;
                 }
             }
@@ -2053,6 +2110,44 @@ namespace KGERP.Services.Procurement
                 if (await _db.SaveChangesAsync() > 0)
                 {
                     result = orderMasters.OrderMasterId;
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<long> PromotionalItemMastersDelete(long id)
+        {
+            long result = -1;
+            IssueMasterInfo issueMasterInfo = await _db.IssueMasterInfoes.FindAsync(id);
+            if (issueMasterInfo != null)
+            {
+                issueMasterInfo.IsActive = false;
+                issueMasterInfo.ModifedBy = System.Web.HttpContext.Current.User.Identity.Name;
+                issueMasterInfo.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = issueMasterInfo.IssueMasterId;
+                }
+            }
+
+            return result;
+        }
+        public async Task<long> UpdatePromotionalItemMasters(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            long result = -1;
+            IssueMasterInfo issueMasterInfo = await _db.IssueMasterInfoes.FindAsync(issueDetailInfoVM.IssueMasterId);
+            if (issueMasterInfo != null)
+            {
+                issueMasterInfo.IssueDate = issueDetailInfoVM.IssueDate;
+                issueMasterInfo.IssuedBy = issueDetailInfoVM.IssuedBy;
+                issueMasterInfo.VendorId = issueDetailInfoVM.VendorId;
+                issueMasterInfo.Remarks = issueDetailInfoVM.Remarks;
+                issueMasterInfo.ModifedBy = System.Web.HttpContext.Current.User.Identity.Name;
+                issueMasterInfo.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = issueMasterInfo.IssueMasterId;
                 }
             }
 
@@ -2749,9 +2844,11 @@ namespace KGERP.Services.Procurement
                                              IssueDate = t1.IssueDate,
                                              CreatedDate = t1.CreatedDate,
                                              AchknologeName = t5.Name,
-                                             AcknologeDate=t1.AcknologeDate,
-                                             Achknolagement=t1.Achknolagement,
-                                             IsSubmit = t1.IsSubmit
+                                             AcknologeDate = t1.AcknologeDate,
+                                             Achknolagement = t1.Achknolagement,
+                                             IsSubmit = t1.IsSubmit,
+                                             Remarks = t1.Remarks,
+                                             CompanyFK = t1.CompanyId
 
 
                                          }).FirstOrDefaultAsync();
@@ -2769,7 +2866,8 @@ namespace KGERP.Services.Procurement
                                                            RMQ = t1.RMQ,
                                                            CostingPrice = t1.CostingPrice,
                                                            UnitName = t6.Name,
-                                                           RProductId = t3.ProductId
+                                                           RProductId = t3.ProductId,
+                                                           AccountingHeadId = t5.AccountingHeadId
 
                                                        }).OrderByDescending(x => x.IssueDetailId).ToListAsync();
 
@@ -2941,20 +3039,20 @@ namespace KGERP.Services.Procurement
         public async Task<IssueDetailInfoVM> SinglePromotionalItemInvoice(int id)
         {
             var v = await (from t1 in _db.IssueDetailInfoes
-                                          join t2 in _db.Products on t1.RProductId equals t2.ProductId
-                                          join t3 in _db.Units on t2.UnitId equals t3.UnitId
+                           join t2 in _db.Products on t1.RProductId equals t2.ProductId
+                           join t3 in _db.Units on t2.UnitId equals t3.UnitId
 
-                                          where t1.IssueDetailId == id
-                                          select new IssueDetailInfoVM
-                                          {
-                                              ProductName = t2.ProductName,
-                                              RProductId = t2.ProductId,
-                                              IssueMasterId = (int)t1.IssueMasterId,
-                                              IssueDetailId = t1.IssueDetailId,
-                                              RMQ = t1.RMQ,
-                                              CostingPrice = t1.CostingPrice,
-                                              UnitName = t3.Name
-                                          }).FirstOrDefaultAsync();
+                           where t1.IssueDetailId == id
+                           select new IssueDetailInfoVM
+                           {
+                               ProductName = t2.ProductName,
+                               RProductId = t2.ProductId,
+                               IssueMasterId = (int)t1.IssueMasterId,
+                               IssueDetailId = t1.IssueDetailId,
+                               RMQ = t1.RMQ,
+                               CostingPrice = t1.CostingPrice,
+                               UnitName = t3.Name
+                           }).FirstOrDefaultAsync();
             return v;
         }
         public async Task<long> KFMALProcurementPurchaseOrderSlaveAdd(VMPurchaseOrderSlave vmPurchaseOrderSlave)

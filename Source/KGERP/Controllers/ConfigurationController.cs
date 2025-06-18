@@ -105,7 +105,7 @@ namespace Pos.App.Controllers
         {
             VMUserMenuAssignment vmUserMenuAssignment = new VMUserMenuAssignment();
             vmUserMenuAssignment.CompanyList = new SelectList(_service.CompaniesDropDownListISS(companyId), "Value", "Text");
-
+            vmUserMenuAssignment.CompanyFK = companyId;
             return View(vmUserMenuAssignment);
         }
         [HttpPost]
@@ -1199,9 +1199,9 @@ namespace Pos.App.Controllers
 
 
 
-        public JsonResult getallEmployee(string prefix)
+        public JsonResult getallEmployee(string prefix, int companyId)
         {
-            var products = _service.AllEmployee(prefix);
+            var products = _service.AllEmployee(prefix, companyId);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
         public JsonResult getallEmployeeId(string prefix)
@@ -1210,9 +1210,9 @@ namespace Pos.App.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult EmployeeAutoComplete(string prefix)
+        public JsonResult EmployeeAutoComplete(string prefix,int companyId)
         {
-            var employees = _service.AllEmployee(prefix);
+            var employees = _service.AllEmployee(prefix, companyId);
             return Json(employees, JsonRequestBehavior.AllowGet);
         }
         public JsonResult EmployeeIdByCompanyAutoComplete(string prefix, int companyId)

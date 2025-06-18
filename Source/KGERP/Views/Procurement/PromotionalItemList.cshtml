@@ -1,0 +1,563 @@
+﻿
+@model KGERP.Services.Procurement.IssueDetailInfoVM
+@using KGERP.Utility;
+
+@{
+    ViewBag.Title = "PromotionalItemList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<style>
+
+    /* Custom Card Styling for Bootstrap 3 */
+    .card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-top: 1%;
+    }
+
+    .card-header {
+        background-color: #f9f9f9;
+        border-bottom: 1px solid #ddd;
+        padding: 15px 20px;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .card-body {
+        padding: 1%;
+    }
+
+    /* Form Enhancements */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        .form-control:focus {
+            border-color: #66afe9;
+            outline: 0;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);
+        }
+
+    .btn-primary {
+        background-color: #337ab7;
+        border-color: #2e6da4;
+        font-weight: 500;
+        padding: 10px 16px;
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btn-primary:hover {
+            background-color: #286090;
+            border-color: #204d74;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+    .input-group-addon {
+        background-color: #eee;
+        border: 1px solid #ccc;
+        color: #555;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .card-body {
+            padding: 15px;
+        }
+
+        .btn-block {
+            margin-top: 10px;
+        }
+    }
+
+    /* Custom datepicker styling */
+    .datepicker {
+        background-color: #fff;
+        position: relative;
+    }
+
+        .datepicker:before {
+            content: "\f073";
+            font-family: FontAwesome;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+    .date-input {
+        padding-right: 35px;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Promotional Item List
+        </span>
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Sales Order</li>
+        <li class="active">
+
+            <a  target="_blank" href="~/Procurement/PromotionalItemInvoice?companyId=@Model.CompanyId">Add Promotional Item</a>
+
+        </li>
+    </ol>
+</section>
+
+
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">
+            <i class="fa fa-filter"></i> Date Range Filter
+        </h4>
+    </div>
+    <div class="card-body">
+        @using (Html.BeginForm("PromotionalItemfilter", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+        {
+            <!-- Hidden Company ID -->
+            @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyFK" })
+
+        <div class="row">
+           
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="StrFromDate" class="control-label">
+                        <i class="fa fa-calendar"></i> From Date
+                    </label>
+                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "form-control datepickers date-input", id = "StrFromDate", name = "StrFromDate", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <!-- To Date -->
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="StrToDate" class="control-label">
+                        <i class="fa fa-calendar"></i> To Date
+                    </label>
+                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "form-control datepickers date-input", id = "StrToDate", name = "StrToDate", @autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label class="control-label">&nbsp;</label>
+                    <button type="submit"
+                            id="btnSave"
+                            class="btn btn-primary btn-block">
+                        <i class="fa fa-search"></i> Show
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+
+
+
+
+        @using (Html.BeginForm("ProcurementSalesOrderList", "Procurement", FormMethod.Post, new { id = "procurementvmSalesOrderListFormId", @class = "formValidator" }))
+        {
+            <div class="">
+                <div class="box-danger">
+                    <div class="box-header">
+
+                        @Html.HiddenFor(model => model.CompanyId, new { id = "CompanyId" })
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="table-responsive col-md-12  text-nowrap">
+                                <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>SL</th>
+                                            <th>Promotion NO</th>
+                                            <th>Promotion Date</th>
+                                            <th>Customer</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.DataListSlave)
+                                        {
+
+
+                                            <tr>
+                                                <th>@(++sl)</th>
+                                                <td>
+
+                                                    <a style="width:100%" target="_blank" href="~/Report/PromotionalItemInvoiceReports?companyId=@Model.CompanyId&issueMasterId=@item.IssueMasterId&reportName=ISSPromotionalItemInvoiceReports"> @item.IssueNo</a>
+
+                                                </td>
+                                                <td>@item.IssueDate.ToString("dd-MMM-yyyy")</td>
+                                                <td>@item.CustomerName</td>
+                                                <td>@item.Remarks</td>
+                                                <td class="btn @(item.IsSubmit==true?"btn-success":"btn-primary")  btn-sm">@(item.IsSubmit==true?"Submited":"Submit Pending")</td>
+                                                <td>
+                                                    @if (!item.IsSubmit)
+                                                    {
+                                                        <a id="@item.IssueMasterId" onclick=" makeEditble(@item.IssueMasterId);" class="linkPointer" data-toggle="modal" data-target="#editPOModal" title="Edit" data-placement="top"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                                        <a id="@item.IssueMasterId" onclick="makeDeletale(@item.IssueMasterId)" class="linkPointer" data-toggle="modal" data-target="#deleteProcurementPurchaseOrderModal" title="Delete" data-placement="top"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></a>
+                                                    }
+
+                                                    <a href="~/Procurement/PromotionalItemInvoice?companyId=@Model.CompanyId&IssueMasterId=@item.IssueMasterId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            @*@if (Model.ID > 0)
+                                {
+                                    <a target="_blank" href="~/Shipment/DeliveryChallanePrint/@Model.ID" class="btn btn-primary" style="width:100%">Print</a>
+                                }*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@using (Html.BeginForm("DeletePromotionalItemMasters", "Procurement", FormMethod.Post))
+{
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal  fade " id="deleteProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b>Delete </b></h5>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.IssueMasterId, new { id = "hidProcurementPurchaseOrderId" })
+                    @Html.HiddenFor(model => model.CompanyFK, new { id = "POdeleteCompanyFK" })
+
+                    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div style="text-align:center">
+                        <h3>Are you sure to Delete this?</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" id="btnsave" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp; Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("UpdatePromotionalItemMasters", "Procurement", FormMethod.Post))
+{
+    <div class="modal fade bd-example-modal-lg" id="editPOModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"><b>Promotional Item Edit (<span id="pSOCIDText"></span>)</b></h4>
+                </div>
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.CompanyId, new { id = "SOEditCompanyFK" })
+
+                    @Html.HiddenFor(model => model.IssueMasterId, new { id = "hidIssueMasterId" })
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="required">Promotion Date</label>
+                                <input name="IssueDate" asp-for="IssueDate" type="text" required="required" class="datepickers form-control" id="txtOrderDate" placeholder="Date" autocomplete="off">
+                                @Html.ValidationMessageFor(model => model.IssueDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group" style="padding:0px">
+                                <label class="required">Promotion By</label>
+                                @Html.EditorFor(model => model.IssueBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Issued By", @id = "txtIssuedBy" } })
+
+                                @Html.HiddenFor(model => model.IssuedBy, new { id = "ddlIssuedBy" })
+                                @Html.ValidationMessageFor(model => model.IssuedBy, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-3">
+                            <div class="form-group" style="padding:0px">
+                                <label class="required">Cusotmer</label>
+                                @Html.EditorFor(model => model.CustomerBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Issued By", @id = "txtVendorBy" } })
+
+                                @Html.HiddenFor(model => model.VendorId, new { id = "ddVendorBy" })
+                                @Html.ValidationMessageFor(model => model.IssuedBy, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Remarks</label>
+                            <div class="form-group" style="padding:0px">
+
+                                @Html.TextAreaFor(model => model.Remarks, new { @autocomplete = "on", @class = "form-control", @name = "Remarks", rows = "1" })
+
+                                @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    @section scripts {
+
+        <script type="text/javascript">
+
+
+        $('.datepickers').datepicker({
+            dateFormat: "yy-mm-dd", 
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2001:+50"
+        });
+            function resetForm() {
+                $('#procurementvmSalesOrderListFormId')[0].reset();
+                $('#SOEditActionId').val(1);
+            }
+            $("#txtCommonCustomerName").autocomplete({
+                source: function (request, response) {
+                    //console.log(request);
+                    //console.log(response);
+
+                    $.ajax({
+                        url:"@Url.Action("GetAutoCompleteSCustomer", "Procurement")",// '/AccountHeads/AutoComplete/',
+                        //data: "{ 'prefix': '" + request.term + "'}",
+                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        dataType: "json",
+                        type: "get",
+                        cache: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                           response($.map(data, function (item) {
+                               return item;
+                           }))
+                        },
+                        error: function (response) {
+                                                                        //alert(response.responseText);
+                        },
+                        failure: function (response) {
+                                                                        //alert(response.responseText);
+                        }
+                    });
+                },
+
+                select: function (e, i) {
+                    $("#ddlCustomerId").val(i.item.val);
+
+                    },
+                minLength: 1,
+                cache: true
+
+            }).focus(function () {
+                $(this).autocomplete("search");
+            });
+
+        function makeCloseable(rowId, actionId) {
+            $('#hidcloseReopenProcurementPurchaseOrderId').val(rowId);
+
+              $('#hidcloseReopenActionId').val(actionId);
+
+
+            if (actionId == "@((int)ActionEnum.Close)") {
+                $('.closeReopenText').text("Close");
+            }
+            if (actionId == "@((int)ActionEnum.ReOpen)") {
+                $('.closeReopenText').text("Reopen");
+            }
+        }
+        $("#txtIssuedBy").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Employee/EmployeeAutoCompleteByCompany/',
+                    data: '{"prefix":"' + request.term + '", "CompanyId":@Model.CompanyId}',
+                    dataType: "json",
+                    type: "POST",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        // $.map transforms the data array - maps each item to the desired format
+                        response($.map(data, function (item) {
+                            return item;
+                        }));
+                    },
+                    error: function (response) {
+                        //alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        //alert(response.responseText);
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#ddlIssuedBy").val(i.item.val);
+            },
+            minLength: 1,
+            cache: true,
+            // Add z-index to ensure autocomplete dropdown appears above other elements
+            appendTo: "body", // Optional: append to body for better positioning
+            open: function() {
+                $(this).autocomplete("widget").css("z-index", 9999);
+            }
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+
+        $("#txtVendorBy").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("GetAutoCompleteSCustomer", "Procurement")",
+                    data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                    dataType: "json",
+                    type: "get",
+                    cache: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item;
+                        }))
+                    },
+                    error: function (response) {
+                        //alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        //alert(response.responseText);
+                    }
+                });
+            },
+
+            select: function (e, i) {
+                $("#ddVendorBy").val(i.item.val);
+
+            },
+            minLength: 1,
+            cache: true,
+             appendTo: "body", // Optional: append to body for better positioning
+         open: function() {
+             $(this).autocomplete("widget").css("z-index", 9999);
+         }
+
+        }).focus(function () {
+    $(this).autocomplete("search");
+});
+
+
+
+
+
+
+
+
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+
+            function makeEditble(rowId) {
+                 $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("GetSinglIssueMastersGet", "Procurement")",
+                        datatype: "Json",
+                     data: { IssueMasterId: rowId },
+                        success: function (data) {
+
+                            $('#txtOrderDate').val(data.IssueDateMsg);
+                            $("#hidIssueMasterId").val(data.IssueMasterId);
+                            $('#txtIssuedBy').val(data.IssueBy);
+                            $('#ddlIssuedBy').val(data.IssuedBy);
+                            $('#txtVendorBy').val(data.CustomerName);
+                            $('#ddVendorBy').val(data.VendorId);
+                            $('#Remarks').val(data.Remarks);
+                            $('#pSOCIDText').text(data.IssueNo);
+
+
+                        }
+                 });
+            }
+
+
+        </script>
+    }
+
+
+
