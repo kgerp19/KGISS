@@ -1119,11 +1119,11 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-        public object AllEmployee(string prefix)
+        public object AllEmployee(string prefix,int companyId)
         {
             var v = (from t1 in _db.Employees
                      join t2 in _db.Designations on t1.DesignationId equals t2.DesignationId
-                     where (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
+                     where t1.CompanyId== companyId && (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
 
                      select new
                      {
