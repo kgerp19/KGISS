@@ -4182,7 +4182,7 @@ namespace KGERP.Service.Implementation
                 Particular = perticular,
                 Debit = (double)(issueDetailInfoVM.DataListSlave.Any() ? (issueDetailInfoVM.DataListSlave.Sum(x => x.RMQ * x.CostingPrice)) : 0),
                 Credit = 0,
-                Accounting_HeadFK = 50628174 //ERP Integration
+                Accounting_HeadFK = 50627595 //Promotional Materials Expenses
             });
 
             foreach (var item in issueDetailInfoVM.DataListSlave)
