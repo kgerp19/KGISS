@@ -939,7 +939,25 @@ namespace KGERP.Service.Implementation
 
                      select new
                      {
-                         label = ((t1.ProductType == "R") ? "Raw Materials: " : (t1.ProductType == "P") ? "Packaging Materials: " : (t1.ProductType == "F") ? "Finished Goods: " : "") + t3.Name + " " + t2.Name + " " + t1.ProductName,
+                         label = ((t1.ProductType == "R") ? "Raw Materials: " : (t1.ProductType == "P") ? "Promotional Item: " : (t1.ProductType == "F") ? "Finished Goods: " : "") + t3.Name + " " + t2.Name + " " + t1.ProductName,
+                         val = t1.ProductId
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+            return v;
+        }
+
+        public object AutoCompletePromotionalItemGet(int companyId, string prefix)
+        {
+            var v = (from t1 in _db.Products
+                     join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                     join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+
+                     where t1.CompanyId == companyId && t1.IsActive && t2.IsActive && t3.IsActive && (t1.ProductType == "P") &&
+                     ((t1.ProductName.Contains(prefix)) || (t2.Name.Contains(prefix)) || (t3.Name.Contains(prefix)) || (t1.ShortName.Contains(prefix)))
+
+                     select new
+                     {
+                         label =  "Promotional Item: " + t3.Name + " " + t2.Name + " " + t1.ProductName,
                          val = t1.ProductId
                      }).OrderBy(x => x.label).Take(100).ToList();
 
@@ -1101,11 +1119,11 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-        public object AllEmployee(string prefix)
+        public object AllEmployee(string prefix,int companyId)
         {
             var v = (from t1 in _db.Employees
                      join t2 in _db.Designations on t1.DesignationId equals t2.DesignationId
-                     where (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
+                     where t1.CompanyId== companyId && (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
 
                      select new
                      {
@@ -3636,6 +3654,26 @@ namespace KGERP.Service.Implementation
                             }).FirstOrDefault();
             VMProductStock vMProductStock = new VMProductStock();
             vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", products.ID, products.CompanyFK, LotNumber).FirstOrDefault();
+            products.CostingPrice = vMProductStock.ClosingRate;
+            products.RemainingStockInQty = vMProductStock.ClosingQty;
+
+            return products;
+        }
+        public VMCommonProduct PromotionalAndClosingRateByProductId(int productId, string lotNo)
+        {
+            var LotNumber = String.IsNullOrEmpty(lotNo) ? "nolot" : lotNo;
+
+            var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
+                            join t4 in _db.Units on t1.UnitId equals t4.UnitId
+                            select new VMCommonProduct
+                            {
+                                ID = t1.ProductId,
+                                Name = t1.ProductName,
+                                UnitName = t4.Name,
+                                CompanyFK = t1.CompanyId
+                            }).FirstOrDefault();
+            VMProductStock vMProductStock = new VMProductStock();
+            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPromotionalStockByProductId {0},{1},{2}", products.ID, products.CompanyFK, LotNumber).FirstOrDefault();
             products.CostingPrice = vMProductStock.ClosingRate;
             products.RemainingStockInQty = vMProductStock.ClosingQty;
 

@@ -562,7 +562,13 @@ namespace KG.App.Controllers
             return RedirectToAction(nameof(ProcurementPurchaseOrderSlave), new { companyId = vmPurchaseOrderSlave.CompanyFK, purchaseOrderId = vmPurchaseOrderSlave.PurchaseOrderId });
         }
 
-        
+        [HttpPost]
+        public async Task<ActionResult> PromotionalItemInvoiceChildDelete(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            issueDetailInfoVM.IssueMasterId = await _service.PromotionalItemInvoiceChildDelete(issueDetailInfoVM.IssueDetailId);
+            return RedirectToAction(nameof(PromotionalItemInvoice), new { companyId = issueDetailInfoVM.CompanyFK, IssueMasterId = issueDetailInfoVM.IssueMasterId });
+        }
+
 
         public JsonResult GetTermNCondition(int id)
         {
@@ -796,6 +802,13 @@ namespace KG.App.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> PromotionalItemInvoiceSubmit(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            issueDetailInfoVM.IssueMasterId = await _service.PromotionalItemInvoiceSubmit(issueDetailInfoVM);
+            return RedirectToAction(nameof(PromotionalItemInvoice), new { companyId = issueDetailInfoVM.CompanyFK, IssueMasterId = issueDetailInfoVM.IssueMasterId });
+        }
+
+        [HttpPost]
         public async Task<ActionResult> SubmitProcurementPurchaseOrder(VMPurchaseOrder vmPurchaseOrder)
         {
             vmPurchaseOrder.PurchaseOrderId = await _service.ProcurementPurchaseOrderSubmit(vmPurchaseOrder.PurchaseOrderId);
@@ -854,6 +867,12 @@ namespace KG.App.Controllers
         public async Task<JsonResult> KFMALSingleProcurementPurchaseOrderSlave(int id)
         {
             var model = await _service.KFMALGetSingleProcurementPurchaseOrderSlave(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<JsonResult> SinglePromotionalItemInvoice(int id)
+        {
+            var model = await _service.SinglePromotionalItemInvoice(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
@@ -1069,6 +1088,21 @@ namespace KG.App.Controllers
         }
 
         [HttpGet]
+        public async Task<ActionResult> PromotionalItemList(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            IssueDetailInfoVM issueDetailInfoVM = new IssueDetailInfoVM();
+            issueDetailInfoVM = await _service.PromotionalItemListGet(companyId, fromDate, toDate);
+            issueDetailInfoVM.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            issueDetailInfoVM.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+            issueDetailInfoVM.CompanyId = companyId;
+            return View(issueDetailInfoVM);
+        }
+
+        [HttpGet]
         public async Task<ActionResult> ProcurementRMSalesOrderList(int companyId, DateTime? fromDate, DateTime? toDate, int? vStatus)
         {
             DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
@@ -1133,6 +1167,19 @@ namespace KG.App.Controllers
             vmSalesOrder.FromDate = Convert.ToDateTime(vmSalesOrder.StrFromDate);
             vmSalesOrder.ToDate = Convert.ToDateTime(vmSalesOrder.StrToDate);
             return RedirectToAction(nameof(ProcurementSalesOrderList), new { companyId = vmSalesOrder.CompanyId, fromDate = vmSalesOrder.FromDate, toDate = vmSalesOrder.ToDate, vStatus = vmSalesOrder.Status });
+        }
+
+        [HttpPost]
+        public ActionResult PromotionalItemfilter(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            if (issueDetailInfoVM.CompanyId > 0)
+            {
+                Session["CompanyId"] = issueDetailInfoVM.CompanyId;
+            }
+
+            issueDetailInfoVM.FromDate = Convert.ToDateTime(issueDetailInfoVM.StrFromDate);
+            issueDetailInfoVM.ToDate = Convert.ToDateTime(issueDetailInfoVM.StrToDate);
+            return RedirectToAction(nameof(PromotionalItemList), new { companyId = issueDetailInfoVM.CompanyId, fromDate = issueDetailInfoVM.FromDate, toDate = issueDetailInfoVM.ToDate });
         }
 
         [HttpPost]
@@ -1245,6 +1292,13 @@ namespace KG.App.Controllers
         public async Task<ActionResult> GetSinglOrderMastersGet(int orderMasterId)
         {
             var model = await _service.GetSinglOrderMasters(orderMasterId);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> GetSinglIssueMastersGet(int IssueMasterId)
+        {
+            var model = await _service.GetSinglIssueMastersGet(IssueMasterId);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
         public async Task<JsonResult> GetOrderDetails(int orderDetailsId)
@@ -1390,6 +1444,20 @@ namespace KG.App.Controllers
                 vmSalesOrder.OrderMasterId = await _service.OrderMastersDelete(vmSalesOrder.OrderMasterId);
             }
             return RedirectToAction(nameof(ProcurementSalesOrderList), new { companyId = vmSalesOrder.CompanyFK });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> DeletePromotionalItemMasters(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            issueDetailInfoVM.IssueMasterId = await _service.PromotionalItemMastersDelete(issueDetailInfoVM.IssueMasterId);
+            return RedirectToAction(nameof(PromotionalItemList), new { companyId = issueDetailInfoVM.CompanyFK });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdatePromotionalItemMasters(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            issueDetailInfoVM.IssueMasterId = await _service.UpdatePromotionalItemMasters(issueDetailInfoVM);
+            return RedirectToAction(nameof(PromotionalItemList), new { companyId = issueDetailInfoVM.CompanyId });
         }
 
         [HttpPost]
@@ -2951,6 +3019,14 @@ namespace KG.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+
+        [HttpGet]
+        public async Task<JsonResult> PromotionalItemInvoiceSingleItem(int id)
+        {
+            IssueDetailInfoVM model = new IssueDetailInfoVM();
+            model = await _service.PromotionalItemInvoiceSingleItem(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<ActionResult> KFMALProcurementPurchaseOrderUpdate(VMPurchaseOrder vmPurchaseOrder)
         {

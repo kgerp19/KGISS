@@ -19,7 +19,7 @@
         @if (Model.IssueMasterId > 0)
         {
             <span>
-                Promotional Item Invoice of:  <a target="_blank" href="~/Report/PackagingPurchaseOrderReports?purchaseOrderId=@Model.IssueMasterId&companyId=@Model.CompanyFK&reportName=ISSPurchaseOrderReports">@Model.IssueNo</a>
+                Promotional Item Invoice of:  <a target="_blank" href="~/Report/PromotionalItemInvoiceReports?issueMasterId=@Model.IssueMasterId&companyId=@Model.CompanyFK&reportName=ISSPromotionalItemInvoiceReports">@Model.IssueNo</a>
 
             </span>
         }
@@ -36,7 +36,7 @@
         <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
         <li class="active">Promotional Item Invoice</li>
         <li class="active">
-            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/Procurement/PackagingPurchaseOrderSlave?companyId=@Model.CompanyFK">Add New Promotional Item Invoice</a>
+            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/Procurement/PromotionalItemList?companyId=@Model.CompanyFK">Promotional Item List</a>
         </li>
 
     </ol>
@@ -109,6 +109,7 @@
                                     <th>:</th>
                                     <td>@Model.CreatedDate </td>
                                 </tr>
+
                                 @if (Model.Achknolagement)
                                 {
                                     <tr>
@@ -120,7 +121,15 @@
                                         <td>@Model.AcknologeDate </td>
                                     </tr>
                                 }
+                                <tr>
+                                    <th>Remarks</th>
+                                    <th>:</th>
+                                    <td colspan="4">@Model.Remarks</td>
 
+                                </tr>
+                                <tr>
+                                    <td colspan="6"></td>
+                                </tr>
 
                             </table>
 
@@ -147,8 +156,17 @@
                                         </div>
                                     </div>
 
-
                                     <div class="col-md-3">
+                                        <div class="form-group" style="padding:0px">
+                                            <label class="required">Promotion Receive</label>
+                                            @Html.EditorFor(model => model.CustomerBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Issued By", @id = "txtVendorBy" } })
+
+                                            @Html.HiddenFor(model => model.VendorId, new { id = "ddVendorBy" })
+                                            @Html.ValidationMessageFor(model => model.IssuedBy, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    @*<div class="col-md-3">
                                         <div class="form-group" style="padding:0px">
                                             <label class="required">Cusotmer</label>
                                             @Html.EditorFor(model => model.CustomerBy, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Issued By", @id = "txtVendorBy" } })
@@ -156,7 +174,7 @@
                                             @Html.HiddenFor(model => model.VendorId, new { id = "ddVendorBy" })
                                             @Html.ValidationMessageFor(model => model.IssuedBy, "", new { @class = "text-danger" })
                                         </div>
-                                    </div>
+                                    </div>*@
 
                                     <div class="col-md-3">
                                         <label>Remarks</label>
@@ -174,10 +192,10 @@
 
                             }
 
-                            @if (!Model.Achknolagement)
+                            @if (!Model.IsSubmit)
                             {
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group" style="padding:0px">
                                             <label class="col-form-label required">Product</label>
 
@@ -188,7 +206,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="required">Quantity</label>
                                             <div class="input-group">
@@ -201,17 +219,24 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="required">Costing Price</label>
-                                            @Html.TextBoxFor(model => model.CostingPrice, new { id = "txtCostingPrice", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Costing Price", required = "Required" })
+                                            @Html.TextBoxFor(model => model.CostingPrice, new { id = "txtCostingPrice", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Costing Price", required = "Required", @readonly = "readonly" })
                                             @Html.ValidationMessageFor(model => model.CostingPrice, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="required">Current Stock</label>
+                                            @Html.TextBoxFor(model => model.RemainingStock, new { id = "txtRemainingStockInQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Costing Price", disabled = "disabled" })
+                                            
                                         </div>
                                     </div>
                                 </div>
                             }
                         </div>
-                        @if (!Model.Achknolagement)
+                        @if (!Model.IsSubmit)
                         {
                             <div class="box-footer">
                                 <div class="row">
@@ -247,7 +272,7 @@
                                                 <th style="padding:5px;text-align:center;">Quantity</th>
                                                 <th style="padding:5px;text-align:center;">Unit Price</th>
                                                 <th style="padding:5px;text-align:right;">Total Price</th>
-                                                @if (!Model.Achknolagement)
+                                                @if (!Model.IsSubmit)
                                                 {
                                                     <th style="padding:5px;text-align:center;">Action</th>
                                                 }
@@ -263,7 +288,7 @@
                                                     <td style="padding:5px;text-align:center;">@String.Format("{0:0.00}", item.CostingPrice)</td>
                                                     <td style="padding:5px;text-align:right;">@String.Format("{0:0.00}", item.RMQ * item.CostingPrice)</td>
 
-                                                    @{ if (!Model.Achknolagement)
+                                                    @{ if (!Model.IsSubmit)
                                                         {
                                                             <td style="padding:5px;text-align:center;">
                                                                 <a id="@item.ID" onclick=" makeEditble(@item.IssueDetailId);" class="linkPointer" title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
@@ -300,18 +325,18 @@
                         {
                             <div class="row">
                                 <div class="col-md-6">
-                                    <a style="width:100%" class="col-md-4 btn btn-warning" target="_blank" href="~/Report/PackagingPurchaseOrderReports?purchaseOrderId=@Model.IssueMasterId&companyId=@Model.CompanyFK&reportName=ISSPurchaseOrderReports">Purchase Order Print</a>
+                                    <a style="width:100%" class="col-md-4 btn btn-warning" target="_blank" href="~/Report/PromotionalItemInvoiceReports?issueMasterId=@Model.IssueMasterId&companyId=@Model.CompanyFK&reportName=ISSPromotionalItemInvoiceReports">Purchase Order Print</a>
                                 </div>
-                                @if (Model.Achknolagement)
+                                @if (Model.IsSubmit)
                                 {
                                     <div class="col-md-4 btn btn-success">  <i>Submitted Successfully</i></div>
                                     @*<div class="col-md-2">
-                                        <a id="@Model.IssueMasterId" onclick="makeSubmitble(@Model.IssueMasterId)" class="linkPointer btn btn-warning" data-toggle="modal" style="width:100%" data-target="#submitProcurementPurchaseOrderModal" data-placement="top">
+                                            <a id="@Model.IssueMasterId" onclick="makeSubmitble(@Model.IssueMasterId)" class="linkPointer btn btn-warning" data-toggle="modal" style="width:100%" data-target="#submitPromotionalItemInvoice" data-placement="top">
 
-                                            <i>Undo Submit</i>
+                                                <i>Undo Submit</i>
 
-                                        </a>
-                                    </div>*@
+                                            </a>
+                                        </div>*@
 
 
 
@@ -321,7 +346,7 @@
                                     <div class="col-md-6">
 
 
-                                        <a id="@Model.IssueMasterId" onclick="makeSubmitble(@Model.IssueMasterId)" class="linkPointer btn btn-success" data-toggle="modal" style="width:100%" data-target="#submitProcurementPurchaseOrderModal" data-placement="top">
+                                        <a id="@Model.IssueMasterId" onclick="makeSubmitble(@Model.IssueMasterId)" class="linkPointer btn btn-success" data-toggle="modal" style="width:100%" data-target="#submitPromotionalItemInvoice" data-placement="top">
 
                                             <i>Submit</i>
 
@@ -336,49 +361,48 @@
         </div>
     </section>
 }
-@*@using (Html.BeginForm("PackagingSubmitPO", "Procurement", FormMethod.Post, new { id = "SubmitProcurementPurchaseOrderFromSlaveFormId", @class = "formValidator" }))
-    {
-        @Html.HiddenFor(model => model.PurchaseOrderDetailId, new { id = "hidSubmitProcurementPurchaseOrderSlaveId" })
-        @Html.HiddenFor(model => model.PurchaseOrderId, new { id = "hidSubmitProcurementPurchaseOrderSlaveId" })
-        @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
-        @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
-        @Html.HiddenFor(model => model.TotalDiscount, new { id = "totalDiscountModalField" })
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="modal fade" id="submitProcurementPurchaseOrderModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
-                            &times;
-                        </button>
-                        <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Purchase Order (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
-                    </div>
-                    <div class="modal-body">
+@using (Html.BeginForm("PromotionalItemInvoiceSubmit", "Procurement", FormMethod.Post, new { id = "SubmitPromotionalItemInvoiceFormId", @class = "formValidator" }))
+{
+    @Html.HiddenFor(model => model.IssueDetailId, new { id = "hidSubmitProcurementPurchaseOrderSlaveId" })
+    @Html.HiddenFor(model => model.IssueMasterId, new { id = "hidSubmitProcurementPurchaseOrderSlaveId" })
+    @Html.HiddenFor(model => model.CompanyFK, new { id = "submitCompanyFK" })
+    @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal fade" id="submitPromotionalItemInvoice" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                        &times;
+                    </button>
+                    <h5 class="modal-title"><b><span class="submitOrDraftText"></span> Purchase Order (<span id="submitOrDraftPOCIDText"></span>)</b></h5>
+                </div>
+                <div class="modal-body">
 
-                        <div style="text-align:center">
-                            <h3>Are you sure to <span class="submitOrDraftText"></span> this Purchase Order?</h3>
-                        </div>
+                    <div style="text-align:center">
+                        <h3>Are you sure to <span class="submitOrDraftText"></span> this?</h3>
                     </div>
-                    <div class="modal-footer">
-                        <div class="col-md-3">
-                            <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
-                        </div>
-                        <div class="col-md-9">
-                            <button type="submit" id="btnsave1" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
-                        </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-3">
+                        <button type="button" onclick="resetProcurementPurchaseOrderForm()" class="btn btn-warning fa fa-close" data-dismiss="modal">&nbsp;NO</button>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="submit" style="width:100%" class="btn btn-primary fa fa-remove">&nbsp;<span class="submitOrDraftText"></span></button>
                     </div>
                 </div>
             </div>
         </div>
-    }*@
+    </div>
+}
 
 
-@*@using (Html.BeginForm("DeleteProcurementPurchaseOrderSlave", "Procurement", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
+@using (Html.BeginForm("PromotionalItemInvoiceChildDelete", "Procurement", FormMethod.Post, new { id = "deleteProcurementPurchaseOrderSlaveFormId", @class = "formValidator" }))
     {
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="modal fade" id="deleteProcurementPurchaseOrderSlaveModal" data-toggle="modal" data-backdrop="static" data-keyboard="false" role="dialog">
             <div class="modal-dialog">
-                @Html.HiddenFor(model => model.PurchaseOrderDetailId, new { id = "hidDeleteProcurementPurchaseOrderSlaveId" })
+                @Html.HiddenFor(model => model.IssueDetailId, new { id = "hidDeleteProcurementPurchaseOrderSlaveId" })
                 @Html.HiddenFor(model => model.CompanyFK, new { id = "deleteCompanyFK" })
                 <div class="modal-content">
                     <div class="modal-header">
@@ -388,15 +412,11 @@
                         <h5 class="modal-title"><b>Delete PO Item</b></h5>
                     </div>
                     <div class="modal-body">
-
-
-                        @Html.HiddenFor(model => model.ActionId, new { id = "deleteActionId" })
-
                         @Html.AntiForgeryToken()
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                         <div style="text-align:center">
-                            <h3>Are you sure to Delete this PO Item?</h3>
+                            <h3>Are you sure to Delete this?</h3>
                         </div>
                     </div>
 
@@ -411,7 +431,7 @@
                 </div>
             </div>
         </div>
-    }*@
+    }
 
 
 
@@ -421,16 +441,12 @@
 
     function makeDeletale(rowId) {
         $('#hidDeleteProcurementPurchaseOrderSlaveId').val(rowId);
-        $('#deleteActionId').val(3);
     }
     function resetProcurementPurchaseRequisitionSlaveForm() {
         $('#procurementPurchaseRequisitionSlaveFormId')[0].reset();
         $('#ActionId').val(1);
         }
-        $("#btnsave1").click(function () {
-            var a = $("#totalDiscount").val();
-            $("#totalDiscountModalField").val(a);
-        });
+
 
         $(document).ready(function () {
 
@@ -440,7 +456,7 @@
             source: function (request, response) {
 
                 $.ajax({
-                    url: "@Url.Action("AutoCompleteRawPackingMaterialsGet", "Configuration")",
+                    url: "@Url.Action("AutoCompletePromotionalItemGet", "Configuration")",
                     data: { companyId: "@Model.CompanyFK", prefix: request.term },
                     dataType: "json",
                     type: "get",
@@ -464,7 +480,7 @@
                 console.log(i);
                 $("#ddlRProductFK").val(i.item.val);
 
-                $.ajax({
+                @*$.ajax({
                     type: "GET",
                     url: "@Url.Action("CommonProductByID", "Configuration")",
                     datatype: "Json",
@@ -478,7 +494,23 @@
 
                         }
                     }
+                });*@
+
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("PromotionalAndClosingRateByProductId", "Configuration")",
+                    datatype: "Json",
+                    data: { productId: i.item.val },
+                    success: function (data) {
+                        console.log(data);
+                        if (data) {
+                            $('.txtUnitName').text(data.UnitName);
+                            $('#txtCostingPrice').val(data.CostingPrice);
+                            $('#txtRemainingStockInQty').val(data.RemainingStockInQty);
+                        }
+                    }
                 });
+
                 $('#txtProductName').focus();
 
             },
@@ -493,7 +525,6 @@
                 source: function (request, response) {
                     $.ajax({
                         url: '/Employee/EmployeeAutoCompleteByCompany/',
-                        //data: "{ 'prefix': '" + request.term + "'}",
                         data: '{"prefix":"' + request.term + '", "CompanyId":@Model.CompanyFK}',
                         dataType: "json",
                         type: "POST",
@@ -525,10 +556,10 @@
             $("#txtVendorBy").autocomplete({
                 source: function (request, response) {
                     $.ajax({
-                        url: "@Url.Action("GetAutoCompleteSCustomer", "Procurement")",
-                        data: { prefix: request.term, companyId: "@Model.CompanyFK" },
+                        url: '/Employee/EmployeeAutoCompleteByCompany/',
+                        data: '{"prefix":"' + request.term + '", "CompanyId":@Model.CompanyFK}',
                         dataType: "json",
-                        type: "get",
+                        type: "POST",
                         cache: true,
                         contentType: "application/json; charset=utf-8",
                         success: function (data) {
@@ -544,17 +575,17 @@
                         }
                     });
                 },
-
                 select: function (e, i) {
                     $("#ddVendorBy").val(i.item.val);
-
                 },
                 minLength: 1,
                 cache: true
-
+            
             }).focus(function () {
                 $(this).autocomplete("search");
             });
+
+            
 
     });
 
@@ -568,52 +599,46 @@
         $.ajax({
 
             type: "POST",
-            url: "@Url.Action("KFMALSingleProcurementPurchaseOrderSlave", "Procurement")",
+            url: "@Url.Action("SinglePromotionalItemInvoice", "Procurement")",
             datatype: "Json",
             data: { id: rowId },
             success: function (data) {
-                console.log(data);
-                var totalWithVat = data.TotalPrice + (data.TotalPrice * (data.VATAddition / 100));
-                console.log(totalWithVat);
                 $('#poCreateBtn').html("<i class='fa fa-edit'></i>&nbsp;Update");
-                $("#hidPurchaseOrderId").val(data.PurchaseOrderId);
+                $("#hidPurchaseOrderId").val(data.IssueMasterId);
                 $('#ActionId').val(2);
-                $("#CompanyFK").val(data.CompanyFK);
+                $("#CompanyFK").val(@Model.CompanyFK);
                 $("#txtProductName").val(data.ProductName);
-                $("#ddlRProductFK").val(data.Common_ProductFK);
-                $("#txtPurchaseQuantity").val(data.PurchaseQuantity);
-                $('#txtPurchasingPrice').val(data.PurchasingPrice);
-                $('#vatAddition').val(data.VATAddition);
-                $('#Totalprice').val(totalWithVat);
-                $("#hidPurchaseOrderDetailId").val(data.PurchaseOrderDetailId)
+                $("#ddlRProductFK").val(data.RProductId);
+                $("#txtPurchaseQuantity").val(data.RMQ);
+                $('#txtCostingPrice').val(data.CostingPrice);
+                $("#hidPurchaseOrderDetailId").val(data.IssueDetailId)
                 $('.txtUnitName').text(data.UnitName);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
         }
 
-        $("#txtPurchaseQuantity, #txtPurchasingPrice, #vatAddition").keyup(function () {
-            var qty = parseFloat($("#txtPurchaseQuantity").val()) || 0;
-            var unitPrice = parseFloat($("#txtPurchasingPrice").val()) || 0;
-            var vatInPercent = parseFloat($("#vatAddition").val()) || 0;
-            var total = qty * unitPrice;
-            var totalWithVat = total + (total * (vatInPercent / 100));
-            $("#Totalprice").val(totalWithVat);
-        });
+        //$("#txtPurchaseQuantity, #txtPurchasingPrice, #vatAddition").keyup(function () {
+        //    var qty = parseFloat($("#txtPurchaseQuantity").val()) || 0;
+        //    var unitPrice = parseFloat($("#txtPurchasingPrice").val()) || 0;
+        //    var vatInPercent = parseFloat($("#vatAddition").val()) || 0;
+        //    var total = qty * unitPrice;
+        //    var totalWithVat = total + (total * (vatInPercent / 100));
+        //    $("#Totalprice").val(totalWithVat);
+        //});
 
         $('#ddlEmployeeId').select2();
     function makeSubmitble(rowId) {
         // console.log(rowId);
         $.ajax({
             type: "get",
-            url: "@Url.Action("PackagingSinglePurchaseOrder", "Procurement")",
+            url: "@Url.Action("PromotionalItemInvoiceSingleItem", "Procurement")",
             datatype: "Json",
-            data: { id: rowId, companyId: "@Model.CompanyFK" },
+            data: { id: rowId },
             success: function (data) {
-                console.log(data);
-                $('#submitOrDraftPOCIDText').text(data.CID);
+                $('#submitOrDraftPOCIDText').text(data.IssueNo);
 
-                if (data.Status == 0) {
+                if (data.IsSubmit == 0) {
                     $('.submitOrDraftText').text("Make Submit");
                 }
                 else {

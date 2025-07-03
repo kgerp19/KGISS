@@ -4151,6 +4151,63 @@ namespace KGERP.Service.Implementation
             return resultData.VoucherId;
         }
 
+        public async Task<long> AccountingPromotionalPushISS(IssueDetailInfoVM issueDetailInfoVM)
+        {
+            var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == issueDetailInfoVM.CompanyFK && x.Code == "ADJV" && x.IsActive == true).FirstOrDefault();
+
+            VMJournalSlave vMJournalSlave = new VMJournalSlave
+            {
+                JournalType = voucherType.VoucherTypeId,
+                Title = issueDetailInfoVM.IssueNo,
+                Narration =  " Date: " + issueDetailInfoVM.IssueDate.ToString("MM/dd/yyyy"),
+                CompanyFK = issueDetailInfoVM.CompanyFK,
+                Date = issueDetailInfoVM.IssueDate,
+                IsSubmit = true,
+            };
+
+            double TotalPrice = (double)issueDetailInfoVM.DataListSlave.Sum(x => x.RMQ * x.CostingPrice);
+
+
+            List<string> strList = new List<string>();
+            foreach (var item in issueDetailInfoVM.DataListSlave)
+            {
+                string s = "Product: " + item.ProductName + "Delivered Qty: " + item.RMQ + " Unit Price: " + item.CostingPrice;
+                strList.Add(s);
+            }
+            string perticular = (String.Join(", ", strList.ToArray())) + " Total Price: " + TotalPrice;
+            vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = perticular,
+                Debit = (double)(issueDetailInfoVM.DataListSlave.Any() ? (issueDetailInfoVM.DataListSlave.Sum(x => x.RMQ * x.CostingPrice)) : 0),
+                Credit = 0,
+                Accounting_HeadFK = 50627595 //Promotional Materials Expenses
+            });
+
+            foreach (var item in issueDetailInfoVM.DataListSlave)
+            {
+                vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+                {
+                    Particular = "Delivered Qty: " + item.RMQ + " Unit Price: " + item.CostingPrice,
+                    Debit = 0,
+                    Credit = (double)(item.RMQ * item.CostingPrice),
+                    Accounting_HeadFK = item.AccountingHeadId.Value
+                });
+            }
+
+
+            var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+            if (resultData.VoucherId > 0)
+            {
+                var voucherMap = VoucherMapping(resultData.VoucherId, issueDetailInfoVM.CompanyFK.Value, issueDetailInfoVM.IssueMasterId, "IssueMasterInfo");
+
+
+            }
+
+            return resultData.VoucherId;
+        }
+
         public async Task<long> SalesTranserVoucherPush(SalesTransferDetailVM salesTransferDetailVM)
         {
             var voucherType = _db.VoucherTypes.Where(x => x.CompanyId == salesTransferDetailVM.CompanyFK && x.Code == "SDV" && x.IsActive == true).FirstOrDefault();

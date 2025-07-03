@@ -538,6 +538,17 @@ namespace KGERP.Controllers
 
         [HttpGet]
 
+        public ActionResult PromotionalItemInvoiceReports(int issueMasterId, int companyId, string reportName)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format=PDF&CompanyId={1}&IssueMasterId={2}", reportName, companyId, issueMasterId);
+            return File(client.DownloadData(reportURL), "application/pdf");
+        }
+
+        [HttpGet]
+
         public ActionResult PackagingBillReports(string reportName, int companyId, int materialReceiveId)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
@@ -8912,10 +8923,29 @@ namespace KGERP.Controllers
             };
             return View(cm);
         }
+        [HttpGet]
+
+        public ActionResult PromotionalStockReport(int companyId)
+        {
+            string title = string.Empty;
+
+            ReportCustomModel cm = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+                ReportName = "ISSPromotionalStockReport",
+                //NoteReportName = "ISSRMStockSummeryReport",
+                Title = title,
+
+            };
+            return View(cm);
+        }
 
 
 
-   
 
 
 
@@ -8934,6 +8964,38 @@ namespace KGERP.Controllers
             string reportURL;
 
             reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductCategoryId={5}&ProductSubCategoryId={6}&ProductId={7}&LotNo={8}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId,categoryId,subCategoryId,productId, lotNumber);
+
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", model.ReportName + ".doc");
+            }
+            return View();
+        }
+
+
+        [HttpGet]
+
+        public ActionResult GetPromotionalStockReport(ReportCustomModel model)
+        {
+
+            string lotNumber = string.IsNullOrEmpty(model.SelectedLotNumber) ? "xyz" : model.SelectedLotNumber;
+            int categoryId = model.Common_ProductCategoryFk ?? 0;
+            int subCategoryId = model.Common_ProductSubCategoryFk ?? 0;
+            int productId = model.ProductId ?? 0;
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL;
+
+            reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductCategoryId={5}&ProductSubCategoryId={6}&ProductId={7}&LotNo={8}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, categoryId, subCategoryId, productId, lotNumber);
 
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
