@@ -988,6 +988,35 @@ namespace KG.App.Controllers
             return View(vmSalesOrderSlave);
         }
 
+
+
+        [HttpGet]
+        public async Task<ActionResult> ProcurementSalesOrderSlaveUseWise(int companyId = 0, int orderMasterId = 0)
+        {
+            VMSalesOrderSlave vmSalesOrderSlave = new VMSalesOrderSlave();
+
+            if (orderMasterId == 0)
+            {
+                vmSalesOrderSlave.CompanyFK = companyId;
+                vmSalesOrderSlave.Status = (int)EnumPOStatus.Draft;
+            }
+            else
+            {
+                vmSalesOrderSlave = await Task.Run(() => _service.ProcurementSalesOrderDetailsGet(companyId, orderMasterId));
+                long userId = Common.GetIntUserId();
+                vmSalesOrderSlave.CurrentEmployeeIntId = userId;
+
+            }
+            long salepersonId = Common.GetIntUserId();
+            vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
+            vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownListUserWise(salepersonId,companyId), "Value", "Text");
+            vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
+            vmSalesOrderSlave.PromoOfferList = new SelectList(_service.PromtionalOffersDropDownList(companyId), "Value", "Text");
+
+
+            return View(vmSalesOrderSlave);
+        }
+
         [HttpGet]
         public async Task<ActionResult> ProcurementRMSalesOrderSlave(int companyId = 0, int orderMasterId = 0)
         {

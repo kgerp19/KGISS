@@ -312,7 +312,9 @@ namespace KGERP.Utility
         Submit,
         Approval,
         PartialDelivered,
-        Delivered
+        Delivered,
+       closed
+
 
     }
     public enum EnumStockTransferStatus

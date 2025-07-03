@@ -413,7 +413,7 @@ namespace KGERP.Services.Procurement
 
         public EnumPOStatus EnumStatus { get { return (EnumPOStatus)this.Status; } }
         public string EnumStatusName { get { return BaseFunctionalities.GetEnumDescription(this.EnumStatus); } }
-        public SelectList EnumStatusList { get { return new SelectList(BaseFunctionalities.GetEnumList<EnumPOStatus>(), "Value", "Text"); } }
+        public SelectList EnumStatusList { get { return new SelectList(BaseFunctionalities.GetEnumList<EnumOrderMasterStatus>(), "Value", "Text"); } }
 
         public decimal InAmount { get; set; }
 

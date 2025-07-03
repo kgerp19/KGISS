@@ -305,6 +305,24 @@ namespace KGERP.Services.Procurement
             return List;
 
         }
+
+        public List<object> SubZonesDropDownListUserWise(long userId, int companyId = 0)
+
+        {
+            var List = new List<object>();
+            _db.SubZones
+        .Where(x => x.IsActive).Where(x => x.CompanyId == companyId && x.SalesOfficerId==userId).Select(x => x).ToList()
+        .ForEach(x => List.Add(new
+        {
+            Value = x.SubZoneId,
+            Text =/* x.SalesOfficerName + " -" + */x.Name
+        }));
+            return List;
+
+        }
+
+
+
         public List<object> ZonesDropDownList(int companyId = 0)
         {
             var List = new List<object>();
@@ -414,7 +432,7 @@ namespace KGERP.Services.Procurement
                                                           && x.CompanyId == companyId
                                                           && x.OrderDate >= fromDate && x.OrderDate <= toDate
                                                           && !x.IsOpening
-                                                          && x.Status < (int)EnumPOStatus.Closed)
+                                                          && x.Status < (int)EnumOrderMasterStatus.closed)
                                                           join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
 
                                                           select new VMSalesOrder
