@@ -43,6 +43,7 @@ namespace KGERP.Service.Implementation.OrderApproval
 
 
         Task<OrderMasterSignatoryApprovalVM> LoadApprovalData(DateTime? fromDate, DateTime? toDate, SignatoryStatusEnum? status);
+        Task<OrderMasterSignatoryApprovalVM> LoadApprovalDataSeed(DateTime? fromDate, DateTime? toDate, SignatoryStatusEnum? status);
         Task<OrderMasterSignatoryApprovalVM> LoadRejectedOrderData(DateTime? fromDate, DateTime? toDate);
 
         Task<IEnumerable<OrderMasterSignatoryApprovalVM>> GetAllApproval(int orderMasterId);

@@ -306,6 +306,15 @@ namespace KGERP.Utility
         StoreAcceptance
 
     }
+    public enum EnumOrderMasterStatus
+    {
+        Draft,
+        Submit,
+        Approval,
+        PartialDelivered,
+        Delivered
+
+    }
     public enum EnumStockTransferStatus
     {
         Draft,

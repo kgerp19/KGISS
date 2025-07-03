@@ -3409,7 +3409,7 @@ namespace KGERP.Services.WareHouse
         {
             var v = (from t1 in _db.OrderMasters.Where(x => x.CompanyId == companyId)
                      join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
-                     where t1.IsActive && t1.Status == (int)EnumPOStatus.Submitted
+                     where t1.IsActive && t1.Status == (int)EnumOrderMasterStatus.Approval
                      && ((t1.OrderNo.Contains(prefix)) || (t2.Name.Contains(prefix)))
 
                      select new

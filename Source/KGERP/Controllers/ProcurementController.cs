@@ -2643,9 +2643,16 @@ namespace KG.App.Controllers
         {
 
             var result = await _service.UpdateSignatoryApproval((int)model.Id, model.SignatoryStatus, model.Comment);
-            return RedirectToAction("FeedProcurementSalesOrderSlave", "Procurement", new { companyId = model.UserCompanyId, productType = "F", result });
+            return RedirectToAction("ProcurementSalesOrderSlave", "Procurement", new { companyId = model.UserCompanyId,orderMasterId=result });
         }
 
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateSignatoryStatus(EmployeeClearanceVM model)
+        {
+            var result = await _service.UpdateSignatoryApproval((int)model.Id, model.SignatoryStatus, model.Comment);
+            return RedirectToAction("IndexForSeed", "FeedApprovalSystem", new { companyId = model.UserCompanyId });
+        }
 
         [HttpGet]
         public async Task<ActionResult> GCCLProcurementSalesOrderSlaveByPRF(int companyId = 0, int orderMasterId = 0)

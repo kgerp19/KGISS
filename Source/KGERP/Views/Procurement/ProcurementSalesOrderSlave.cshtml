@@ -517,7 +517,7 @@
                     @if (Model.OrderMasterId > 0)
                     {
                         <div class="row">
-                            @if (Model.Status == (int)EnumPOStatus.Draft)
+                            @if (Model.Status == (int)EnumOrderMasterStatus.Draft)
                             {
                                 <div class="col-md-6">
                                     @using (Html.BeginForm("ProcurementSalesOrderSlave", "Procurement", FormMethod.Post, new { id = "procurementSalesOrderSlaveFormId", @class = "formValidator" }))
@@ -556,7 +556,7 @@
 
 
 
-                            @if (Model.Status == (int)EnumPOStatus.Submitted)
+                            @if (Model.Status == (int)EnumOrderMasterStatus.Submit)
                             {
                                 <div class="col-md-3 btn btn-success">  <i>Submitted Successfully</i></div>
                                 <div class="col-md-3">
@@ -656,9 +656,13 @@
                                                         @item.Comments
                                                     </td>
                                                     <td>
-                                                        @if (item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending || (int)item.SignatoryStatus == -1)
+                                                        @if (item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending)
                                                         {
                                                             <span class="btn btn-warning btn-xs">Pending</span>
+                                                        }
+                                                        else if ((int)item.SignatoryStatus == -1)
+                                                        {
+                                                            <span class="text-center">----</span>
                                                         }
                                                         else
                                                         {
@@ -671,8 +675,8 @@
                                                         @if (item.ApproverEmployeeIntId == Model.CurrentEmployeeIntId && item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Pending)
                                                         {
 
-                                                            <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approve" data-placement="top" class="btn btn-primary btn-xs"> <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></a>
-                                                            <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Rejected));" data-toggle="modal" data-target="#actionModal" title="Reject" data-placement="top" class="btn btn-danger btn-xs">  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                                            <a onclick="loadActionModal(@Model.CompanyFK,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approve" data-placement="top" class="btn btn-primary btn-xs"> <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></a>
+                                                            <a onclick="loadActionModal(@Model.CompanyFK,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Rejected));" data-toggle="modal" data-target="#actionModal" title="Reject" data-placement="top" class="btn btn-danger btn-xs">  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                                                         }
                                                         @*else if (item.ApproverEmployeeIntId == Model.CurrentEmployeeIntId && item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Rejected)
             {
@@ -1171,7 +1175,8 @@ $('#txtSalesQuantity').select();
 
      $("#Id").val(id);
      $("#SignatoryStatus").val(statusEnum);
-     $("#UserCompanyId").val(companyId);
+                  $("#UserCompanyId").val(companyId);
+
 
      $("#Comment").removeAttr("class");
      $("#Comment").addClass("form-control");

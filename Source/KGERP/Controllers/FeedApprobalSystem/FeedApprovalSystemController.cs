@@ -30,6 +30,16 @@ namespace KGERP.Controllers.FeedApprobalSystem
             ViewBag.CompanyId = companyId;
             return View(res);
         }
+
+
+        [HttpGet]
+        public async Task<ActionResult> IndexForSeed(int companyId, DateTime? fromDate, DateTime? toDate, SignatoryStatusEnum? SignatoryStatus)
+        {
+            var res = await orderApprovalService.LoadApprovalDataSeed(fromDate, toDate, SignatoryStatus);
+            ViewBag.CompanyId = companyId;
+            return View(res);
+        }
+
         [HttpGet]
         public async Task<ActionResult> RejectedOrdersIndex(int companyId, DateTime? fromDate, DateTime? toDate)
         {
@@ -44,6 +54,15 @@ namespace KGERP.Controllers.FeedApprobalSystem
             var result = await orderApprovalService.UpdateSignatoryApproval((int)model.Id, model.SignatoryStatus, model.Comment);
             return RedirectToAction("Index", new { companyId = model.UserCompanyId });
         }
+
+
+
+
+
+
+
+
+
         [HttpPost]
         public async Task<ActionResult> UpdateSignatoryStatusFromDetail(EmployeeClearanceVM model)
         {

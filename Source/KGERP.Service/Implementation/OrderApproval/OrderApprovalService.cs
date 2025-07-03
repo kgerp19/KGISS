@@ -491,50 +491,103 @@ namespace KGERP.Service.Implementation.OrderApproval
                            .ToListAsync();
             return order;
         }
+
+        public async Task<OrderMasterSignatoryApprovalVM> LoadApprovalDataSeed(DateTime? fromDate, DateTime? toDate, SignatoryStatusEnum? status)
+        {
+
+            long userId = Common.GetIntUserId();
+            //userId = 624;
+            //  userId = 139;
+            //userId = 1300;
+            OrderMasterSignatoryApprovalVM order = new OrderMasterSignatoryApprovalVM();
+            order.datalist = await (from approval in _context.ApprovalOrderMasters
+                                    join a in _context.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
+                                    join o in _context.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
+                                    join v in _context.Vendors on o.CustomerId equals v.VendorId
+                                    join e in _context.Employees on a.EmployeeId equals e.Id
+                                    join c in _context.Companies on e.CompanyId equals c.CompanyId
+                                    join d in _context.Departments on e.DepartmentId equals d.DepartmentId
+                                    join ds in _context.Designations on e.DesignationId equals ds.DesignationId
+                                    where a.IsActive && approval.IsActive && a.EmployeeId == userId
+                                        && (status == null || approval.ApprovalStatus == (int?)status)
+                                        && (fromDate == null || o.OrderDate >= fromDate)
+                                        && (toDate == null || o.OrderDate <= toDate)
+
+                                    select new OrderMasterSignatoryApprovalVM()
+                                    {
+                                        CompanyId = o.CompanyId,
+                                        ProductType = o.ProductType,
+                                        Id = approval.Id,
+                                        EmployeeId = e.EmployeeId,
+                                        EmployeeName = e.Name,
+                                        CompanyName = c.Name,
+                                        DepartmentName = d.Name,
+                                        DesignationName = ds.Name,
+                                        OrderNo = o.OrderNo,
+                                        OrderMasterId = o.OrderMasterId,
+                                        OrderDate = o.OrderDate,
+                                        CoustomerName = v.Name,
+                                        ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
+                                        ApprovalDate = approval.ApprovalDate,
+                                        Comments = approval.Comments,
+                                        Status = o.Status,
+                                        SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
+                                        IsPreviousApproved = _context.ApprovalOrderMasters.Where(x => x.IsActive)
+                                                            .Any(x => x.OrderMasterId == approval.OrderMasterId &&
+                                                                    x.Id != approval.Id && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved) &&
+                                                                    _context.OrderMasterSignatories.Where(o => o.IsActive)
+                                                                            .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId &&
+                                                                                    y.Precedence < a.Precedence &&
+                                                                                    y.IsActive))
+                                    }).Where(x => !x.IsPreviousApproved)
+                           .AsQueryable()
+                           .OrderBy(x => x.Status)
+                           .ThenByDescending(x => x.OrderDate)
+                           .ToListAsync();
+            return order;
+        }
         public async Task<IEnumerable<OrderMasterSignatoryApprovalVM>> GetAllApproval(int orderMasterId)
         {
-            var SignatoryApprovalList = await (from approval in _context.ApprovalOrderMasters
-                                               join a in _context.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
-                                               join o in _context.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
-                                               join v in _context.Vendors on o.CustomerId equals v.VendorId
-                                               join e in _context.Employees on a.EmployeeId equals e.Id
-                                               join c in _context.Companies on e.CompanyId equals c.CompanyId
-                                               join d in _context.Departments on e.DepartmentId equals d.DepartmentId
-                                               join ds in _context.Designations on e.DesignationId equals ds.DesignationId
-                                               where a.IsActive && approval.IsActive
-                                               && approval.OrderMasterId == orderMasterId
+            var approvalList = await (from approval in _context.ApprovalOrderMasters
+                                      join a in _context.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
+                                      join o in _context.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
+                                      join v in _context.Vendors on o.CustomerId equals v.VendorId
+                                      join e in _context.Employees on a.EmployeeId equals e.Id
+                                      join c in _context.Companies on e.CompanyId equals c.CompanyId
+                                      join d in _context.Departments on e.DepartmentId equals d.DepartmentId
+                                      join ds in _context.Designations on e.DesignationId equals ds.DesignationId
+                                      where approval.IsActive
+                                            && approval.OrderMasterId == orderMasterId
+                                      select new OrderMasterSignatoryApprovalVM()
+                                      {
+                                          CompanyId = o.CompanyId,
+                                          ProductType = o.ProductType,
+                                          Id = approval.Id,
+                                          EmployeeId = e.EmployeeId,
+                                          ApproverEmployeeIntId = a.EmployeeId.Value,
+                                          EmployeeName = e.Name,
+                                          CompanyName = c.Name,
+                                          DepartmentName = d.Name,
+                                          DesignationName = ds.Name,
+                                          OrderNo = o.OrderNo,
+                                          OrderMasterId = o.OrderMasterId,
+                                          OrderDate = o.OrderDate,
+                                          CoustomerName = v.Name,
+                                          ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
+                                          ApprovalDate = approval.ApprovalDate,
+                                          Comments = approval.Comments,
+                                          SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
+                                          IsPreviousApproved = _context.ApprovalOrderMasters.Where(x => x.IsActive)
+                                              .Any(x => x.OrderMasterId == approval.OrderMasterId
+                                                    && x.Id != approval.Id
+                                                    && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved)
+                                                    && _context.OrderMasterSignatories.Where(o => o.IsActive)
+                                                        .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId
+                                                              && y.Precedence < a.Precedence
+                                                              && y.IsActive))
+                                      }).ToListAsync();
 
-
-                                               select new OrderMasterSignatoryApprovalVM()
-                                               {
-                                                   CompanyId = o.CompanyId,
-                                                   ProductType = o.ProductType,
-                                                   Id = approval.Id,
-                                                   EmployeeId = e.EmployeeId,
-                                                   ApproverEmployeeIntId = a.EmployeeId.Value,
-
-                                                   EmployeeName = e.Name,
-                                                   CompanyName = c.Name,
-                                                   DepartmentName = d.Name,
-                                                   DesignationName = ds.Name,
-                                                   OrderNo = o.OrderNo,
-                                                   OrderMasterId = o.OrderMasterId,
-                                                   OrderDate = o.OrderDate,
-                                                   CoustomerName = v.Name,
-                                                   ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
-                                                   ApprovalDate = approval.ApprovalDate,
-                                                   Comments = approval.Comments,
-                                                   SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
-                                                   IsPreviousApproved = _context.ApprovalOrderMasters.Where(x => x.IsActive)
-                                                                .Any(x => x.OrderMasterId == approval.OrderMasterId &&
-                                                                          x.Id != approval.Id && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved) &&
-                                                                          _context.OrderMasterSignatories.Where(o => o.IsActive)
-                                                                                  .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId &&
-                                                                                            y.Precedence < a.Precedence &&
-                                                                                            y.IsActive))
-
-                                               }).AsQueryable().OrderBy(x => x.SignatoryStatus).ToListAsync();
-
+            var SignatoryApprovalList = approvalList.OrderBy(a => a.Precedence).ToList();
             return SignatoryApprovalList;
         }
 
