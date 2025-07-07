@@ -497,7 +497,7 @@ namespace KGERP.Services.Procurement
                                                           && x.CompanyId == companyId
                                                           && x.OrderDate >= fromDate && x.OrderDate <= toDate
                                                           && !x.IsOpening
-                                                          && x.Status < (int)EnumPOStatus.Closed)
+                                                          && x.Status < (int)EnumOrderMasterStatus.closed)
                                                           join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
 
                                                           select new VMSalesOrder
