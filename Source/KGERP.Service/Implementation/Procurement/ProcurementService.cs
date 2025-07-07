@@ -961,13 +961,13 @@ namespace KGERP.Services.Procurement
 
             if (orderMasters != null)
             {
-                if (orderMasters.Status == (int)EnumPOStatus.Draft)
+                if (orderMasters.Status == (int)EnumOrderMasterStatus.Draft)
                 {
-                    orderMasters.Status = (int)EnumPOStatus.Submitted;
+                    orderMasters.Status = (int)EnumOrderMasterStatus.Approval;
                 }
                 else
                 {
-                    orderMasters.Status = (int)EnumPOStatus.Draft;
+                    orderMasters.Status = (int)EnumOrderMasterStatus.Draft;
 
                 }
                 orderMasters.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
