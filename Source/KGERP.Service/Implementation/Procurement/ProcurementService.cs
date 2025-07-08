@@ -931,7 +931,7 @@ namespace KGERP.Services.Procurement
 
 
 
-        public async Task<long> OrderMastersSubmit(long? id = 0)
+        public async Task<long> OrderMastersSubmitrm(long? id = 0)
         {
             long result = -1;
             OrderMaster orderMasters = await _db.OrderMasters.FindAsync(id);
@@ -979,6 +979,65 @@ namespace KGERP.Services.Procurement
             }
             return result;
         }
+
+
+
+
+
+        public async Task<long> OrderMastersSubmit(long? id = 0)
+        {
+            long result = -1;
+            OrderMaster orderMasters = await _db.OrderMasters.FindAsync(id);
+
+
+
+            //if (orderMasters != null)
+            //{
+            //    if (orderMasters.IsService && orderMasters.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+            //    {
+            //        #region Ready To Account Integration
+            //        var AccData = await Task.Run(() => KfmalProcurementSalesOrderDetailsGet(orderMasters.CompanyId.Value, orderMasters.OrderMasterId));
+
+            //        //VMOrderDeliverDetail AccData = await KfmalOrderDeliverForAcc(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
+            //        await _accountingService.AccServiceSalesPushKfmal(AccData.CompanyId, AccData, (int)KfmalJournalEnum.SalesVoucher);
+            //        //await _accountingService.GCCLOrderDeliverySMSPush(AccData);
+
+            //        #endregion
+            //    }
+            //}
+
+
+
+
+
+
+
+            if (orderMasters != null)
+            {
+                if (orderMasters.Status == (int)EnumOrderMasterStatus.Draft)
+                {
+                    orderMasters.Status = (int)EnumOrderMasterStatus.Submit;
+                }
+                else
+                {
+                    orderMasters.Status = (int)EnumOrderMasterStatus.Draft;
+
+                }
+                orderMasters.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
+                orderMasters.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = orderMasters.OrderMasterId;
+                }
+            }
+            return result;
+        }
+
+
+
+
+
+
 
         public async Task<long> OrderDetaisSubmit(long? id = 0)
         {
@@ -4347,17 +4406,35 @@ namespace KGERP.Services.Procurement
                              PackSize = t1.PackSize,
                              CompanyFK = t1.CompanyId,
                              FormulaQty = t1.FormulaQty,
-                             UnitPrice = t1.UnitPrice ?? 0
+                             UnitPrice = t1.UnitPrice ?? 0,
+                             ProductType=t1.ProductType
+
 
                          }).FirstOrDefault();
-
             VMProductStock vmProductStock = new VMProductStock();
-            vmProductStock = _db.Database.SqlQuery<VMProductStock>(
-               "EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}",
+            if (vmProduct.ProductType == "F")
+            {
+         
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>(
+                   "EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}",
+                   productId,
+                   companyId,
+                   string.IsNullOrEmpty(Lotnumber) ? "xyz" : Lotnumber
+               ).FirstOrDefault();
+            }
+            else
+            {
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>(
+               "EXEC GetSeedRMStockByProductId {0}, {1}, {2}",
                productId,
                companyId,
                string.IsNullOrEmpty(Lotnumber) ? "xyz" : Lotnumber
            ).FirstOrDefault();
+
+            }
+
+
+          
             vmProduct.CurrentStock = vmProductStock.ClosingQty;
 
 
@@ -4847,7 +4924,7 @@ namespace KGERP.Services.Procurement
         .ForEach(x => List.Add(new
         {
             Value = x.VendorId,
-            Text = x.Name
+            Text = x.Name+"-"+x.Address
         }));
             return List;
 

@@ -1361,7 +1361,7 @@ namespace KG.App.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitRMOrderMastersFromSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
-            vmSalesOrderSlave.OrderMasterId = await _service.OrderMastersSubmit(vmSalesOrderSlave.OrderMasterId);
+            vmSalesOrderSlave.OrderMasterId = await _service.OrderMastersSubmitrm(vmSalesOrderSlave.OrderMasterId);
             return RedirectToAction(nameof(ProcurementRMSalesOrderSlave), "Procurement", new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
         }
         [HttpPost]
