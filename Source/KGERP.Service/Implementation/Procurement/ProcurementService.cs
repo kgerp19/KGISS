@@ -3704,7 +3704,7 @@ namespace KGERP.Services.Procurement
             }
 
 
-            vmSalesOrderSlave.SignatoryApprovalList = await (from approval in _db.ApprovalOrderMasters
+       var approvalList = await (from approval in _db.ApprovalOrderMasters
                                                              join a in _db.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
                                                              join o in _db.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
                                                              join v in _db.Vendors on o.CustomerId equals v.VendorId
@@ -3745,6 +3745,10 @@ namespace KGERP.Services.Procurement
                                                                                                           y.IsActive))
 
                                                              }).AsQueryable().OrderBy(x => x.SignatoryStatus).ToListAsync();
+
+
+
+            vmSalesOrderSlave.SignatoryApprovalList = approvalList.OrderBy(a => a.Precedence).ToList();
 
             vmSalesOrderSlave.LedgerBalance = _db.Database.SqlQuery<decimal>("EXEC CustomerLadegerBalance {0},{1} ", vmSalesOrderSlave.CompanyId, vmSalesOrderSlave.HeadGLId).FirstOrDefault();
 

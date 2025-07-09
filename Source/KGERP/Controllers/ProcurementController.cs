@@ -2700,7 +2700,7 @@ namespace KG.App.Controllers
             {
                 vmSalesOrderSlave.CompanyId = companyId;
                 vmSalesOrderSlave.OrderMasterId = orderMasterId;
-                vmSalesOrderSlave.Status = (int)EnumFeedSalesStatus.Draft;
+                vmSalesOrderSlave.Status = (int)EnumOrderMasterStatus.Draft;
             }
             else
             {
