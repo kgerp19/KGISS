@@ -28,28 +28,43 @@
 
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label class="control-label">From Date <span class="text-danger">*</span></label>
                                 <div class="input-group date">
-                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off", required = "required" } })
-                                   
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "form-control datepickerCustom", @autocomplete = "off", required = "required" } })
+
                                 </div>
                                 @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label class="control-label">To Date <span class="text-danger">*</span></label>
                                 <div class="input-group date">
-                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off", required = "required" } })
-                                   
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "form-control datepickerCustom", @autocomplete = "off", required = "required" } })
+
                                 </div>
                                 @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlZoneId">Zone</label>
+                                @Html.DropDownListFor(model => model.ZoneId, Model.ZoneListList as SelectList, "--Select Zone--", new { id = "ddlZoneId", @class = "form-control" })
 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <label>Territory</label>
+                                @Html.DropDownListFor(model => model.SubZoneId, Model.TerritoryList as SelectList, "--Select Territory--", new { id = "ddlSubZoneId", @class = "form-control"})
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="control-label">Export Format</label>
@@ -102,9 +117,9 @@
             border-bottom: 1px solid #f4f4f4;
         }
 
-        .box-header.with-border {
-            border-bottom: 1px solid #f4f4f4;
-        }
+            .box-header.with-border {
+                border-bottom: 1px solid #f4f4f4;
+            }
 
         .box-title {
             display: inline-block;
@@ -126,10 +141,10 @@
             border-color: #ddd;
         }
 
-        .form-control:focus {
-            border-color: #3c8dbc;
-            box-shadow: none;
-        }
+            .form-control:focus {
+                border-color: #3c8dbc;
+                box-shadow: none;
+            }
 
         .btn-success {
             background-color: #00a65a;
@@ -181,13 +196,13 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryui")
-    <script>
+<script>
         $(document).ready(function () {
-            // Initialize datepicker with improved styling
-            $('.datepicker').datepicker({
+
+            $('.datepickerCustom').datepicker({
                 dateFormat: "mm/dd/yy",
-                showOn: 'both',
-                buttonText: "<i class='fa fa-calendar'></i>",
+                //showOn: 'both',
+                //buttonText: "<i class='fa fa-calendar'></i>",
                 changeMonth: true,
                 changeYear: true,
                 yearRange: "2001:+50",
@@ -197,6 +212,27 @@
                         marginLeft: '-10px'
                     });
                 }
+            });
+
+            $("#ddlZoneId").change(function (e) {
+                var zoneId = $("#ddlZoneId :selected").val();
+                     $.ajax({
+                     type: "GET",
+                     url: "@Url.Action("CommonSubZonesGet", "Configuration")",
+                     datatype: "Json",
+                         data: { id: zoneId },
+                         success: function (data) {
+                         var items = "";
+                             if (data) {
+                                 $("#ddlSubZoneId").empty();
+                                 $("#ddlSubZoneId").append("<option value=''>==Select Territory==</option>");
+                                 $(data).each(function (index, item) {
+                                     $("#ddlSubZoneId").append("<option value='" + item.Value + "'>" + item.Text + "</option>");
+                                 });
+            
+                             }
+                         }
+                     });
             });
 
             @*// Form validation and loading overlay
@@ -227,5 +263,5 @@
                 }
             });*@
         });
-    </script>
+</script>
 }
