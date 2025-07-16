@@ -2677,6 +2677,8 @@ namespace KGERP.Controllers
                 ToDate = DateTime.Now,
                 StrFromDate = DateTime.Now.ToShortDateString(),
                 StrToDate = DateTime.Now.ToShortDateString(),
+                ZoneListList = new SelectList(_configrationService.CommonZonesDropDownList(companyId), "Value", "Text"),
+                TerritoryList = new SelectList(_configrationService.CommonSubZonesDropDownList(companyId), "Value", "Text")
             };
             return View(cm);
         }
@@ -2730,9 +2732,11 @@ namespace KGERP.Controllers
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
+            int zoneid = model.ZoneId??0;
+            int SubZoneid = model.SubZoneId??0;
             client.Credentials = nwc;
             model.ReportName = "ISSSeedCategoryAndTerritoryWiseCollectionReport";
-            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId);
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ZoneId={5}&SubZoneId={6}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId,zoneid, SubZoneid);
             if (model.ReportType.Equals(ReportType.EXCEL))
             {
                 return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");

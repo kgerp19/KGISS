@@ -1289,7 +1289,7 @@ namespace KGERP.Service.Implementation
         public async Task<List<VMCommonDistricts>> CommonSubZonesGet(int id)
         {
 
-            List<VMCommonDistricts> vmCommonDistricts = await Task.Run(() => (_db.SubZones.Where(x => x.IsActive && x.ZoneId == id)).Select(x => new VMCommonDistricts() { ID = x.SubZoneId, Name = x.Name }).ToListAsync());
+            List<VMCommonDistricts> vmCommonDistricts = await (_db.SubZones.Where(x => x.IsActive && x.ZoneId == id)).Select(x => new VMCommonDistricts() { ID = x.SubZoneId, Name = x.Name }).ToListAsync();
 
             return vmCommonDistricts;
         }
