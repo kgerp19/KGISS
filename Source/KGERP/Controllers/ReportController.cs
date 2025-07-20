@@ -5885,6 +5885,19 @@ namespace KGERP.Controllers
 
         }
 
+
+
+        [HttpGet]
+        public ActionResult SeedCustomerAgeingTerritory(int companyId = 0)
+        {
+            VmCustomerAgeing vmCustomerAgeing = new VmCustomerAgeing();
+            vmCustomerAgeing.CompanyFK = companyId;
+
+            vmCustomerAgeing.TerritoryList = new SelectList(_service.SubZonesDropDownListAging(companyId), "Value", "Text");
+            return View(vmCustomerAgeing);
+
+        }
+
         [HttpPost]
 
         public ActionResult CustomerAgeingReportView(VmCustomerAgeing model)

@@ -294,6 +294,8 @@ namespace KGERP.Services.Procurement
 
         public List<object> SubZonesDropDownList(int companyId = 0)
         {
+            
+
             var List = new List<object>();
             _db.SubZones
         .Where(x => x.IsActive).Where(x => x.CompanyId == companyId).Select(x => x).ToList()
@@ -305,6 +307,28 @@ namespace KGERP.Services.Procurement
             return List;
 
         }
+
+
+
+
+        public List<object> SubZonesDropDownListAging(int companyId = 0)
+        {
+
+            var userid = Common.GetIntUserId();
+            var List = new List<object>();
+            _db.SubZones
+        .Where(x => x.IsActive && userid==x.SalesOfficerId).Where(x => x.CompanyId == companyId).Select(x => x).ToList()
+        .ForEach(x => List.Add(new
+        {
+            Value = x.SubZoneId,
+            Text =/* x.SalesOfficerName + " -" + */x.Name
+        }));
+            return List;
+
+        }
+
+
+
 
         public List<object> SubZonesDropDownListUserWise(long userId, int companyId = 0)
 
