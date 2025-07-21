@@ -3736,7 +3736,11 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-        public VMRealStateProduct GetCommonProductByIDPackaging(int id)
+
+
+
+
+        public VMRealStateProduct GetCommonProductByIDpackaging(int id)
         {
             var v = (from t1 in _db.Products.Where(x => x.ProductId == id)
                      join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
@@ -3764,16 +3768,15 @@ namespace KGERP.Service.Implementation
                          PackSize = t1.PackSize,
                          ProcessLoss = t1.ProcessLoss,
                          FormulaQty = t1.FormulaQty,
-                         LotNumbers = _db.Prod_ReferenceSlave
-                 .Where(m => m.FProductId == id && m.LotNumber != null && m.IsActive)
+                         LotNumbers = _db.MaterialReceiveDetails
+                 .Where(m => m.ProductId == id && m.LotNumber != null && m.IsActive)
                  .Select(m => m.LotNumber)
                  .Distinct()
                  .ToList()
 
                      }).FirstOrDefault();
             return v;
-        }\
-
+        }
 
         public VMRealStateProduct GetCommonProductByProducId(int id, string LotNo, int CompanyId = 0)
         {
