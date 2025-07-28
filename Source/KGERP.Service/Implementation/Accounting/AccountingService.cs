@@ -565,8 +565,11 @@ namespace KGERP.Service.Implementation
         public List<object> CRVVoucherTypesDownList(int companyId)
         {
             var List = new List<object>();
+            var voucherCodes = new[] { "jsv", "crv" };
             _db.VoucherTypes
-        .Where(x => x.IsActive && x.CompanyId == companyId && x.Code == "CRV").Select(x => x).ToList()
+        .Where(x => x.IsActive
+                && x.CompanyId == companyId
+                && voucherCodes.Any(code => x.Code.ToLower().Contains(code))).ToList()
         .ForEach(x => List.Add(new
         {
             Value = x.VoucherTypeId,
