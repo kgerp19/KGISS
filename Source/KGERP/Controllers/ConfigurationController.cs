@@ -1049,6 +1049,13 @@ namespace Pos.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+
+        public JsonResult CommonProductByIDGetpack(int id)
+        {
+            var model = _service.GetCommonProductByIDpackaging(id);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult FinishProductBOMsByIDGet(int id)
         {
             var model = _service.GetFinishProductBOMsByID(id);

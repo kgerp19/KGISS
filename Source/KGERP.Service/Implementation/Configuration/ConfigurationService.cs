@@ -3736,6 +3736,48 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
+
+
+
+
+        public VMRealStateProduct GetCommonProductByIDpackaging(int id)
+        {
+            var v = (from t1 in _db.Products.Where(x => x.ProductId == id)
+                     join t2 in _db.ProductSubCategories on t1.ProductSubCategoryId equals t2.ProductSubCategoryId
+                     join t3 in _db.ProductCategories on t2.ProductCategoryId equals t3.ProductCategoryId
+                     join t4 in _db.Units on t1.UnitId equals t4.UnitId
+
+                     select new VMRealStateProduct
+                     {
+                         ID = t1.ProductId,
+                         Name = t1.ProductName,
+                         UnitPrice = t1.UnitPrice ?? 0,
+                         TPPrice = t1.TPPrice,
+                         ShortName = t1.ShortName,
+                         SubCategoryName = t2.Name,
+                         CategoryName = t3.Name,
+                         UnitName = t4.Name,
+                         Common_ProductSubCategoryFk = t1.ProductSubCategoryId,
+                         Common_UnitFk = t1.UnitId,
+                         Common_ProductCategoryFk = t2.ProductCategoryId,
+                         CompanyFK = t1.CompanyId,
+                         CostingPrice = t1.CostingPrice,
+                         PackId = t1.PackId,
+
+                         DieSize = t1.DieSize,
+                         PackSize = t1.PackSize,
+                         ProcessLoss = t1.ProcessLoss,
+                         FormulaQty = t1.FormulaQty,
+                         LotNumbers = _db.MaterialReceiveDetails
+                 .Where(m => m.ProductId == id && m.LotNumber != null && m.IsActive)
+                 .Select(m => m.LotNumber)
+                 .Distinct()
+                 .ToList()
+
+                     }).FirstOrDefault();
+            return v;
+        }
+
         public VMRealStateProduct GetCommonProductByProducId(int id, string LotNo, int CompanyId = 0)
         {
             var v = (from t1 in _db.Products.Where(x => x.ProductId == id)
