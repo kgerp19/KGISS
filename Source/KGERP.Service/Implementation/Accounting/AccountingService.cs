@@ -4241,16 +4241,16 @@ namespace KGERP.Service.Implementation
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
-                Debit = 0,
-                Credit = totalSalesTranserAmount,
+                Debit = totalSalesTranserAmount,
+                Credit = 0,
                 Accounting_HeadFK = (int)salesTransferDetailVM.ToVenderHeadGLId
             });
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
-                Debit = totalSalesTranserAmount,
-                Credit = 0,
+                Debit = 0,
+                Credit = totalSalesTranserAmount,
                 Accounting_HeadFK = (int)salesTransferDetailVM.FromVenderHeadGLId
             });
 
