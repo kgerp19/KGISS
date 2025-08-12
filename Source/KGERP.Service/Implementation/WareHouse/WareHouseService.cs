@@ -4167,7 +4167,7 @@ namespace KGERP.Services.WareHouse
         public async Task<VMOrderDeliverDetail> WareHouseOrderDeliverDetailGet(int companyId, int orderDeliverId)
         {
             VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
-            vmOrderDeliverDetail = await Task.Run(() => (from t1 in _db.OrderDelivers
+            vmOrderDeliverDetail = await  (from t1 in _db.OrderDelivers
                                                          join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
                                                          join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
                                                          join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
@@ -4205,7 +4205,7 @@ namespace KGERP.Services.WareHouse
                                                              CompanyFK = t1.CompanyId,
                                                              OrderMasterId = t2.OrderMasterId,
 
-
+                                                             AcCostCenterId = t6.CostCenterId,
                                                              CreatedBy = t1.CreatedBy,
                                                              CreatedDate = t1.CreatedDate,
                                                              IsSubmitted = t1.IsSubmitted,
@@ -4219,11 +4219,11 @@ namespace KGERP.Services.WareHouse
                                                              Territory = t6.Name,
                                                              Remarks = t2.Remarks
 
-                                                         }).FirstOrDefault());
+                                                         }).FirstOrDefaultAsync();
 
             /// hggfgfhf
 
-            vmOrderDeliverDetail.DataListDetail = await Task.Run(() => (from t1 in _db.OrderDeliverDetails
+            vmOrderDeliverDetail.DataListDetail = await (from t1 in _db.OrderDeliverDetails
                                                                         join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId
                                                                         join t3 in _db.OrderDetails on t1.OrderDetailId equals t3.OrderDetailId
                                                                         join t5 in _db.Products on t3.ProductId equals t5.ProductId
@@ -4255,7 +4255,7 @@ namespace KGERP.Services.WareHouse
                                                                             Amount = t1.DeliveredQty * t1.UnitPrice,
                                                                             LotNunmber =t1.LotNumber
                                                                            
-                                                                        }).OrderByDescending(x => x.OrderDeliverDetailId).AsEnumerable());
+                                                                        }).ToListAsync();
 
 
 

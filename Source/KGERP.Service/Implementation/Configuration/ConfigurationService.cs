@@ -2105,6 +2105,8 @@ namespace KGERP.Service.Implementation
             vmCommonSubZone.CompanyFK = companyId;
             vmCommonSubZone.DataList = await Task.Run(() => (from t1 in _db.SubZones
                                                              join t2 in _db.Zones on t1.ZoneId equals t2.ZoneId
+                                                             join t3 in _db.Accounting_CostCenter on t1.CostCenterId equals t3.CostCenterId into LAC
+                                                             from t4 in LAC.DefaultIfEmpty()
                                                              where t1.IsActive && t1.CompanyId == companyId
                                                              && (zoneId > 0 ? t1.ZoneId == zoneId : t1.SubZoneId > 0)
                                                              select new VMCommonSubZone
@@ -2119,7 +2121,9 @@ namespace KGERP.Service.Implementation
                                                                  Email = t1.Email,
                                                                  MobileOffice = t1.MobileOffice,
                                                                  MobilePersonal = t1.MobilePersonal,
-                                                                 CompanyFK = t1.CompanyId
+                                                                 CompanyFK = t1.CompanyId,
+                                                                 CostCenterName=t4.Name,
+                                                                 CostCenterId = t1.CostCenterId,
                                                              }).OrderByDescending(x => x.ID).AsEnumerable());
             return vmCommonSubZone;
         }
@@ -2139,7 +2143,8 @@ namespace KGERP.Service.Implementation
                 CompanyId = vmCommonSubZone.CompanyFK.Value,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                CostCenterId= vmCommonSubZone.CostCenterId
 
             };
             _db.SubZones.Add(subZone);
@@ -2185,6 +2190,7 @@ namespace KGERP.Service.Implementation
             subZone.MobileOffice = vmCommonSubZone.MobileOffice;
             subZone.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             subZone.ModifiedDate = DateTime.Now;
+            subZone.CostCenterId = vmCommonSubZone.CostCenterId;
 
             if (subZone.CompanyId == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
             {
@@ -2699,6 +2705,17 @@ namespace KGERP.Service.Implementation
             foreach (var x in v)
             {
                 list.Add(new { Text = x.Name, Value = x.ZoneId });
+            }
+            return list;
+        }
+
+        public List<object> CommonCostCenterDropDownList(int companyId)
+        {
+            var list = new List<object>();
+            var v = _db.Accounting_CostCenter.Where(x => x.IsActive && x.CompanyId == companyId).ToList();
+            foreach (var x in v)
+            {
+                list.Add(new { Text = x.Name, Value = x.CostCenterId });
             }
             return list;
         }

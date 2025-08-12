@@ -577,7 +577,7 @@ namespace KGERP.Services.WareHouse
         public double TotalDelivered { get; set; }
         public double? Consumption { get; set; }
         public double? PackQuantity { get; set; }
-
+        public int AcCostCenterId { get; set; }
         public int PaymentMethod { get; set; }
         public string CourierNo { get; set; }
         public double CourierCharge { get; set; }
@@ -601,6 +601,7 @@ namespace KGERP.Services.WareHouse
         public SelectList POPaymentMethodList { get { return new SelectList(BaseFunctionalities.GetEnumList<VendorsPaymentMethodEnum>(), "Value", "Text"); } }
 
         public string LotNunmber { get;  set; }
+        
     }
 
 

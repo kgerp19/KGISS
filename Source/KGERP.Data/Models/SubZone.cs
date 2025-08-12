@@ -23,6 +23,7 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> ModifiedDate { get; set; }
         public string ModifiedBy { get; set; }
         public bool IsActive { get; set; }
+        public int CostCenterId { get; set; }
         public int CompanyId { get; set; }
         public string SalesOfficerName { get; set; }
         public string Designation { get; set; }

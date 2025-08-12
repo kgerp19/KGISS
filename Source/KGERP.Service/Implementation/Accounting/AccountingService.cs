@@ -115,11 +115,12 @@ namespace KGERP.Service.Implementation
             string VoucherBy = GlobalValues.UserId;
             var C = Common.GetUserId();
             Accounting_CostCenter _CostCenter = new Accounting_CostCenter();
-            if (vmJournalSlave.CompanyFK == 7 || vmJournalSlave.CompanyFK == 9)
+
+            if (vmJournalSlave.CompanyFK==2)
             {
                 if (vmJournalSlave.Accounting_CostCenterFK != null)
                 {
-                    _CostCenter.CostCenterId = (int)vmJournalSlave.Accounting_CostCenterFK;
+                    _CostCenter.CostCenterId = (int)vmJournalSlave.Accounting_CostCenterFK; //for Sales Voucher
                 }
                 else
                 {
@@ -4080,6 +4081,7 @@ namespace KGERP.Service.Implementation
                 CompanyFK = vmOrderDeliverDetail.CompanyFK,
                 Date = vmOrderDeliverDetail.DeliveryDate,
                 IsSubmit = true,
+                Accounting_CostCenterFK = vmOrderDeliverDetail.AcCostCenterId
             };
 
             double unitDiscount = vmOrderDeliverDetail.DataListDetail.Sum(x => x.DeliveredQty * Convert.ToDouble(x.DiscountUnit));

@@ -35,10 +35,11 @@
                     <!-- /.box-header -->
                     <div class="box-body">
                         @Html.HiddenFor(model => model.ID, new { id = "subZoneId" })
+                        @Html.HiddenFor(model => model.CostCenterId, new { id = "costCenterId" })
                         @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
                         @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group" style="padding:0px">
                                     <label for="message-text" class="col-form-label">Zone:</label>
                                     @Html.DropDownListFor(model => model.ZoneId, Model.ZoneList as SelectList, "--Zone--", new { id = "ddlZoneId", @class = "form-control", required = "true" })
@@ -46,7 +47,15 @@
 
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="form-group" style="padding:0px">
+                                    <label for="message-text" class="col-form-label">Cost Center:</label>
+                                    @Html.DropDownListFor(model => model.CostCenterIdHidden, Model.CostCenterList as SelectList, "--Cost Center--", new { id = "ddlCostCenterId", @class = "form-control", required = "true" })
+                                    @Html.ValidationMessageFor(model => model.CostCenterIdHidden, "", new { @class = "text-danger" })
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="form-group" style="padding:0px">
                                     <label for="message-text" class="col-form-label">Territory:</label>
                                     @Html.TextBoxFor(model => model.Name, new { id = "txtSubZoneName", @class = "form-control input-sm", @placeholder = "Territory", required = "true" })
@@ -55,7 +64,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group" style="padding:0px">
                                     <label for="message-text" class="col-form-label">Sales Officer:</label>
                                     @Html.EditorFor(model => model.SalesOfficerName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "SalesOfficerName", @id = "txtSalesOfficerName" } })
@@ -142,6 +151,7 @@
                                             <th style="width:5%;">SL</th>
                                             <th style="width:10%;">Zone</th>
                                             <th style="width:15%;">Territory</th>
+                                            <th style="width:15%;">Cost Center</th>
                                             <th style="width:10%;">Sales Officer</th>
                                             <th style="width:10%;">Designation</th>
                                             <th style="width:10%;">Email</th>
@@ -161,10 +171,12 @@
                                                 <td>
                                                     <input type="hidden" id="commonZoneId_@item.ID" value="@item.ZoneId" />
                                                     <input type="hidden" id="tdSalesOfficerId_@item.ID" value="@item.SalesOfficerId" />
+                                                    <input type="hidden" id="tdCostCenterId__@item.ID" value="@item.CostCenterId" />
 
                                                     @item.ZoneName
                                                 </td>
                                                 <td id="tdSubZoneName_@item.ID">@item.Name</td>
+                                                <td id="tdCostCenterName_@item.CostCenterId">@item.CostCenterName</td>
                                                 <td id="tdSalesOfficerName_@item.ID">@item.SalesOfficerName</td>
                                                 <td id="tdDesignation_@item.ID">@item.Designation</td>
                                                 <td id="tdEmail_@item.ID">@item.Email</td>
@@ -239,12 +251,15 @@
 @section scripts {
 
     @*@Scripts.Render("~/bundles/jqueryui")
-    @Styles.Render("~/Content/cssjqryUi")*@
+        @Styles.Render("~/Content/cssjqryUi")*@
 
-<script type="text/javascript">
+    <script type="text/javascript">
         $(document).ready(function () {
             $('.formValidator').bootstrapValidator();
-
+            $('#ddlCostCenterId').on('change', function () {
+                var value = $(this).val();          // selected option value (CostCenterId)
+                $('#costCenterId').val(value);
+            });
 
             $("#txtSalesOfficerName").autocomplete({
                 source: function (request, response) {
@@ -287,13 +302,16 @@
 
 
 
-        function makeEditble(elem) {
+    function makeEditble(elem) {
+
             if (elem !== null) {
                 var rowId = elem.id;
                 $('#subZoneId').val(rowId);
+                $('#costCenterId').val($('#tdCostCenterId__' + rowId).val());
                 $('#ActionId').val(2);
                 $('#btnSave').html("<i class='fa fa-edit'></i>&nbsp;Update");
                 $('#ddlZoneId').val($('#commonZoneId_' + rowId).val().trim()).trigger('change');
+                $('#ddlCostCenterId').val($('#tdCostCenterId__' + rowId).val().trim()).trigger('change');
                 $('#txtSubZoneName').val($('#tdSubZoneName_' + rowId).text().trim());
 
                 $('#txtSalesOfficerName').val($('#tdSalesOfficerName_' + rowId).text().trim());
@@ -320,6 +338,6 @@
         }
 
 
-</script>
+    </script>
 }
 

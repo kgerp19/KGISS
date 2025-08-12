@@ -6406,6 +6406,7 @@ warning 6002: The table/view 'KGISSDB.Erp.RequisitionItemDetail' does not have a
           <Property Name="ModifiedDate" Type="datetime" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="128" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="CostCenterId" Type="int" Nullable="false" />
           <Property Name="CompanyId" Type="int" Nullable="false" />
           <Property Name="SalesOfficerName" Type="varchar" MaxLength="100" />
           <Property Name="Designation" Type="varchar" MaxLength="80" />
@@ -10175,7 +10176,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="StockTransferDetails" EntityType="ERPModel.StockTransferDetail" />
           <EntitySet Name="Stores" EntityType="ERPModel.Store" />
           <EntitySet Name="StoreDetails" EntityType="ERPModel.StoreDetail" />
-          <EntitySet Name="SubZones" EntityType="ERPModel.SubZone" />
           <EntitySet Name="TeamInfoes" EntityType="ERPModel.TeamInfo" />
           <EntitySet Name="Units" EntityType="ERPModel.Unit" />
           <EntitySet Name="UpazilaAssigns" EntityType="ERPModel.UpazilaAssign" />
@@ -10533,10 +10533,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_StoreDetail_Store" Association="ERPModel.FK_StoreDetail_Store">
             <End Role="Store" EntitySet="Stores" />
             <End Role="StoreDetail" EntitySet="StoreDetails" />
-          </AssociationSet>
-          <AssociationSet Name="FK_SubZone_Zone" Association="ERPModel.FK_SubZone_Zone">
-            <End Role="Zone" EntitySet="Zones" />
-            <End Role="SubZone" EntitySet="SubZones" />
           </AssociationSet>
           <AssociationSet Name="AspNetUserRoles" Association="ERPModel.AspNetUserRoles">
             <End Role="AspNetRole" EntitySet="AspNetRoles" />
@@ -11016,6 +11012,11 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_IssueDetailInfo_IssueMasterInfo" Association="ERPModel.FK_IssueDetailInfo_IssueMasterInfo">
             <End Role="IssueMasterInfo" EntitySet="IssueMasterInfoes" />
             <End Role="IssueDetailInfo" EntitySet="IssueDetailInfoes" />
+          </AssociationSet>
+          <EntitySet Name="SubZones" EntityType="ERPModel.SubZone" />
+          <AssociationSet Name="FK_SubZone_Zone" Association="ERPModel.FK_SubZone_Zone">
+            <End Role="Zone" EntitySet="Zones" />
+            <End Role="SubZone" EntitySet="SubZones" />
           </AssociationSet>
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
@@ -14980,29 +14981,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="ProductDetails" Relationship="ERPModel.FK_ProductDetails_StoreDetail" FromRole="StoreDetail" ToRole="ProductDetail" />
           <NavigationProperty Name="Store" Relationship="ERPModel.FK_StoreDetail_Store" FromRole="StoreDetail" ToRole="Store" />
         </EntityType>
-        <EntityType Name="SubZone">
-          <Key>
-            <PropertyRef Name="SubZoneId" />
-          </Key>
-          <Property Name="SubZoneId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ZoneId" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="CreatedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <Property Name="CompanyId" Type="Int32" Nullable="false" />
-          <Property Name="SalesOfficerName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Designation" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="MobileOffice" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MobilePersonal" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="AccountHeadId" Type="Int32" Nullable="false" />
-          <Property Name="SalesOfficerId" Type="Int64" />
-          <NavigationProperty Name="Zone" Relationship="ERPModel.FK_SubZone_Zone" FromRole="SubZone" ToRole="Zone" />
-        </EntityType>
         <EntityType Name="TeamInfo">
           <Key>
             <PropertyRef Name="Id" />
@@ -16343,18 +16321,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="StoreDetail">
               <PropertyRef Name="StoreId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_SubZone_Zone">
-          <End Type="ERPModel.Zone" Role="Zone" Multiplicity="1" />
-          <End Type="ERPModel.SubZone" Role="SubZone" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Zone">
-              <PropertyRef Name="ZoneId" />
-            </Principal>
-            <Dependent Role="SubZone">
-              <PropertyRef Name="ZoneId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -20269,6 +20235,42 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="IssueDetailInfo">
               <PropertyRef Name="IssueMasterId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="SubZone">
+          <Key>
+            <PropertyRef Name="SubZoneId" />
+          </Key>
+          <Property Name="SubZoneId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ZoneId" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CostCenterId" Type="Int32" Nullable="false" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="SalesOfficerName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Designation" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MobileOffice" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="MobilePersonal" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="AccountHeadId" Type="Int32" Nullable="false" />
+          <Property Name="SalesOfficerId" Type="Int64" />
+          <NavigationProperty Name="Zone" Relationship="ERPModel.FK_SubZone_Zone" FromRole="SubZone" ToRole="Zone" />
+        </EntityType>
+        <Association Name="FK_SubZone_Zone">
+          <End Type="ERPModel.Zone" Role="Zone" Multiplicity="1" />
+          <End Type="ERPModel.SubZone" Role="SubZone" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Zone">
+              <PropertyRef Name="ZoneId" />
+            </Principal>
+            <Dependent Role="SubZone">
+              <PropertyRef Name="ZoneId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -24217,29 +24219,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="SubZones">
-            <EntityTypeMapping TypeName="ERPModel.SubZone">
-              <MappingFragment StoreEntitySet="SubZone">
-                <ScalarProperty Name="SalesOfficerId" ColumnName="SalesOfficerId" />
-                <ScalarProperty Name="AccountHeadId" ColumnName="AccountHeadId" />
-                <ScalarProperty Name="MobilePersonal" ColumnName="MobilePersonal" />
-                <ScalarProperty Name="MobileOffice" ColumnName="MobileOffice" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="Designation" ColumnName="Designation" />
-                <ScalarProperty Name="SalesOfficerName" ColumnName="SalesOfficerName" />
-                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="Code" ColumnName="Code" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
-                <ScalarProperty Name="SubZoneId" ColumnName="SubZoneId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="TeamInfoes">
             <EntityTypeMapping TypeName="ERPModel.TeamInfo">
               <MappingFragment StoreEntitySet="TeamInfo">
@@ -27329,6 +27308,30 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="IssueDate" ColumnName="IssueDate" />
                 <ScalarProperty Name="IssueNo" ColumnName="IssueNo" />
                 <ScalarProperty Name="IssueMasterId" ColumnName="IssueMasterId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SubZones">
+            <EntityTypeMapping TypeName="ERPModel.SubZone">
+              <MappingFragment StoreEntitySet="SubZone">
+                <ScalarProperty Name="SalesOfficerId" ColumnName="SalesOfficerId" />
+                <ScalarProperty Name="AccountHeadId" ColumnName="AccountHeadId" />
+                <ScalarProperty Name="MobilePersonal" ColumnName="MobilePersonal" />
+                <ScalarProperty Name="MobileOffice" ColumnName="MobileOffice" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Designation" ColumnName="Designation" />
+                <ScalarProperty Name="SalesOfficerName" ColumnName="SalesOfficerName" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="CostCenterId" ColumnName="CostCenterId" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
+                <ScalarProperty Name="SubZoneId" ColumnName="SubZoneId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

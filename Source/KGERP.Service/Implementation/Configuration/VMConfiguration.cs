@@ -174,11 +174,13 @@ namespace KGERP.Service.Configuration
         public string MobilePersonal { get; set; }
         public string ZoneName { get; set; }
         public SelectList ZoneList { get; set; } = new SelectList(new List<object>());
+        public SelectList CostCenterList { get; set; } = new SelectList(new List<object>());
 
         public int ZoneId { get; set; }
+        public int CostCenterIdHidden { get; set; }
+        public int CostCenterId { get; set; }
         public IEnumerable<VMCommonSubZone> DataList { get; set; }
-
-
+        public string CostCenterName { get;  set; }
     }
     public class VMCommonSize : BaseVM
     {

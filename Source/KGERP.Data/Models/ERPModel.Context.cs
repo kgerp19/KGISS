@@ -226,7 +226,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<StockTransferDetail> StockTransferDetails { get; set; }
         public virtual DbSet<Store> Stores { get; set; }
         public virtual DbSet<StoreDetail> StoreDetails { get; set; }
-        public virtual DbSet<SubZone> SubZones { get; set; }
         public virtual DbSet<TeamInfo> TeamInfoes { get; set; }
         public virtual DbSet<Unit> Units { get; set; }
         public virtual DbSet<UpazilaAssign> UpazilaAssigns { get; set; }
@@ -368,6 +367,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<KGSalesAchivementDetail> KGSalesAchivementDetails { get; set; }
         public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
         public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
+        public virtual DbSet<SubZone> SubZones { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

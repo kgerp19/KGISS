@@ -416,6 +416,7 @@ namespace Pos.App.Controllers
             VMCommonSubZone vmCommonSubZone = new VMCommonSubZone();
             vmCommonSubZone = await Task.Run(() => _service.GetSubZones(companyId, zoneId));
             vmCommonSubZone.ZoneList = new SelectList(_service.CommonZonesDropDownList(companyId), "Value", "Text");
+            vmCommonSubZone.CostCenterList = new SelectList(_service.CommonCostCenterDropDownList(companyId), "Value", "Text");
 
             return View(vmCommonSubZone);
         }
