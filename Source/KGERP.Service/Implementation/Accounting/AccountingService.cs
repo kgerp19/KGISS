@@ -1523,7 +1523,7 @@ namespace KGERP.Service.Implementation
                         && hgl.IsActive
                         && h5.IsActive
                         && h4.IsActive
-                        && (h3.AccCode == "1304") || (h4.AccCode == "1301001") || allowedHead2Ids.Contains(h3.ParentId.Value)
+                        && (h3.AccCode == "1304" || h4.AccCode == "1301001" || (h3.ParentId.HasValue && allowedHead2Ids.Contains(h3.ParentId.Value)))
                         && (hgl.AccName.StartsWith(prefix) || hgl.AccCode.StartsWith(prefix))
                         select new
                      {
