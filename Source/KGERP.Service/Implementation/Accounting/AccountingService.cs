@@ -116,7 +116,7 @@ namespace KGERP.Service.Implementation
             var C = Common.GetUserId();
             Accounting_CostCenter _CostCenter = new Accounting_CostCenter();
 
-            if (vmJournalSlave.CompanyFK==2)
+            if (vmJournalSlave.CompanyFK == 2)
             {
                 if (vmJournalSlave.Accounting_CostCenterFK != null)
                 {
@@ -308,7 +308,7 @@ namespace KGERP.Service.Implementation
 
             vmJournalSlave.DataListDetails = await Task.Run(() => (from t1 in _db.VoucherDetails.Where(x => x.IsActive && x.VoucherId == voucherId && !x.IsVirtual)
                                                                    join t2 in _db.HeadGLs on t1.AccountHeadId equals t2.Id
-                                                                   join t3 in _db.ProductCategories.Where(x=>x.IsActive) on t1.ProductCategory equals t3.ProductCategoryId into Lt3
+                                                                   join t3 in _db.ProductCategories.Where(x => x.IsActive) on t1.ProductCategory equals t3.ProductCategoryId into Lt3
                                                                    from t3 in Lt3.DefaultIfEmpty()
                                                                    select new VMJournalSlave
                                                                    {
@@ -318,7 +318,7 @@ namespace KGERP.Service.Implementation
                                                                        Credit = t1.CreditAmount,
                                                                        Debit = t1.DebitAmount,
                                                                        Particular = t1.Particular,
-                                                                       ProductCategoryName=t3.Name
+                                                                       ProductCategoryName = t3.Name
                                                                    }).OrderByDescending(x => x.VoucherDetailId).AsEnumerable());
             if (vmJournalSlave.DataListDetails.Any())
             {
@@ -410,7 +410,7 @@ namespace KGERP.Service.Implementation
                     Particular = vmJournalSlave.Particular,
                     TransactionDate = DateTime.Now,
                     VoucherId = vmJournalSlave.VoucherId,
-                    ProductCategory= vmJournalSlave.ProductCategory,
+                    ProductCategory = vmJournalSlave.ProductCategory,
                     IsActive = true
                 };
                 _db.VoucherDetails.Add(voucherDetail);
@@ -1505,6 +1505,46 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
+        public object GetAutoCompleteHeadGLForCollectionVoucherAsync(string prefix, int companyId)
+        {
+            //AccCode 42 //AccCode 43 //AccCode 44 //AccCode 45
+
+            var allowedHead2Ids = new HashSet<int> {
+                50613417, 50613418, 50613419, 50613420
+            };
+
+            // Use async execution to prevent blocking
+            var v = (from hgl in _db.HeadGLs
+                        join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                        join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                        join h3 in _db.Head3 on h4.ParentId equals h3.Id
+                       
+                        where hgl.CompanyId == companyId
+                        && hgl.IsActive
+                        && h5.IsActive
+                        && h4.IsActive
+                        && allowedHead2Ids.Contains(h3.ParentId.Value)
+                        && (hgl.AccName.StartsWith(prefix) || hgl.AccCode.StartsWith(prefix))
+                        select new
+                     {
+                         label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
+                         val = hgl.Id
+                     }).OrderBy(x => x.label).Take(200).ToList();
+
+            //var results = await query.ToListAsync();
+
+            //var v = results.Select(x => new
+            //{
+            //    label = $"[{x.AccCode}] {(x.H4AccName == x.H5AccName ? x.H5AccName : $"{x.H4AccName} {x.H5AccName}")} {x.AccName}",
+            //    val = x.Id
+            //})
+            //.OrderBy(x => x.label)
+            //.Take(200)
+            //.ToList();
+
+            return v;
+        }
+
         public object GetAutoCompleteHeadGLForSeedProcessingGet(string prefix, int companyId)
         {
             var v = (from hgl in _db.HeadGLs
@@ -1548,9 +1588,9 @@ namespace KGERP.Service.Implementation
         public object GetAutoCompleteVendorHeadGL(string prefix, int companyId, int vendorTypeId)
         {
             var userId = Common.GetIntUserId();
-            if (userId<=0)
+            if (userId <= 0)
             {
-                return new {};
+                return new { };
             }
 
             // Pre-filter prefix to avoid case-sensitive comparisons and improve index usage
@@ -1599,7 +1639,7 @@ namespace KGERP.Service.Implementation
         }
 
 
-        public async Task<long> AutoInsertVoucherDetails(int voucherId, int virtualHeadId, string virtualHeadParticular,int? productCategory=null)
+        public async Task<long> AutoInsertVoucherDetails(int voucherId, int virtualHeadId, string virtualHeadParticular, int? productCategory = null)
         {
             long result = -1;
 
@@ -1627,7 +1667,7 @@ namespace KGERP.Service.Implementation
                     TransactionDate = DateTime.Now,
                     IsActive = true,
                     Particular = virtualHeadParticular,
-                    ProductCategory= productCategory
+                    ProductCategory = productCategory
                 };
                 _db.VoucherDetails.Add(voucherDetail);
                 if (await _db.SaveChangesAsync() > 0)
@@ -4164,7 +4204,7 @@ namespace KGERP.Service.Implementation
             {
                 JournalType = voucherType.VoucherTypeId,
                 Title = issueDetailInfoVM.IssueNo,
-                Narration =  " Date: " + issueDetailInfoVM.IssueDate.ToString("MM/dd/yyyy"),
+                Narration = " Date: " + issueDetailInfoVM.IssueDate.ToString("MM/dd/yyyy"),
                 CompanyFK = issueDetailInfoVM.CompanyFK,
                 Date = issueDetailInfoVM.IssueDate,
                 IsSubmit = true,
