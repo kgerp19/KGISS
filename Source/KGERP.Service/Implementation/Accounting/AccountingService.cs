@@ -1524,7 +1524,7 @@ namespace KGERP.Service.Implementation
                         && h5.IsActive
                         && h4.IsActive
                         && (h3.AccCode == "1304" || h4.AccCode == "1301001" || (h3.ParentId.HasValue && allowedHead2Ids.Contains(h3.ParentId.Value)))
-                        && (hgl.AccName.StartsWith(prefix) || hgl.AccCode.StartsWith(prefix))
+                        && (hgl.AccName.Contains(prefix) || hgl.AccCode.Contains(prefix))
                         select new
                      {
                          label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
