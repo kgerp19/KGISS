@@ -673,7 +673,7 @@ namespace KGERP.Services.Production
 
         public async Task<VMProdReferenceSlave> GetSingleProductionDetails(int id)
         {
-            var v = await Task.Run(() => (from t1 in _db.ProductionDetails.Where(x => x.ProductionDetailId == id)
+            var v = await (from t1 in _db.ProductionDetails.Where(x => x.ProductionDetailId == id)
                                           join t2 in _db.HeadGLs on t1.ExpensesHeadGLId equals t2.Id
 
 
@@ -688,7 +688,7 @@ namespace KGERP.Services.Production
                                               FectoryExpensesAmount = t1.COGS,
                                               CreatedBy = t1.CreatedBy,
                                               CreatedDate = t1.CreatedDate
-                                          }).FirstOrDefault());
+                                          }).FirstAsync();
             return v;
         }
         public async Task<int> ProdReferenceSlaveAdd(VMProdReferenceSlave vmProdReferenceSlave)
