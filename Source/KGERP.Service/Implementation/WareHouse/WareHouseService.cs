@@ -2957,7 +2957,7 @@ namespace KGERP.Services.WareHouse
         public async Task<VMSaleReturnDetail> WareHouseSalesReturnSlaveGet(int companyId, int saleReturnId)
         {
             VMSaleReturnDetail vmSaleReturnDetail = new VMSaleReturnDetail();
-            vmSaleReturnDetail = await Task.Run(() => (from t1 in _db.SaleReturns.Where(x => x.CompanyId == companyId)
+            vmSaleReturnDetail = await (from t1 in _db.SaleReturns.Where(x => x.CompanyId == companyId)
                                                        join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId into t2_Join
                                                        from t2 in t2_Join.DefaultIfEmpty()
                                                        join t4 in _db.OrderMasters on t2.OrderMasterId equals t4.OrderMasterId into t4_Join
@@ -2998,7 +2998,7 @@ namespace KGERP.Services.WareHouse
                                                            IntegratedFrom = "SaleReturn"
                                                        
                                                            //ProcurementPurchaseOrderList = new SelectList(PODropDownList(), "Value", "Text")
-                                                       }).FirstOrDefault());
+                                                       }).FirstAsync();
 
 
 
@@ -5957,7 +5957,12 @@ namespace KGERP.Services.WareHouse
             {
                 #region Ready To Account Integration
                 VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
-                await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, (int)SeedJournalEnum.SalesReturnVoucher);
+                var getVoucherType=await _db.VoucherTypes.FirstAsync(x=>x.IsActive && x.Code== "SRV" && x.CompanyId== AccData.CompanyFK.Value);
+                if (getVoucherType is null || getVoucherType.VoucherTypeId<=0)
+                {
+                    return result;
+                }
+                await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, getVoucherType.VoucherTypeId);
 
                 #endregion
             }
