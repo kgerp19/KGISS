@@ -1632,7 +1632,7 @@ namespace KGERP.Service.Implementation
 
             if (childHeads.Count() > 0)
             {
-                string lastAccCode = childHeads.OrderByDescending(x => x.AccCode).FirstOrDefault().AccCode;
+                string lastAccCode = childHeads.OrderByDescending(x => x.Id).FirstOrDefault().AccCode;
                 string parentPart = lastAccCode.Substring(0, 10);
                 string childPart = lastAccCode.Substring(10, 3);
                 newAccountCode = parentPart + (Convert.ToInt32(childPart) + 1).ToString().PadLeft(3, '0');
