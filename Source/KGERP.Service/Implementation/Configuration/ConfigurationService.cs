@@ -1036,6 +1036,32 @@ namespace KGERP.Service.Implementation
         }
 
 
+        //public object GetAutoCompleteLotRaw(int productId)
+        //{
+        //    var v = (from t1 in _db.MaterialReceiveDetails
+        //             where t1.IsActive && t1.ProductId == productId
+        //             select new
+        //             {
+        //                 value = t1.LotNumber.ToString(),
+        //                 label = t1.LotNumber
+        //             }).OrderBy(x => x.label).Take(100).ToList();
+
+        //    var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
+        //                   .Select(g => new
+        //                   {
+        //                       value = g.Key == "nolot" ? "nolot" : g.Key,
+        //                       label = g.Key == "nolot" ? "NoLot" : g.Key
+        //                   })
+        //                   .OrderBy(x => x.label)
+        //                   .Take(100)
+        //                   .ToList();
+
+        //    // Insert default option at the beginning
+        //    grouped.Insert(0, new { value = (string)null, label = "Select Lot" });
+
+        //    return grouped;
+        //}
+
         public object GetAutoCompleteLotRaw(int productId)
         {
             var v = (from t1 in _db.MaterialReceiveDetails
@@ -1046,23 +1072,13 @@ namespace KGERP.Service.Implementation
                          label = t1.LotNumber
                      }).OrderBy(x => x.label).Take(100).ToList();
 
-            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
-                           .Select(g => new
-                           {
-                               value = g.Key == "nolot" ? "nolot" : g.Key,
-                               label = g.Key == "nolot" ? "NoLot" : g.Key
-                           })
-                           .OrderBy(x => x.label)
-                           .Take(100)
-                           .ToList();
+
 
             // Insert default option at the beginning
-            grouped.Insert(0, new { value = (string)null, label = "Select Lot" });
+            v.Insert(0, new { value = (string)null, label = "Select Lot" });
 
-            return grouped;
+            return v;
         }
-
-
 
 
         public object GetAutoCompleteLotFinish(int productId)
@@ -3658,7 +3674,7 @@ namespace KGERP.Service.Implementation
         }
         public VMCommonProduct GetRMUnitAndClosingRateByProductId(int productId, string lotNo)
         {
-            var LotNumber = String.IsNullOrEmpty(lotNo) ? "nolot" : lotNo;
+            var LotNumber = string.IsNullOrWhiteSpace(lotNo) || lotNo == "Null" ? "xyz" : lotNo;
 
             var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
                             join t4 in _db.Units on t1.UnitId equals t4.UnitId
@@ -3670,7 +3686,7 @@ namespace KGERP.Service.Implementation
                                 CompanyFK = t1.CompanyId
                             }).FirstOrDefault();
             VMProductStock vMProductStock = new VMProductStock();
-            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", products.ID, products.CompanyFK, LotNumber).FirstOrDefault();
+            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1},{2}", products.ID, products.CompanyFK, LotNumber).FirstOrDefault();
             products.CostingPrice = vMProductStock.ClosingRate;
             products.RemainingStockInQty = vMProductStock.ClosingQty;
 
@@ -3709,7 +3725,7 @@ namespace KGERP.Service.Implementation
                                 CompanyFK = t1.CompanyId
                             }).FirstOrDefault();
             VMProductStock vMProductStock = new VMProductStock();
-            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", productId, companyId, lotnumber).FirstOrDefault();
+            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1},{2}", productId, companyId, lotnumber).FirstOrDefault();
             products.CostingPrice = vMProductStock.ClosingRate;
             products.RemainingStockInQty = vMProductStock.ClosingQty;
 
