@@ -493,7 +493,7 @@ namespace KGERP.Services.Procurement
                                                           .Where(x => x.IsActive
                                                           && x.CompanyId == companyId
                                                           && x.IssueDate >= fromDate && x.IssueDate <= toDate)
-                                                join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                                                join t2 in _db.Employees on t1.VendorId equals t2.Id
 
                                                 select new IssueDetailInfoVM
                                                 {
@@ -783,7 +783,7 @@ namespace KGERP.Services.Procurement
         {
 
             var v = await (from t1 in _db.IssueMasterInfoes.Where(x => x.IsActive && x.IssueMasterId == orderMasterId)
-                           join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                           join t2 in _db.Employees on t1.VendorId equals t2.Id
                            join t3 in _db.Companies on t1.CompanyId equals t3.CompanyId
                            join t4 in _db.Employees on t1.IssuedBy equals t4.Id
                            select new IssueDetailInfoVM
@@ -1337,7 +1337,7 @@ namespace KGERP.Services.Procurement
         public async Task<IssueDetailInfoVM> PromotionalItemInvoiceSingleItem(int id)
         {
             var v = await (from t1 in _db.IssueMasterInfoes
-                           join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                           join t2 in _db.Employees on t1.VendorId equals t2.Id
                            where t1.IssueMasterId == id
                            select new IssueDetailInfoVM
                            {
@@ -2916,7 +2916,7 @@ namespace KGERP.Services.Procurement
 
 
             vmIssueDetailInfoVM = await (from t1 in _db.IssueMasterInfoes.Where(x => x.IsActive && x.IssueMasterId == IssueMasterId && x.CompanyId == companyId)
-                                         join t2 in _db.Vendors on t1.VendorId equals t2.VendorId
+                                         join t2 in _db.Employees on t1.VendorId equals t2.Id
                                          join t3 in _db.Companies on t1.CompanyId equals t3.CompanyId
 
                                          join t4 in _db.Employees on t1.IssuedBy equals t4.Id into t4_Join
@@ -2931,8 +2931,6 @@ namespace KGERP.Services.Procurement
                                          {
                                              IssueMasterId = t1.IssueMasterId,
                                              CustomerBy = t2.Name,
-                                             Code = t2.Code,
-                                             CustomerAddress = t2.Address,
                                              CustomerMobile = t3.Phone,
                                              IssueBy = t4 != null ? t4.Name : "",
                                              EmployeeMobile = t4 != null ? t4.MobileNo : "",
