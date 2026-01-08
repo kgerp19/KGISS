@@ -5507,7 +5507,7 @@ namespace KGERP.Service.Implementation
                 Particular = "Adjust",
                 Debit = 0,
                 Credit = vmSaleReturnDetail.DataListDetail.Any() ? Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.COGSRate.Value)))) : 0,
-                Accounting_HeadFK = 50628174 //ERP Integration old code will be 43576
+                Accounting_HeadFK = 50625304 //Store & Stock Adjustment old code will be 43576
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
