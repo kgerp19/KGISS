@@ -5500,12 +5500,14 @@ namespace KGERP.Service.Implementation
                     Accounting_HeadFK = item.AccountingHeadId.Value
                 });
             }
+
+
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Adjust",
                 Debit = 0,
                 Credit = vmSaleReturnDetail.DataListDetail.Any() ? Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.COGSRate.Value)))) : 0,
-                Accounting_HeadFK = 43576 //Seed Stock Adjust With Erp Cr
+                Accounting_HeadFK = 50628174 //ERP Integration old code will be 43576
             });
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)

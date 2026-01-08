@@ -9,6 +9,7 @@ using KGERP.Service.Implementation.TaskManagment;
 using KGERP.Service.ServiceModel;
 using KGERP.Service.ServiceModel.RealState;
 using KGERP.Services.Procurement;
+using KGERP.Services.WareHouse;
 using KGERP.Utility;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -957,7 +958,7 @@ namespace KGERP.Service.Implementation
 
                      select new
                      {
-                         label =  "Promotional Item: " + t3.Name + " " + t2.Name + " " + t1.ProductName,
+                         label = "Promotional Item: " + t3.Name + " " + t2.Name + " " + t1.ProductName,
                          val = t1.ProductId
                      }).OrderBy(x => x.label).Take(100).ToList();
 
@@ -1135,11 +1136,11 @@ namespace KGERP.Service.Implementation
             return v;
         }
 
-        public object AllEmployee(string prefix,int companyId)
+        public object AllEmployee(string prefix, int companyId)
         {
             var v = (from t1 in _db.Employees
                      join t2 in _db.Designations on t1.DesignationId equals t2.DesignationId
-                     where t1.CompanyId== companyId && (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
+                     where t1.CompanyId == companyId && (t1.EmployeeId.Contains(prefix) || t1.Name.Contains(prefix) || t1.ShortName.Contains(prefix) || t2.Name.Contains(prefix))
 
                      select new
                      {
@@ -2138,7 +2139,7 @@ namespace KGERP.Service.Implementation
                                                                  MobileOffice = t1.MobileOffice,
                                                                  MobilePersonal = t1.MobilePersonal,
                                                                  CompanyFK = t1.CompanyId,
-                                                                 CostCenterName=t4.Name,
+                                                                 CostCenterName = t4.Name,
                                                                  CostCenterId = t1.CostCenterId,
                                                              }).OrderByDescending(x => x.ID).AsEnumerable());
             return vmCommonSubZone;
@@ -2160,7 +2161,7 @@ namespace KGERP.Service.Implementation
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                CostCenterId= vmCommonSubZone.CostCenterId
+                CostCenterId = vmCommonSubZone.CostCenterId
 
             };
             _db.SubZones.Add(subZone);
@@ -3752,7 +3753,6 @@ namespace KGERP.Service.Implementation
                          Common_UnitFk = t1.UnitId,
                          Common_ProductCategoryFk = t2.ProductCategoryId,
                          CompanyFK = t1.CompanyId,
-                         CostingPrice = t1.CostingPrice,
                          PackId = t1.PackId,
 
                          DieSize = t1.DieSize,
@@ -3760,18 +3760,25 @@ namespace KGERP.Service.Implementation
                          ProcessLoss = t1.ProcessLoss,
                          FormulaQty = t1.FormulaQty,
                          LotNumbers = _db.MaterialReceiveDetails
-.Where(m => m.ProductId == id && m.LotNumber != null && m.IsActive)
-.Select(m => m.LotNumber)
-.Distinct()
-.ToList()
+                        .Where(m => m.ProductId == id && m.LotNumber != null && m.IsActive)
+                        .Select(m => m.LotNumber)
+                        .Distinct()
+                        .ToList()
 
                      }).FirstOrDefault();
+            VMProductStock vMProductStock = GetFinishProductCogs(id, v.CompanyFK);
+            v.CostingPrice = vMProductStock.ClosingRate;
+            v.ClosingQty = vMProductStock.ClosingQty;
+
+
             return v;
         }
 
-
-
-
+        public VMProductStock GetFinishProductCogs(int id, int? compnayId,string lotNo="")
+        {
+            var lotNoVal = string.IsNullOrEmpty(lotNo) ? "xyzz" : lotNo;
+            return _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, compnayId, lotNoVal).FirstOrDefault();
+        }
 
         public VMRealStateProduct GetCommonProductByIDpackaging(int id)
         {
@@ -5839,18 +5846,18 @@ namespace KGERP.Service.Implementation
             VmOrderApprovalSignatory vmOrderApprovalSignatory = new VmOrderApprovalSignatory();
             vmOrderApprovalSignatory.CompanyFK = companyId;
             vmOrderApprovalSignatory.DataList = await Task.Run(() => (from t1 in _db.OrderMasterSignatories
-                                                                   join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
-                                                                   join t3 in _db.Employees on t1.EmployeeId equals t3.Id
-                                                                   where t1.CompanyId == companyId && t1.IsActive
+                                                                      join t2 in _db.Companies on t1.CompanyId equals t2.CompanyId
+                                                                      join t3 in _db.Employees on t1.EmployeeId equals t3.Id
+                                                                      where t1.CompanyId == companyId && t1.IsActive
 
-                                                                   select new VmOrderApprovalSignatory
-                                                                   {
-                                                                       SalesOrderSignatoryId = t1.SalesOrderSignatoryId,
-                                                                       CompanyFK = t1.CompanyId,
-                                                                       EmployeeId = t1.EmployeeId,
-                                                                       Precedence=t1.Precedence,
-                                                                       SignatoryName=t3.Name,
-                                                                   }).OrderByDescending(x => x.SalesOrderSignatoryId).AsEnumerable());
+                                                                      select new VmOrderApprovalSignatory
+                                                                      {
+                                                                          SalesOrderSignatoryId = t1.SalesOrderSignatoryId,
+                                                                          CompanyFK = t1.CompanyId,
+                                                                          EmployeeId = t1.EmployeeId,
+                                                                          Precedence = t1.Precedence,
+                                                                          SignatoryName = t3.Name,
+                                                                      }).OrderByDescending(x => x.SalesOrderSignatoryId).AsEnumerable());
             return vmOrderApprovalSignatory;
         }
 
@@ -5886,12 +5893,12 @@ namespace KGERP.Service.Implementation
             OrderMasterSignatory commo = new OrderMasterSignatory
             {
 
-               
+
                 EmployeeId = vmOrderApprovalSignatory.EmployeeId,
                 Precedence = vmOrderApprovalSignatory.Precedence,
                 CompanyId = vmOrderApprovalSignatory.CompanyFK.Value,
                 IsActive = true,
-        
+
             };
             _db.OrderMasterSignatories.Add(commo);
             if (await _db.SaveChangesAsync() > 0)
@@ -5929,7 +5936,7 @@ namespace KGERP.Service.Implementation
             OrderMasterSignatory ordermasterSignatory = _db.OrderMasterSignatories.Find(vmOrderApprovalSignatory.SalesOrderSignatoryId);
             ordermasterSignatory.EmployeeId = vmOrderApprovalSignatory.EmployeeId;
             ordermasterSignatory.Precedence = vmOrderApprovalSignatory.Precedence;
-     
+
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = ordermasterSignatory.SalesOrderSignatoryId;
@@ -8586,11 +8593,11 @@ namespace KGERP.Service.Implementation
 
             var v3 = v.Union(v2).ToList();
 
-            var grouped = v3.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
+            var grouped = v3.GroupBy(x => string.IsNullOrEmpty(x.value) ? "" : x.value)
                     .Select(g => new
                     {
-                        value = g.Key == "nolot" ? "nolot" : g.Key,
-                        label = g.Key == "nolot" ? "nolot" : g.Key
+                        value = g.Key == "" ? "" : g.Key,
+                        label = g.Key == "" ? "" : g.Key
                     })
                     .OrderBy(x => x.label)
                     .ToList();

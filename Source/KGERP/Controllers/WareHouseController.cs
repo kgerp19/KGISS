@@ -416,15 +416,30 @@ namespace KGERP.Controllers
         {
             if (vmModel.ActionEum == ActionEnum.Add)
             {
+                var checkCogs = _service.FinishProductCogsGet(vmModel.ProductId??0,vmModel.CompanyFK,vmModel.LotNumber);
+                if (checkCogs.ClosingRate<=0)
+                {
+                    TempData["ErrorMessage"] = "COGS Rate Not Found For This Product.Please Set COGS Rate First.";
+                    return RedirectToAction(nameof(WareHouseSalesReturnByProduct), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
+                }
+                else
+                {
+                    vmModel.COGSRate = checkCogs.ClosingRate;
+                }
+
                 if (vmModel.SaleReturnId == 0)
                 {
                     vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
+                    if (vmModel.SaleReturnId>0)
+                    {
+                        await _service.WareHouseSaleReturnByProductAdd(vmModel);
+                    }
                 }
-                if (vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                {
-                    await _service.KfmalSaleReturnByProductAdd(vmModel);
+                //if (vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
+                //{
+                //    await _service.KfmalSaleReturnByProductAdd(vmModel);
 
-                }
+                //}
                 else
                 {
                     await _service.WareHouseSaleReturnByProductAdd(vmModel);
@@ -499,6 +514,7 @@ namespace KGERP.Controllers
         {
             if (vmModel.ActionEum == ActionEnum.Add)
             {
+
                 if (vmModel.SaleReturnId == 0)
                 {
                     vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);

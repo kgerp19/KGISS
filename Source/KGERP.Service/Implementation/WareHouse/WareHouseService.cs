@@ -371,6 +371,12 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
+        public VMProductStock FinishProductCogsGet(int id, int? compnayId, string lotNo = "")
+        {
+            var lotNoVal = string.IsNullOrEmpty(lotNo) ? "xyzz" : lotNo;
+            return _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, compnayId, lotNoVal).FirstOrDefault();
+        }
+
         public async Task<long> WareHouseSaleReturnByProductAdd(VMSaleReturnDetail vmSaleReturnDetail)
         {
             long result = -1;
@@ -389,23 +395,20 @@ namespace KGERP.Services.WareHouse
             //    IsActive = true,
             //};
 
-            var vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", vmSaleReturnDetail.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
             SaleReturnDetail saleReturnDetail = new SaleReturnDetail
             {
                 SaleReturnId = vmSaleReturnDetail.SaleReturnId,
                 ProductId = vmSaleReturnDetail.ProductId,
                 Qty = vmSaleReturnDetail.Qty,
-                COGSRate = vMProductStock.ClosingRate,
+                COGSRate = vmSaleReturnDetail.COGSRate,
                 Rate = vmSaleReturnDetail.Rate,
                 OrderDeliverDetailsId = vmSaleReturnDetail.OrderDeliverDetailsId,
 
                 BaseCommission = vmSaleReturnDetail.DiscountUnit,
                 CashCommission = vmSaleReturnDetail.DiscountRate,
                 SpecialDiscount = vmSaleReturnDetail.Qty < Convert.ToDecimal(vmSaleReturnDetail.DeliveredQty) ? vmSaleReturnDetail.SpecialDiscount / Convert.ToDecimal(vmSaleReturnDetail.DeliveredQty) * vmSaleReturnDetail.Qty : vmSaleReturnDetail.SpecialDiscount,
-
                 AdditionPrice = 0,
                 CarryingCommission = 0,
-
                 IsActive = true,
                 LotNumber=vmSaleReturnDetail.LotNumber
 
@@ -523,9 +526,11 @@ namespace KGERP.Services.WareHouse
             long result = -1;
             var dataList = vmSaleReturnDetailPartial.DataToList.Where(x => x.Qty > 0).ToList();
             List<SaleReturnDetail> saleReturnList = new List<SaleReturnDetail>();
+            
             foreach (var item in dataList)
             {
-                var vMProductStock =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", item.ProductId, vmSaleReturnDetail.CompanyFK).FirstOrDefault();
+                var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
+                var vMProductStock =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", item.ProductId, vmSaleReturnDetail.CompanyFK, lotNo).FirstOrDefault();
                 SaleReturnDetail saleReturnDetail = new SaleReturnDetail
                 {
                     SaleReturnId = vmSaleReturnDetail.SaleReturnId,
