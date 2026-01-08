@@ -142,7 +142,6 @@
                                             @Html.EditorFor(model => model.ProductName, new { htmlAttributes = new { @autocomplete = "on", @class = "form-control", @name = "Product Name", @id = "txtProductName" } })
                                             @Html.HiddenFor(model => model.ProductId, new { id = "ddlRProductFK" })
                                             @Html.HiddenFor(model => model.COGSRate, new { id = "hidCOGSRate" })
-                                            @Html.HiddenFor(model => model.COGSRate, new { id = "hidCOGSRate" })
 
                                             @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
                                         </div>
@@ -153,7 +152,7 @@
                                         <div class="form-group">
                                             <label for="ddlLotNumbers">Lot Numbers</label>
                                             <div class="input-group">
-                                                <select id="ddlLotNumbers" name="LotNumber"  class="form-control" style="width: 100%; border: 1px solid black;">
+                                                <select id="ddlLotNumbers" name="LotNumber" class="form-control" style="width: 100%; border: 1px solid black;">
                                                     <option value="">Select Lot Number</option>
                                                 </select>
                                                 <div class="input-group-addon">
@@ -162,13 +161,33 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group">
+                                                <label>COGS</label>
+                                                <div class="input-group">
+                                                    <input type="text" id="txtCogs" readonly class="form-control" style="width:100%;border:1px black solid" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group">
+                                                <label>Closing Qty</label>
+                                                <div class="input-group">
+                                                    <input type="text" id="txtClosingQty" readonly class="form-control" style="width:100%;border:1px black solid" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
 
-                                    <div class="col-md-2">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Return Qty</label>
                                             <div class="input-group">
-                                                @Html.TextBoxFor(model => model.Qty, new { id = "txtReturnQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Return Quantity" })
+                                                @Html.TextBoxFor(model => model.Qty, new { id = "txtReturnQty", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Return Quantity", required = "Required" })
                                                 @Html.ValidationMessageFor(model => model.Qty, "", new { @class = "text-danger" })
 
                                                 <div class="input-group-addon">
@@ -177,7 +196,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>MRP Price</label>
                                             @Html.TextBoxFor(model => model.Rate, new { id = "txtUnitPrice", type = "number", step = "0.01", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "MRP Price", required = "Required" })
@@ -186,6 +205,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+
                             }
 
 
@@ -409,6 +430,38 @@
 
         $(document).ready(function () {
             //$('.formValidator').bootstrapValidator();
+            $("#ddlLotNumbers").change(function () {
+            // Get the selected product value
+                var productId = $("#ddlRProductFK").val();
+                var lotNoVal = $(this).val();
+
+                if (productId) {
+                    // Trigger the AJAX request to get lot numbers for the selected product
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("GetFinishProductCogs", "Configuration")", // Ensure the method name and controller are correct
+                        dataType: "json", // Expecting a JSON response
+                        data: {
+                            id: productId,
+                            companyId:"@Model.CompanyFK",
+                            lotNo: lotNoVal,
+                        },
+                        success: function (data) {
+                            if (data) {
+                                // Populate the Lot Number field (assuming you have a dropdown for lot numbers)
+                                $("#hidCOGSRate").val(data.ClosingRate);
+                                $("#txtCogs").val(data.ClosingRate);
+                                $("#txtClosingQty").val(data.ClosingQty);
+                            } else {
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching lot numbers:", error);
+                        }
+                    });
+                 }
+            });
 
             $('#datePickerById').datepicker({
                 format: "yyyy-mm-dd",
@@ -487,6 +540,8 @@ select: function (e, i) {
             if (data) {
                 $('.txtUnitName').text(data.UnitName);
                 $("#hidCOGSRate").val(data.CostingPrice);
+                $("#txtCogs").val(data.CostingPrice);
+                $("#txtClosingQty").val(data.ClosingQty);
 
                 var customerTypeFK = $("#hidCustomerTypeFk").val();
                 if (customerTypeFK == "@((int)CustomerType.Dealer)") {
@@ -497,33 +552,59 @@ select: function (e, i) {
                 }
 
                 // Bind LotNumbers to the select dropdown
-                var lotNumbersDropdown = $("#ddlLotNumbers");
-                lotNumbersDropdown.empty(); // Clear previous options
+                //var lotNumbersDropdown = $("#ddlLotNumbers");
+                //lotNumbersDropdown.empty(); // Clear previous options
 
-                if (data.LotNumbers && data.LotNumbers.length > 0) {
-                    // Add the default "Select" option
-                    lotNumbersDropdown.append($('<option>', {
-                        value: '',
-                        text: 'Select Option'
-                    }));
+                //if (data.LotNumbers && data.LotNumbers.length > 0) {
+                //    // Add the default "Select" option
+                //    lotNumbersDropdown.append($('<option>', {
+                //        value: '',
+                //        text: 'Select Option'
+                //    }));
 
-                    // Append the lot numbers
-                    $.each(data.LotNumbers, function (index, lotNumber) {
-                        lotNumbersDropdown.append($('<option>', {
-                            value: lotNumber,
-                            text: lotNumber
-                        }));
-                    });
-                } else {
-                    // Add a default option if no lot numbers are available
-                    lotNumbersDropdown.append($('<option>', {
-                        value: '',
-                        text: 'No Lot Numbers available'
-                    }));
-                }
+                //    // Append the lot numbers
+                //    $.each(data.LotNumbers, function (index, lotNumber) {
+                //        lotNumbersDropdown.append($('<option>', {
+                //            value: lotNumber,
+                //            text: lotNumber
+                //        }));
+                //    });
+                //} else {
+                //    // Add a default option if no lot numbers are available
+                //    lotNumbersDropdown.append($('<option>', {
+                //        value: '',
+                //        text: 'No Lot Numbers available'
+                //    }));
+                //}
             }
         }
     });
+    $.ajax({
+    type: "GET",
+    url: "@Url.Action("GetLotNumberF", "Configuration")", // Ensure the method name and controller are correct
+    dataType: "json", // Expecting a JSON response
+    data: {
+        productid: i.item.val
+    },
+    success: function (data) {
+        if (data && data.length > 0) {
+            // Populate the Lot Number field (assuming you have a dropdown for lot numbers)
+            var lotOptions = "<option value=''>==Select Lot Number==</option>";
+            $(data).each(function (index, item) {
+                lotOptions += "<option value='" + item + "'>" + item + "</option>";
+            });
+
+            // Append the lot number options to the lot number dropdown (or any other field)
+            $("#ddlLotNumbers").empty().append(lotOptions);
+        } else {
+            // If no lot numbers are found, reset the lot number field
+            $("#ddlLotNumbers").empty().append("<option value=''>No Lot Numbers Found</option>");
+        }
+    },
+    error: function (xhr, status, error) {
+        console.error("Error fetching lot numbers:", error);
+    }
+});
 
     $('#txtProductName').focus();
 },

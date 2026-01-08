@@ -647,6 +647,7 @@ namespace KGERP.Service.Configuration
         public decimal TotalPrice { get; set; }
         public decimal PreviousStock { get; set; }
         public decimal CurrentStock { get; set; }
+        public decimal ClosingQty { get; set; }
 
         public string Image { get; set; }
 

@@ -1049,6 +1049,11 @@ namespace Pos.App.Controllers
             var model = _service.GetCommonProductByID(id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult GetFinishProductCogs(int id,int companyId,string lotNo)
+        {
+            var model = _service.GetFinishProductCogs(id,companyId,lotNo);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
 
 
         public JsonResult CommonProductByIDGetpack(int id)
@@ -1124,7 +1129,7 @@ namespace Pos.App.Controllers
         //}
 
 
-        public JsonResult CommonProductByID(int id)
+        public JsonResult CommonProductByID(int id,string lotNo="")
         {
 
             var model = _service.GetCommonProductByID(id);
