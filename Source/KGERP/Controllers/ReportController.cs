@@ -2925,6 +2925,24 @@ namespace KGERP.Controllers
 
             return View(sr);
         }
+        [HttpGet]
+
+        public ActionResult SalesReturnRegisterReport(int companyId, string reportName)
+        {
+            Session["CompanyId"] = companyId;
+            ReportCustomModel sr = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+                ReportName = reportName,
+                ProductCategoryList = voucherTypeService.GetProductCategory(companyId),
+            };
+
+            return View(sr);
+        }
 
         [HttpGet]
 
@@ -3054,6 +3072,31 @@ namespace KGERP.Controllers
         [HttpGet]
 
         public ActionResult SalesRegisterReportView(ReportCustomModel model)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+
+
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&StrFromDate={2}&StrToDate={3}&CompanyId={4}&ProductId={5}&ProductCategoryId={6}&ProductSubCategoryId={7}&VendorId={8}&SubZoneId={9}", model.ReportName, model.ReportType, model.StrFromDate, model.StrToDate, model.CompanyId, model.ProductId ?? 0, model.ProductCategoryId ?? 0, model.ProductSubCategoryId ?? 0, model.CustomerId ?? 0,model.SubZoneId ?? 0); //, model.CostCenterId ?? 0
+
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", model.ReportName + ".doc");
+            }
+            return View();
+        }
+        [HttpGet]
+
+        public ActionResult SalesReturnRegisterReportView(ReportCustomModel model)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
