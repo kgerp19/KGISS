@@ -3695,7 +3695,7 @@ namespace KGERP.Service.Implementation
         }
         public VMCommonProduct PromotionalAndClosingRateByProductId(int productId, string lotNo)
         {
-            var LotNumber = String.IsNullOrEmpty(lotNo) ? "nolot" : lotNo;
+            var LotNumber = String.IsNullOrEmpty(lotNo) ? "xyzz" : lotNo;
 
             var products = (from t1 in _db.Products.Where(x => x.ProductId == productId)
                             join t4 in _db.Units on t1.UnitId equals t4.UnitId
@@ -8549,11 +8549,11 @@ namespace KGERP.Service.Implementation
                          value = t1.LotNumber.ToString(),
                          label = t1.LotNumber
                      }).Distinct().OrderBy(x => x.label).ToList();
-            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "nolot" : x.value)
+            var grouped = v.GroupBy(x => string.IsNullOrEmpty(x.value) ? "" : x.value)
         .Select(g => new
         {
-            value = g.Key == "nolot" ? "nolot" : g.Key,
-            label = g.Key == "nolot" ? "nolot" : g.Key
+            value = g.Key == "" ? "" : g.Key,
+            label = g.Key == "" ? "" : g.Key
         })
         .OrderBy(x => x.label)
         .ToList();
