@@ -449,6 +449,8 @@ namespace KGERP.Service.Implementation
             Voucher model = await _db.Vouchers.FindAsync(voucherModel.VoucherId);
 
             model.IsActive = false;
+            model.ModifiedBy = Common.GetUserId();
+            model.ModifiedDate = DateTime.Now;
 
             List<VoucherDetail> VoucherDetailList = _db.VoucherDetails.Where(x => x.VoucherId == voucherModel.VoucherId).ToList();
             VoucherDetailList.ForEach(x => x.IsActive = false);
