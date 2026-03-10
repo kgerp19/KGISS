@@ -531,37 +531,41 @@ namespace KGERP.Services.WareHouse
             {
                 var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
                 var vMProductStock =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", item.ProductId, vmSaleReturnDetail.CompanyFK, lotNo).FirstOrDefault();
-                SaleReturnDetail saleReturnDetail = new SaleReturnDetail
+                if (vMProductStock.ClosingRate>0)
                 {
-                    SaleReturnId = vmSaleReturnDetail.SaleReturnId,
-                    ProductId = item.ProductId,
-                    Qty = item.Qty,
-                    COGSRate = vMProductStock.CostingPrice,
-                    Rate = Convert.ToDecimal(item.UnitPrice),
-                    OrderDeliverDetailsId = item.OrderDeliverDetailsId,
+                    SaleReturnDetail saleReturnDetail = new SaleReturnDetail
+                    {
+                        SaleReturnId = vmSaleReturnDetail.SaleReturnId,
+                        ProductId = item.ProductId,
+                        Qty = item.Qty,
+                        COGSRate = vMProductStock.ClosingRate,
+                        Rate = Convert.ToDecimal(item.UnitPrice),
+                        OrderDeliverDetailsId = item.OrderDeliverDetailsId,
 
-                    BaseCommission = item.DiscountUnit,
-                    CashCommission = item.DiscountRate,
-                    SpecialDiscount = item.Qty < Convert.ToDecimal(item.DeliveredQty) ? item.SpecialDiscount / Convert.ToDecimal(item.DeliveredQty) * item.Qty : item.SpecialDiscount,
+                        BaseCommission = item.DiscountUnit,
+                        CashCommission = item.DiscountRate,
+                        SpecialDiscount = item.Qty < Convert.ToDecimal(item.DeliveredQty) ? item.SpecialDiscount / Convert.ToDecimal(item.DeliveredQty) * item.Qty : item.SpecialDiscount,
 
-                    AdditionPrice = 0,
-                    CarryingCommission = 0,
+                        AdditionPrice = 0,
+                        CarryingCommission = 0,
 
-                    IsActive = true,
-                    LotNumber=item.LotNumber
+                        IsActive = true,
+                        LotNumber = item.LotNumber
 
-                };
-                saleReturnList.Add(saleReturnDetail);
+                    };
+                    saleReturnList.Add(saleReturnDetail);
+                }
+                
             }
 
             // GCCL Spetial Requirment : Recevable convert to COGS.
-            if (vmSaleReturnDetail.IsUnitAsCost == true)
-            {
-                saleReturnList.ForEach(x => x.COGSRate = ((x.Qty * x.Rate) -
-                           ((x.Qty * x.BaseCommission ?? 0) +
-                           (x.BaseCommission > 0 ? (((x.Qty * x.Rate) - (x.Qty * x.BaseCommission)) / 100 * x.CashCommission ?? 0) : ((x.Qty * x.Rate) / 100 * x.CashCommission ?? 0)) +
-                            (x.SpecialDiscount ?? 0))) / x.Qty);
-            }
+            //if (vmSaleReturnDetail.IsUnitAsCost == true)
+            //{
+            //    saleReturnList.ForEach(x => x.COGSRate = ((x.Qty * x.Rate) -
+            //               ((x.Qty * x.BaseCommission ?? 0) +
+            //               (x.BaseCommission > 0 ? (((x.Qty * x.Rate) - (x.Qty * x.BaseCommission)) / 100 * x.CashCommission ?? 0) : ((x.Qty * x.Rate) / 100 * x.CashCommission ?? 0)) +
+            //                (x.SpecialDiscount ?? 0))) / x.Qty);
+            //}
             _db.SaleReturnDetails.AddRange(saleReturnList);
             if (await _db.SaveChangesAsync() > 0)
             {
