@@ -908,9 +908,55 @@ namespace KGERP.Controllers
             ReportCustomModel cm = new ReportCustomModel() { VendorTypeId = VendorTypeId, CompanyId = companyId, CompanyName = company.Name + " (" + company.ShortName + ")", FromDate = DateTime.Now, ToDate = DateTime.Now, StrFromDate = DateTime.Now.ToShortDateString(), StrToDate = DateTime.Now.ToShortDateString() };
             return View(cm);
         }
+
+        [HttpGet]
+
+        public ActionResult CommonGeneralLedger(int companyId, int VendorTypeId)
+        {
+            Session["CompanyId"] = companyId;
+            var company = _accountingService.GetCompanyById(companyId);
+            ReportCustomModel cm = new ReportCustomModel() { VendorTypeId = VendorTypeId, CompanyId = companyId, CompanyName = company.Name + " (" + company.ShortName + ")", FromDate = DateTime.Now, ToDate = DateTime.Now, StrFromDate = DateTime.Now.ToShortDateString(), StrToDate = DateTime.Now.ToShortDateString() };
+            return View(cm);
+        }
+
         [HttpGet]
 
         public ActionResult CustomerGeneralLedgerReport(ReportCustomModel model)
+        {
+            string reportName = "IssKfmalCustomerGeneralLedger";
+            //if (model.CompanyId == 10)
+            //{
+            //    reportName = "KfmalCustomerGeneralLedger";
+            //}
+            //else if (model.CompanyId == 24)
+            //{
+            //    reportName = "GcclCustomerGeneralLedger";
+            //}
+
+
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&AccHeadId={2}&StrFromDate={3}&StrToDate={4}&CompanyId={5}", reportName, model.ReportType, model.Id, model.StrFromDate, model.StrToDate, model.CompanyId);
+
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", "GeneralLedger.xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", "GeneralLedger.doc");
+            }
+            return View();
+        }
+
+        [HttpGet]
+
+        public ActionResult CommonCustomerGeneralLedgerReport(ReportCustomModel model)
         {
             string reportName = "IssKfmalCustomerGeneralLedger";
             //if (model.CompanyId == 10)

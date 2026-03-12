@@ -709,6 +709,11 @@ namespace KGERP.Controllers
             var products = _accountingService.GetAutoCompleteVendorHeadGL(prefix, companyId, vendorTypeId);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult CommonAutoCompleteVendorHeadGet(string prefix, int companyId, int vendorTypeId)
+        {
+            var products = _accountingService.CommonGetAutoCompleteVendorHeadGL(prefix, companyId, vendorTypeId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<JsonResult> GetSingleVoucherDetails(int voucherDetailId)
         {

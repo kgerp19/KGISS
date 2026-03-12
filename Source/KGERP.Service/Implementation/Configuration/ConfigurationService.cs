@@ -526,47 +526,56 @@ namespace KGERP.Service.Implementation
 
         public async Task<int> UserSubMenuAdd(VMUserSubMenu vmUserSubMenu)
         {
-            var result = -1;
-
-            var objectToSave = await _db.CompanySubMenus
-                .SingleOrDefaultAsync(q => q.Name == vmUserSubMenu.Name
-                && q.CompanyId == vmUserSubMenu.CompanyFK
-                && q.CompanyMenuId == vmUserSubMenu.User_MenuFk
-                );
-
-            if (objectToSave != null)
+            try
             {
+                var result = -1;
 
-                return result = objectToSave.CompanySubMenuId;
+                var objectToSave = await _db.CompanySubMenus
+                    .SingleOrDefaultAsync(q => q.Name == vmUserSubMenu.Name
+                    && q.CompanyId == vmUserSubMenu.CompanyFK
+                    && q.CompanyMenuId == vmUserSubMenu.User_MenuFk
+                    );
+
+                if (objectToSave != null)
+                {
+
+                    return result = objectToSave.CompanySubMenuId;
+                }
+
+
+                CompanySubMenu userSubMenu = new CompanySubMenu
+                {
+                    CompanySubMenuId = _db.Database.SqlQuery<int>("exec spGetNewCompanyId").FirstOrDefault(),
+                    Name = vmUserSubMenu.Name,
+                    CompanyId = vmUserSubMenu.CompanyFK,
+                    CompanyMenuId = vmUserSubMenu.User_MenuFk,
+                    OrderNo = vmUserSubMenu.Priority,
+                    Controller = vmUserSubMenu.Controller,
+                    Action = vmUserSubMenu.Action,
+                    LayerNo = vmUserSubMenu.LayerNo,
+                    IsActive = true,
+                    IsSideMenu = true,
+                    ShortName = vmUserSubMenu.ShortName,
+                    Param = vmUserSubMenu.Param,
+                    CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+                    CreatedDate = DateTime.Now
+
+
+
+                };
+                _db.CompanySubMenus.Add(userSubMenu);
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = userSubMenu.CompanySubMenuId;
+                }
+                return result;
             }
-
-
-            CompanySubMenu userSubMenu = new CompanySubMenu
+            catch (Exception ex)
             {
-                CompanySubMenuId = _db.Database.SqlQuery<int>("exec spGetNewCompanyId").FirstOrDefault(),
-                Name = vmUserSubMenu.Name,
-                CompanyId = vmUserSubMenu.CompanyFK,
-                CompanyMenuId = vmUserSubMenu.User_MenuFk,
-                OrderNo = vmUserSubMenu.Priority,
-                Controller = vmUserSubMenu.Controller,
-                Action = vmUserSubMenu.Action,
-                LayerNo = vmUserSubMenu.LayerNo,
-                IsActive = true,
-                IsSideMenu = true,
-                ShortName = vmUserSubMenu.ShortName,
-                Param = vmUserSubMenu.Param,
-                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                CreatedDate = DateTime.Now
 
-
-
-            };
-            _db.CompanySubMenus.Add(userSubMenu);
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                result = userSubMenu.CompanySubMenuId;
+                throw;
             }
-            return result;
+            
         }
         public async Task<int> UserSubMenuEdit(VMUserSubMenu vmUserSubMenu)
         {
