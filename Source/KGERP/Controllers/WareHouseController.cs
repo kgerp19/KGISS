@@ -337,7 +337,7 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> WareHouseSalesReturnSlave(int companyId = 0, int saleReturnId = 0)
+        public async Task<ActionResult> WareHouseSalesReturnSlave(int companyId = 0, int saleReturnId = 0,string message="")
         {
             VMSaleReturnDetail vmSaleReturnDetail = new VMSaleReturnDetail();
             if (saleReturnId == 0)
@@ -354,6 +354,7 @@ namespace KGERP.Controllers
             }
 
             vmSaleReturnDetail.StockInfoList = new SelectList(_procurementService.StockInfoesDropDownList(companyId), "Value", "Text");
+            ViewBag.Message = message;
 
             return View(vmSaleReturnDetail);
         }
@@ -362,31 +363,40 @@ namespace KGERP.Controllers
         public async Task<ActionResult> WareHouseSalesReturnSlave(VMSaleReturnDetail vmModel, VMSaleReturnDetailPartial vmModelList)
         {
 
+            var Message = "";
             if (vmModel.ActionEum == ActionEnum.Add)
             {
-                if (vmModel.SaleReturnId == 0)
+                bool checkCogs = _service.ValidateProductStockClosingRates(vmModelList, vmModel);
+                
+
+                if (!checkCogs)
                 {
-                    vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
+                    Message = "COGS Rate Not Found For Some Product.Please Set COGS Rate First.";
                 }
-                if (vmModel.SaleReturnId>0)
+                else
                 {
-                    await _service.WareHouseSaleReturnDetailAdd(vmModel, vmModelList);
+                    if (vmModel.SaleReturnId == 0)
+                    {
+                        vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
+                    }
+                    if (vmModel.SaleReturnId > 0)
+                    {
+                        await _service.WareHouseSaleReturnDetailAdd(vmModel, vmModelList);
+                    }
                 }
 
-                
+
             }
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
                 await _service.SubmitSaleReturnByProduct(vmModel);
-
-
             }
             else
             {
                 return RedirectToAction("Error", "Home");
             }
 
-            return RedirectToAction(nameof(WareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
+            return RedirectToAction(nameof(WareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId,message= Message });
         }
 
         [HttpGet]
@@ -416,8 +426,8 @@ namespace KGERP.Controllers
         {
             if (vmModel.ActionEum == ActionEnum.Add)
             {
-                var checkCogs = _service.FinishProductCogsGet(vmModel.ProductId??0,vmModel.CompanyFK,vmModel.LotNumber);
-                if (checkCogs.ClosingRate<=0)
+                var checkCogs = _service.FinishProductCogsGet(vmModel.ProductId ?? 0, vmModel.CompanyFK, vmModel.LotNumber);
+                if (checkCogs.ClosingRate <= 0)
                 {
                     TempData["ErrorMessage"] = "COGS Rate Not Found For This Product.Please Set COGS Rate First.";
                     return RedirectToAction(nameof(WareHouseSalesReturnByProduct), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
@@ -430,7 +440,7 @@ namespace KGERP.Controllers
                 if (vmModel.SaleReturnId == 0)
                 {
                     vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
-                    if (vmModel.SaleReturnId>0)
+                    if (vmModel.SaleReturnId > 0)
                     {
                         await _service.WareHouseSaleReturnByProductAdd(vmModel);
                     }
@@ -869,7 +879,7 @@ namespace KGERP.Controllers
             SalesTransferDetailVM SalesTransferDetail = new SalesTransferDetailVM();
             if (salesTransfer == 0)
             {
-                
+
                 SalesTransferDetail.CustomerList = new SelectList(_procurementService.CustomerLisByCompany(companyId), "Value", "Text");
             }
             else if (salesTransfer > 0)
@@ -893,7 +903,7 @@ namespace KGERP.Controllers
                 {
                     vmModel.SalesTransferId = await _service.WareHouseSalestransferAdd(vmModel, vmModelList);
                 }
-                
+
 
             }
 
@@ -945,7 +955,7 @@ namespace KGERP.Controllers
             return View(vmSaleReturnDetail);
         }
 
-       
+
 
 
         [HttpGet]
@@ -1807,7 +1817,7 @@ namespace KGERP.Controllers
             {
                 vmReceiving = await _service.ISSPOReceivingGet(companyId, materialReceiveId);
             }
-            
+
             return View(vmReceiving);
         }
 

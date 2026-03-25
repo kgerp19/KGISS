@@ -521,6 +521,8 @@ namespace KGERP.Services.WareHouse
             details.ForEach(x => x.ModifiedDate = DateTime.Now);
             _db.SaveChanges();
         }
+
+
         public async Task<long> WareHouseSaleReturnDetailAdd(VMSaleReturnDetail vmSaleReturnDetail, VMSaleReturnDetailPartial vmSaleReturnDetailPartial)
         {
             long result = -1;
@@ -573,6 +575,31 @@ namespace KGERP.Services.WareHouse
             }
 
             return result;
+        }
+
+        public bool ValidateProductStockClosingRates(VMSaleReturnDetailPartial vmSaleReturnDetailPartial,VMSaleReturnDetail vmSaleReturnDetail)
+        {
+            var dataList = vmSaleReturnDetailPartial.DataToList
+                .Where(x => x.Qty > 0)
+                .ToList();
+
+            foreach (var item in dataList)
+            {
+                var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
+
+                var vMProductStock = _db.Database
+                    .SqlQuery<VMProductStock>(
+                        "EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}",
+                        item.ProductId,
+                        vmSaleReturnDetail.CompanyFK,
+                        lotNo)
+                    .FirstOrDefault();
+
+                if (vMProductStock == null || vMProductStock.ClosingRate <= 0)
+                    return false;
+            }
+
+            return true;
         }
 
 
@@ -3246,7 +3273,7 @@ namespace KGERP.Services.WareHouse
                                                               CompanyPhone = t5.Phone,
                                                               IsFinalized = t1.IsFinalized
 
-                                                          }).AsEnumerable());
+                                                          }).OrderByDescending(x => x.ReturnDate).AsEnumerable());
 
 
 
