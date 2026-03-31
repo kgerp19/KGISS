@@ -364,14 +364,24 @@ namespace KGERP.Controllers
         {
 
             var Message = "";
+            bool checkCogs = false;
             if (vmModel.ActionEum == ActionEnum.Add)
             {
-                bool checkCogs = _service.ValidateProductStockClosingRates(vmModelList, vmModel);
-                
+                //string productType = _service.ProductTypeCheck(vmModelList, vmModel);
+                //if (productType=="R")
+                //{
+                //    checkCogs = _service.ValidateProductStockClosingRatesRaw(vmModelList, vmModel);
+                //}
+                //else if (productType == "F")
+                //{
+                //    checkCogs = _service.ValidateProductStockClosingRates(vmModelList, vmModel);
+                    
+                //}
+                checkCogs = _service.ValidateProductCOGS(vmModelList, vmModel);
 
                 if (!checkCogs)
                 {
-                    Message = "COGS Rate Not Found For Some Product.Please Set COGS Rate First.";
+                    Message = $"COGS Rate Not Found For Some Product.Please Set COGS Rate First.";
                 }
                 else
                 {
@@ -424,17 +434,19 @@ namespace KGERP.Controllers
         [HttpPost]
         public async Task<ActionResult> WareHouseSalesReturnByProduct(VMSaleReturnDetail vmModel)
         {
+            decimal checkCogs = 0;
             if (vmModel.ActionEum == ActionEnum.Add)
             {
-                var checkCogs = _service.FinishProductCogsGet(vmModel.ProductId ?? 0, vmModel.CompanyFK, vmModel.LotNumber);
-                if (checkCogs.ClosingRate <= 0)
+                //var checkCogs = _service.FinishProductCogsGet(vmModel.ProductId ?? 0, vmModel.CompanyFK, vmModel.LotNumber);
+                checkCogs = _service.ValidateProductByiDcOGS(vmModel);
+                if (checkCogs>0)
                 {
                     TempData["ErrorMessage"] = "COGS Rate Not Found For This Product.Please Set COGS Rate First.";
                     return RedirectToAction(nameof(WareHouseSalesReturnByProduct), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
                 }
                 else
                 {
-                    vmModel.COGSRate = checkCogs.ClosingRate;
+                    vmModel.COGSRate = checkCogs;
                 }
 
                 if (vmModel.SaleReturnId == 0)
@@ -567,29 +579,29 @@ namespace KGERP.Controllers
             return View(vmSaleReturnDetail);
         }
 
-        [HttpPost]
-        public async Task<ActionResult> GCCLWareHouseSalesReturnSlave(VMSaleReturnDetail vmModel, VMSaleReturnDetailPartial vmModelList)
-        {
-            if (vmModel.ActionEum == ActionEnum.Add)
-            {
-                if (vmModel.SaleReturnId == 0)
-                {
-                    vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
-                }
+        //[HttpPost]
+        //public async Task<ActionResult> GCCLWareHouseSalesReturnSlave(VMSaleReturnDetail vmModel, VMSaleReturnDetailPartial vmModelList)
+        //{
+        //    if (vmModel.ActionEum == ActionEnum.Add)
+        //    {
+        //        if (vmModel.SaleReturnId == 0)
+        //        {
+        //            vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
+        //        }
 
-                await _service.WareHouseSaleReturnDetailAdd(vmModel, vmModelList);
-            }
-            else if (vmModel.ActionEum == ActionEnum.Finalize)
-            {
-                await _service.SubmitSaleReturnByProduct(vmModel);
-            }
-            else
-            {
-                return RedirectToAction("Error", "Home");
-            }
+        //        await _service.WareHouseSaleReturnDetailAdd(vmModel, vmModelList);
+        //    }
+        //    else if (vmModel.ActionEum == ActionEnum.Finalize)
+        //    {
+        //        await _service.SubmitSaleReturnByProduct(vmModel);
+        //    }
+        //    else
+        //    {
+        //        return RedirectToAction("Error", "Home");
+        //    }
 
-            return RedirectToAction(nameof(GCCLWareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
-        }
+        //    return RedirectToAction(nameof(GCCLWareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
+        //}
 
 
 
@@ -616,29 +628,29 @@ namespace KGERP.Controllers
             return View(vmSaleReturnDetail);
         }
 
-        [HttpPost]
-        public async Task<ActionResult> KfmalSalesReturn(VMSaleReturnDetail vmModel, VMSaleReturnDetailPartial vmModelList)
-        {
-            if (vmModel.ActionEum == ActionEnum.Add)
-            {
-                if (vmModel.SaleReturnId == 0)
-                {
-                    vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
-                }
+        //[HttpPost]
+        //public async Task<ActionResult> KfmalSalesReturn(VMSaleReturnDetail vmModel, VMSaleReturnDetailPartial vmModelList)
+        //{
+        //    if (vmModel.ActionEum == ActionEnum.Add)
+        //    {
+        //        if (vmModel.SaleReturnId == 0)
+        //        {
+        //            vmModel.SaleReturnId = await _service.WareHouseSaleReturnAdd(vmModel);
+        //        }
 
-                await _service.WareHouseSaleReturnDetailAdd(vmModel, vmModelList);
-            }
-            else if (vmModel.ActionEum == ActionEnum.Finalize)
-            {
-                await _service.SubmitSaleReturnByProduct(vmModel);
-            }
-            else
-            {
-                return RedirectToAction("Error", "Home");
-            }
+        //        await _service.WareHouseSaleReturnDetailAdd(vmModel, vmModelList);
+        //    }
+        //    else if (vmModel.ActionEum == ActionEnum.Finalize)
+        //    {
+        //        await _service.SubmitSaleReturnByProduct(vmModel);
+        //    }
+        //    else
+        //    {
+        //        return RedirectToAction("Error", "Home");
+        //    }
 
-            return RedirectToAction(nameof(GCCLWareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
-        }
+        //    return RedirectToAction(nameof(GCCLWareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
+        //}
 
 
 

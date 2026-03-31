@@ -531,9 +531,33 @@ namespace KGERP.Services.WareHouse
             
             foreach (var item in dataList)
             {
-                var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
-                var vMProductStock =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", item.ProductId, vmSaleReturnDetail.CompanyFK, lotNo).FirstOrDefault();
-                if (vMProductStock.ClosingRate>0)
+                //var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
+                //var FinishCogs =  _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", item.ProductId, vmSaleReturnDetail.CompanyFK, lotNo).FirstOrDefault();
+                //decimal cogs = 0;
+                //if (ProductType=="F")
+                //{
+                //    var lotNoF = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
+                //    cogs = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", item.ProductId, vmSaleReturnDetail.CompanyFK, lotNoF).FirstOrDefault().ClosingRate;
+                //}
+                //else if(ProductType=="R")
+                //{
+                //    var lotNoR = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
+                //     cogs = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1},{2}", item.ProductId, vmSaleReturnDetail.CompanyFK, lotNoR).FirstOrDefault().ClosingRate;
+                //}
+                var vMProductStock = _db.OrderDeliverDetails.Where(x => x.OrderDeliverDetailId == item.OrderDeliverDetailsId)
+                   .Select(odd => new
+                   {
+                       ClosingRate = odd.COGSPrice,
+                       LotNumber = odd.LotNumber
+                   })
+                   .AsEnumerable()
+                   .Select(x => new VMProductStock
+                   {
+                       ClosingRate = x.ClosingRate,
+                   })
+                   .FirstOrDefault();
+
+                if (vMProductStock.ClosingRate > 0)
                 {
                     SaleReturnDetail saleReturnDetail = new SaleReturnDetail
                     {
@@ -577,7 +601,7 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
-        public bool ValidateProductStockClosingRates(VMSaleReturnDetailPartial vmSaleReturnDetailPartial,VMSaleReturnDetail vmSaleReturnDetail)
+        public bool ValidateProductCOGS(VMSaleReturnDetailPartial vmSaleReturnDetailPartial,VMSaleReturnDetail vmSaleReturnDetail)
         {
             var dataList = vmSaleReturnDetailPartial.DataToList
                 .Where(x => x.Qty > 0)
@@ -585,14 +609,18 @@ namespace KGERP.Services.WareHouse
 
             foreach (var item in dataList)
             {
-                var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
 
-                var vMProductStock = _db.Database
-                    .SqlQuery<VMProductStock>(
-                        "EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}",
-                        item.ProductId,
-                        vmSaleReturnDetail.CompanyFK,
-                        lotNo)
+                var vMProductStock = _db.OrderDeliverDetails.Where(x => x.OrderDeliverDetailId == item.OrderDeliverDetailsId)
+                    .Select(odd => new
+                    {
+                        ClosingRate = odd.COGSPrice,
+                        LotNumber = odd.LotNumber
+                    })
+                    .AsEnumerable()
+                    .Select(x => new VMProductStock
+                    {
+                        ClosingRate = x.ClosingRate,
+                    })
                     .FirstOrDefault();
 
                 if (vMProductStock == null || vMProductStock.ClosingRate <= 0)
@@ -600,6 +628,98 @@ namespace KGERP.Services.WareHouse
             }
 
             return true;
+        }
+        public decimal ValidateProductByiDcOGS(VMSaleReturnDetail vmSaleReturnDetailPartial)
+        {
+
+            var vMProductStock = _db.OrderDeliverDetails.Where(x => x.OrderDeliverDetailId == vmSaleReturnDetailPartial.OrderDeliverDetailsId)
+                   .Select(odd => new
+                   {
+                       ClosingRate = odd.COGSPrice,
+                       LotNumber = odd.LotNumber
+                   })
+                   .AsEnumerable()
+                   .Select(x => new VMProductStock
+                   {
+                       ClosingRate = x.ClosingRate,
+                   })
+                   .FirstOrDefault();
+
+            if (vMProductStock == null || vMProductStock.ClosingRate <= 0)
+                return 0;
+
+            return vMProductStock.ClosingRate;
+        }
+        //public bool ValidateProductStockClosingRates(VMSaleReturnDetailPartial vmSaleReturnDetailPartial,VMSaleReturnDetail vmSaleReturnDetail)
+        //{
+        //    var dataList = vmSaleReturnDetailPartial.DataToList
+        //        .Where(x => x.Qty > 0)
+        //        .ToList();
+
+        //    foreach (var item in dataList)
+        //    {
+        //        var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
+
+        //        var vMProductStock = _db.Database
+        //            .SqlQuery<VMProductStock>(
+        //                "EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}",
+        //                item.ProductId,
+        //                vmSaleReturnDetail.CompanyFK,
+        //                lotNo)
+        //            .FirstOrDefault();
+
+        //        if (vMProductStock == null || vMProductStock.ClosingRate <= 0)
+        //            return false;
+        //    }
+
+        //    return true;
+        //}
+        //public bool ValidateProductStockClosingRatesRaw(VMSaleReturnDetailPartial vmSaleReturnDetailPartial,VMSaleReturnDetail vmSaleReturnDetail)
+        //{
+        //    var dataList = vmSaleReturnDetailPartial.DataToList
+        //        .Where(x => x.Qty > 0)
+        //        .ToList();
+
+        //    foreach (var item in dataList)
+        //    {
+        //        var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
+
+        //        var vMProductStock = _db.Database
+        //            .SqlQuery<VMProductStock>(
+        //                "EXEC GetPackagingRMStockByProductId {0},{1},{2}",
+        //                item.ProductId,
+        //                vmSaleReturnDetail.CompanyFK,
+        //                lotNo)
+        //            .FirstOrDefault();
+
+        //        if (vMProductStock == null || vMProductStock.ClosingRate <= 0)
+        //            return false;
+        //    }
+
+        //    return true;
+        //}
+        public string ProductTypeCheck(VMSaleReturnDetailPartial vmSaleReturnDetailPartial, VMSaleReturnDetail vmSaleReturnDetail)
+        {
+            var dataList = vmSaleReturnDetailPartial.DataToList
+                .Where(x => x.Qty > 0)
+                .ToList();
+
+            if (!dataList.Any())
+                return string.Empty;
+
+            var productTypes = dataList
+                .Select(item => _db.Products.FirstOrDefault(x => x.ProductId == item.ProductId))
+                .Where(product => product != null)
+                .Select(product => product.ProductType)
+                .ToList();
+
+            if (!productTypes.Any())
+                return string.Empty;
+
+            if (productTypes.All(t => t == "R")) return "R";
+            if (productTypes.All(t => t == "F")) return "F";
+
+            return string.Empty;
         }
 
 
@@ -633,13 +753,13 @@ namespace KGERP.Services.WareHouse
             }
 
             // GCCL Spetial Requirment : Recevable convert to COGS.
-            if (vmSaleReturnDetail.IsUnitAsCost == true)
-            {
-                saleReturnList.ForEach(x => x.COGSRate = ((x.Qty * x.Rate) -
-                           ((x.Qty * x.BaseCommission ?? 0) +
-                           (x.BaseCommission > 0 ? (((x.Qty * x.Rate) - (x.Qty * x.BaseCommission)) / 100 * x.CashCommission ?? 0) : ((x.Qty * x.Rate) / 100 * x.CashCommission ?? 0)) +
-                            (x.SpecialDiscount ?? 0))) / x.Qty);
-            }
+            //if (vmSaleReturnDetail.IsUnitAsCost == true)
+            //{
+            //    saleReturnList.ForEach(x => x.COGSRate = ((x.Qty * x.Rate) -
+            //               ((x.Qty * x.BaseCommission ?? 0) +
+            //               (x.BaseCommission > 0 ? (((x.Qty * x.Rate) - (x.Qty * x.BaseCommission)) / 100 * x.CashCommission ?? 0) : ((x.Qty * x.Rate) / 100 * x.CashCommission ?? 0)) +
+            //                (x.SpecialDiscount ?? 0))) / x.Qty);
+            //}
             _db.SaleReturnDetails.AddRange(saleReturnList);
             if (await _db.SaveChangesAsync() > 0)
             {
@@ -1866,10 +1986,12 @@ namespace KGERP.Services.WareHouse
                 VMProductStock vmProductStock = new VMProductStock();
                 if (item.ProductType=="R")
                 {
+                    //var lotNoR = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
                     vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
                 }
                 else if (item.ProductType=="F")
                 {
+                    //var lotNoF = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
                     vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
                 }
                 
