@@ -1,0 +1,225 @@
+﻿
+@model KGERP.Data.CustomModel.RequisitionSignatoryViewModel
+
+<div class="modal fade" id="modalCreateEditSignatory" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("CreateOrEdit", "RequisitionSignatory", FormMethod.Post, new { id = "formCreateEdit" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.RequisitionSignatoryId)
+                @Html.HiddenFor(m => m.IntegrateWith)
+                <input type="hidden" id="hdnAssignmentMode" name="AssignmentMode" value="individual" />
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">
+                        @(Model.RequisitionSignatoryId > 0 ? "Edit Signatory" : "Add New Signatory")
+                    </h4>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Assignment Mode Toggle -->
+                    @*@if (Model.RequisitionSignatoryId == 0)
+                    {
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Assignment Mode</label>
+                                    <div class="btn-group btn-group-justified" role="group">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-default active" id="btnIndividualMode">
+                                                <i class="fa fa-user"></i> Individual Employee
+                                            </button>
+                                        </div>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-default" id="btnBulkMode">
+                                                <i class="fa fa-users"></i> Bulk Assignment
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                    }*@
+
+                    <!-- INDIVIDUAL MODE SECTION -->
+                    <div id="individualModeSection">
+                        <div class="row">
+                            <!-- Employee Selection -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="txtEmployeeMod">Employee <span class="text-danger">*</span></label>
+                                    <input type="text" id="txtEmployeeMod" class="form-control" placeholder="Type to search employee..." value="@Model.EmployeeName" />
+                                    @Html.HiddenFor(m => m.EmployeeId, new { id = "hdnEmployeeIdMob" })
+                                    @Html.ValidationMessageFor(m => m.EmployeeId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <!-- Signatory Selection -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="txtSignatory">Signatory/Approver <span class="text-danger">*</span></label>
+                                    <input type="text" id="txtSignatory" class="form-control" placeholder="Type to search signatory..." value="@Model.SignatoryName" />
+                                    @Html.HiddenFor(m => m.SignatoryEmpId, new { id = "hdnSignatoryEmpId" })
+                                    @Html.ValidationMessageFor(m => m.SignatoryEmpId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Designation (Auto-filled) -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtDesignation">Designation For Emp.</label>
+                                    @Html.TextBoxFor(m => m.DesignationName, new { @class = "form-control", @readonly = "readonly", id = "txtDesignation" })
+                                </div>
+                            </div>
+
+                            <!-- Level/OrderBy -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlOrderBy">Level <span class="text-danger">*</span></label>
+                                    @Html.DropDownListFor(m => m.OrderBy,
+                                        new SelectList(new[] {
+                                            new { Value = 1, Text = "1" },
+                                            new { Value = 2, Text = "2" },
+                                            new { Value = 3, Text = "3" },
+                                            new { Value = 4, Text = "4" }
+                                        }, "Value", "Text", Model.OrderBy),
+                                        "-- Select Level --",
+                                        new { @class = "form-control", id = "ddlOrderBy" })
+                                    @Html.ValidationMessageFor(m => m.OrderBy, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtDesignationSig">Designation For Sig.</label>
+                                    @Html.TextBoxFor(m => m.DesignationNameSig, new { @class = "form-control", @readonly = "readonly", id = "txtDesignationSig" })
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+                    <!-- BULK MODE SECTION -->
+                    <!--<div id="bulkModeSection" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle"></i> <strong>Bulk Assignment:</strong> Assign signatory to multiple employees based on filters below.
+                        </div>
+
+                        <div class="row">-->
+                            <!-- Bulk Company Filter -->
+                            <!--<div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlBulkCompany">Company <span class="text-danger">*</span></label>
+                                    @Html.DropDownList("BulkCompanyId",
+                                        new SelectList(Model.Companies, "Value", "Text"),
+                                        "-- Select Company --",
+                                        new { @class = "form-control", id = "ddlBulkCompany" })
+                                </div>
+                            </div>-->
+
+                            <!-- Bulk Department Filter -->
+                            <!--<div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlBulkDepartment">Department</label>
+                                    <select id="ddlBulkDepartment" name="BulkDepartmentId" class="form-control">
+                                        <option value="">-- All Departments --</option>
+                                    </select>
+                                </div>
+                            </div>-->
+
+                            <!-- Bulk Designation Filter -->
+                            <!--<div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlBulkDesignation">Designation</label>
+                                    <select id="ddlBulkDesignation" name="BulkDesignationId" class="form-control">
+                                        <option value="">-- All Designations --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-info btn-sm" id="btnPreviewEmployees">
+                                    <i class="fa fa-eye"></i> Preview Affected Employees
+                                </button>
+                                <div id="employeePreview" class="mt-2" style="display: none;">
+                                    <div class="alert alert-warning">
+                                        <strong>Affected Employees:</strong> <span id="employeeCount">0</span> employee(s) will be assigned this signatory.
+                                        <div id="employeeList" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">-->
+                            <!-- Signatory Selection (Bulk) -->
+                            <!--<div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="txtBulkSignatory">Signatory/Approver <span class="text-danger">*</span></label>
+                                    <input type="text" id="txtBulkSignatory" class="form-control" placeholder="Type to search signatory..." />
+                                    <input type="hidden" id="hdnBulkSignatoryEmpId" name="BulkSignatoryEmpId" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ddlBulkOrderBy">Level <span class="text-danger">*</span></label>
+                                    <select id="ddlBulkOrderBy" name="BulkOrderBy" class="form-control">
+                                        <option value="">-- Select Level --</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>-->
+
+                    <!-- COMMON FIELDS -->
+                    <div class="row">
+                        @if (string.IsNullOrEmpty(Model.IntegrateWith))
+                        {
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ddlModalIntegrateWith">Module Name <span class="text-danger">*</span></label>
+                                    @Html.DropDownListFor(m => m.IntegrateWith,
+                                        new SelectList(Model.ModelNames, "Value", "Text", Model.IntegrateWith),
+                                        "-- Select Module --",
+                                        new { @class = "form-control", id = "ddlModalIntegrateWith" })
+                                    @Html.ValidationMessageFor(m => m.IntegrateWith, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-6" style="margin-top:1%">
+                            <div class="form-group">
+                                <div class="checkbox">
+                                    <label>
+                                        @Html.CheckBoxFor(m => m.IsHRAdmin, new { id = "chkIsHRAdmin" })
+                                        Is Supreme Power
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveSignatory">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

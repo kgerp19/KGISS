@@ -294,7 +294,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<LeaveApplicationDetail> LeaveApplicationDetails { get; set; }
         public virtual DbSet<MaterialReceive> MaterialReceives { get; set; }
-        public virtual DbSet<RequisitionSignatory> RequisitionSignatories { get; set; }
         public virtual DbSet<RequisitionItemDetail> RequisitionItemDetails { get; set; }
         public virtual DbSet<StockAdjust> StockAdjusts { get; set; }
         public virtual DbSet<WorkState> WorkStates { get; set; }
@@ -368,6 +367,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<IssueDetailInfo> IssueDetailInfoes { get; set; }
         public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
         public virtual DbSet<SubZone> SubZones { get; set; }
+        public virtual DbSet<RequisitionSignatory> RequisitionSignatories { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

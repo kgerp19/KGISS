@@ -919,9 +919,15 @@ warning 6002: The table/view 'KGISSDB.dbo.AttendanceType' does not have a primar
           <Property Name="IsActive" Type="bit" Nullable="false" />
           <Property Name="IsWeb" Type="bit" Nullable="false" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KGISSDB.dbo.CompanySubMenu' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="CompanySubMenu">
           <Key>
             <PropertyRef Name="CompanySubMenuId" />
+            
+            
+            
+            
           </Key>
           <Property Name="CompanySubMenuId" Type="int" Nullable="false" />
           <Property Name="CompanyMenuId" Type="int" />
@@ -6137,6 +6143,7 @@ warning 6002: The table/view 'KGISSDB.Erp.RequisitionItemDetail' does not have a
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="20" />
           <Property Name="ModifiedDate" Type="datetime" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="IsSupremeApproved" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="RequisitionSignatoryApproval">
           <Key>
@@ -8765,7 +8772,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <EntitySet Name="Colour" EntityType="Self.Colour" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Company" EntityType="Self.Company" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CompanyMenu" EntityType="Self.CompanyMenu" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="CompanySubMenu" EntityType="Self.CompanySubMenu" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CompanyUserMenu" EntityType="Self.CompanyUserMenu" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CompanyVoucher" EntityType="Self.CompanyVoucher" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ComparativeStatement" EntityType="Self.ComparativeStatement" Schema="dbo" store:Type="Tables" />
@@ -9078,6 +9084,33 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
     [AttendanceType].[ModifedBy] AS [ModifedBy], 
     [AttendanceType].[ModifedDate] AS [ModifedDate]
     FROM [dbo].[AttendanceType] AS [AttendanceType]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="CompanySubMenu" EntityType="Self.CompanySubMenu" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [CompanySubMenu].[CompanySubMenuId] AS [CompanySubMenuId], 
+    [CompanySubMenu].[CompanyMenuId] AS [CompanyMenuId], 
+    [CompanySubMenu].[CompanyId] AS [CompanyId], 
+    [CompanySubMenu].[Name] AS [Name], 
+    [CompanySubMenu].[ShortName] AS [ShortName], 
+    [CompanySubMenu].[OrderNo] AS [OrderNo], 
+    [CompanySubMenu].[CompanyType] AS [CompanyType], 
+    [CompanySubMenu].[MushokNo] AS [MushokNo], 
+    [CompanySubMenu].[Address] AS [Address], 
+    [CompanySubMenu].[Phone] AS [Phone], 
+    [CompanySubMenu].[Fax] AS [Fax], 
+    [CompanySubMenu].[Email] AS [Email], 
+    [CompanySubMenu].[Controller] AS [Controller], 
+    [CompanySubMenu].[Action] AS [Action], 
+    [CompanySubMenu].[Param] AS [Param], 
+    [CompanySubMenu].[LayerNo] AS [LayerNo], 
+    [CompanySubMenu].[CreatedBy] AS [CreatedBy], 
+    [CompanySubMenu].[CreatedDate] AS [CreatedDate], 
+    [CompanySubMenu].[ModifiedBy] AS [ModifiedBy], 
+    [CompanySubMenu].[ModifiedDate] AS [ModifiedDate], 
+    [CompanySubMenu].[IsActive] AS [IsActive], 
+    [CompanySubMenu].[IsWeb] AS [IsWeb], 
+    [CompanySubMenu].[IsSideMenu] AS [IsSideMenu]
+    FROM [dbo].[CompanySubMenu] AS [CompanySubMenu]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="Employee_Audit" EntityType="Self.Employee_Audit" store:Type="Tables" store:Schema="dbo">
             <DefiningQuery>SELECT 
@@ -10740,7 +10773,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="LeaveApplicationDetail" EntitySet="LeaveApplicationDetails" />
           </AssociationSet>
           <EntitySet Name="MaterialReceives" EntityType="ERPModel.MaterialReceive" />
-          <EntitySet Name="RequisitionSignatories" EntityType="ERPModel.RequisitionSignatory" />
           <EntitySet Name="RequisitionItemDetails" EntityType="ERPModel.RequisitionItemDetail" />
           <EntitySet Name="StockAdjusts" EntityType="ERPModel.StockAdjust" />
           <EntitySet Name="WorkStates" EntityType="ERPModel.WorkState" />
@@ -11018,6 +11050,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="Zone" EntitySet="Zones" />
             <End Role="SubZone" EntitySet="SubZones" />
           </AssociationSet>
+          <EntitySet Name="RequisitionSignatories" EntityType="ERPModel.RequisitionSignatory" />
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
           <Property Type="Int64" Name="Id" Nullable="false" />
@@ -18001,26 +18034,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="IsSeen" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="PurchaseOrder" Relationship="ERPModel.FK_MaterialReceive_PurchaseOrder" FromRole="MaterialReceive" ToRole="PurchaseOrder" />
         </EntityType>
-        <EntityType Name="RequisitionSignatory">
-          <Key>
-            <PropertyRef Name="RequisitionSignatoryId" />
-          </Key>
-          <Property Name="RequisitionSignatoryId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EmployeeId" Type="Int64" Nullable="false" />
-          <Property Name="SignatoryEmpId" Type="Int64" Nullable="false" />
-          <Property Name="DesignationName" Type="String" Nullable="false" MaxLength="300" FixedLength="false" Unicode="true" />
-          <Property Name="OrderBy" Type="Int32" Nullable="false" />
-          <Property Name="IsHRAdmin" Type="Boolean" Nullable="false" />
-          <Property Name="IntegrateWith" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Limitation" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
-          <Property Name="CompanyId" Type="Int32" Nullable="false" />
-          <Property Name="CategoryId" Type="Int32" />
-          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-        </EntityType>
         <EntityType Name="RequisitionItemDetail">
           <Key>
             <PropertyRef Name="RequistionItemDetailId" />
@@ -20274,6 +20287,27 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="RequisitionSignatory">
+          <Key>
+            <PropertyRef Name="RequisitionSignatoryId" />
+          </Key>
+          <Property Name="RequisitionSignatoryId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeId" Type="Int64" Nullable="false" />
+          <Property Name="SignatoryEmpId" Type="Int64" Nullable="false" />
+          <Property Name="DesignationName" Type="String" Nullable="false" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="OrderBy" Type="Int32" Nullable="false" />
+          <Property Name="IsHRAdmin" Type="Boolean" Nullable="false" />
+          <Property Name="IntegrateWith" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Limitation" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="CategoryId" Type="Int32" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="IsSupremeApproved" Type="Boolean" Nullable="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -25670,27 +25704,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="RequisitionSignatories">
-            <EntityTypeMapping TypeName="ERPModel.RequisitionSignatory">
-              <MappingFragment StoreEntitySet="RequisitionSignatory">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
-                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
-                <ScalarProperty Name="Limitation" ColumnName="Limitation" />
-                <ScalarProperty Name="IntegrateWith" ColumnName="IntegrateWith" />
-                <ScalarProperty Name="IsHRAdmin" ColumnName="IsHRAdmin" />
-                <ScalarProperty Name="OrderBy" ColumnName="OrderBy" />
-                <ScalarProperty Name="DesignationName" ColumnName="DesignationName" />
-                <ScalarProperty Name="SignatoryEmpId" ColumnName="SignatoryEmpId" />
-                <ScalarProperty Name="EmployeeId" ColumnName="EmployeeId" />
-                <ScalarProperty Name="RequisitionSignatoryId" ColumnName="RequisitionSignatoryId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="RequisitionItemDetails">
             <EntityTypeMapping TypeName="ERPModel.RequisitionItemDetail">
               <MappingFragment StoreEntitySet="RequisitionItemDetail">
@@ -27332,6 +27345,28 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="ZoneId" ColumnName="ZoneId" />
                 <ScalarProperty Name="SubZoneId" ColumnName="SubZoneId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RequisitionSignatories">
+            <EntityTypeMapping TypeName="ERPModel.RequisitionSignatory">
+              <MappingFragment StoreEntitySet="RequisitionSignatory">
+                <ScalarProperty Name="IsSupremeApproved" ColumnName="IsSupremeApproved" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="Limitation" ColumnName="Limitation" />
+                <ScalarProperty Name="IntegrateWith" ColumnName="IntegrateWith" />
+                <ScalarProperty Name="IsHRAdmin" ColumnName="IsHRAdmin" />
+                <ScalarProperty Name="OrderBy" ColumnName="OrderBy" />
+                <ScalarProperty Name="DesignationName" ColumnName="DesignationName" />
+                <ScalarProperty Name="SignatoryEmpId" ColumnName="SignatoryEmpId" />
+                <ScalarProperty Name="EmployeeId" ColumnName="EmployeeId" />
+                <ScalarProperty Name="RequisitionSignatoryId" ColumnName="RequisitionSignatoryId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
