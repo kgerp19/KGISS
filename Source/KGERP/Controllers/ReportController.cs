@@ -5790,8 +5790,68 @@ namespace KGERP.Controllers
             return View(cm);
         }
 
+        [HttpGet]
+        public ActionResult KgIssDateWiseSaleDetails(int companyId, string reportName)
+        {
+            Session["CompanyId"] = companyId;
+            ReportCustomModel cm = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+                SubZoneList = new SelectList(_service.SubZonesDropDownList(companyId), "Value", "Text"),
+                ProductCategoryList = voucherTypeService.GetProductCategory(companyId),
+                ReportName = reportName
+            };
+            return View(cm);
+        }
+
         [HttpPost]
 
+        public ActionResult KgIssDateWiseSaleDetails(ReportCustomModel model)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            client.Credentials = nwc;
+            model.ReportName = "KgIssDateWiseSaleDetailsReport";
+            if (model.CustomerId == null)
+            {
+                model.CustomerId = 0;
+            }
+            if (model.ProductId == null)
+            {
+                model.ProductId = 0;
+            }
+            if (model.SubZoneFk == null)
+            {
+                model.SubZoneFk = 0;
+            }
+            if (model.ProductCategoryId == null)
+            {
+                model.ProductCategoryId = 0;
+            }
+            if (model.ProductSubCategoryId == null)
+            {
+                model.ProductSubCategoryId = 0;
+            }
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&StrFromDate={3}&StrToDate={4}&CustomerId={5}&ProductId={6}&SubZoneId={7}&ProductCategoryId={8}&ProductSubCategoryId={9}", model.ReportName, model.ReportType, model.CompanyId, model.StrFromDate, model.StrToDate, model.CustomerId, model.ProductId, model.SubZoneFk, model.ProductCategoryId, model.ProductSubCategoryId);
+
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", "BankCashBookSeed.xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", "GeneralLedger.doc");
+            }
+            return View();
+        }
         public ActionResult DateWiseSaleDetailsReport(ReportCustomModel model)
         {
             NetworkCredential nwc = new NetworkCredential(admin, password);
