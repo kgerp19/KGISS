@@ -1,34 +1,29 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.EMMA;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using KG.Core.Services.Configuration;
 using KGERP;
-using KGERP.CustomModel;
-using KGERP.Data.CustomModel;
 using KGERP.Data.Models;
 using KGERP.Service.CommonModels.Model;
 using KGERP.Service.Configuration;
 using KGERP.Service.Contracts.KGERP.Requisitions.Command.RequestResponseModel;
 using KGERP.Service.Contracts.KGERP.Requisitions.Queries.RequestModel;
 using KGERP.Service.Implementation;
-using KGERP.Service.Implementation.OrderApproval;
 using KGERP.Service.Implementation.RealStateMoneyReceipt;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
 using KGERP.Services.Procurement;
-using KGERP.Services.WareHouse;
 using KGERP.Utility;
 using KGERP.Utility.Interface;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using static KGERP.Controllers.Custom_Authorization.ParentAuthorizedAttribute;
 
 namespace KG.App.Controllers
 {
@@ -93,7 +88,7 @@ namespace KG.App.Controllers
             return Json(products, JsonRequestBehavior.AllowGet);
         }
 
-         
+
         public JsonResult GetAutoCompleteOrderNoGet(string prefix, int companyId)
         {
 
@@ -934,7 +929,7 @@ namespace KG.App.Controllers
         {
 
             var vmCommonProductSubCategory = await Task.Run(() => _service.CustomerLisBySubZonetGet(subZoneId));
-            var list = vmCommonProductSubCategory.Select(x => new { Value = x.ID, Text = x.Name}).ToList();
+            var list = vmCommonProductSubCategory.Select(x => new { Value = x.ID, Text = x.Name }).ToList();
             return Json(list, JsonRequestBehavior.AllowGet);
         }
 
@@ -963,7 +958,7 @@ namespace KG.App.Controllers
             return Json(list, JsonRequestBehavior.AllowGet);
         }
         [HttpGet]
-        public async Task<ActionResult> ProcurementSalesOrderSlave(int companyId = 0, int orderMasterId = 0)
+        public async Task<ActionResult> ProcurementSalesOrderSlave(int companyId = 0, int orderMasterId = 0,string message=null)
         {
             VMSalesOrderSlave vmSalesOrderSlave = new VMSalesOrderSlave();
 
@@ -974,7 +969,7 @@ namespace KG.App.Controllers
             }
             else
             {
-                vmSalesOrderSlave = await Task.Run(() => _service.ProcurementSalesOrderDetailsGet(companyId, orderMasterId));
+                vmSalesOrderSlave = await _service.ProcurementSalesOrderDetailsGet(companyId, orderMasterId);
                 long userId = Common.GetIntUserId();
                 vmSalesOrderSlave.CurrentEmployeeIntId = userId;
 
@@ -983,7 +978,7 @@ namespace KG.App.Controllers
             vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownList(companyId), "Value", "Text");
             vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
             vmSalesOrderSlave.PromoOfferList = new SelectList(_service.PromtionalOffersDropDownList(companyId), "Value", "Text");
-
+            ViewBag.Message = message;
 
             return View(vmSalesOrderSlave);
         }
@@ -1009,7 +1004,7 @@ namespace KG.App.Controllers
             }
             long salepersonId = Common.GetIntUserId();
             vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
-            vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownListUserWise(salepersonId,companyId), "Value", "Text");
+            vmSalesOrderSlave.SubZoneList = new SelectList(_service.SubZonesDropDownListUserWise(salepersonId, companyId), "Value", "Text");
             vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
             vmSalesOrderSlave.PromoOfferList = new SelectList(_service.PromtionalOffersDropDownList(companyId), "Value", "Text");
 
@@ -1043,11 +1038,54 @@ namespace KG.App.Controllers
         [HttpPost]
         public async Task<ActionResult> ProcurementSalesOrderSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
+            #region This Section is responsable for Customer Limit Check
+            DateTime orderDate = DateTime.Now;
+            var customerId = 0;
+            string message = null;
+            if (vmSalesOrderSlave.OrderMasterId<=0)
+            {
+                customerId = vmSalesOrderSlave.CustomerId;
+                orderDate = vmSalesOrderSlave.OrderDate;
+            }
+            else
+            {
+                customerId = vmSalesOrderSlave.CustomerIdVA;
+                orderDate = vmSalesOrderSlave.OrderDateVA;
+            }
+
+            if (customerId<=0)
+            {
+                message = "Customer is not found!";
+                return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK });
+            }
+
+            RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
+            var previousAmount = await _db.OrderDetails
+                .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
+                .Select(x => x.Amount)
+                .DefaultIfEmpty(0)
+                .SumAsync();
+
+            var receivableAmount = rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount);
+
+            bool isCustomerEligibleForOrder = (rResult.result == 1 || receivableAmount > 0);
+
+            if (!isCustomerEligibleForOrder)
+            {
+                // Added TempData so the user actually knows WHY it failed when the page reloads
+                message = "Customer is not eligible for this order due to insufficient balance.";
+                return vmSalesOrderSlave.OrderMasterId<=0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message= message }):
+                    RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message= message });
+            }
+            #endregion
 
             if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
             {
+
+
                 if (vmSalesOrderSlave.OrderMasterId == 0)
                 {
+
                     vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterAdd(vmSalesOrderSlave);
 
                 }
@@ -1297,7 +1335,7 @@ namespace KG.App.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult ProductStockByProductDeliver(int companyId, int productId,string Lotnumber)
+        public JsonResult ProductStockByProductDeliver(int companyId, int productId, string Lotnumber)
         {
             var model = _service.ProductStockByProductGetOrderDeliver(companyId, productId, Lotnumber);
             return Json(model, JsonRequestBehavior.AllowGet);
@@ -1353,7 +1391,7 @@ namespace KG.App.Controllers
         public async Task<ActionResult> SubmitOrderMastersFromSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
             vmSalesOrderSlave.OrderMasterId = await _service.OrderMastersSubmit(vmSalesOrderSlave.OrderMasterId);
-            var approvalStatus = await _service.AddAllMappingSignatoryApproval((int)vmSalesOrderSlave.OrderMasterId,vmSalesOrderSlave.CompanyFK.Value);
+            var approvalStatus = await _service.AddAllMappingSignatoryApproval((int)vmSalesOrderSlave.OrderMasterId, vmSalesOrderSlave.CompanyFK.Value);
 
             return RedirectToAction(nameof(ProcurementSalesOrderSlave), "Procurement", new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
         }
@@ -1526,7 +1564,7 @@ namespace KG.App.Controllers
                 vmSalesOrderSlave = await Task.Run(() => _service.PackagingSalesOrderDetailsGet(companyId, orderMasterId));
             }
             vmSalesOrderSlave.TermNCondition = new SelectList(_service.CommonTremsAndConditionDropDownList(companyId), "Value", "Text");
-             
+
             vmSalesOrderSlave.StockInfoList = new SelectList(_service.StockInfoesDropDownList(companyId), "Value", "Text");
             return View(vmSalesOrderSlave);
         }
@@ -1543,7 +1581,7 @@ namespace KG.App.Controllers
                 {
                     await _service.PackagingOrderDetailAdd(vmSalesOrderSlave);
                 }
-              
+
             }
             else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
             {
@@ -1954,7 +1992,7 @@ namespace KG.App.Controllers
         [HttpPost]
         public async Task<ActionResult> PackagingProductionRequisitionDetails(PackagingProductionRequisitionDetailsRM model)
         {
-            
+
             if (model.RequisitionItemDetailId.HasValue)
             {
                 model.RequisitionId = await Task.Run(() => _requisitionService.RequisitionItemDetailUpdate(model.RequisitionId, model.Qty ?? 0, model.ProductId, model.RequisitionItemDetailId));
@@ -1963,7 +2001,7 @@ namespace KG.App.Controllers
             //{
             //    model.RequisitionId = await Task.Run(() => _requisitionService.RequisitionItemDetailSave(model.RequisitionId, model.Qty ?? 0, model.ProductId,model.FinishProductBOMId));
             //}
-           
+
             return RedirectToAction(nameof(PackagingProductionRequisitionDetails), new { companyId = model.CompanyId, requisitionId = model.RequisitionId });
         }
 
@@ -2021,14 +2059,14 @@ namespace KG.App.Controllers
         [HttpPost]
         public async Task<ActionResult> RequisitionSubmitied(PackagingProductionRequisitionDetailsRM vmProductionRequisition)
         {
-           
+
             await _requisitionService.RequisitionSubmitied(vmProductionRequisition.RequisitionId);
             return RedirectToAction(nameof(PackagingProductionRequisitionDetails), new { companyId = vmProductionRequisition.CompanyId, requisitionId = vmProductionRequisition.RequisitionId });
 
         }
 
         [HttpGet]
-        public async Task<ActionResult> PackagingIssueProductFromStore(int companyId = 0, long issueMasterId = 0,int RequisitionId=0)
+        public async Task<ActionResult> PackagingIssueProductFromStore(int companyId = 0, long issueMasterId = 0, int RequisitionId = 0)
         {
             VMPackagingPurchaseRequisition vmPurchaseRequisition = new VMPackagingPurchaseRequisition();
             vmPurchaseRequisition.IssueDate = DateTime.Now;
@@ -2039,16 +2077,16 @@ namespace KG.App.Controllers
                 vmPurchaseRequisition = await Task.Run(() => _service.GetIssueDetail(companyId, issueMasterId));
 
             }
-            if (RequisitionId>0)
+            if (RequisitionId > 0)
             {
                 vmPurchaseRequisition.RequisitionId = RequisitionId;
             }
-            
+
             return View(vmPurchaseRequisition);
         }
 
         [HttpGet]
-        public async Task<ActionResult> PackagingGIssueProductFromStore(int companyId = 0, long issueMasterId = 0,int requisitionId=0)
+        public async Task<ActionResult> PackagingGIssueProductFromStore(int companyId = 0, long issueMasterId = 0, int requisitionId = 0)
         {
             VMPackagingPurchaseRequisition vmPurchaseRequisition = new VMPackagingPurchaseRequisition();
             vmPurchaseRequisition.IssueDate = DateTime.Now;
@@ -2235,14 +2273,14 @@ namespace KG.App.Controllers
         {
             model.AchknologeById = Common.GetIntUserId();
             GlobalValues.UserId = Common.GetUserId();
-           await Task.Run(() => _service.PackagingRMIssuedAchknolagement(model));
+            await Task.Run(() => _service.PackagingRMIssuedAchknolagement(model));
 
-           //await _service.SubmitMultiIssuePackaging(model);
+            //await _service.SubmitMultiIssuePackaging(model);
 
             return RedirectToAction(nameof(ProductPackagingAchknolagementList), new { companyId = 20 });
         }
 
-       
+
 
         [HttpGet]
         public async Task<ActionResult> RequisitionItemDetailDelete(Guid? id)
@@ -2467,13 +2505,13 @@ namespace KG.App.Controllers
             }
             return RedirectToAction(nameof(PromtionalOfferDetail), new { companyId = vMPromtionalOffer.CompanyFK, promtionalOfferId = vMPromtionalOffer.PromtionalOfferId });
         }
-        
+
         [HttpPost]
         public async Task<ActionResult> PromtionalOfferEdit(VMPromtionalOffer vMPromtionalOffer)
         {
 
             vMPromtionalOffer.PromtionalOfferId = await _service.PromtionalOfferEdit(vMPromtionalOffer.PromtionalOfferId, vMPromtionalOffer.PromoCode, vMPromtionalOffer.FromDate, vMPromtionalOffer.ToDate);
-            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId = vMPromtionalOffer.CompanyId});
+            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId = vMPromtionalOffer.CompanyId });
         }
 
         [HttpPost]
@@ -2497,14 +2535,14 @@ namespace KG.App.Controllers
             vmPurchaseOrder.CompanyId = companyId;
             vmPurchaseOrder.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
             vmPurchaseOrder.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
-             vmPurchaseOrder.UserId = System.Web.HttpContext.Current.User.Identity.Name;
+            vmPurchaseOrder.UserId = System.Web.HttpContext.Current.User.Identity.Name;
             return View(vmPurchaseOrder);
         }
 
         [HttpPost]
-        public ActionResult PromotionalOfferDetailList(int CompanyId,DateTime StrFromDate,DateTime StrToDate)
+        public ActionResult PromotionalOfferDetailList(int CompanyId, DateTime StrFromDate, DateTime StrToDate)
         {
-            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId=CompanyId,fromDate= StrFromDate, toDate= StrToDate } );
+            return RedirectToAction(nameof(PromotionalOfferDetailList), new { companyId = CompanyId, fromDate = StrFromDate, toDate = StrToDate });
         }
 
         [HttpPost]
@@ -2740,7 +2778,7 @@ namespace KG.App.Controllers
         {
 
             var result = await _service.UpdateSignatoryApproval((int)model.Id, model.SignatoryStatus, model.Comment);
-            return RedirectToAction("ProcurementSalesOrderSlave", "Procurement", new { companyId = model.UserCompanyId,orderMasterId=result });
+            return RedirectToAction("ProcurementSalesOrderSlave", "Procurement", new { companyId = model.UserCompanyId, orderMasterId = result });
         }
 
 
@@ -3279,6 +3317,20 @@ namespace KG.App.Controllers
             }
 
             return RedirectToAction(nameof(PackagingFGPurchaseOrderSlave), new { companyId = vmPurchaseOrderSlave.CompanyFK, purchaseOrderId = vmPurchaseOrderSlave.PurchaseOrderId });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> CustomerLedgerBalanceShow(
+            int companyId,
+            int vendorId,
+            DateTime? invoiceDate = null)
+        {
+            var result = await _service.CustomerLedgerBalanceAsync(
+                    companyId,
+                    vendorId,
+                    invoiceDate);
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
 }

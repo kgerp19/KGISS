@@ -1,0 +1,1025 @@
+﻿@model KGERP.Service.ServiceModel.ApplicationManageModel
+@{
+    ViewBag.Title = "Manage Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: #eef1ff;
+        --success: #2cb67d;
+        --success-light: #e8f8f0;
+        --danger: #e53e3e;
+        --danger-light: #fef2f2;
+        --warning: #f59e0b;
+        --warning-light: #fffbeb;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+        --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .aml-wrapper {
+        padding: 20px 0;
+        font-family: inherit;
+    }
+
+    .aml-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .aml-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--gray-400);
+        margin-bottom: 4px;
+    }
+
+        .aml-breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .aml-breadcrumb a:hover {
+                text-decoration: underline;
+            }
+
+        .aml-breadcrumb .sep {
+            font-size: 9px;
+        }
+
+    .aml-topbar-left h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--gray-900);
+        letter-spacing: -0.4px;
+    }
+
+    .aml-topbar-left p {
+        margin: 3px 0 0;
+        font-size: 13px;
+        color: var(--gray-500);
+    }
+
+    .aml-btn-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 10px 22px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: var(--transition);
+        box-shadow: 0 4px 14px rgba(67,97,238,0.28);
+        white-space: nowrap;
+    }
+
+        .aml-btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67,97,238,0.38);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .aml-btn-new i {
+            font-size: 13px;
+        }
+
+    .aml-card {
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+
+        .aml-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+    .aml-filter-bar {
+        padding: 18px 24px;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .aml-filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 140px;
+    }
+
+        .aml-filter-group label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .aml-filter-group label i {
+                color: var(--primary);
+                font-size: 11px;
+            }
+
+        .aml-filter-group .form-control,
+        .aml-filter-group select {
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--gray-800);
+            background: #fff;
+            transition: var(--transition);
+            height: 38px;
+        }
+
+            .aml-filter-group .form-control:focus,
+            .aml-filter-group select:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(67,97,238,0.1);
+                outline: none;
+            }
+
+    .aml-filter-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        padding-bottom: 0;
+    }
+
+    .aml-btn-search {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        height: 38px;
+    }
+
+        .aml-btn-search:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+    .aml-btn-clear {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #fff;
+        color: var(--gray-600);
+        border: 1.5px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: var(--transition);
+        height: 38px;
+    }
+
+        .aml-btn-clear:hover {
+            border-color: var(--gray-400);
+            color: var(--gray-800);
+            text-decoration: none;
+        }
+
+    .aml-stats-bar {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        padding: 12px 24px;
+        border-bottom: 1px solid var(--gray-100);
+        background: #fff;
+        flex-wrap: wrap;
+    }
+
+    .aml-stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+
+    .aml-stat-all {
+        background: var(--primary-light);
+        color: var(--primary);
+    }
+
+    .aml-stat-pending {
+        background: var(--warning-light);
+        color: #92400e;
+    }
+
+    .aml-stat-approved {
+        background: var(--success-light);
+        color: #065f46;
+    }
+
+    .aml-stat-rejected {
+        background: var(--danger-light);
+        color: #991b1b;
+    }
+
+    .aml-stat-chip .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .aml-stat-all .dot {
+        background: var(--primary);
+    }
+
+    .aml-stat-pending .dot {
+        background: var(--warning);
+    }
+
+    .aml-stat-approved .dot {
+        background: var(--success);
+    }
+
+    .aml-stat-rejected .dot {
+        background: var(--danger);
+    }
+
+    .aml-table-wrapper {
+        overflow-x: auto;
+    }
+
+    table.aml-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        min-width: 900px;
+    }
+
+        table.aml-table thead th {
+            background: var(--gray-50);
+            color: var(--gray-500);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 13px 16px;
+            border-bottom: 2px solid var(--gray-200);
+            white-space: nowrap;
+            text-align: left;
+        }
+
+            table.aml-table thead th:first-child {
+                text-align: center;
+                border-radius: 0;
+            }
+
+            table.aml-table thead th:last-child {
+                text-align: center;
+            }
+
+        table.aml-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+            vertical-align: middle;
+        }
+
+        table.aml-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        table.aml-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+            table.aml-table tbody tr:hover {
+                background: var(--primary-light);
+            }
+
+    .aml-id-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-light);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        min-width: 38px;
+    }
+
+    .aml-date-primary {
+        font-weight: 500;
+        color: var(--gray-800);
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .aml-date-sub {
+        font-size: 12px;
+        color: var(--gray-500);
+        white-space: nowrap;
+    }
+
+    .aml-validity-range {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .aml-validity-dates {
+        font-weight: 500;
+        color: var(--gray-800);
+        font-size: 12px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .aml-validity-dates .arrow {
+            color: var(--gray-400);
+            font-size: 10px;
+        }
+
+    .aml-day-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--gray-100);
+        color: var(--gray-600);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    .aml-person-primary {
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: 13px;
+    }
+
+    .aml-person-sub {
+        font-size: 11px;
+        color: var(--gray-500);
+        margin-top: 1px;
+    }
+
+    .aml-reason-text {
+        max-width: 180px;
+        line-height: 1.5;
+        color: var(--gray-600);
+        font-size: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .aml-sig-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1.5px solid var(--primary);
+        color: var(--primary);
+        background: var(--primary-light);
+        border-radius: var(--radius-sm);
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+        .aml-sig-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(67,97,238,0.25);
+        }
+
+        .aml-sig-btn i {
+            font-size: 11px;
+        }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        padding: 5px 13px;
+        border-radius: 20px;
+        font-size: 11px;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: var(--warning-light);
+        color: #92400e;
+        border: 1px solid rgba(245,158,11,0.25);
+    }
+
+    .status-approved {
+        background: var(--success-light);
+        color: #065f46;
+        border: 1px solid rgba(44,182,125,0.25);
+    }
+
+    .status-rejected {
+        background: var(--danger-light);
+        color: #991b1b;
+        border: 1px solid rgba(229,62,62,0.2);
+    }
+
+    .aml-empty {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .aml-empty-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--gray-100);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+        .aml-empty-icon i {
+            font-size: 22px;
+            color: var(--gray-400);
+        }
+
+    .aml-empty h5 {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin: 0 0 5px;
+    }
+
+    .aml-empty p {
+        font-size: 13px;
+        color: var(--gray-400);
+        margin: 0;
+    }
+
+    /* Modal */
+    .aml-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(17,24,39,0.55);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+        padding: 20px;
+    }
+
+        .aml-modal-overlay.open {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            transform: translateY(16px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .aml-modal {
+        background: #fff;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        overflow: hidden;
+        animation: slideUp 0.25s ease;
+    }
+
+    .aml-modal-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .aml-modal-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .aml-modal-header-icon {
+        width: 38px;
+        height: 38px;
+        background: rgba(255,255,255,0.18);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .aml-modal-header-icon i {
+            color: #fff;
+            font-size: 16px;
+        }
+
+    .aml-modal-header h5 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .aml-modal-header span {
+        font-size: 12px;
+        color: rgba(255,255,255,0.7);
+        display: block;
+        margin-top: 2px;
+    }
+
+    .aml-modal-close {
+        width: 30px;
+        height: 30px;
+        background: rgba(255,255,255,0.15);
+        border: none;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        flex-shrink: 0;
+    }
+
+        .aml-modal-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+    .aml-modal-body {
+        padding: 24px;
+    }
+
+    .aml-sig-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .aml-sig-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--gray-200);
+    }
+
+        .aml-sig-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+    .aml-sig-step {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .aml-sig-step.step-approved {
+            background: var(--success-light);
+            color: #065f46;
+            border: 2px solid rgba(44,182,125,0.3);
+        }
+
+        .aml-sig-step.step-rejected {
+            background: var(--danger-light);
+            color: #991b1b;
+            border: 2px solid rgba(229,62,62,0.2);
+        }
+
+        .aml-sig-step.step-pending {
+            background: var(--warning-light);
+            color: #92400e;
+            border: 2px solid rgba(245,158,11,0.25);
+        }
+
+    .aml-sig-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .aml-sig-name {
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: 13px;
+    }
+
+    .aml-sig-desig {
+        font-size: 11px;
+        color: var(--gray-400);
+        margin-left: 4px;
+    }
+
+    .aml-sig-status-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-top: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+        .aml-sig-status-badge.approved {
+            background: var(--success-light);
+            color: #065f46;
+        }
+
+        .aml-sig-status-badge.rejected {
+            background: var(--danger-light);
+            color: #991b1b;
+        }
+
+        .aml-sig-status-badge.pending {
+            background: var(--warning-light);
+            color: #92400e;
+        }
+
+    .aml-sig-comment {
+        font-size: 12px;
+        color: var(--gray-500);
+        margin-top: 5px;
+        font-style: italic;
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        background: var(--gray-50);
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        border-left: 3px solid var(--gray-300);
+    }
+
+        .aml-sig-comment i {
+            margin-top: 1px;
+            color: var(--gray-400);
+            font-size: 11px;
+        }
+
+    .aml-modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--gray-100);
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .aml-btn-close-modal {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 8px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+        .aml-btn-close-modal:hover {
+            background: var(--gray-200);
+        }
+
+    @@media (max-width: 640px) {
+        .aml-filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .aml-filter-group {
+            min-width: unset;
+        }
+
+        .aml-filter-actions {
+            flex-direction: row;
+        }
+
+        .aml-topbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="aml-wrapper">
+
+    <!-- Top Bar -->
+    <div class="aml-topbar">
+        <div class="aml-topbar-left">
+            <div class="aml-breadcrumb">
+                <a href="@Url.Action("Index", "Home")"><i class="fa fa-home" style="font-size:11px"></i> Home</a>
+                <span class="sep"><i class="fa fa-chevron-right"></i></span>
+                <span>Applications</span>
+                <span class="sep"><i class="fa fa-chevron-right"></i></span>
+                <span>Order Credit Limit</span>
+            </div>
+            <h2>Order Credit Limit Applications</h2>
+            <p>Manage and track all submitted credit limit requests</p>
+        </div>
+        <a href="@Url.Action("OrderCreditLimitEntry", "ApplicationManage", new { companyId = Model.CompanyId })" class="aml-btn-new">
+            <i class="fa fa-plus-circle"></i> New Application
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="aml-card">
+
+        <!-- Filter Bar -->
+        <div class="aml-filter-bar-wrapper">
+            <form action="@Url.Action("OrderCreditLimitManageList", "ApplicationManage")" method="get" class="aml-filter-bar" style="margin-bottom:0;">
+                <input type="hidden" name="companyId" value="@Model.CompanyId" />
+                <div class="aml-filter-group">
+                    <label><i class="fa fa-calendar-o"></i> From date</label>
+                    <input type="date" name="strFromDate" value="@Model.StrFromDate" class="form-control" />
+                </div>
+
+                <div class="aml-filter-group">
+                    <label><i class="fa fa-calendar-o"></i> To date</label>
+                    <input type="date" name="strToDate" value="@Model.StrToDate" class="form-control" />
+                </div>
+
+                <div class="aml-filter-group" style="min-width:160px;">
+                    <label><i class="fa fa-filter"></i> Status</label>
+                    <select name="searchStatus" class="form-control">
+                        <option value="">Show all</option>
+                        <option value="0" @(Model.SearchStatus == 0 ? "selected" : "")>Pending</option>
+                        <option value="1" @(Model.SearchStatus == 1 ? "selected" : "")>Approved</option>
+                        <option value="2" @(Model.SearchStatus == 2 ? "selected" : "")>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="aml-filter-actions">
+                    <button type="submit" class="aml-btn-search">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                    @if (Model.SearchStatus.HasValue || !string.IsNullOrEmpty(Model.StrFromDate))
+                    {
+                        <a href="@Url.Action("OrderCreditLimitManageList", "ApplicationManage", new { companyId = Model.CompanyId })" class="aml-btn-clear">
+                            <i class="fa fa-times"></i> Clear
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+
+        <!-- Stats Chips -->
+        @{
+            var allCount = Model.ApplicationList?.Count() ?? 0;
+            var pendingCount = Model.ApplicationList?.Count(x => x.Status == 0) ?? 0;
+            var approvedCount = Model.ApplicationList?.Count(x => x.Status == 1) ?? 0;
+            var rejectedCount = Model.ApplicationList?.Count(x => x.Status == 2) ?? 0;
+        }
+        <div class="aml-stats-bar">
+            <span class="aml-stat-chip aml-stat-all"><span class="dot"></span> All &mdash; @allCount</span>
+            <span class="aml-stat-chip aml-stat-pending"><span class="dot"></span> Pending &mdash; @pendingCount</span>
+            <span class="aml-stat-chip aml-stat-approved"><span class="dot"></span> Approved &mdash; @approvedCount</span>
+            <span class="aml-stat-chip aml-stat-rejected"><span class="dot"></span> Rejected &mdash; @rejectedCount</span>
+        </div>
+
+        <!-- Table -->
+        <div class="aml-table-wrapper">
+            <table class="aml-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;width:56px;">ID</th>
+                        <th>Apply date</th>
+                        <th>Validity period</th>
+                        <th>Applicant</th>
+                        <th>Manager</th>
+                        <th>Reason</th>
+                        <th style="text-align:center;">Signatory flow</th>
+                        <th style="text-align:center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ApplicationList != null && Model.ApplicationList.Any())
+                    {
+                        foreach (var item in Model.ApplicationList)
+                        {
+                            <tr>
+                                <td style="text-align:center;"><span class="aml-id-badge">@item.ApplicationId</span></td>
+                                <td>
+                                    <div class="aml-date-primary">@item.ApplicationDate.ToString("dd MMM yyyy")</div>
+                                    <div class="aml-date-sub">@item.ApplicationDate.ToString("dddd")</div>
+                                </td>
+                                <td>
+                                    <div class="aml-validity-range">
+                                        <div class="aml-validity-dates">
+                                            @item.StartDate.ToString("dd MMM yyyy") <span class="arrow"><i class="fa fa-long-arrow-right"></i></span> @item.EndDate.ToString("dd MMM yyyy")
+                                        </div>
+                                        <span class="aml-day-pill"><i class="fa fa-clock-o" style="font-size:10px"></i> @item.DayCounts days</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="aml-person-primary">@item.ApplicantName</div>
+                                    <div class="aml-person-sub">Vendor</div>
+                                </td>
+                                <td>
+                                    <div class="aml-person-primary">@item.ManagerName</div>
+                                    <div class="aml-person-sub">Manager</div>
+                                </td>
+                                <td><div class="aml-reason-text">@item.Reason</div></td>
+                                <td style="text-align:center;">
+                                    @if (item.SignatoryApprovals != null && item.SignatoryApprovals.Any())
+                                    {
+                                        <button class="aml-sig-btn" onclick="openModal(this)">
+                                            <i class="fa fa-sitemap"></i> View flow
+                                        </button>
+                                        <div class="aml-sig-data" style="display:none">
+                                            @foreach (var sig in item.SignatoryApprovals)
+                                            {
+                                                <div data-name="@sig.EmployeeName" data-desig="@sig.DesignationName" data-status="@sig.Status" data-statusname="@sig.StatusName" data-comment="@sig.Comment"></div>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                                <td style="text-align:center;">
+                                    @if (item.Status == 1)
+                                    {
+                                        <span class="status-badge status-approved"><i class="fa fa-check-circle"></i> Approved</span>
+                                    }
+                                    else if (item.Status == 2)
+                                    {
+                                        <span class="status-badge status-rejected"><i class="fa fa-times-circle"></i> Rejected</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-pending"><i class="fa fa-clock-o"></i> Pending</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8">
+                                <div class="aml-empty">
+                                    <div class="aml-empty-icon"><i class="fa fa-folder-open-o"></i></div>
+                                    <h5>No applications found</h5>
+                                    <p>Try adjusting your search filters or create a new application.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="aml-modal-overlay" id="sigModal">
+    <div class="aml-modal" id="sigModalBox">
+        <div class="aml-modal-header">
+            <div class="aml-modal-header-left">
+                <div class="aml-modal-header-icon"><i class="fa fa-sitemap"></i></div>
+                <div>
+                    <h5>Signatory Approval Flow</h5>
+                    <span>Review the complete approval chain</span>
+                </div>
+            </div>
+            <button class="aml-modal-close" onclick="closeModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="aml-modal-body" id="sigModalBody"></div>
+        <div class="aml-modal-footer">
+            <button class="aml-btn-close-modal" onclick="closeModal()"><i class="fa fa-check"></i> Done</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>function openModal(btn) {
+  var dataDiv = btn.parentElement.querySelector('.aml-sig-data');
+  var items = dataDiv.querySelectorAll('div');
+  var html = '<ul class="aml-sig-list">';
+  var step = 1;
+  items.forEach(function(el) {
+    if (!el.dataset.name) return;
+    var status = parseInt(el.dataset.status);
+    var stepClass = status === 1 ? 'step-approved' : (status === 2 ? 'step-rejected' : 'step-pending');
+    var badgeClass = status === 1 ? 'approved' : (status === 2 ? 'rejected' : 'pending');
+    var icon = status === 1 ? 'fa-check' : (status === 2 ? 'fa-times' : 'fa-hourglass-half');
+    html += '<li class="aml-sig-item">';
+    html += '<div class="aml-sig-step ' + stepClass + '"><i class="fa ' + icon + '"></i></div>';
+    html += '<div class="aml-sig-info">';
+    html += '<span class="aml-sig-name">' + el.dataset.name + '</span>';
+    html += '<span class="aml-sig-desig">' + el.dataset.desig + '</span><br>';
+    html += '<span class="aml-sig-status-badge ' + badgeClass + '">' + el.dataset.statusname + '</span>';
+    if (el.dataset.comment) {
+      html += '<div class="aml-sig-comment"><i class="fa fa-quote-left"></i>' + el.dataset.comment + '</div>';
+    }
+    html += '</div></li>';
+    step++;
+  });
+  html += '</ul>';
+  document.getElementById('sigModalBody').innerHTML = html;
+  document.getElementById('sigModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('sigModal').classList.remove('open');
+}
+
+document.getElementById('sigModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});</script>
+}

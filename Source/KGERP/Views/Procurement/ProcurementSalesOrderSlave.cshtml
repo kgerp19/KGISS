@@ -16,6 +16,9 @@
     double TotalGrossAmount = 0;
 
     decimal TotalSpetialDiscount = 0;
+
+    var hidden = Model.OrderMasterId > 0 ? "" : "display:none";
+    var customerCreditLimitMsg = ViewBag.Message;
 }
 
 <style type="text/css">
@@ -23,6 +26,68 @@
     input, select, textarea {
         max-width: 100%;
     }
+    #showMsg {
+        display: block;
+        padding: 15px 20px;
+        margin: 15px 0;
+        border-radius: 6px;
+        background-color: #f8f9fa;
+        color: #212529;
+        font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        border-left: 5px solid #17a2b8;
+        transition: all 0.3s ease;
+    }
+
+        #showMsg.success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        #showMsg.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        #showMsg .amount {
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        #showMsg .permission {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+            font-style: italic;
+            color: #666;
+        }
+
+        #showMsg .credit-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        #showMsg .over-limit {
+            background-color: #fff5f5;
+            color: #c30000;
+            border: 1px solid #ffb3b8;
+        }
+
+        #showMsg .within-limit {
+            background-color: #f0f7ff;
+            color: #0057b3;
+            border: 1px solid #b3d9ff;
+        }
+
+
 </style>
 
 <section class="content-header">
@@ -57,7 +122,14 @@
 <section class="content">
     <div class="row">
         <div class="box">
-
+            <div style="text-align:center;margin-top:2%;font-family:initial;color:orangered;font-weight:800">
+                <h4>@customerCreditLimitMsg</h4>
+            </div>
+            <div>
+                <input hidden id="hdnCurrentBlanceVal" value="0" />
+                <input hidden id="hdnPermisionCheckVal" value="0" />
+                <span id="showMsg" style="display: none;"></span>
+            </div>
             <div class="box-danger">
 
                 <!-- /.box-header -->
@@ -72,6 +144,8 @@
                         @Html.HiddenFor(model => model.ActionId, new { id = "ActionId" })
                         @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyFK" })
                         @Html.HiddenFor(model => model.CustomerTypeFk, new { id = "hidCustomerTypeFk" })
+                        @Html.HiddenFor(model => model.CustomerIdVA, new { id = "hidCustomerIdVA" })
+                        @Html.HiddenFor(model => model.OrderDateVA, new { id = "hidOrderDateVA" })
 
                         if (Model.OrderMasterId > 0)
                         {
@@ -257,7 +331,7 @@
                                     <div class="col-md-2" style="padding:0px">
                                         <div class="form-group">
                                             <label>Unit Price</label>
-                                            @Html.TextBoxFor(model => model.UnitPrice, new { id = "txtUnitPrice", type = "number", @class = "form-control", @style = "width:100%;border:1px black solid", placeholder = "Purchasing Price", required = "Required" })
+                                            @Html.TextBoxFor(model => model.UnitPrice, new { id = "txtUnitPrice", type = "number", @class = "form-control", @onkeyup = "calculateAmount()", @style = "width:100%;border:1px black solid", placeholder = "Purchasing Price", required = "Required" })
                                             @Html.ValidationMessageFor(model => model.UnitPrice, "", new { @class = "text-danger" })
                                         </div>
                                     </div>
@@ -327,7 +401,7 @@
                                     </div>
                                     <div class="col-lg-4 col-md-4">
 
-                                        <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block">
+                                        <button type="submit" id="poCreateBtn" class="btn btn-primary btn-block" style=@hidden>
                                             <i class='fa fa-plus'></i>
                                             @if (Model.OrderMasterId > 0)
                                             {
@@ -690,10 +764,10 @@
                                                             <a onclick="loadActionModal(@Model.CompanyFK,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Rejected));" data-toggle="modal" data-target="#actionModal" title="Reject" data-placement="top" class="btn btn-danger btn-xs">  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                                                         }
                                                         @*else if (item.ApproverEmployeeIntId == Model.CurrentEmployeeIntId && item.SignatoryStatus == KGERP.Utility.SignatoryStatusEnum.Rejected)
-            {
-                <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
-                <button class="btn btn-sm pr-1 text-danger">@item.SignatoryStatus</button>
-            }*@
+                                                            {
+                                                                <a onclick="loadActionModal(@Model.CompanyId,@item.Id,@((int)KGERP.Utility.SignatoryStatusEnum.Approved));" data-toggle="modal" data-target="#actionModal" title="Approved" data-placement="top"> <span class="glyphicon glyphicon-ok text-primary" aria-hidden="true"></span></a>
+                                                                <button class="btn btn-sm pr-1 text-danger">@item.SignatoryStatus</button>
+                                                            }*@
                                                         else
                                                         {
                                                             <span>--</span>
@@ -829,6 +903,7 @@
                         <button type="submit" id="btnName" style="width:100%" class="btn btn-danger fa fa-remove"></button>
                     </div>
                 </div>
+                
             </div>
         </div>
     </div>
@@ -839,12 +914,26 @@
 
     <script type="text/javascript">
         function calculateAmount() {
-
             var salesQuantity = $("#txtSalesQuantity").val();
             var unitPrice = $('#txtUnitPrice').val();
 
-            var quantityInKg = (Number(salesQuantity) * Number(unitPrice));
-            $('#txtTotalAmount').val(Number((quantityInKg).toFixed(3)))
+            var quantityInKg = (parseFloat(salesQuantity) * parseFloat(unitPrice));
+            $('#txtTotalAmount').val(parseFloat((quantityInKg).toFixed(3)))
+            if (Number(@Model.OrderMasterId)==0) {
+                let currentBlanceVal = $("#hdnCurrentBlanceVal").val();
+                let permisionCheckVal = $("#hdnPermisionCheckVal").val();
+                let currentBlanceCheck = (parseFloat(currentBlanceVal) - quantityInKg);
+                $("#CurrentBalanceVal").text(`CURRENT BALANCE: ${currentBlanceCheck}`)
+                if (Number(permisionCheckVal) > 0) {
+                    $('#poCreateBtn').fadeIn();
+
+                } else if (currentBlanceCheck > 0) {
+                    $('#poCreateBtn').fadeIn();
+                } else {
+                    $('#poCreateBtn').hide();
+                }
+            }
+            
         }
 
 
@@ -878,8 +967,75 @@
             });
         }
 
+
         $(document).ready(function () {
             //$('.formValidator').bootstrapValidator();
+            $("#ddlCustomerId").change(function (e) {
+                $('#showMsg').hide().empty();
+                $('#poCreateBtn').hide();
+                var vendorId = e.target.value;
+                var invoiceDate = $("#txtOrderDate").val();
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("CustomerLedgerBalanceShow", "Procurement")",
+                dataType: "json",
+                data: {
+                    companyId: "@Model.CompanyFK",
+                    vendorId: vendorId,
+                    invoiceDate: invoiceDate
+                },
+                success: function (output) {
+                    $('#showMsg').empty();
+                    console.log(output);
+
+                    let statusClass = 'within-limit';
+                    if (parseFloat(output.datas.currentBalance)<=0) statusClass = 'over-limit';
+
+                    $("#hdnCurrentBlanceVal").val(output.datas.currentBalance);
+                    $("#hdnPermisionCheckVal").val(output.result);
+
+                    let html = `
+                        <div class="message-header">
+                            <span class="amount">RECEIVABLE:   ${output.datas.receivableAmount}</span>
+                            <span class="credit-status ${statusClass}">
+                                ${statusClass === 'over-limit' ? '🔴 CREDIT LIMIT' :
+                                  statusClass === 'within-limit' ? '🟢 NORMAL' : ''}
+                            </span>
+                        </div>
+
+                        <div class="message-details">
+                            <span>CREDIT LIMIT: ${output.datas.creditLimit}</span>
+                            <span style="margin-left: 15px;" id="CurrentBalanceVal">CURRENT BALANCE: ${output.datas.currentBalance}</span>
+                        </div>
+                    `;
+
+
+                    html += `
+                        <div class="permission-note">
+                            <strong>📝 INFORMATION:</strong> ${output.message}
+                        </div>
+                    `;
+
+                    $('#showMsg').html(html);
+                    $('#showMsg').addClass(output.result === 1 ? 'success' : 'error');
+                    $('#showMsg').fadeIn();
+
+                    if (output.datas.currentBalance > 0 || output.result > 0) {
+                        debugger
+                        $('#poCreateBtn').fadeIn();
+                    } else {
+                        debugger
+                    }
+
+                },
+                error: function(xhr, status, error) {
+                    $('#showMsg').text(`Error: ${error} (Status: ${status})`);
+                    $('#showMsg').addClass('error');
+                }
+            });
+        });
+
             var orderMasterIdInit = "@Model.OrderMasterId";
             if (orderMasterIdInit > 0) {
                 $('#txtProductName').focus();
@@ -1081,6 +1237,9 @@ $('#txtSalesQuantity').select();
 
 
         });
+
+
+
             function makeEditble(rowId) {
                 console.log(rowId);
             $.ajax({
@@ -1132,14 +1291,6 @@ $('#txtSalesQuantity').select();
                  });
                 $('#hidsubmitProcurementPurchaseOrderId').val(rowId);
         }
-
-
-
-
-
-
-
-
 
 
           $("#ddlSubZoneFk").change(function () {

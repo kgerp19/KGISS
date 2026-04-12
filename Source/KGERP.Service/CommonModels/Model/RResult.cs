@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KGERP.Services.Procurement;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,6 +42,7 @@ namespace KGERP.Service.CommonModels.Model
         public long longId { get; set; }
         public decimal decimalValue { get; set; }
         public string returnURL { get; set; }
+        public CustomerBalanceDto datas { get; set; }
         public Dictionary<string, string[]> Errors { get; set; }
 
     }

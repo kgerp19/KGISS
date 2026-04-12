@@ -199,6 +199,7 @@ namespace KGERP.App_Start
             kernel.Bind<ISalesManagementService>().To<SalesManagementService>().InRequestScope();
             kernel.Bind<ISeedProcessingService>().To<SeedProcessingService>().InRequestScope();
             kernel.Bind<IUnitOfWork>().To<UnitOfWork>().InRequestScope();
+            kernel.Bind<IApplicationManageService>().To<ApplicationManageService>().InRequestScope();
 
         }
     }

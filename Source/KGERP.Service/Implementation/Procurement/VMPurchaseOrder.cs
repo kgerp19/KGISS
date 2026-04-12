@@ -338,7 +338,9 @@ namespace KGERP.Services.Procurement
         public string OrderNoMsg { get; set; }
         public string ProductType { get; set; }
         public int CustomerId { get; set; }
+        public int CustomerIdVA { get; set; }
         public DateTime OrderDate { get; set; }
+        public DateTime OrderDateVA { get; set; }
         public DateTime PaymentDate { get; set; }
         public int? PromotionalOfferId { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }
@@ -487,6 +489,7 @@ namespace KGERP.Services.Procurement
         public bool IsVATInclude { get; set; }
         public decimal SpecialBaseCommission { get;  set; }
         public decimal DiscountUnit { get; set; }
+        public decimal LedgerBalance { get; set; }
     }
     public partial class FeedOrderMaster : VMFeedPayment
     {
@@ -913,5 +916,12 @@ namespace KGERP.Services.Procurement
         public DateTime ToDate { get; set; }
         public string StrFromDate { get; set; }
         public string StrToDate { get; set; }
+    }
+
+    public class CustomerBalanceDto
+    {
+        public decimal receivableAmount { get; set; }
+        public decimal creditLimit { get; set; }
+        public decimal currentBalance { get; set; }
     }
 }

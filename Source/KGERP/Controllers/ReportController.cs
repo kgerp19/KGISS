@@ -5797,7 +5797,7 @@ namespace KGERP.Controllers
             NetworkCredential nwc = new NetworkCredential(admin, password);
             WebClient client = new WebClient();
             client.Credentials = nwc;
-            model.ReportName = "DateWiseSaleDetailsReport";
+            model.ReportName = "IssDateWiseSaleDetailsReport";
             if (model.CustomerId == null)
             {
                 model.CustomerId = 0;

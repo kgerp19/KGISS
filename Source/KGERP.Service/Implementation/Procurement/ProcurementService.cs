@@ -1,25 +1,27 @@
-﻿using KGERP.Data.Models;
+﻿using KGERP.CustomModel;
+using KGERP.Data.CustomModel;
+using KGERP.Data.Models;
+using KGERP.Service.CommonModels.Model;
 using KGERP.Service.Configuration;
+using KGERP.Service.Implementation;
+using KGERP.Service.Implementation.General_Requisition.ViewModels;
+using KGERP.Service.Implementation.LcInfoServices;
+using KGERP.Service.Implementation.OrderApproval.ViewModels;
+using KGERP.Service.ServiceModel;
+using KGERP.Services.WareHouse;
 using KGERP.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
-using KGERP.Service.ServiceModel;
-using KGERP.Data.CustomModel;
-using Officervwmodel = KGERP.Data.CustomModel.Officervwmodel;
-using KGERP.Service.Implementation.LcInfoServices;
-using KGERP.Service.Implementation;
-using KGERP.Service.Implementation.OrderApproval.ViewModels;
-using KGERP.Service.Implementation.General_Requisition.ViewModels;
-using System.Web.Mvc;
-using KGERP.Services.WareHouse;
-using System.Threading;
-using KGERP.CustomModel;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using Officervwmodel = KGERP.Data.CustomModel.Officervwmodel;
 
 namespace KGERP.Services.Procurement
 {
@@ -294,7 +296,7 @@ namespace KGERP.Services.Procurement
 
         public List<object> SubZonesDropDownList(int companyId = 0)
         {
-            
+
 
             var List = new List<object>();
             _db.SubZones
@@ -317,7 +319,7 @@ namespace KGERP.Services.Procurement
             var userid = Common.GetIntUserId();
             var List = new List<object>();
             _db.SubZones
-        .Where(x => x.IsActive && userid==x.SalesOfficerId).Where(x => x.CompanyId == companyId).Select(x => x).ToList()
+        .Where(x => x.IsActive && userid == x.SalesOfficerId).Where(x => x.CompanyId == companyId).Select(x => x).ToList()
         .ForEach(x => List.Add(new
         {
             Value = x.SubZoneId,
@@ -335,7 +337,7 @@ namespace KGERP.Services.Procurement
         {
             var List = new List<object>();
             _db.SubZones
-        .Where(x => x.IsActive).Where(x => x.CompanyId == companyId && x.SalesOfficerId==userId).Select(x => x).ToList()
+        .Where(x => x.IsActive).Where(x => x.CompanyId == companyId && x.SalesOfficerId == userId).Select(x => x).ToList()
         .ForEach(x => List.Add(new
         {
             Value = x.SubZoneId,
@@ -3726,47 +3728,47 @@ namespace KGERP.Services.Procurement
             }
 
 
-       var approvalList = await (from approval in _db.ApprovalOrderMasters
-                                                             join a in _db.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
-                                                             join o in _db.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
-                                                             join v in _db.Vendors on o.CustomerId equals v.VendorId
-                                                             join e in _db.Employees on a.EmployeeId equals e.Id
-                                                             join c in _db.Companies on e.CompanyId equals c.CompanyId
-                                                             join d in _db.Departments on e.DepartmentId equals d.DepartmentId
-                                                             join ds in _db.Designations on e.DesignationId equals ds.DesignationId
-                                                             where approval.IsActive
-                                                             && approval.OrderMasterId == orderMasterId
+            var approvalList = await (from approval in _db.ApprovalOrderMasters
+                                      join a in _db.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
+                                      join o in _db.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
+                                      join v in _db.Vendors on o.CustomerId equals v.VendorId
+                                      join e in _db.Employees on a.EmployeeId equals e.Id
+                                      join c in _db.Companies on e.CompanyId equals c.CompanyId
+                                      join d in _db.Departments on e.DepartmentId equals d.DepartmentId
+                                      join ds in _db.Designations on e.DesignationId equals ds.DesignationId
+                                      where approval.IsActive
+                                      && approval.OrderMasterId == orderMasterId
 
 
-                                                             select new OrderMasterSignatoryApprovalVM()
-                                                             {
-                                                                 CompanyId = o.CompanyId,
-                                                                 ProductType = o.ProductType,
-                                                                 Id = approval.Id,
-                                                                 EmployeeId = e.EmployeeId,
-                                                                 ApproverEmployeeIntId = a.EmployeeId.Value,
+                                      select new OrderMasterSignatoryApprovalVM()
+                                      {
+                                          CompanyId = o.CompanyId,
+                                          ProductType = o.ProductType,
+                                          Id = approval.Id,
+                                          EmployeeId = e.EmployeeId,
+                                          ApproverEmployeeIntId = a.EmployeeId.Value,
 
-                                                                 EmployeeName = e.Name,
-                                                                 CompanyName = c.Name,
-                                                                 DepartmentName = d.Name,
-                                                                 DesignationName = ds.Name,
-                                                                 OrderNo = o.OrderNo,
-                                                                 OrderMasterId = o.OrderMasterId,
-                                                                 OrderDate = o.OrderDate,
-                                                                 CoustomerName = v.Name,
-                                                                 ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
-                                                                 ApprovalDate = approval.ApprovalDate,
-                                                                 Comments = approval.Comments,
-                                                                 SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
-                                                                 IsPreviousApproved = _db.ApprovalOrderMasters.Where(x => x.IsActive)
-                                                                              .Any(x => x.OrderMasterId == approval.OrderMasterId &&
-                                                                                        x.Id != approval.Id && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved) &&
-                                                                                        _db.OrderMasterSignatories.Where(o => o.IsActive)
-                                                                                                .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId &&
-                                                                                                          y.Precedence < a.Precedence &&
-                                                                                                          y.IsActive))
+                                          EmployeeName = e.Name,
+                                          CompanyName = c.Name,
+                                          DepartmentName = d.Name,
+                                          DesignationName = ds.Name,
+                                          OrderNo = o.OrderNo,
+                                          OrderMasterId = o.OrderMasterId,
+                                          OrderDate = o.OrderDate,
+                                          CoustomerName = v.Name,
+                                          ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
+                                          ApprovalDate = approval.ApprovalDate,
+                                          Comments = approval.Comments,
+                                          SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
+                                          IsPreviousApproved = _db.ApprovalOrderMasters.Where(x => x.IsActive)
+                                                       .Any(x => x.OrderMasterId == approval.OrderMasterId &&
+                                                                 x.Id != approval.Id && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved) &&
+                                                                 _db.OrderMasterSignatories.Where(o => o.IsActive)
+                                                                         .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId &&
+                                                                                   y.Precedence < a.Precedence &&
+                                                                                   y.IsActive))
 
-                                                             }).AsQueryable().OrderBy(x => x.SignatoryStatus).ToListAsync();
+                                      }).AsQueryable().OrderBy(x => x.SignatoryStatus).ToListAsync();
 
 
 
@@ -3868,55 +3870,53 @@ namespace KGERP.Services.Procurement
         public async Task<VMSalesOrderSlave> ProcurementSalesOrderDetailsGet(int companyId, int orderMasterId)
         {
             VMSalesOrderSlave vmSalesOrderSlave = new VMSalesOrderSlave();
-            vmSalesOrderSlave = await Task.Run(() => (from t1 in _db.OrderMasters.Where(x => x.IsActive && x.OrderMasterId == orderMasterId && x.CompanyId == companyId)
-                                                      join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
-                                                      join t4 in _db.SubZones on t2.SubZoneId equals t4.SubZoneId
-                                                      join t5 in _db.Zones on t4.ZoneId equals t5.ZoneId
-                                                      join t6 in _db.StockInfoes on t1.StockInfoId equals t6.StockInfoId into t6_Join
-                                                      from t6 in t6_Join.DefaultIfEmpty()
-                                                      join t8 in _db.Employees on t1.SalePersonId equals t8.Id into t8_Join
-                                                      from t8 in t8_Join.DefaultIfEmpty()
-                                                      select new VMSalesOrderSlave
-                                                      {
-                                                          WareHouse = t6 != null ? t6.Name : "",
-                                                          Propietor = t2.Propietor,
-                                                          CreatedDate = t1.CreateDate,
+            vmSalesOrderSlave = await (from t1 in _db.OrderMasters.Where(x => x.IsActive && x.OrderMasterId == orderMasterId && x.CompanyId == companyId)
+                                       join t2 in _db.Vendors on t1.CustomerId equals t2.VendorId
+                                       join t4 in _db.SubZones on t2.SubZoneId equals t4.SubZoneId
+                                       join t5 in _db.Zones on t4.ZoneId equals t5.ZoneId
+                                       join t6 in _db.StockInfoes on t1.StockInfoId equals t6.StockInfoId into t6_Join
+                                       from t6 in t6_Join.DefaultIfEmpty()
+                                       join t8 in _db.Employees on t1.SalePersonId equals t8.Id into t8_Join
+                                       from t8 in t8_Join.DefaultIfEmpty()
+                                       select new VMSalesOrderSlave
+                                       {
+                                           WareHouse = t6 != null ? t6.Name : "",
+                                           Propietor = t2.Propietor,
+                                           CreatedDate = t1.CreateDate,
+                                           CustomerIdVA=t2.VendorId,
+                                           OrderDateVA=t1.OrderDate,
+                                           CustomerPhone = t2.Phone,
+                                           CustomerAddress = t2.Address,
+                                           CustomerEmail = t2.Email,
+                                           ContactPerson = t2.ContactName,
+                                           CompanyFK = t1.CompanyId,
+                                           OrderMasterId = t1.OrderMasterId,
+                                           CreditLimit = t2.CreditLimit,
+                                           OrderNo = t1.OrderNo,
+                                           Status = t1.Status,
+                                           OrderDate = t1.OrderDate,
+                                           CreatedBy = t1.CreatedBy,
+                                           CustomerPaymentMethodEnumFK = t1.PaymentMethod,
+                                           ExpectedDeliveryDate = t1.ExpectedDeliveryDate,
+                                           CommonCustomerName = t2.Name,
+                                           AccountingHeadId = t2.HeadGLId,
+                                           ZoneName = t5.Name,
+                                           ZoneIncharge = t5.ZoneIncharge,
+                                           SubZonesName = t4.Name,
+                                           SubZoneIncharge = t4.SalesOfficerName,
+                                           SubZoneInchargeMobile = t4.MobileOffice,
+                                           CommonCustomerCode = t2.Code,
+                                           CustomerTypeFk = t2.CustomerTypeFK,
+                                           CustomerId = t2.VendorId,
+                                           CourierCharge = t1.CourierCharge,
+                                           FinalDestination = t1.FinalDestination,
+                                           CourierNo = t1.CourierNo,
+                                           DiscountAmount = t1.DiscountAmount ?? 0,
+                                           DiscountRate = t1.DiscountRate ?? 0,
+                                           TotalAmountAfterDiscount = t1.TotalAmount ?? 0,
+                                           OfficerNAme = t8 != null ? t8.Name : ""
 
-                                                          CustomerPhone = t2.Phone,
-                                                          CustomerAddress = t2.Address,
-                                                          CustomerEmail = t2.Email,
-                                                          ContactPerson = t2.ContactName,
-                                                          CompanyFK = t1.CompanyId,
-                                                          OrderMasterId = t1.OrderMasterId,
-                                                          CreditLimit = t2.CreditLimit,
-                                                          OrderNo = t1.OrderNo,
-                                                          Status = t1.Status,
-                                                          OrderDate = t1.OrderDate,
-                                                          CreatedBy = t1.CreatedBy,
-                                                          CustomerPaymentMethodEnumFK = t1.PaymentMethod,
-                                                          ExpectedDeliveryDate = t1.ExpectedDeliveryDate,
-                                                          CommonCustomerName = t2.Name,
-
-                                                          ZoneName = t5.Name,
-                                                          ZoneIncharge = t5.ZoneIncharge,
-                                                          SubZonesName = t4.Name,
-                                                          SubZoneIncharge = t4.SalesOfficerName,
-                                                          SubZoneInchargeMobile = t4.MobileOffice,
-                                                          CommonCustomerCode = t2.Code,
-                                                          CustomerTypeFk = t2.CustomerTypeFK,
-                                                          CustomerId = t2.VendorId,
-                                                          CourierCharge = t1.CourierCharge,
-                                                          FinalDestination = t1.FinalDestination,
-                                                          CourierNo = t1.CourierNo,
-                                                          DiscountAmount = t1.DiscountAmount ?? 0,
-                                                          DiscountRate = t1.DiscountRate ?? 0,
-                                                          TotalAmountAfterDiscount = t1.TotalAmount ?? 0,
-                                                          OfficerNAme = t8 != null ? t8.Name : ""
-
-
-
-
-                                                      }).FirstOrDefault());
+                                       }).FirstOrDefaultAsync();
 
 
 
@@ -3952,47 +3952,50 @@ namespace KGERP.Services.Procurement
 
                                                                     }).OrderByDescending(x => x.OrderDetailId).AsEnumerable());
 
-           var approvalList = await (from approval in _db.ApprovalOrderMasters
-                                                                              join a in _db.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
-                                                                              join o in _db.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
-                                                                              join v in _db.Vendors on o.CustomerId equals v.VendorId
-                                                                              join e in _db.Employees on a.EmployeeId equals e.Id
-                                                                              join c in _db.Companies on e.CompanyId equals c.CompanyId
-                                                                              join d in _db.Departments on e.DepartmentId equals d.DepartmentId
-                                                                              join ds in _db.Designations on e.DesignationId equals ds.DesignationId
-                                                                              where approval.IsActive
-                                                                                    && approval.OrderMasterId == orderMasterId
-                                                                              select new OrderMasterSignatoryApprovalVM()
-                                                                              {
-                                                                                  CompanyId = o.CompanyId,
-                                                                                  ProductType = o.ProductType,
-                                                                                  Id = approval.Id,
-                                                                                  EmployeeId = e.EmployeeId,
-                                                                                  ApproverEmployeeIntId = a.EmployeeId.Value,
-                                                                                  EmployeeName = e.Name,
-                                                                                  CompanyName = c.Name,
-                                                                                  DepartmentName = d.Name,
-                                                                                  DesignationName = ds.Name,
-                                                                                  OrderNo = o.OrderNo,
-                                                                                  OrderMasterId = o.OrderMasterId,
-                                                                                  OrderDate = o.OrderDate,
-                                                                                  CoustomerName = v.Name,
-                                                                                  ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
-                                                                                  ApprovalDate = approval.ApprovalDate,
-                                                                                  Comments = approval.Comments,
-                                                                                  SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
-                                                                                  IsPreviousApproved = _db.ApprovalOrderMasters.Where(x => x.IsActive)
-                                                                                      .Any(x => x.OrderMasterId == approval.OrderMasterId
-                                                                                            && x.Id != approval.Id
-                                                                                            && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved)
-                                                                                            && _db.OrderMasterSignatories.Where(o => o.IsActive)
-                                                                                                .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId
-                                                                                                      && y.Precedence < a.Precedence
-                                                                                                      && y.IsActive))
-                                                                              }).ToListAsync();
+            var approvalList = await (from approval in _db.ApprovalOrderMasters
+                                      join a in _db.OrderMasterSignatories on approval.SalesOrderSignatoryId equals a.SalesOrderSignatoryId
+                                      join o in _db.OrderMasters on approval.OrderMasterId equals o.OrderMasterId
+                                      join v in _db.Vendors on o.CustomerId equals v.VendorId
+                                      join e in _db.Employees on a.EmployeeId equals e.Id
+                                      join c in _db.Companies on e.CompanyId equals c.CompanyId
+                                      join d in _db.Departments on e.DepartmentId equals d.DepartmentId
+                                      join ds in _db.Designations on e.DesignationId equals ds.DesignationId
+                                      where approval.IsActive
+                                            && approval.OrderMasterId == orderMasterId
+                                      select new OrderMasterSignatoryApprovalVM()
+                                      {
+                                          CompanyId = o.CompanyId,
+                                          ProductType = o.ProductType,
+                                          Id = approval.Id,
+                                          EmployeeId = e.EmployeeId,
+                                          ApproverEmployeeIntId = a.EmployeeId.Value,
+                                          EmployeeName = e.Name,
+                                          CompanyName = c.Name,
+                                          DepartmentName = d.Name,
+                                          DesignationName = ds.Name,
+                                          OrderNo = o.OrderNo,
+                                          OrderMasterId = o.OrderMasterId,
+                                          OrderDate = o.OrderDate,
+                                          CoustomerName = v.Name,
+                                          ApprovalOrderMasterSignatoryId = a.SalesOrderSignatoryId,
+                                          ApprovalDate = approval.ApprovalDate,
+                                          Comments = approval.Comments,
+                                          SignatoryStatus = (SignatoryStatusEnum)approval.ApprovalStatus,
+                                          IsPreviousApproved = _db.ApprovalOrderMasters.Where(x => x.IsActive)
+                                              .Any(x => x.OrderMasterId == approval.OrderMasterId
+                                                    && x.Id != approval.Id
+                                                    && (x.ApprovalStatus != (int)SignatoryStatusEnum.Approved)
+                                                    && _db.OrderMasterSignatories.Where(o => o.IsActive)
+                                                        .Any(y => y.SalesOrderSignatoryId == x.SalesOrderSignatoryId
+                                                              && y.Precedence < a.Precedence
+                                                              && y.IsActive))
+                                      }).ToListAsync();
 
             // Now, sort in memory
             vmSalesOrderSlave.SignatoryApprovalList = approvalList.OrderBy(a => a.Precedence).ToList();
+
+
+            //vmSalesOrderSlave.LedgerBalance = CustomerLadegerBalance(companyId, vmSalesOrderSlave.AccountingHeadId.Value);
 
 
 
@@ -4003,6 +4006,151 @@ namespace KGERP.Services.Procurement
 
 
             return vmSalesOrderSlave;
+        }
+
+        //public RResult CustomerLadegerBalance(int companyId, int vendorId, DateTime? invoiceDate = null)
+        //{
+        //    RResult rResult = new RResult();
+        //    try
+        //    {
+        //        string date = invoiceDate.HasValue ? invoiceDate.Value.ToString("yyyy-MM-dd") : null;
+        //        DateTime myDate = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        //        var customerInfo = _db.Vendors.Where(x => x.IsActive && x.HeadGLId > 0 && x.VendorId == vendorId).Select(x => new { x.HeadGLId, x.CreditLimit }).FirstOrDefault();
+        //        if (customerInfo.HeadGLId > 0 && companyId > 0)
+        //        {
+        //            rResult.decimalValue = _db.Database.SqlQuery<decimal>("EXEC CustomerLadegerBalance {0},{1} ", companyId, customerInfo.HeadGLId).FirstOrDefault();
+        //            decimal BlanceValue = ((customerInfo.CreditLimit ?? 0) - rResult.decimalValue);
+        //            string havePermision = string.Empty;
+        //            if (BlanceValue <= 0)
+        //            {
+        //                var permisionCheck = _db.ApplicationManages.Where(x => x.IsActive && x.IsSubmitted && x.ApplicantId == vendorId && x.Status == (int)SignatoryStatusEnum.Approved && x.EndDate >= myDate);
+        //                if (permisionCheck.Any())
+        //                {
+        //                    var application = permisionCheck.OrderByDescending(x => x.ApplicationId).FirstOrDefault();
+        //                    havePermision = $"This Customer Have Permission For Over Credit Limit and Permision End Date will be {application.EndDate.ToString("dd-MMM-yyyy")}";
+        //                }
+        //                else
+        //                {
+        //                    havePermision = "Don't have a Permation";
+        //                }
+        //            }
+        //            rResult.message = $"This Receiveable Amount {rResult.decimalValue} and Credit Limit {customerInfo.CreditLimit ?? 0} with Current Position Blance {BlanceValue}. {havePermision}";
+        //        }
+        //        else
+        //        {
+        //            rResult.message = "Failed";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        rResult.message = $"Failed {ex}";
+        //        throw;
+        //    }
+
+        //    return rResult;
+        //}
+
+        public async Task<RResult> CustomerLedgerBalanceAsync(
+            int companyId,
+            int vendorId,
+            DateTime? invoiceDate = null)
+        {
+            RResult rResult = new RResult();
+
+            try
+            {
+                // ── 1. Input validation ───
+                if (companyId <= 0)
+                {
+                    rResult.message = "Invalid company ID.";
+                    return rResult;
+                }
+
+                DateTime effectiveDate = invoiceDate?.Date ?? DateTime.Today;
+
+                // ── 2. Database query - ASYNC ──
+
+                var customerInfo = await _db.Vendors
+                    .Where(x => x.IsActive
+                             && x.HeadGLId > 0
+                             && x.VendorId == vendorId)
+                    .Select(x => new { x.HeadGLId, x.CreditLimit })
+                    .FirstOrDefaultAsync();  
+
+                if (customerInfo == null || customerInfo.HeadGLId <= 0)
+                {
+                    rResult.message = "Customer not found or GL Head is not configured.";
+                    return rResult;
+                }
+
+                // ── 3. Stored procedure call - ASYNC ──
+
+                var receivableResult = await _db.Database
+                    .SqlQuery<decimal>(
+                        "EXEC CustomerLadegerBalance @p0, @p1",
+                        companyId,
+                        customerInfo.HeadGLId)
+                    .FirstOrDefaultAsync();  
+
+                decimal receivableAmount = receivableResult;
+                decimal creditLimit = customerInfo.CreditLimit ?? 0m;
+                decimal currentBalance = creditLimit - receivableAmount;
+
+                rResult.decimalValue = receivableAmount;
+
+                // ── 4. Permission check - ASYNC ───
+                string permissionNote = string.Empty;
+
+                if (currentBalance <= 0)
+                {
+                    var latestPermission = await _db.ApplicationManages
+                        .Where(x => x.IsActive
+                                  && x.IsSubmitted
+                                  && x.ApplicantId == vendorId
+                                  && x.Status == (int)SignatoryStatusEnum.Approved
+                                  && x.EndDate >= effectiveDate)
+                        .OrderByDescending(x => x.ApplicationId)
+                        .Select(x => new { x.EndDate })
+                        .FirstOrDefaultAsync(); 
+
+                    permissionNote = latestPermission != null
+                        ? $"This customer has permission for over-credit-limit usage;" +
+                          $"permission expires on {latestPermission.EndDate:dd-MMM-yyyy}."
+                        : "Customer does not have permission to exceed the credit limit.";
+                    if (latestPermission != null)
+                    {
+                        rResult.result = 1;
+                    }
+                    
+                }
+
+                // ── 5. Build result ──────────────────────────────────────
+                rResult.message = string.Format(
+                    "Receivable Amount: {0:N2} | Credit Limit: {1:N2} | " +
+                    "Current Balance: {2:N2}। {3}",
+                    receivableAmount,
+                    creditLimit,
+                    currentBalance,
+                    permissionNote).TrimEnd();
+;
+                rResult.datas = new CustomerBalanceDto
+                {
+                    receivableAmount=receivableAmount,
+                    creditLimit = creditLimit,
+                    currentBalance = currentBalance,
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"CustomerLedgerBalance error: {ex}");
+                rResult.message =
+                    $"An error occurred while retrieving the ledger balance: {ex.Message}";
+                rResult.result = 0;
+            }
+
+            return rResult;
         }
 
         public async Task<VMSalesOrderSlave> GcclProcurementSalesOrderDetailsGet(int companyId, int orderMasterId)
@@ -4433,14 +4581,14 @@ namespace KGERP.Services.Procurement
                              CompanyFK = t1.CompanyId,
                              FormulaQty = t1.FormulaQty,
                              UnitPrice = t1.UnitPrice ?? 0,
-                             ProductType=t1.ProductType
+                             ProductType = t1.ProductType
 
 
                          }).FirstOrDefault();
             VMProductStock vmProductStock = new VMProductStock();
             if (vmProduct.ProductType == "F")
             {
-         
+
                 vmProductStock = _db.Database.SqlQuery<VMProductStock>(
                    "EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}",
                    productId,
@@ -4460,7 +4608,7 @@ namespace KGERP.Services.Procurement
             }
 
 
-          
+
             vmProduct.CurrentStock = vmProductStock.ClosingQty;
 
 
@@ -4950,7 +5098,7 @@ namespace KGERP.Services.Procurement
         .ForEach(x => List.Add(new
         {
             Value = x.VendorId,
-            Text = x.Name+"-"+x.Address
+            Text = x.Name + "-" + x.Address
         }));
             return List;
 
