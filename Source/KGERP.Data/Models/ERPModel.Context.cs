@@ -67,7 +67,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<Colour> Colours { get; set; }
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<CompanyMenu> CompanyMenus { get; set; }
-        public virtual DbSet<CompanySubMenu> CompanySubMenus { get; set; }
         public virtual DbSet<CompanyUserMenu> CompanyUserMenus { get; set; }
         public virtual DbSet<CompanyVoucher> CompanyVouchers { get; set; }
         public virtual DbSet<ComplainManagement> ComplainManagements { get; set; }
@@ -369,6 +368,7 @@ namespace KGERP.Data.Models
         public virtual DbSet<SubZone> SubZones { get; set; }
         public virtual DbSet<RequisitionSignatory> RequisitionSignatories { get; set; }
         public virtual DbSet<ApplicationManage> ApplicationManages { get; set; }
+        public virtual DbSet<CompanySubMenu> CompanySubMenus { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
