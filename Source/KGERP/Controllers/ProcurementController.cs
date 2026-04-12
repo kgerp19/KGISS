@@ -1039,44 +1039,44 @@ namespace KG.App.Controllers
         public async Task<ActionResult> ProcurementSalesOrderSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
             #region This Section is responsable for Customer Limit Check
-            DateTime orderDate = DateTime.Now;
-            var customerId = 0;
-            string message = null;
-            if (vmSalesOrderSlave.OrderMasterId<=0)
-            {
-                customerId = vmSalesOrderSlave.CustomerId;
-                orderDate = vmSalesOrderSlave.OrderDate;
-            }
-            else
-            {
-                customerId = vmSalesOrderSlave.CustomerIdVA;
-                orderDate = vmSalesOrderSlave.OrderDateVA;
-            }
+            //DateTime orderDate = DateTime.Now;
+            //var customerId = 0;
+            //string message = null;
+            //if (vmSalesOrderSlave.OrderMasterId<=0)
+            //{
+            //    customerId = vmSalesOrderSlave.CustomerId;
+            //    orderDate = vmSalesOrderSlave.OrderDate;
+            //}
+            //else
+            //{
+            //    customerId = vmSalesOrderSlave.CustomerIdVA;
+            //    orderDate = vmSalesOrderSlave.OrderDateVA;
+            //}
 
-            if (customerId<=0)
-            {
-                message = "Customer is not found!";
-                return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK });
-            }
+            //if (customerId<=0)
+            //{
+            //    message = "Customer is not found!";
+            //    return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK });
+            //}
 
-            RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
-            var previousAmount = await _db.OrderDetails
-                .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
-                .Select(x => x.Amount)
-                .DefaultIfEmpty(0)
-                .SumAsync();
+            //RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
+            //var previousAmount = await _db.OrderDetails
+            //    .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
+            //    .Select(x => x.Amount)
+            //    .DefaultIfEmpty(0)
+            //    .SumAsync();
 
-            var receivableAmount = rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount);
+            //var receivableAmount = rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount);
 
-            bool isCustomerEligibleForOrder = (rResult.result == 1 || receivableAmount > 0);
+            //bool isCustomerEligibleForOrder = (rResult.result == 1 || receivableAmount > 0);
 
-            if (!isCustomerEligibleForOrder)
-            {
-                // Added TempData so the user actually knows WHY it failed when the page reloads
-                message = "Customer is not eligible for this order due to insufficient balance.";
-                return vmSalesOrderSlave.OrderMasterId<=0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message= message }):
-                    RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message= message });
-            }
+            //if (!isCustomerEligibleForOrder)
+            //{
+            //    // Added TempData so the user actually knows WHY it failed when the page reloads
+            //    message = "Customer is not eligible for this order due to insufficient balance.";
+            //    return vmSalesOrderSlave.OrderMasterId<=0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message= message }):
+            //        RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message= message });
+            //}
             #endregion
 
             if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
