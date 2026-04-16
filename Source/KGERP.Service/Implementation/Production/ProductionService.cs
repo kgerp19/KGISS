@@ -13,7 +13,10 @@ using System.Data.SqlClient;
 using System.IdentityModel;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
+using System.Web;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace KGERP.Services.Production
@@ -691,81 +694,218 @@ namespace KGERP.Services.Production
                                           }).FirstAsync();
             return v;
         }
+        //public async Task<int> ProdReferenceSlaveAdd(VMProdReferenceSlave vmProdReferenceSlave)
+        //{
+        //    int result = -1;
+        //    Prod_ReferenceSlave prodReferenceSlave = new Prod_ReferenceSlave
+        //    {
+        //        CostingPrice = vmProdReferenceSlave.CostingPrice,
+        //        FProductId = vmProdReferenceSlave.FProductId,
+        //        ProdReferenceId = vmProdReferenceSlave.ProdReferenceId,
+        //        Quantity = vmProdReferenceSlave.Quantity,
+        //        CompanyId = vmProdReferenceSlave.CompanyFK,
+        //        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+        //        CreatedDate = DateTime.Now,
+        //        IsActive = true
+
+        //    };
+        //    _db.Prod_ReferenceSlave.Add(prodReferenceSlave);
+        //    if (await _db.SaveChangesAsync() > 0)
+        //    {
+        //        result = prodReferenceSlave.ProdReferenceSlaveID;
+        //    }
+        //    string lot = "";
+        //    if (result > 0)
+        //    {
+
+        //        //var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive && x.CompanyId== vmProdReferenceSlave.CompanyFK).AsEnumerable();
+        //        var bomsOfProduct = _db.FinishProductBOMs
+        //    .Where(x => x.FProductFK == vmProdReferenceSlave.FProductId
+        //        && x.IsActive
+        //        && x.CompanyId == vmProdReferenceSlave.CompanyFK)
+        //    .ToList();
+
+        //        decimal RequiredQuantity = 0;
+        //        List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
+        //        foreach (var bom in bomsOfProduct.Where(x => x.RProductFK > 0))
+        //        {
+
+        //            VMProductStock vMProductStock = new VMProductStock();
+        //            vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, bom.LotNumber ?? "xyzz").FirstOrDefault();
+        //            RequiredQuantity = bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm ? bom.RequiredQuantity / 1000 : bom.RequiredQuantity;
+
+        //            decimal totalConsumeQty = RequiredQuantity * vmProdReferenceSlave.Quantity;
+
+        //            if (totalConsumeQty > vMProductStock.ClosingQty )
+        //            {
+        //                return result = -1;
+        //            }
+
+        //            Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
+        //            {
+        //                RProductId = bom.RProductFK,
+        //                TotalConsumeQuantity = totalConsumeQty,
+        //                COGS = vMProductStock.ClosingRate,
+        //                ProdReferenceSlaveID = result,
+        //                CompanyId = vmProdReferenceSlave.CompanyFK,
+        //                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
+        //                CreatedDate = DateTime.Now,
+        //                IsActive = true,
+        //                LotNumber = bom.LotNumber,
+        //            };
+        //            List.Add(prod_ReferenceSlaveConsumption);
+
+        //            lot += bom.LotNumber;
+        //            RequiredQuantity = 0;
+        //        }
+        //        _db.Prod_ReferenceSlaveConsumption.AddRange(List);
+        //        await _db.SaveChangesAsync();
+        //    }
+        //    #region Update Finished Goods COGS
+        //    var consumeAmount = _db.Prod_ReferenceSlaveConsumption.Where(x => x.ProdReferenceSlaveID == result
+        //                       && x.IsActive).Select(x => x.TotalConsumeQuantity * x.COGS).DefaultIfEmpty(0).Sum();
+        //    if (consumeAmount > 0)
+        //    {
+        //        Prod_ReferenceSlave referenceSlave = _db.Prod_ReferenceSlave.Find(result);
+        //        referenceSlave.CostingPrice = consumeAmount / referenceSlave.Quantity;
+        //        referenceSlave.LotNumber = lot;
+        //        await _db.SaveChangesAsync();
+
+        //    }
+        //    #endregion
+
+
+        //    return result;
+        //}
+
         public async Task<int> ProdReferenceSlaveAdd(VMProdReferenceSlave vmProdReferenceSlave)
         {
-            int result = -1;
-            Prod_ReferenceSlave prodReferenceSlave = new Prod_ReferenceSlave
+            if (vmProdReferenceSlave == null)
             {
-                CostingPrice = vmProdReferenceSlave.CostingPrice,
-                FProductId = vmProdReferenceSlave.FProductId,
-                ProdReferenceId = vmProdReferenceSlave.ProdReferenceId,
-                Quantity = vmProdReferenceSlave.Quantity,
-                CompanyId = vmProdReferenceSlave.CompanyFK,
-                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                CreatedDate = DateTime.Now,
-                IsActive = true
-
-            };
-            _db.Prod_ReferenceSlave.Add(prodReferenceSlave);
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                result = prodReferenceSlave.ProdReferenceSlaveID;
+                throw new ArgumentNullException(nameof(vmProdReferenceSlave));
             }
-            string lot = "";
-            if (result > 0)
+
+            string currentUser = HttpContext.Current?.User?.Identity?.Name
+                ?? throw new InvalidOperationException("Current user not found.");
+
+            DateTime currentTimestamp = DateTime.Now;
+            int referenceSlaveId = -1;
+
+            // ─── TransactionScope তৈরি ──────────────────────────────────
+            // TransactionScopeAsyncFlowOption.Enabled → async/await 
+            var transactionOptions = new TransactionOptions
             {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TransactionManager.MaximumTimeout
+            };
 
-                //var bomsOfProduct = _db.FinishProductBOMs.Where(x => x.FProductFK == vmProdReferenceSlave.FProductId && x.IsActive && x.CompanyId== vmProdReferenceSlave.CompanyFK).AsEnumerable();
-                var bomsOfProduct = _db.FinishProductBOMs
-            .Where(x => x.FProductFK == vmProdReferenceSlave.FProductId
-                && x.IsActive
-                && x.CompanyId == vmProdReferenceSlave.CompanyFK)
-            .ToList();
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required,
+                transactionOptions,
+                TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var prodReferenceSlave = new Prod_ReferenceSlave
+                {
+                    CostingPrice = vmProdReferenceSlave.CostingPrice,
+                    FProductId = vmProdReferenceSlave.FProductId,
+                    ProdReferenceId = vmProdReferenceSlave.ProdReferenceId,
+                    Quantity = vmProdReferenceSlave.Quantity,
+                    CompanyId = vmProdReferenceSlave.CompanyFK,
+                    CreatedBy = currentUser,
+                    CreatedDate = currentTimestamp,
+                    IsActive = true
+                };
 
-                decimal RequiredQuantity = 0;
-                List<Prod_ReferenceSlaveConsumption> List = new List<Prod_ReferenceSlaveConsumption>();
-                foreach (var bom in bomsOfProduct.Where(x => x.RProductFK > 0))
+                _db.Prod_ReferenceSlave.Add(prodReferenceSlave);
+
+                if (await _db.SaveChangesAsync().ConfigureAwait(false) <= 0)
                 {
 
-                    VMProductStock vMProductStock = new VMProductStock();
-                    vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", bom.RProductFK, bom.CompanyId, bom.LotNumber ?? "xyzz").FirstOrDefault();
-                    RequiredQuantity = bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm ? bom.RequiredQuantity / 1000 : bom.RequiredQuantity;
+                    return -1;
+                }
 
-                    Prod_ReferenceSlaveConsumption prod_ReferenceSlaveConsumption = new Prod_ReferenceSlaveConsumption
+                referenceSlaveId = prodReferenceSlave.ProdReferenceSlaveID;
+
+                var bomsWithRawProduct = _db.FinishProductBOMs
+                    .Where(x => x.FProductFK == vmProdReferenceSlave.FProductId
+                              && x.IsActive
+                              && x.CompanyId == vmProdReferenceSlave.CompanyFK
+                              && x.RProductFK > 0)
+                    .ToList();
+
+                var consumptionList = new List<Prod_ReferenceSlaveConsumption>(bomsWithRawProduct.Count);
+                var lotNumberBuilder = new StringBuilder();
+
+                foreach (var bom in bomsWithRawProduct)
+                {
+                    string safeLot = bom.LotNumber ?? "xyzz";
+
+                    var stock = _db.Database
+                        .SqlQuery<VMProductStock>(
+                            "EXEC GetSeedRMStockByProductId {0}, {1}, {2}",
+                            bom.RProductFK, bom.CompanyId, safeLot)
+                        .FirstOrDefault();
+
+                    if (stock == null)
+                    {
+
+                        return -1;
+                    }
+
+                    // gm হলে kg তে convert (1000 দিয়ে ভাগ)
+                    decimal requiredQty = bom.CalculationUnit.HasValue
+                        && bom.CalculationUnit.Value == (int)FormulaCalculationEnum.gm
+                            ? bom.RequiredQuantity / 1000m
+                            : bom.RequiredQuantity;
+
+                    decimal totalConsumeQty = requiredQty * vmProdReferenceSlave.Quantity;
+
+                    if (totalConsumeQty > stock.ClosingQty)
+                    {
+                        return -1;
+                    }
+
+                    consumptionList.Add(new Prod_ReferenceSlaveConsumption
                     {
                         RProductId = bom.RProductFK,
-                        TotalConsumeQuantity = RequiredQuantity * vmProdReferenceSlave.Quantity,
-                        COGS = vMProductStock.ClosingRate,
-                        ProdReferenceSlaveID = result,
+                        TotalConsumeQuantity = totalConsumeQty,
+                        COGS = stock.ClosingRate,
+                        ProdReferenceSlaveID = referenceSlaveId,
                         CompanyId = vmProdReferenceSlave.CompanyFK,
-                        CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                        CreatedDate = DateTime.Now,
+                        CreatedBy = currentUser,
+                        CreatedDate = currentTimestamp,
                         IsActive = true,
-                        LotNumber = bom.LotNumber,
-                    };
-                    List.Add(prod_ReferenceSlaveConsumption);
+                        LotNumber = bom.LotNumber
+                    });
 
-                    lot += bom.LotNumber;
-                    RequiredQuantity = 0;
+                    lotNumberBuilder.Append(bom.LotNumber);
                 }
-                _db.Prod_ReferenceSlaveConsumption.AddRange(List);
-                await _db.SaveChangesAsync();
+
+                if (consumptionList.Any())
+                {
+                    _db.Prod_ReferenceSlaveConsumption.AddRange(consumptionList);
+                    await _db.SaveChangesAsync().ConfigureAwait(false);
+                }
+
+   
+                decimal consumeAmount = _db.Prod_ReferenceSlaveConsumption
+                    .Where(x => x.ProdReferenceSlaveID == referenceSlaveId && x.IsActive)
+                    .Select(x => x.TotalConsumeQuantity * x.COGS)
+                    .DefaultIfEmpty(0m)
+                    .Sum();
+
+                if (consumeAmount > 0m && prodReferenceSlave.Quantity != 0)
+                {
+                    prodReferenceSlave.CostingPrice = consumeAmount / prodReferenceSlave.Quantity;
+                    prodReferenceSlave.LotNumber = lotNumberBuilder.ToString();
+                    await _db.SaveChangesAsync().ConfigureAwait(false);
+                }
+
+                scope.Complete();
+
+                return referenceSlaveId;
             }
-            #region Update Finished Goods COGS
-            var consumeAmount = _db.Prod_ReferenceSlaveConsumption.Where(x => x.ProdReferenceSlaveID == result
-                               && x.IsActive).Select(x => x.TotalConsumeQuantity * x.COGS).DefaultIfEmpty(0).Sum();
-            if (consumeAmount > 0)
-            {
-                Prod_ReferenceSlave referenceSlave = _db.Prod_ReferenceSlave.Find(result);
-                referenceSlave.CostingPrice = consumeAmount / referenceSlave.Quantity;
-                referenceSlave.LotNumber = lot;
-                await _db.SaveChangesAsync();
 
-            }
-            #endregion
-
-
-            return result;
         }
 
         public async Task<int> ProdReferenceSlaveByChallanAdd(VMProdReferenceSlave vmProdReferenceSlave)
