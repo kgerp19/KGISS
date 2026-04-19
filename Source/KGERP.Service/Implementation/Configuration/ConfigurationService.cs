@@ -3776,8 +3776,12 @@ namespace KGERP.Service.Implementation
 
                      }).FirstOrDefault();
             VMProductStock vMProductStock = GetFinishProductCogs(id, v.CompanyFK);
-            v.CostingPrice = vMProductStock.ClosingRate;
-            v.ClosingQty = vMProductStock.ClosingQty;
+            if (vMProductStock != null)
+            {
+                v.CostingPrice = vMProductStock.ClosingRate;
+                v.ClosingQty = vMProductStock.ClosingQty;
+            }
+            
 
 
             return v;
