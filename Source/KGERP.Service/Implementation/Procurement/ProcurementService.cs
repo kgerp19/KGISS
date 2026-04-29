@@ -4610,6 +4610,7 @@ namespace KGERP.Services.Procurement
 
 
             vmProduct.CurrentStock = vmProductStock.ClosingQty;
+            vmProduct.ClosingRate = vmProductStock.ClosingRate;
 
 
             return vmProduct;

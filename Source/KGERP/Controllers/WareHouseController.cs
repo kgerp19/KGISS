@@ -828,7 +828,7 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> WareHouseOrderDeliverDetail(int companyId, int orderDeliverId = 0)
+        public async Task<ActionResult> WareHouseOrderDeliverDetail(int companyId, int orderDeliverId = 0,string message="")
         {
             VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
             if (orderDeliverId == 0)
@@ -840,6 +840,7 @@ namespace KGERP.Controllers
                 vmOrderDeliverDetail = await _service.WareHouseOrderDeliverDetailGet(companyId, orderDeliverId);
             }
             vmOrderDeliverDetail.StockInfoList = new SelectList(_procurementService.StockInfoesDropDownList(companyId), "Value", "Text");
+            ViewBag.errormessage = message;
 
             return View(vmOrderDeliverDetail);
         }
@@ -854,6 +855,14 @@ namespace KGERP.Controllers
             {
                 if (vmModel.OrderDeliverId == 0)
                 {
+                    var dataListSlavePartial = vmModelList.DataToList.Where(x => x.Flag && x.DeliverQty > 0).ToList();
+                    bool isCogs = dataListSlavePartial.Any(x => x.ClosingRate <= 0);
+                    if (!dataListSlavePartial.Any() || isCogs)
+                    {
+                        return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId, message= "COGS Rate Not Found For Some Product.Please check COGS Rate First." });
+                    }
+                    
+
                     vmModel.OrderDeliverId = await _service.WareHouseOrderDeliversAdd(vmModel);
                 }
                 if (vmModel.OrderDeliverId > 0)

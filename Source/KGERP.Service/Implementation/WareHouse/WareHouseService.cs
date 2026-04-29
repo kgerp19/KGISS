@@ -1984,15 +1984,16 @@ namespace KGERP.Services.WareHouse
             foreach (VMOrderDeliverDetailPartial item in list)
             {
                 VMProductStock vmProductStock = new VMProductStock();
-                if (item.ProductType=="R")
+
+                if (item.ProductType=="F")
                 {
-                    //var lotNoR = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
-                    vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetPackagingRMStockByProductId {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                    var lotNoR = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
+                    vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}", item.ProductId, item.CompanyFK, lotNoR).FirstOrDefault();
                 }
-                else if (item.ProductType=="F")
+                else if (item.ProductType=="R")
                 {
-                    //var lotNoF = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
-                    vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC ISSFinishedGoodsStockByProduct {0},{1}", item.ProductId, item.CompanyFK).FirstOrDefault();
+                    var lotNoF = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
+                    vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0}, {1}, {2}", item.ProductId, item.CompanyFK, lotNoF).FirstOrDefault();
                 }
                 
                 item.CurrentStock = vmProductStock.ClosingQty;

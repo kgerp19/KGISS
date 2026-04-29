@@ -694,6 +694,7 @@ namespace KGERP.Service.Configuration
         public decimal? ReturnQuntity { get; set; }
 
         public decimal? FormulaQty { get; set; }
+        public decimal ClosingRate { get; set; }
     }
 
 
