@@ -16,7 +16,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
@@ -1661,7 +1663,15 @@ namespace KGERP.Service.Implementation
                 string lastAccCode = childHeads.OrderByDescending(x => x.Id).FirstOrDefault().AccCode;
                 string parentPart = lastAccCode.Substring(0, 10);
                 string childPart = lastAccCode.Substring(10, 3);
-                newAccountCode = parentPart + (Convert.ToInt32(childPart) + 1).ToString().PadLeft(3, '0');
+                int nextChildNumber = Convert.ToInt32(childPart) + 1;
+
+                do
+                {
+                    newAccountCode = parentPart + nextChildNumber.ToString().PadLeft(3, '0');
+                    nextChildNumber++;
+                }
+                while (childHeads.Any(x => x.AccCode == newAccountCode));
+
                 orderNo = childHeads.Count();
             }
 
@@ -1694,6 +1704,169 @@ namespace KGERP.Service.Implementation
                 result = headGL.Id;
             }
             return headGL;
+        }
+
+        //public async Task<HeadGL> PayableHeadIntegrationAdd(VMHeadIntegration vmHeadIntegration)
+        //{
+        //    const int MAX_RETRIES = 3;
+        //    int attempt = 0;
+
+        //    while (attempt < MAX_RETRIES)
+        //    {
+        //        attempt++;
+        //        using (var transaction = _db.Database.BeginTransaction())
+        //        {
+        //            try
+        //            {
+        //                // ── 1. Validate parent ──────────────────────────────────────
+        //                Head5 parentHead = await _db.Head5
+        //                    .Where(x => x.Id == vmHeadIntegration.ParentId)
+        //                    .FirstOrDefaultAsync();
+
+        //                if (parentHead == null)
+        //                    throw new InvalidOperationException(
+        //                        $"Parent head not found. ParentId: {vmHeadIntegration.ParentId}");
+
+        //                if (string.IsNullOrWhiteSpace(parentHead.AccCode))
+        //                    throw new InvalidOperationException(
+        //                        $"Parent AccCode is null or empty. ParentId: {vmHeadIntegration.ParentId}");
+
+        //                // ── 2. Single DB call — load all child codes into memory ────
+        //                List<string> existingCodes = await _db.HeadGLs
+        //                    .Where(x => x.ParentId == vmHeadIntegration.ParentId)
+        //                    .Select(x => x.AccCode)
+        //                    .ToListAsync();
+
+        //                // ── 3. Generate unique AccCode in memory (no DB loop) ───────
+        //                string newAccountCode;
+        //                int orderNo;
+
+        //                if (existingCodes.Count > 0)
+        //                {
+        //                    // Validate existing codes have correct length before parsing
+        //                    string sample = existingCodes.FirstOrDefault(c => c != null && c.Length >= 13);
+        //                    if (sample == null)
+        //                        throw new InvalidOperationException(
+        //                            "Existing child AccCodes have invalid format (expected length >= 13).");
+
+        //                    string parentPart = sample.Substring(0, 10);
+
+        //                    // Parse all numeric child parts into a HashSet for O(1) lookup
+        //                    HashSet<int> existingNumbers = new HashSet<int>();
+        //                    foreach (var code in existingCodes)
+        //                    {
+        //                        if (code != null && code.Length >= 13 &&
+        //                            int.TryParse(code.Substring(10, 3), out int num))
+        //                        {
+        //                            existingNumbers.Add(num);
+        //                        }
+        //                    }
+
+        //                    // Find the next available slot (fills gaps too)
+        //                    int nextNumber = 1;
+        //                    while (existingNumbers.Contains(nextNumber))
+        //                        nextNumber++;
+
+        //                    if (nextNumber > 999)
+        //                        throw new InvalidOperationException(
+        //                            "Maximum account code limit (999) reached for this parent.");
+
+        //                    newAccountCode = parentPart + nextNumber.ToString().PadLeft(3, '0');
+        //                    orderNo = existingCodes.Count + 1;
+        //                }
+        //                else
+        //                {
+        //                    // First child under this parent
+        //                    if (parentHead.AccCode.Length < 10)
+        //                        throw new InvalidOperationException(
+        //                            $"Parent AccCode '{parentHead.AccCode}' is too short (expected >= 10 chars).");
+
+        //                    newAccountCode = parentHead.AccCode.PadRight(10, '0') + "001";
+        //                    orderNo = 1;
+        //                }
+
+        //                // ── 4. Generate new ID via stored procedure ─────────────────
+        //                int newId = _db.Database
+        //                    .SqlQuery<int>("spGetNewId")
+        //                    .FirstOrDefault();
+
+        //                if (newId <= 0)
+        //                    throw new InvalidOperationException(
+        //                        "Failed to generate a new ID from spGetNewId.");
+
+        //                // ── 5. Build and save entity ────────────────────────────────
+        //                HeadGL headGL = new HeadGL
+        //                {
+        //                    Id = newId,
+        //                    AccCode = newAccountCode,
+        //                    LayerNo = vmHeadIntegration.LayerNo,
+        //                    CompanyId = vmHeadIntegration.CompanyFK,
+        //                    CreateDate = vmHeadIntegration.CreatedDate,
+        //                    CreatedBy = vmHeadIntegration.CreatedBy,
+        //                    AccName = vmHeadIntegration.AccName,
+        //                    ParentId = vmHeadIntegration.ParentId,
+        //                    OrderNo = orderNo,
+        //                    Remarks = vmHeadIntegration.Remarks,
+        //                    IsActive = true
+        //                };
+
+        //                _db.HeadGLs.Add(headGL);
+        //                int saved = await _db.SaveChangesAsync();
+
+        //                if (saved <= 0)
+        //                    throw new InvalidOperationException("SaveChangesAsync reported 0 rows affected.");
+
+        //                transaction.Commit();
+        //                return headGL;
+        //            }
+        //            catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
+        //            {
+        //                // Race condition — another request grabbed the same AccCode
+        //                transaction.Rollback();
+
+        //                if (attempt >= MAX_RETRIES)
+        //                    throw new InvalidOperationException(
+        //                        $"Failed to generate a unique AccCode after {MAX_RETRIES} attempts. " +
+        //                        "Please try again.", ex);
+
+        //                // Small delay before retry to reduce collision chance
+        //                await Task.Delay(50 * attempt);
+        //            }
+        //            catch (DbUpdateException ex)
+        //            {
+        //                transaction.Rollback();
+        //                throw new InvalidOperationException(
+        //                    "Database error while saving HeadGL: " +
+        //                    (ex.InnerException?.Message ?? ex.Message), ex);
+        //            }
+        //            catch (InvalidOperationException)
+        //            {
+        //                transaction.Rollback();
+        //                throw; // Re-throw our own validation errors as-is
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                transaction.Rollback();
+        //                throw new InvalidOperationException(
+        //                    "Unexpected error in PayableHeadIntegrationAdd: " + ex.Message, ex);
+        //            }
+        //        }
+        //    }
+
+        //    // Should never reach here — satisfies compiler
+        //    throw new InvalidOperationException("Unexpected exit from retry loop.");
+        //}
+
+        // ── Duplicate key detection (SQL Server focused for EF 4.7) ──────────────────
+        private bool IsDuplicateKeyException(DbUpdateException ex)
+        {
+            if (ex?.InnerException is SqlException sqlEx)
+                return sqlEx.Number == 2627  // PRIMARY KEY / UNIQUE constraint violation
+                    || sqlEx.Number == 2601; // Duplicate key row (unique index)
+
+            var message = ex?.InnerException?.Message ?? ex?.Message ?? string.Empty;
+            return message.IndexOf("duplicate", StringComparison.OrdinalIgnoreCase) >= 0
+                || message.IndexOf("unique", StringComparison.OrdinalIgnoreCase) >= 0;
         }
         public async Task<Head5> HEad5PayableHeadIntegrationAdd(VMHeadIntegration vmHeadIntegration)
         {
