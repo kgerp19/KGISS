@@ -1976,9 +1976,6 @@ namespace KGERP.Services.WareHouse
                               .Distinct()
                               .OrderBy(x => x)
                               .ToList()
-
-
-
                         }).ToList();
 
             foreach (VMOrderDeliverDetailPartial item in list)
@@ -5802,6 +5799,7 @@ namespace KGERP.Services.WareHouse
             model.ModifedDate = DateTime.Now;
 
             VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
+            AccData.IntegratedFrom = "MaterialReceive";
             await _accountingService.AccountingSalesPushISS(AccData);
             return result;
         }
@@ -6124,6 +6122,52 @@ namespace KGERP.Services.WareHouse
                 await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, getVoucherType.VoucherTypeId);
 
                 #endregion
+            }
+
+            return result;
+        }
+        public async Task<long> SubmitSaleReturnByProductMultiple(VMSaleReturnDetail vmModel)
+        {
+            long result = -1;
+            var saleReturnIds = new List<long>
+            {
+            102250
+            ,102251
+            ,102252
+            ,102253
+            ,102254
+            ,102293
+            ,102294
+            ,102295
+            ,102296
+            ,103027
+            };
+
+            foreach (var id in saleReturnIds)
+            {
+                SaleReturn model = await _db.SaleReturns.FindAsync(id);
+                model.IsFinalized = true;
+
+                //model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
+                //model.ModifiedDate = DateTime.Now;
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = model.SaleReturnId;
+                }
+
+                if (result > 0)
+                {
+                    #region Ready To Account Integration
+                    VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(id));
+                    var getVoucherType = await _db.VoucherTypes.FirstAsync(x => x.IsActive && x.Code == "SRV" && x.CompanyId == AccData.CompanyFK.Value);
+                    if (getVoucherType is null || getVoucherType.VoucherTypeId <= 0)
+                    {
+                        return result;
+                    }
+                    await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, getVoucherType.VoucherTypeId);
+
+                    #endregion
+                }
             }
 
             return result;

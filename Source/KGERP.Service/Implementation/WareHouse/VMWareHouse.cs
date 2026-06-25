@@ -668,6 +668,7 @@ namespace KGERP.Services.WareHouse
         public decimal DiscountAmount { get; set; }
         public decimal DiscountRate { get; set; }
         public decimal ClosingRate { get; set; }
+        public decimal CurrentStockQty { get; set; }
         public decimal DiscountUnit { get; set; }
         /// <summary>
         /// /

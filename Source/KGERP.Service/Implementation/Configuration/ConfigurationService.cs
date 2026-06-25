@@ -4128,7 +4128,7 @@ namespace KGERP.Service.Implementation
             {
 
                 VMProductStock vMProductStock = new VMProductStock();
-                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", item.RProductFK, item.CompanyId, item.LotNumbers ?? "xyzz").FirstOrDefault();
+                vMProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0},{1},{2}", item.RProductFK, item.CompanyId, item.LotNumbers ?? "xyz").FirstOrDefault();
                 item.CurrentStock = vMProductStock.ClosingQty;
                 //--GetRMUnitAndClosingRateByProductId-
             }

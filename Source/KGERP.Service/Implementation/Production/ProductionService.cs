@@ -838,7 +838,7 @@ namespace KGERP.Services.Production
 
                 foreach (var bom in bomsWithRawProduct)
                 {
-                    string safeLot = bom.LotNumber ?? "xyzz";
+                    string safeLot = bom.LotNumber ?? "xyz";
 
                     var stock = _db.Database
                         .SqlQuery<VMProductStock>(

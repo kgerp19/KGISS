@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 
 namespace KGERP.Controllers
 {
@@ -400,15 +401,16 @@ namespace KGERP.Controllers
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
                 await _service.SubmitSaleReturnByProduct(vmModel);
+                
             }
             else
             {
                 return RedirectToAction("Error", "Home");
             }
-
+            
             return RedirectToAction(nameof(WareHouseSalesReturnSlave), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId,message= Message });
         }
-
+        //await _service.SubmitSaleReturnByProductMultiple(vmModel);
         [HttpGet]
         public async Task<ActionResult> WareHouseSalesReturnByProduct(int companyId, int saleReturnId = 0)
         {
@@ -857,9 +859,14 @@ namespace KGERP.Controllers
                 {
                     var dataListSlavePartial = vmModelList.DataToList.Where(x => x.Flag && x.DeliverQty > 0).ToList();
                     bool isCogs = dataListSlavePartial.Any(x => x.ClosingRate <= 0);
+                    bool isDeliveryQtyGreaterThanStock = dataListSlavePartial.Any(x =>   (double)x.CurrentStockQty< x.DeliverQty);
                     if (!dataListSlavePartial.Any() || isCogs)
                     {
                         return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId, message= "COGS Rate Not Found For Some Product.Please check COGS Rate First." });
+                    }
+                    if (isDeliveryQtyGreaterThanStock)
+                    {
+                        return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId, message= "Delivery Quntity more then Stock Quantity" });
                     }
                     
 
