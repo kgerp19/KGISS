@@ -3948,11 +3948,10 @@ namespace KGERP.Service.Implementation
                         .ToList()
 
                      }).FirstOrDefault();
-            VMProductStock vMProductStock = GetFinishProductCogs(id, v.CompanyFK);
-            if (vMProductStock != null)
+            if (v != null)
             {
-                v.CostingPrice = vMProductStock.ClosingRate;
-                v.ClosingQty = vMProductStock.ClosingQty;
+                v.CostingPrice = 0;
+                v.ClosingQty = 0;
             }
             
 
@@ -3962,8 +3961,31 @@ namespace KGERP.Service.Implementation
 
         public VMProductStock GetFinishProductCogs(int id, int? compnayId,string lotNo="")
         {
-            var lotNoVal = string.IsNullOrEmpty(lotNo) ? "xyzz" : lotNo;
-            return _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1},{2}", id, compnayId, lotNoVal).FirstOrDefault();
+            string pType = _db.Products.FirstAsync(x => x.ProductId == id).Result.ProductType;
+
+
+            VMProductStock vmProductStock = new VMProductStock();
+            if (pType == "F")
+            {
+
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>(
+                   "EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}",
+                   id,
+                   compnayId,
+                   string.IsNullOrEmpty(lotNo) ? "xyz" : lotNo
+               ).FirstOrDefault();
+            }
+            else if(pType=="R")
+            {
+                vmProductStock = _db.Database.SqlQuery<VMProductStock>(
+               "EXEC GetSeedRMStockByProductId {0}, {1}, {2}",
+               id,
+               compnayId,
+               string.IsNullOrEmpty(lotNo) ? "xyz" : lotNo
+           ).FirstOrDefault();
+
+            }
+            return vmProductStock;
         }
 
         public VMRealStateProduct GetCommonProductByIDpackaging(int id)

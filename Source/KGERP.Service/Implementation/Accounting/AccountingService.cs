@@ -5518,6 +5518,9 @@ namespace KGERP.Service.Implementation
                 IsSubmit = true
             };
 
+            double unitDiscount = vmSaleReturnDetail.DataListDetail.Sum(x => x.DeliveredQty * Convert.ToDouble(x.DiscountUnit));
+            double spetialDiscount = vmSaleReturnDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
+
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
             List<string> strList = new List<string>();
             foreach (var item in vmSaleReturnDetail.DataListDetail)
@@ -5526,24 +5529,39 @@ namespace KGERP.Service.Implementation
             }
             string perticular = String.Join(", ", strList.ToArray());
 
+
+
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
                 Debit = 0,
-                Credit = vmSaleReturnDetail.DataListDetail.Any() ? Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.Rate.Value)))) : 0,
+                Credit = vmSaleReturnDetail.DataListDetail.Any() ? (Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.Rate.Value))))+ (unitDiscount + spetialDiscount)) : 0,
                 Accounting_HeadFK = vmSaleReturnDetail.AccountingHeadId.Value //Customer
             });
+
 
             foreach (var item in vmSaleReturnDetail.DataListDetail)
             {
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                 {
                     Particular = "Return Qty: " + item.Qty + " Price: " + item.Rate,
-                    Debit = Convert.ToDouble(item.Qty.Value * item.Rate.Value),
-                    Credit = 0,
+                    Debit = 0,
+                    Credit = Convert.ToDouble(item.Qty.Value * item.Rate.Value),
                     Accounting_HeadFK = item.AccountingIncomeHeadId.Value
                 });
             }
+
+            var salesCommition = _db.HeadGLs.Where(x => x.CompanyId == vmSaleReturnDetail.CompanyFK && x.AccCode == "4501001001001" && x.IsActive).FirstOrDefault();
+
+            vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+            {
+                Particular = "Unit Discount: " + unitDiscount + " Spetial Discount: " + spetialDiscount,
+                Debit = unitDiscount + spetialDiscount,
+                Credit = 0,
+                Accounting_HeadFK = salesCommition.Id //Sales Commissiom
+
+            });
+
             foreach (var item in vmSaleReturnDetail.DataListDetail)
             {
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave

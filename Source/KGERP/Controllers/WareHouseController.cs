@@ -368,16 +368,6 @@ namespace KGERP.Controllers
             bool checkCogs = false;
             if (vmModel.ActionEum == ActionEnum.Add)
             {
-                //string productType = _service.ProductTypeCheck(vmModelList, vmModel);
-                //if (productType=="R")
-                //{
-                //    checkCogs = _service.ValidateProductStockClosingRatesRaw(vmModelList, vmModel);
-                //}
-                //else if (productType == "F")
-                //{
-                //    checkCogs = _service.ValidateProductStockClosingRates(vmModelList, vmModel);
-                    
-                //}
                 checkCogs = _service.ValidateProductCOGS(vmModelList, vmModel);
 
                 if (!checkCogs)
@@ -436,19 +426,18 @@ namespace KGERP.Controllers
         [HttpPost]
         public async Task<ActionResult> WareHouseSalesReturnByProduct(VMSaleReturnDetail vmModel)
         {
-            decimal checkCogs = 0;
+
             if (vmModel.ActionEum == ActionEnum.Add)
             {
-                //var checkCogs = _service.FinishProductCogsGet(vmModel.ProductId ?? 0, vmModel.CompanyFK, vmModel.LotNumber);
-                checkCogs = _service.ValidateProductByiDcOGS(vmModel);
-                if (checkCogs>0)
+                VMProductStock vmProductStock = _configurationService.GetFinishProductCogs(vmModel.ProductId ?? 0, vmModel.CompanyFK, vmModel.LotNumber);
+                if (vmProductStock.ClosingRate == 0)
                 {
                     TempData["ErrorMessage"] = "COGS Rate Not Found For This Product.Please Set COGS Rate First.";
                     return RedirectToAction(nameof(WareHouseSalesReturnByProduct), new { companyId = vmModel.CompanyFK, saleReturnId = vmModel.SaleReturnId });
                 }
                 else
                 {
-                    vmModel.COGSRate = checkCogs;
+                    vmModel.COGSRate = vmProductStock.ClosingRate;
                 }
 
                 if (vmModel.SaleReturnId == 0)
@@ -459,11 +448,6 @@ namespace KGERP.Controllers
                         await _service.WareHouseSaleReturnByProductAdd(vmModel);
                     }
                 }
-                //if (vmModel.CompanyFK == (int)CompanyName.KrishibidFarmMachineryAndAutomobilesLimited)
-                //{
-                //    await _service.KfmalSaleReturnByProductAdd(vmModel);
-
-                //}
                 else
                 {
                     await _service.WareHouseSaleReturnByProductAdd(vmModel);

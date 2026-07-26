@@ -689,7 +689,7 @@ namespace KGERP.Services.Procurement
         public decimal UnitPrice { get; set; }
         public decimal TPPrice { get; set; }
         public decimal? CreditSalePrice { get; set; }
-
+        public decimal SpecialDiscount { get; set; }
         public decimal CostingPrice { get; set; }
         public decimal ReceiveQty { get; set; }
         public decimal SalesQuantity { get; set; }
@@ -699,8 +699,7 @@ namespace KGERP.Services.Procurement
         public decimal ClosingQty { get; set; }
         public decimal ClosingRate { get; set; }
         public decimal CurrentStock { get; set; }
-
-
+        
     }
 
 

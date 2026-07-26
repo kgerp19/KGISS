@@ -1,10 +1,7 @@
-﻿using KGERP.CustomModel;
-using KGERP.Data.CustomModel;
-using KGERP.Data.Models;
+﻿using KGERP.Data.Models;
 using KGERP.Service.CommonModels.Model;
 using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
-using KGERP.Service.Implementation.General_Requisition.ViewModels;
 using KGERP.Service.Implementation.LcInfoServices;
 using KGERP.Service.Implementation.OrderApproval.ViewModels;
 using KGERP.Service.ServiceModel;
@@ -13,14 +10,9 @@ using KGERP.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Globalization;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Mvc;
-using System.Web.UI.WebControls;
 using Officervwmodel = KGERP.Data.CustomModel.Officervwmodel;
 
 namespace KGERP.Services.Procurement
@@ -3883,8 +3875,8 @@ namespace KGERP.Services.Procurement
                                            WareHouse = t6 != null ? t6.Name : "",
                                            Propietor = t2.Propietor,
                                            CreatedDate = t1.CreateDate,
-                                           CustomerIdVA=t2.VendorId,
-                                           OrderDateVA=t1.OrderDate,
+                                           CustomerIdVA = t2.VendorId,
+                                           OrderDateVA = t1.OrderDate,
                                            CustomerPhone = t2.Phone,
                                            CustomerAddress = t2.Address,
                                            CustomerEmail = t2.Email,
@@ -4076,7 +4068,7 @@ namespace KGERP.Services.Procurement
                              && x.HeadGLId > 0
                              && x.VendorId == vendorId)
                     .Select(x => new { x.HeadGLId, x.CreditLimit })
-                    .FirstOrDefaultAsync();  
+                    .FirstOrDefaultAsync();
 
                 if (customerInfo == null || customerInfo.HeadGLId <= 0)
                 {
@@ -4091,7 +4083,7 @@ namespace KGERP.Services.Procurement
                         "EXEC CustomerLadegerBalance @p0, @p1",
                         companyId,
                         customerInfo.HeadGLId)
-                    .FirstOrDefaultAsync();  
+                    .FirstOrDefaultAsync();
 
                 decimal receivableAmount = receivableResult;
                 decimal creditLimit = customerInfo.CreditLimit ?? 0m;
@@ -4102,28 +4094,27 @@ namespace KGERP.Services.Procurement
                 // ── 4. Permission check - ASYNC ───
                 string permissionNote = string.Empty;
 
-                if (currentBalance <= 0)
-                {
-                    var latestPermission = await _db.ApplicationManages
-                        .Where(x => x.IsActive
-                                  && x.IsSubmitted
-                                  && x.ApplicantId == vendorId
-                                  && x.Status == (int)SignatoryStatusEnum.Approved
-                                  && x.EndDate >= effectiveDate)
-                        .OrderByDescending(x => x.ApplicationId)
-                        .Select(x => new { x.EndDate })
-                        .FirstOrDefaultAsync(); 
 
-                    permissionNote = latestPermission != null
-                        ? $"This customer has permission for over-credit-limit usage;" +
-                          $"permission expires on {latestPermission.EndDate:dd-MMM-yyyy}."
-                        : "Customer does not have permission to exceed the credit limit.";
-                    if (latestPermission != null)
-                    {
-                        rResult.result = 1;
-                    }
-                    
+                var latestPermission = await _db.ApplicationManages
+                    .Where(x => x.IsActive
+                              && x.IsSubmitted
+                              && x.ApplicantId == vendorId
+                              && x.Status == (int)SignatoryStatusEnum.Approved
+                              && x.EndDate >= effectiveDate)
+                    .OrderByDescending(x => x.ApplicationId)
+                    .Select(x => new { x.EndDate })
+                    .FirstOrDefaultAsync();
+
+                permissionNote = latestPermission != null
+                    ? $"This customer has permission for over-credit-limit usage;" +
+                      $"permission expires on {latestPermission.EndDate:dd-MMM-yyyy}."
+                    : "Customer does not have permission to exceed the credit limit.";
+                if (latestPermission != null)
+                {
+                    rResult.result = 1;
                 }
+
+
 
                 // ── 5. Build result ──────────────────────────────────────
                 rResult.message = string.Format(
@@ -4133,10 +4124,10 @@ namespace KGERP.Services.Procurement
                     creditLimit,
                     currentBalance,
                     permissionNote).TrimEnd();
-;
+                ;
                 rResult.datas = new CustomerBalanceDto
                 {
-                    receivableAmount=receivableAmount,
+                    receivableAmount = receivableAmount,
                     creditLimit = creditLimit,
                     currentBalance = currentBalance,
                 };
@@ -4558,7 +4549,7 @@ namespace KGERP.Services.Procurement
                          }).FirstOrDefault();
 
             VMProductStock vmProductStock = new VMProductStock();
-            vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProduct {0},{1}", productId, companyId).FirstOrDefault();
+            vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProductForDeliver {0},{1}", productId, companyId).FirstOrDefault();
             vmProduct.CurrentStock = vmProductStock.ClosingQty;
 
 
@@ -6928,13 +6919,13 @@ namespace KGERP.Services.Procurement
         public async Task<Officervwmodel> OfficerofTerritoryName(int SubzoneId)
         {
             var v = await (from t1 in _db.SubZones
-                                          join t2 in _db.Employees on t1.SalesOfficerId equals t2.Id
-                                          where t1.SubZoneId == SubzoneId && t1.IsActive
-                                          select new Officervwmodel
-                                          {
-                                              EmployeeName = t1.SalesOfficerName??t1.Name,
-                                              EmpId = t1.SalesOfficerId ?? 0
-                                          }).FirstOrDefaultAsync();
+                           join t2 in _db.Employees on t1.SalesOfficerId equals t2.Id
+                           where t1.SubZoneId == SubzoneId && t1.IsActive
+                           select new Officervwmodel
+                           {
+                               EmployeeName = t1.SalesOfficerName ?? t1.Name,
+                               EmpId = t1.SalesOfficerId ?? 0
+                           }).FirstOrDefaultAsync();
             return v;
         }
 
