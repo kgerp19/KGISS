@@ -181,7 +181,11 @@ namespace KGERP.Service.Implementation
                                               ManagerName = e.Name,
                                               Reason = a.Reason,
                                               ApplicationDate = a.ApplicationDate,
-                                              Status = a.Status
+                                              Status = a.Status,
+                                              StartDate=a.StartDate,
+                                              EndDate=a.EndDate,
+                                              DayCounts=a.DayCounts,
+                                              CreditLimitAmount=a.CreditLimitAmount
                                           }).ToListAsync();
 
             // Fetch the specific signatory approval ID for the user to act upon
