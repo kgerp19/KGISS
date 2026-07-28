@@ -1060,20 +1060,23 @@ namespace KG.App.Controllers
             }
 
             RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
+
+
             var previousAmount = await _db.OrderDetails
                 .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
                 .Select(x => x.Amount)
                 .DefaultIfEmpty(0)
                 .SumAsync();
 
-            var receivableAmount = rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount);
+            var receivableAmount =Math.Abs(rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount));
 
-            bool isCustomerEligibleForOrder = (rResult.result == 1 || receivableAmount > 0);
+            bool isCustomerEligibleForOrder = (rResult.result == 1) ? (receivableAmount <= rResult.datas.creditLimitApplicationBlance) : (receivableAmount > 0);
+
 
             if (!isCustomerEligibleForOrder)
             {
                 // Added TempData so the user actually knows WHY it failed when the page reloads
-                message = "Customer is not eligible for this order due to insufficient balance.";
+                message = $"Customer is not eligible for this order due to insufficient balance (Credit Limit amount: {rResult.datas.creditLimitApplicationBlance})";
                 return vmSalesOrderSlave.OrderMasterId <= 0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message }) :
                     RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message = message });
             }

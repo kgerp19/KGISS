@@ -3,6 +3,7 @@ using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
 using System;
 using System.Collections.Generic;
+
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,54 +21,64 @@ namespace KGERP.Service.Implementation
 
         public async Task<long> SaveOrderCreditLimitApplication(ApplicationManageModel model, string username, long employeeId)
         {
-            var applicationManage = new ApplicationManage
+            using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
             {
-                ApplicantId = model.ApplicantId,
-                ManagerId = model.ManagerId,
-                StartDate = model.StartDate,
-                EndDate = model.EndDate,
-                DayCounts = (model.EndDate - model.StartDate).Days + 1,
-                Reason = model.Reason,
-                Remarks = model.Remarks ?? string.Empty,
-                ApplicationDate = DateTime.Now,
-                Status = 0, // 0 = Pending
-                IsActive = true,
-                IsSubmitted = true,
-                CreatedBy = username,
-                CreatedDate = DateTime.Now
-            };
-
-            context.ApplicationManages.Add(applicationManage);
-            await context.SaveChangesAsync();
-
-            // Fetch signatories for OrderCreditLimit
-            var signatories = await context.RequisitionSignatories
-                .Where(x => x.IntegrateWith == "OrderCreditLimit" && x.IsActive)
-                .OrderBy(x => x.OrderBy)
-                .ToListAsync();
-
-            if (signatories.Any())
-            {
-                var approvals = new List<RequisitionSignatoryApproval>();
-                foreach (var signatory in signatories)
+                try
                 {
-                    approvals.Add(new RequisitionSignatoryApproval
+                    var applicationManage = new ApplicationManage
                     {
-                        RequisitionSignatoryId = signatory.RequisitionSignatoryId,
-                        RequisitionId = applicationManage.ApplicationId,
-                        EmployeeId = signatory.SignatoryEmpId, // Signatory person
-                        OrderBy = signatory.OrderBy,
-                        Status = 0, // Pending
+                        ApplicantId = model.ApplicantId,
+                        ManagerId = model.ManagerId,
+                        StartDate = model.StartDate,
+                        EndDate = model.EndDate,
+                        DayCounts = (model.EndDate - model.StartDate).Days + 1,
+                        Reason = model.Reason,
+                        Remarks = model.Remarks ?? string.Empty,
+                        ApplicationDate = DateTime.Now,
+                        Status = 0,
                         IsActive = true,
+                        IsSubmitted = true,
                         CreatedBy = username,
-                        CreatedDate = DateTime.Now
-                    });
-                }
-                context.RequisitionSignatoryApprovals.AddRange(approvals);
-                await context.SaveChangesAsync();
-            }
+                        CreatedDate = DateTime.Now,
+                        CreditLimitAmount = model.CreditLimitAmount
+                    };
+                    context.ApplicationManages.Add(applicationManage);
+                    await context.SaveChangesAsync();
 
-            return applicationManage.ApplicationId;
+                    var signatories = await context.RequisitionSignatories
+                        .Where(x => x.IntegrateWith == "OrderCreditLimit" && x.EmployeeId== employeeId && x.IsActive)
+                        .OrderBy(x => x.OrderBy)
+                        .ToListAsync();
+
+                    if (signatories.Any())
+                    {
+                        var approvals = signatories.Select(signatory => new RequisitionSignatoryApproval
+                        {
+                            RequisitionSignatoryId = signatory.RequisitionSignatoryId,
+                            RequisitionId = applicationManage.ApplicationId,
+                            EmployeeId = signatory.SignatoryEmpId,
+                            OrderBy = signatory.OrderBy,
+                            Status = 0,
+                            IsActive = true,
+                            CreatedBy = username,
+                            CreatedDate = DateTime.Now
+                        }).ToList();
+
+                        context.RequisitionSignatoryApprovals.AddRange(approvals);
+                        await context.SaveChangesAsync();
+                        transaction.Commit();
+                        return applicationManage.ApplicationId;
+                    }
+
+
+                    return 0;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
 
         public async Task<ApplicationManageModel> GetOrderCreditLimitApplications(int companyId, long applicationId = 0)
@@ -253,7 +264,8 @@ namespace KGERP.Service.Implementation
                                         StartDate = a.StartDate,
                                         EndDate = a.EndDate,
                                         DayCounts = a.DayCounts,
-                                        Status = a.Status
+                                        Status = a.Status,
+                                        CreditLimitAmount=a.CreditLimitAmount
                                     };
 
             if (searchStatus.HasValue)

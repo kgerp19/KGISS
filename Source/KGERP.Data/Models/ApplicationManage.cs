@@ -21,6 +21,7 @@ namespace KGERP.Data.Models
         public System.DateTime EndDate { get; set; }
         public int DayCounts { get; set; }
         public string Reason { get; set; }
+        public decimal CreditLimitAmount { get; set; }
         public string Remarks { get; set; }
         public System.DateTime ApplicationDate { get; set; }
         public int Status { get; set; }

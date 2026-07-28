@@ -922,5 +922,6 @@ namespace KGERP.Services.Procurement
         public decimal receivableAmount { get; set; }
         public decimal creditLimit { get; set; }
         public decimal currentBalance { get; set; }
+        public decimal creditLimitApplicationBlance { get; set; }
     }
 }

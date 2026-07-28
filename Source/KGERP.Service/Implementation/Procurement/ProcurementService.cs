@@ -4100,15 +4100,19 @@ namespace KGERP.Services.Procurement
                               && x.IsSubmitted
                               && x.ApplicantId == vendorId
                               && x.Status == (int)SignatoryStatusEnum.Approved
-                              && x.EndDate >= effectiveDate)
+                              && x.EndDate >= effectiveDate
+                              )
+                              
                     .OrderByDescending(x => x.ApplicationId)
-                    .Select(x => new { x.EndDate })
+                    .Select(x => new { x.EndDate,x.CreditLimitAmount })
                     .FirstOrDefaultAsync();
 
                 permissionNote = latestPermission != null
                     ? $"This customer has permission for over-credit-limit usage;" +
                       $"permission expires on {latestPermission.EndDate:dd-MMM-yyyy}."
                     : "Customer does not have permission to exceed the credit limit.";
+
+
                 if (latestPermission != null)
                 {
                     rResult.result = 1;
@@ -4130,6 +4134,7 @@ namespace KGERP.Services.Procurement
                     receivableAmount = receivableAmount,
                     creditLimit = creditLimit,
                     currentBalance = currentBalance,
+                    creditLimitApplicationBlance = latestPermission==null? 0 : latestPermission.CreditLimitAmount
                 };
             }
             catch (Exception ex)

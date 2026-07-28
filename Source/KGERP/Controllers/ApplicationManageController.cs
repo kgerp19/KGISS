@@ -49,11 +49,24 @@ namespace KGERP.Controllers
 
         private void PopulateDropdowns(ApplicationManageModel model)
         {
-            var employees = db.Employees.Where(e => e.Active && e.CompanyId == model.CompanyId).Select(e => new { e.Id, Name = e.EmployeeId + " - " + e.Name }).ToList();
+            var currentUserId = Common.GetIntUserId();
+            var employees = db.Employees.Where(e => e.Active && e.CompanyId == model.CompanyId && e.Id== currentUserId).Select(e => new { e.Id, Name = e.EmployeeId + " - " + e.Name }).ToList();
             model.Managers = new SelectList(employees, "Id", "Name", model.ManagerId);
 
-            var vendors = db.Vendors.Where(v => v.IsActive && v.CompanyId == model.CompanyId).Select(v => new { v.VendorId, Name = v.Code + " - " + v.Name }).ToList();
+            //var vendors = db.Vendors.Where(v => v.IsActive && v.CompanyId == model.CompanyId).Select(v => new { v.VendorId, Name = v.Code + " - " + v.Name }).ToList();
+            //model.Applicants = new SelectList(vendors, "VendorId", "Name", model.ApplicantId);
+            
+            var vendors = (from v in db.Vendors
+                           join sz in db.SubZones on v.SubZoneId equals sz.SubZoneId
+                           where v.IsActive && v.CompanyId == model.CompanyId && sz.SalesOfficerId== currentUserId
+                           select new
+                           {
+                               v.VendorId,
+                               Name = v.Code + " - " + v.Name
+                           }).ToList();
+
             model.Applicants = new SelectList(vendors, "VendorId", "Name", model.ApplicantId);
+
         }
 
         [HttpGet]
@@ -83,7 +96,15 @@ namespace KGERP.Controllers
                     try
                     {
                         long newAppId = await _applicationManageService.SaveOrderCreditLimitApplication(model, GetUsername(), employeeId);
-                        TempData["Message"] = "Application Submitted Successfully";
+                        if (newAppId==0)
+                        {
+                            TempData["Message"] = "Data can't save!";
+                        }
+                        else
+                        {
+                            TempData["Message"] = "Application Submitted Successfully";
+                        }
+                        
                         return RedirectToAction("OrderCreditLimitEntry", new { companyId = model.CompanyId, applicationId = newAppId });
                     }
                     catch (Exception ex)

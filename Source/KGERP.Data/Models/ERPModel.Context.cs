@@ -367,8 +367,8 @@ namespace KGERP.Data.Models
         public virtual DbSet<IssueMasterInfo> IssueMasterInfoes { get; set; }
         public virtual DbSet<SubZone> SubZones { get; set; }
         public virtual DbSet<RequisitionSignatory> RequisitionSignatories { get; set; }
-        public virtual DbSet<ApplicationManage> ApplicationManages { get; set; }
         public virtual DbSet<CompanySubMenu> CompanySubMenus { get; set; }
+        public virtual DbSet<ApplicationManage> ApplicationManages { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {

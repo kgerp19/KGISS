@@ -39,6 +39,7 @@ namespace KGERP.Service.ServiceModel
         [Required(ErrorMessage = "Reason is required")]
         [DataType(DataType.MultilineText)]
         public string Reason { get; set; }
+        public decimal CreditLimitAmount { get; set; }
 
         public string Remarks { get; set; }
 

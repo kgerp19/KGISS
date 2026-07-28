@@ -596,7 +596,7 @@
                                     @if (approvalStep != null)
                                     {
                                         <div class="aml-action-group">
-                                            <button class="aml-btn-approve" onclick="submitApproval(@approvalStep.RequisitionSignatoryApprovalId, 1)">
+                                            <button class="aml-btn-approve" onclick="openApprovedModal(@approvalStep.RequisitionSignatoryApprovalId, 1)">
                                                 <i class="fa fa-check"></i> Approve
                                             </button>
                                             <button class="aml-btn-reject" onclick="openRejectModal(@approvalStep.RequisitionSignatoryApprovalId)">
@@ -653,6 +653,35 @@
     </div>
 </div>
 
+<!-- Reject Modal (Customized) -->
+<div class="aml-modal-overlay" id="approveModalOverlay">
+    <div class="aml-modal" id="rejectModalBox">
+        <div class="aml-modal-header" style="background: linear-gradient(135deg, #207c56, #289e6d); ">
+            <div class="aml-modal-header-left">
+                <div class="aml-modal-header-icon"><i class="fa fa-exclamation-triangle"></i></div>
+                <div>
+                    <h5>Approve Application</h5>
+                    <span>Provide a reason for Approve (optional)</span>
+                </div>
+            </div>
+            <button class="aml-modal-close" onclick="closeApproveModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="aml-modal-body bg-light">
+            <input type="hidden" id="approveApprovalId" />
+            <div class="aml-filter-group" style="width: 100%;">
+                <label>Reason for Approved <span style="text-transform:none; font-weight:normal; color:#9ca3af;">(Optional)</span></label>
+                <textarea id="approveComment" class="form-control" rows="4" style="height: auto; min-height: 100px; resize: vertical;" placeholder="Briefly explain why this application is being Approved..."></textarea>
+            </div>
+        </div>
+        <div class="aml-modal-footer">
+            <button class="aml-btn-close-modal" onclick="closeApproveModal()">Cancel</button>
+            <button class="aml-btn-approve" style="margin-left:8px;" id="btnConfirmReject" onclick="submitApprove()"><i class="fa fa-times"></i> Confirm Approve</button>
+        </div>
+    </div>
+</div>
+
+
+
 @section Scripts {
     <script>
         function openRejectModal(approvalId) {
@@ -660,10 +689,23 @@
             $('#rejectComment').val('');
             $('#rejectModalOverlay').addClass('open');
         }
+        function openApprovedModal(approvalId) {
+            $('#approveApprovalId').val(approvalId);
+            $('#approveComment').val('');
+            $('#approveModalOverlay').addClass('open');
+        }
 
+        function closeApproveModal() {
+            $('#approveModalOverlay').removeClass('open');
+        }
         function closeRejectModal() {
             $('#rejectModalOverlay').removeClass('open');
         }
+
+        $('#approveModalOverlay').on('click', function(e) {
+            if (e.target === this) closeRejectModal();
+        });
+
 
         $('#rejectModalOverlay').on('click', function(e) {
             if (e.target === this) closeRejectModal();
@@ -678,13 +720,17 @@
 
             submitApproval(approvalId, 2, comment);
         }
+        function submitApprove() {
+            let approvalId = $('#approveApprovalId').val();
+            let comment = $('#approveComment').val();
+
+            // disable button to prevent double submit
+            $('#btnConfirmReject').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+
+            submitApproval(approvalId, 1, comment);
+        }
 
         function submitApproval(approvalId, status, comment = "") {
-            if (status == 1) { // Approve
-                if (!confirm("Are you sure you want to officially APPROVE this application?")) {
-                    return;
-                }
-            }
 
             $.ajax({
                 url: '@Url.Action("UpdateApprovalStatus", "ApplicationManage")',
