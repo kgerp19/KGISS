@@ -1038,49 +1038,51 @@ namespace KG.App.Controllers
         [HttpPost]
         public async Task<ActionResult> ProcurementSalesOrderSlave(VMSalesOrderSlave vmSalesOrderSlave)
         {
-            #region This Section is responsable for Customer Limit Check
-            DateTime orderDate = DateTime.Now;
-            var customerId = 0;
             string message = null;
-            if (vmSalesOrderSlave.OrderMasterId <= 0)
-            {
-                customerId = vmSalesOrderSlave.CustomerId;
-                orderDate = vmSalesOrderSlave.OrderDate;
-            }
-            else
-            {
-                customerId = vmSalesOrderSlave.CustomerIdVA;
-                orderDate = vmSalesOrderSlave.OrderDateVA;
-            }
 
-            if (customerId <= 0)
-            {
-                message = "Customer is not found!";
-                return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK });
-            }
+            //#region This Section is responsable for Customer Limit Check
+            //DateTime orderDate = DateTime.Now;
+            //var customerId = 0;
+            
+            //if (vmSalesOrderSlave.OrderMasterId <= 0)
+            //{
+            //    customerId = vmSalesOrderSlave.CustomerId;
+            //    orderDate = vmSalesOrderSlave.OrderDate;
+            //}
+            //else
+            //{
+            //    customerId = vmSalesOrderSlave.CustomerIdVA;
+            //    orderDate = vmSalesOrderSlave.OrderDateVA;
+            //}
 
-            RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
+            //if (customerId <= 0)
+            //{
+            //    message = "Customer is not found!";
+            //    return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK });
+            //}
 
-
-            var previousAmount = await _db.OrderDetails
-                .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
-                .Select(x => x.Amount)
-                .DefaultIfEmpty(0)
-                .SumAsync();
-
-            var receivableAmount =Math.Abs(rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount));
-
-            bool isCustomerEligibleForOrder = (rResult.result == 1) ? (receivableAmount <= rResult.datas.creditLimitApplicationBlance) : (receivableAmount > 0);
+            //RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
 
 
-            if (!isCustomerEligibleForOrder)
-            {
-                // Added TempData so the user actually knows WHY it failed when the page reloads
-                message = $"Customer is not eligible for this order due to insufficient balance (Credit Limit amount: {rResult.datas.creditLimitApplicationBlance})";
-                return vmSalesOrderSlave.OrderMasterId <= 0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message }) :
-                    RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message = message });
-            }
-            #endregion
+            //var previousAmount = await _db.OrderDetails
+            //    .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
+            //    .Select(x => x.Amount)
+            //    .DefaultIfEmpty(0)
+            //    .SumAsync();
+
+            //var receivableAmount =Math.Abs(rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount));
+
+            //bool isCustomerEligibleForOrder = (rResult.result == 1) ? (receivableAmount <= rResult.datas.creditLimitApplicationBlance) : (receivableAmount > 0);
+
+
+            //if (!isCustomerEligibleForOrder)
+            //{
+            //    // Added TempData so the user actually knows WHY it failed when the page reloads
+            //    message = $"Customer is not eligible for this order due to insufficient balance (Credit Limit amount: {rResult.datas.creditLimitApplicationBlance})";
+            //    return vmSalesOrderSlave.OrderMasterId <= 0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message }) :
+            //        RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message = message });
+            //}
+            //#endregion
 
             var productStock = _service.ProductStockByProductGet(vmSalesOrderSlave.CompanyFK.Value, vmSalesOrderSlave.FProductId);
 
