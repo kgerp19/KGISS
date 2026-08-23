@@ -62,7 +62,6 @@ namespace KGERP.Controllers
 
 
         string password = "@@Root@123#";
-
         string admin = "Administrator";
         string url = "http://192.168.0.13/ReportServer/?%2fErpReport/";
 
