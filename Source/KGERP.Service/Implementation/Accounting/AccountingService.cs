@@ -1517,17 +1517,17 @@ namespace KGERP.Service.Implementation
 
             // Use async execution to prevent blocking
             var v = (from hgl in _db.HeadGLs
-                        join h5 in _db.Head5 on hgl.ParentId equals h5.Id
-                        join h4 in _db.Head4 on h5.ParentId equals h4.Id
-                        join h3 in _db.Head3 on h4.ParentId equals h3.Id
-                       
-                        where hgl.CompanyId == companyId
-                        && hgl.IsActive
-                        && h5.IsActive
-                        && h4.IsActive
-                        && (h3.AccCode == "1304" || h4.AccCode == "1301001" || (h3.ParentId.HasValue && allowedHead2Ids.Contains(h3.ParentId.Value)))
-                        && (hgl.AccName.Contains(prefix) || hgl.AccCode.Contains(prefix))
-                        select new
+                     join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                     join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                     join h3 in _db.Head3 on h4.ParentId equals h3.Id
+
+                     where hgl.CompanyId == companyId
+                     && hgl.IsActive
+                     && h5.IsActive
+                     && h4.IsActive
+                     && (h3.AccCode == "1304" || h4.AccCode == "1301001" || (h3.ParentId.HasValue && allowedHead2Ids.Contains(h3.ParentId.Value)))
+                     && (hgl.AccName.Contains(prefix) || hgl.AccCode.Contains(prefix))
+                     select new
                      {
                          label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
                          val = hgl.Id
@@ -5518,7 +5518,7 @@ namespace KGERP.Service.Implementation
                 IsSubmit = true
             };
 
-            double unitDiscount = vmSaleReturnDetail.DataListDetail.Sum(x => x.DeliveredQty * Convert.ToDouble(x.DiscountUnit));
+            double unitDiscount = (double)vmSaleReturnDetail.DataListDetail.Sum(x => x.Qty * Convert.ToDecimal(x.DiscountUnit));
             double spetialDiscount = vmSaleReturnDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
 
             vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
@@ -5529,39 +5529,59 @@ namespace KGERP.Service.Implementation
             }
             string perticular = String.Join(", ", strList.ToArray());
 
-
+            // ---------------------------------------------------------
+            // 1) Customer Head -> Credit (Total = Sales Value + Discount)
+            // ---------------------------------------------------------
+            double Total = vmSaleReturnDetail.DataListDetail.Any()
+                ? (Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.Rate.Value)))) + (unitDiscount + spetialDiscount))
+                : 0;
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = perticular,
                 Debit = 0,
-                Credit = vmSaleReturnDetail.DataListDetail.Any() ? (Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.Rate.Value))))+ (unitDiscount + spetialDiscount)) : 0,
+                Credit = Total,
                 Accounting_HeadFK = vmSaleReturnDetail.AccountingHeadId.Value //Customer
             });
 
-
+            // ---------------------------------------------------------
+            // 2) Sales Income Head -> Debit (FIX: আগে ভুলভাবে Credit ছিল)
+            //    Sales Return এর ক্ষেত্রে মূল Sale entry এর ঠিক উল্টো হতে হবে,
+            //    তাই Income head এখন Debit সাইডে যাবে।
+            // ---------------------------------------------------------
             foreach (var item in vmSaleReturnDetail.DataListDetail)
             {
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
                 {
                     Particular = "Return Qty: " + item.Qty + " Price: " + item.Rate,
-                    Debit = 0,
-                    Credit = Convert.ToDouble(item.Qty.Value * item.Rate.Value),
+                    Debit = Convert.ToDouble(item.Qty.Value * item.Rate.Value),
+                    Credit = 0,
                     Accounting_HeadFK = item.AccountingIncomeHeadId.Value
                 });
             }
 
-            var salesCommition = _db.HeadGLs.Where(x => x.CompanyId == vmSaleReturnDetail.CompanyFK && x.AccCode == "4501001001001" && x.IsActive).FirstOrDefault();
+            // ---------------------------------------------------------
+            // 3) Sales Commission / Discount reversal -> Debit
+            // ---------------------------------------------------------
+            var salesCommition = _db.HeadGLs.Where(x => x.CompanyId == vmSaleReturnDetail.CompanyFK
+                && x.AccCode == "4501001001001" && x.IsActive).FirstOrDefault();
+
+            if (salesCommition == null)
+            {
+                throw new Exception("Sales Commission Head (AccCode: 4501001001001) is not configured/active for this company.");
+            }
 
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Unit Discount: " + unitDiscount + " Spetial Discount: " + spetialDiscount,
                 Debit = unitDiscount + spetialDiscount,
                 Credit = 0,
-                Accounting_HeadFK = salesCommition.Id //Sales Commissiom
-
+                Accounting_HeadFK = salesCommition.Id //Sales Commission
             });
 
+            // ---------------------------------------------------------
+            // 4) Inventory / COGS Head -> Debit (stock ফেরত আসছে বলে ইনভেন্টরি বাড়বে)
+            // ---------------------------------------------------------
             foreach (var item in vmSaleReturnDetail.DataListDetail)
             {
                 vMJournalSlave.DataListSlave.Add(new VMJournalSlave
@@ -5573,23 +5593,124 @@ namespace KGERP.Service.Implementation
                 });
             }
 
-
+            // ---------------------------------------------------------
+            // 5) Store & Stock Adjustment (COGS reversal) -> Credit
+            // ---------------------------------------------------------
             vMJournalSlave.DataListSlave.Add(new VMJournalSlave
             {
                 Particular = "Adjust",
                 Debit = 0,
-                Credit = vmSaleReturnDetail.DataListDetail.Any() ? Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.COGSRate.Value)))) : 0,
+                Credit = vmSaleReturnDetail.DataListDetail.Any()
+                    ? Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.COGSRate.Value))))
+                    : 0,
                 Accounting_HeadFK = 50625304 //Store & Stock Adjustment old code will be 43576
             });
+
+            // ---------------------------------------------------------
+            // Safety Check: Debit ও Credit সমান কিনা যাচাই করা
+            // (ভবিষ্যতে কোনো লজিক পরিবর্তনে ভুল হলে সঙ্গে সঙ্গে ধরা পড়বে)
+            // ---------------------------------------------------------
+            double totalDebit = vMJournalSlave.DataListSlave.Sum(x => x.Debit);
+            double totalCredit = vMJournalSlave.DataListSlave.Sum(x => x.Credit);
+
+            if (Math.Round(totalDebit, 2) != Math.Round(totalCredit, 2))
+            {
+                throw new Exception($"Sales Return Journal is not balanced. TotalDebit={totalDebit}, TotalCredit={totalCredit}, SaleReturnNo={vmSaleReturnDetail.SaleReturnNo}");
+            }
+
             var resultData = await AccountingJournalMasterPush(vMJournalSlave);
             if (resultData.VoucherId > 0)
             {
                 var voucherMap = VoucherMapping(resultData.VoucherId, vmSaleReturnDetail.CompanyFK.Value, vmSaleReturnDetail.SaleReturnId, vmSaleReturnDetail.IntegratedFrom);
-
             }
 
             return resultData.VoucherId;
         }
+        //public async Task<long> AccountingSalesReturnPushSeed(int CompanyFK, VMSaleReturnDetail vmSaleReturnDetail, int journalType)
+        //{
+        //    VMJournalSlave vMJournalSlave = new VMJournalSlave
+        //    {
+        //        JournalType = journalType,
+
+        //        Title = vmSaleReturnDetail.SaleReturnNo + " Date: " + vmSaleReturnDetail.ReturnDate.ToString() + " Reason: " + vmSaleReturnDetail.Reason,
+        //        Narration = vmSaleReturnDetail.Reason,
+        //        CompanyFK = CompanyFK,
+        //        Date = vmSaleReturnDetail.ReturnDate,
+        //        IsSubmit = true
+        //    };
+
+        //    double unitDiscount = (double)vmSaleReturnDetail.DataListDetail.Sum(x => x.Qty * Convert.ToDecimal(x.DiscountUnit));
+        //    double spetialDiscount = vmSaleReturnDetail.DataListDetail.Sum(item => Convert.ToDouble(item.SpecialDiscount ?? 0));
+
+        //    vMJournalSlave.DataListSlave = new List<VMJournalSlave>();
+        //    List<string> strList = new List<string>();
+        //    foreach (var item in vmSaleReturnDetail.DataListDetail)
+        //    {
+        //        strList.Add(item.ProductName + " Return Qty: " + item.Qty + " Price: " + item.Rate);
+        //    }
+        //    string perticular = String.Join(", ", strList.ToArray());
+
+
+        //    double Total = vmSaleReturnDetail.DataListDetail.Any() ? (Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.Rate.Value)))) + (unitDiscount + spetialDiscount)) : 0;
+        //    vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+        //    {
+        //        Particular = perticular,
+        //        Debit = 0,
+        //        Credit = Total,
+        //        Accounting_HeadFK = vmSaleReturnDetail.AccountingHeadId.Value //Customer
+        //    });
+
+
+        //    foreach (var item in vmSaleReturnDetail.DataListDetail)
+        //    {
+        //        vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+        //        {
+        //            Particular = "Return Qty: " + item.Qty + " Price: " + item.Rate,
+        //            Debit = 0,
+        //            Credit = Convert.ToDouble(item.Qty.Value * item.Rate.Value),
+        //            Accounting_HeadFK = item.AccountingIncomeHeadId.Value
+        //        });
+        //    }
+
+        //    var salesCommition = _db.HeadGLs.Where(x => x.CompanyId == vmSaleReturnDetail.CompanyFK && x.AccCode == "4501001001001" && x.IsActive).FirstOrDefault();
+
+        //    vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+        //    {
+        //        Particular = "Unit Discount: " + unitDiscount + " Spetial Discount: " + spetialDiscount,
+        //        Debit = unitDiscount + spetialDiscount,
+        //        Credit = 0,
+        //        Accounting_HeadFK = salesCommition.Id //Sales Commissiom
+
+        //    });
+
+        //    foreach (var item in vmSaleReturnDetail.DataListDetail)
+        //    {
+        //        vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+        //        {
+        //            Particular = "Return Qty: " + item.Qty + " Costing Price: " + item.COGSRate,
+        //            Debit = Convert.ToDouble(item.Qty.Value * item.COGSRate.Value),
+        //            Credit = 0,
+        //            Accounting_HeadFK = item.AccountingHeadId.Value
+        //        });
+        //    }
+
+
+        //    vMJournalSlave.DataListSlave.Add(new VMJournalSlave
+        //    {
+        //        Particular = "Adjust",
+        //        Debit = 0,
+        //        Credit = vmSaleReturnDetail.DataListDetail.Any() ? Convert.ToDouble(vmSaleReturnDetail.DataListDetail.Sum(x => (Convert.ToDouble(x.Qty.Value * x.COGSRate.Value)))) : 0,
+        //        Accounting_HeadFK = 50625304 //Store & Stock Adjustment old code will be 43576
+        //    });
+        //    var resultData = await AccountingJournalMasterPush(vMJournalSlave);
+        //    if (resultData.VoucherId > 0)
+        //    {
+        //        var voucherMap = VoucherMapping(resultData.VoucherId, vmSaleReturnDetail.CompanyFK.Value, vmSaleReturnDetail.SaleReturnId, vmSaleReturnDetail.IntegratedFrom);
+
+        //    }
+
+        //    return resultData.VoucherId;
+        //}
 
         public async Task<long> AccountingSalesReturnPushFeed(int CompanyFK, VMSaleReturnDetail vmSaleReturnDetail, int journalType)
         {

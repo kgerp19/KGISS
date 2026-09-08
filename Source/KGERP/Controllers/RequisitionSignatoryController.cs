@@ -60,7 +60,13 @@ namespace KGERP.Controllers
                 string integrateWith = Request["integrateWith"];
                 if (String.IsNullOrEmpty(integrateWith) || (companyId is null && employeeId is null))
                 {
-                    return Json(new { }, JsonRequestBehavior.AllowGet);
+                    return Json(new
+                    {
+                        draw = draw,
+                        recordsTotal = 0,
+                        recordsFiltered = 0,
+                        data = new List<object>() // খালি অ্যারে পাঠানো হচ্ছে
+                    }, JsonRequestBehavior.AllowGet);
                 }
                 var serviceResult = await _service.GetSignatoriesForDataTable(
                     start, length, searchValue, sortColumnName, sortDirection,
@@ -86,7 +92,52 @@ namespace KGERP.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+                // Catch ব্লকেও খালি ডাটা স্ট্রাকচার এবং error মেসেজ রিটার্ন করুন
+                return Json(new
+                {
+                    draw = Request["draw"],
+                    recordsTotal = 0,
+                    recordsFiltered = 0,
+                    data = new List<object>(),
+                    error = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // POST: Get Signatory Data for Modal Results Table
+        [HttpPost]
+        public async Task<JsonResult> GetSignatoryDataForModal(
+            long? employeeId = null,
+            int? companyId = null,
+            int? departmentId = null,
+            int? designationId = null,
+            string integrateWith = null)
+        {
+            try
+            {
+                var result = await _service.GetSignatoriesForDataTable(
+                    0, 1000, "", "", "",
+                    employeeId, companyId, null, departmentId, designationId, integrateWith
+                );
+
+                // Extract the data property using reflection (more reliable than dynamic)
+                var resultType = result.GetType();
+                var dataProp = resultType.GetProperty("data") ?? resultType.GetProperty("Data");
+
+                if (dataProp != null)
+                {
+                    var resultData = dataProp.GetValue(result);
+                    return Json(resultData, JsonRequestBehavior.AllowGet);
+                }
+
+                // If we can't find the data property, return empty list
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error in GetSignatoryDataForModal: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Stack Trace: " + ex.StackTrace);
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
             }
         }
 

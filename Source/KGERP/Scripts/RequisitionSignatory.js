@@ -466,6 +466,11 @@
             e.preventDefault();
             saveSignatory();
         });
+
+        // Close Modal button handler - reset when modal is closed
+        $(document).off('hidden.bs.modal', '#modalCreateEditSignatory').on('hidden.bs.modal', '#modalCreateEditSignatory', function () {
+            resetModalForm();
+        });
     }
 
     // Bulk Assignment Helper Functions
@@ -552,6 +557,14 @@
         var form = $('#formCreateEdit');
         var formData = form.serialize();
 
+        // Capture filter values BEFORE clearing the form
+        var savedIntegrateWith = $('#ddlModalIntegrateWith').val() || currentIntegrateWith;
+        var savedEmployeeId = $('#hdnEmployeeIdMob').val() || currentEmployeeId;
+        // Get companyId from main page hidden field (this is the main company context)
+        var savedCompanyId = $('#hdnCompanyId').val() || currentCompanyId;
+        var savedDepartmentId = currentDepartmentId;
+        var savedDesignationId = currentDesignationId;
+
         $.ajax({
             url: form.attr('action'),
             type: 'POST',
@@ -559,9 +572,12 @@
             success: function (response) {
                 if (response.success) {
                     showNotification(response.message, 'success');
-                    $('#modalCreateEditSignatory').modal('hide');
-                    window.location.reload();
-                    //reloadDataTable();
+                    // Load and display saved data below form with captured values
+                    loadAndDisplaySavedData(savedIntegrateWith, savedEmployeeId, savedCompanyId, savedDepartmentId, savedDesignationId);
+                    // Clear the form fields for new entry
+                    clearFormFields();
+                    // Update main data table
+                    reloadDataTable();
                 } else {
                     showNotification(response.message, 'error');
                 }
@@ -570,6 +586,100 @@
                 showNotification('Error saving signatory', 'error');
             }
         });
+    }
+
+    function clearFormFields() {
+        // Clear form fields
+        //$('#txtEmployeeMod').val('');
+        //$('#hdnEmployeeIdMob').val('');
+        //$('#txtDesignation').val('');
+        //$('#ddlModalIntegrateWith').val('');
+        $('#txtSignatory').val('');
+        $('#hdnSignatoryEmpId').val('');
+        $('#txtDesignationSig').val('');
+        $('#ddlOrderBy').val('');
+
+    }
+
+    function loadAndDisplaySavedData(integrateWith, employeeId, companyId, departmentId, designationId) {
+        // Use provided parameters or fall back to current page values
+        var filterIntegrateWith = integrateWith || currentIntegrateWith || $('#ddlModalIntegrateWith').val();
+        var filterEmployeeId = employeeId || currentEmployeeId;
+        // Fallback to hdnCompanyId from main page
+        var filterCompanyId = companyId || currentCompanyId || (parseInt($('#hdnCompanyId').val()) || null);
+        var filterDepartmentId = departmentId || currentDepartmentId;
+        var filterDesignationId = designationId || currentDesignationId;
+
+
+        $.ajax({
+            url: '/RequisitionSignatory/GetSignatoryDataForModal',
+            type: 'POST',
+            data: {
+                integrateWith: filterIntegrateWith,
+                companyId: filterCompanyId,
+                employeeId: filterEmployeeId,
+                departmentId: filterDepartmentId,
+                designationId: filterDesignationId
+            },
+            success: function (data) {
+
+                populateResultsTable(data);
+                // Show results section
+                $('#resultsSection').slideDown(300);
+            },
+            error: function (xhr, status, error) {
+
+                showNotification('Error loading saved data', 'error');
+            }
+        });
+    }
+
+    function populateResultsTable(data) {
+        var tbody = $('#tblModalResults tbody');
+        tbody.empty();
+
+
+        // Handle if data is wrapped in an object with a 'data' property
+        var recordData = data;
+        if (data && typeof data === 'object' && !Array.isArray(data) && data.data) {
+            recordData = data.data;
+
+        }
+
+        // Ensure we have an array
+        if (!Array.isArray(recordData)) {
+            recordData = [];
+        }
+
+        if (!recordData || recordData.length === 0) {
+
+            tbody.append('<tr><td colspan="6" class="text-center">No data found</td></tr>');
+            return;
+        }
+
+
+
+        $.each(recordData, function (i, row) {
+
+            tbody.append(
+                '<tr>' +
+                '<td>' + (row.employeeName || '') + '</td>' +
+                '<td>' + (row.approverCode ? row.approverCode + ' - ' : '') + (row.approverName || '') + '</td>' +
+                '<td>' + (row.level || '') + '</td>' +
+                '<td>' + (row.companyName || '') + '</td>' +
+                '<td>' + (row.departmentName || '') + '</td>' +
+                '</tr>'
+            );
+        });
+
+        console.log('Table population complete');
+    }
+
+    function resetModalForm() {
+        // Clear form fields
+        clearFormFields();
+        // Hide results table
+        $('#resultsSection').slideUp(300);
     }
 
     function openReplaceApproverModal() {

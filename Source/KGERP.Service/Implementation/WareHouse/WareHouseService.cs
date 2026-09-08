@@ -6126,52 +6126,52 @@ namespace KGERP.Services.WareHouse
 
             return result;
         }
-        public async Task<long> SubmitSaleReturnByProductMultiple(VMSaleReturnDetail vmModel)
-        {
-            long result = -1;
-            var saleReturnIds = new List<long>
-            {
-            102250
-            ,102251
-            ,102252
-            ,102253
-            ,102254
-            ,102293
-            ,102294
-            ,102295
-            ,102296
-            ,103027
-            };
+        //public async Task<long> SubmitSaleReturnByProductMultiple(VMSaleReturnDetail vmModel)
+        //{
+        //    long result = -1;
+        //    var saleReturnIds = new List<long>
+        //    {
+        //    102250
+        //    ,102251
+        //    ,102252
+        //    ,102253
+        //    ,102254
+        //    ,102293
+        //    ,102294
+        //    ,102295
+        //    ,102296
+        //    ,103027
+        //    };
 
-            foreach (var id in saleReturnIds)
-            {
-                SaleReturn model = await _db.SaleReturns.FindAsync(id);
-                model.IsFinalized = true;
+        //    foreach (var id in saleReturnIds)
+        //    {
+        //        SaleReturn model = await _db.SaleReturns.FindAsync(id);
+        //        model.IsFinalized = true;
 
-                //model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
-                //model.ModifiedDate = DateTime.Now;
-                if (await _db.SaveChangesAsync() > 0)
-                {
-                    result = model.SaleReturnId;
-                }
+        //        //model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
+        //        //model.ModifiedDate = DateTime.Now;
+        //        if (await _db.SaveChangesAsync() > 0)
+        //        {
+        //            result = model.SaleReturnId;
+        //        }
 
-                if (result > 0)
-                {
-                    #region Ready To Account Integration
-                    VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(id));
-                    var getVoucherType = await _db.VoucherTypes.FirstAsync(x => x.IsActive && x.Code == "SRV" && x.CompanyId == AccData.CompanyFK.Value);
-                    if (getVoucherType is null || getVoucherType.VoucherTypeId <= 0)
-                    {
-                        return result;
-                    }
-                    await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, getVoucherType.VoucherTypeId);
+        //        if (result > 0)
+        //        {
+        //            #region Ready To Account Integration
+        //            VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(id));
+        //            var getVoucherType = await _db.VoucherTypes.FirstAsync(x => x.IsActive && x.Code == "SRV" && x.CompanyId == AccData.CompanyFK.Value);
+        //            if (getVoucherType is null || getVoucherType.VoucherTypeId <= 0)
+        //            {
+        //                return result;
+        //            }
+        //            await _accountingService.AccountingSalesReturnPushSeed(vmModel.CompanyFK.Value, AccData, getVoucherType.VoucherTypeId);
 
-                    #endregion
-                }
-            }
+        //            #endregion
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
         public dynamic GetPurchaseNo(int id)
         {
             var res = (from t1 in _db.PurchaseOrders.Where(f => f.IsActive && f.SupplierId == id)
