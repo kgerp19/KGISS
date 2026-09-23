@@ -1,4 +1,4 @@
-﻿using KGERP.Service.ServiceModel;
+using KGERP.Service.ServiceModel;
 using System;
 using System.Threading.Tasks;
 
@@ -11,5 +11,7 @@ namespace KGERP.Service.Interface
         Task<ApplicationManageModel> GetPendingApprovals(int companyId, long employeeId);
         Task<bool> UpdateApprovalStatus(long approvalId, int status, string comment, string username);
         Task<ApplicationManageModel> GetOrderCreditLimitManageList(int companyId, int? searchStatus, DateTime? fromDate, DateTime? toDate);
+        Task<QuickCreditLimitVm> GetQuickChangeCreditLimitList(int companyId);
+        Task<bool> UpdateVendorCreditLimit(int vendorId, decimal creditLimit, string username);
     }
 }

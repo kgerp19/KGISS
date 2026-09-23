@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -106,5 +106,24 @@ namespace KGERP.Service.ServiceModel
                 return "Pending";
             }
         }
+    }
+
+    public class VendorCreditLimitModel
+    {
+        public int VendorId { get; set; }
+        public int CompanyId { get; set; }
+        public string CompanyName { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Phone { get; set; }
+        public string Address { get; set; }
+        public decimal? CreditLimit { get; set; }
+    }
+
+    public class QuickCreditLimitVm
+    {
+        public int CompanyId { get; set; }
+        public SelectList Companies { get; set; }
+        public List<VendorCreditLimitModel> VendorList { get; set; } = new List<VendorCreditLimitModel>();
     }
 }

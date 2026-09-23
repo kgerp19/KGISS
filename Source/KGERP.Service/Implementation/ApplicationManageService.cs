@@ -1,12 +1,13 @@
-﻿using KGERP.Data.Models;
+using KGERP.Data.Models;
 using KGERP.Service.Interface;
 using KGERP.Service.ServiceModel;
+using KGERP.Utility;
 using System;
 using System.Collections.Generic;
-
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace KGERP.Service.Implementation
 {
@@ -312,6 +313,61 @@ namespace KGERP.Service.Implementation
 
             model.ApplicationList = applicationsList;
             return model;
+        }
+
+        public async Task<QuickCreditLimitVm> GetQuickChangeCreditLimitList(int companyId)
+        {
+            var vm = new QuickCreditLimitVm
+            {
+                CompanyId = companyId
+            };
+
+            var companyList = await context.Companies
+                .Where(c => c.IsActive && c.IsCompany)
+                .OrderBy(c => c.Name)
+                .Select(c => new { c.CompanyId, Name = c.Name + " (" + c.ShortName + ")" })
+                .ToListAsync();
+
+            vm.Companies = new SelectList(companyList, "CompanyId", "Name", companyId);
+
+            var query = context.Vendors.Where(v => v.IsActive && v.VendorTypeId == (int)Provider.Customer);
+            if (companyId > 0)
+            {
+                query = query.Where(v => v.CompanyId == companyId);
+            }
+
+            vm.VendorList = await (from v in query
+                                   join c in context.Companies on v.CompanyId equals c.CompanyId into cGroup
+                                   from comp in cGroup.DefaultIfEmpty()
+                                   orderby v.Name
+                                   select new VendorCreditLimitModel
+                                   {
+                                       VendorId = v.VendorId,
+                                       CompanyId = v.CompanyId,
+                                       CompanyName = comp != null ? comp.ShortName : "",
+                                       Code = v.Code,
+                                       Name = v.Name,
+                                       Phone = v.Phone,
+                                       Address = v.Address,
+                                       CreditLimit = v.CreditLimit ?? 0
+                                   }).ToListAsync();
+
+            return vm;
+        }
+
+        public async Task<bool> UpdateVendorCreditLimit(int vendorId, decimal creditLimit, string username)
+        {
+            var vendor = await context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
+            if (vendor == null)
+            {
+                return false;
+            }
+
+            vendor.CreditLimit = creditLimit;
+            vendor.ModifiedBy = username;
+            vendor.ModifiedDate = DateTime.Now;
+            await context.SaveChangesAsync();
+            return true;
         }
     }
 }

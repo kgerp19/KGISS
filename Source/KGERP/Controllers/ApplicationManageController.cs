@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -173,6 +173,55 @@ namespace KGERP.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> QuickChangeCreditLimit(int companyId = 0)
+        {
+            if (companyId <= 0 && Session["CompanyId"] != null)
+            {
+                int.TryParse(Session["CompanyId"].ToString(), out companyId);
+            }
+
+            var model = await _applicationManageService.GetQuickChangeCreditLimitList(companyId);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> UpdateCreditLimit(int vendorId, decimal creditLimit)
+        {
+            try
+            {
+                if (vendorId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid customer selected." });
+                }
+
+                if (creditLimit < 0)
+                {
+                    return Json(new { success = false, message = "Credit limit cannot be negative." });
+                }
+
+                bool result = await _applicationManageService.UpdateVendorCreditLimit(vendorId, creditLimit, GetUsername());
+                if (result)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Credit limit updated successfully.",
+                        vendorId = vendorId,
+                        newCreditLimit = creditLimit
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Customer not found or update failed." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error updating credit limit: " + ex.Message });
             }
         }
     }

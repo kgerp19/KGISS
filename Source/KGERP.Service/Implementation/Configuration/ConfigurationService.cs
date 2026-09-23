@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.Remoting.Contexts;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -577,7 +578,7 @@ namespace KGERP.Service.Implementation
 
                 throw;
             }
-            
+
         }
         public async Task<int> UserSubMenuEdit(VMUserSubMenu vmUserSubMenu)
         {
@@ -3953,13 +3954,13 @@ namespace KGERP.Service.Implementation
                 v.CostingPrice = 0;
                 v.ClosingQty = 0;
             }
-            
+
 
 
             return v;
         }
 
-        public VMProductStock GetFinishProductCogs(int id, int? compnayId,string lotNo="")
+        public VMProductStock GetFinishProductCogs(int id, int? compnayId, string lotNo = "")
         {
             string pType = _db.Products.FirstAsync(x => x.ProductId == id).Result.ProductType;
 
@@ -3975,7 +3976,7 @@ namespace KGERP.Service.Implementation
                    string.IsNullOrEmpty(lotNo) ? "xyz" : lotNo
                ).FirstOrDefault();
             }
-            else if(pType=="R")
+            else if (pType == "R")
             {
                 vmProductStock = _db.Database.SqlQuery<VMProductStock>(
                "EXEC GetSeedRMStockByProductId {0}, {1}, {2}",
@@ -5719,105 +5720,290 @@ namespace KGERP.Service.Implementation
 
             return result;
         }
-        public async Task<int> CustomerEdit(VMCommonSupplier vmCommonCustomer)
+        public async Task<int> CustomerEdit(VMCommonSupplier model,CancellationToken cancellationToken = default)
         {
-            var result = -1;
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
 
-            int ParentId = 0;
+            if (model.CompanyFK == null)
+                throw new ArgumentException("Company is required.", nameof(model.CompanyFK));
 
-            var subZones = _db.SubZones.Find(vmCommonCustomer.SubZoneId);
-            ParentId = subZones.AccountHeadId;
+            var customer = await _db.Vendors
+                    .FirstOrDefaultAsync(
+                        x => x.VendorId == model.ID,
+                        cancellationToken);
 
-            string newAccountCode = "";
-            int orderNo = 0;
-            Head5 parentHead = _db.Head5.Where(x => x.Id == ParentId).FirstOrDefault();
+            if (customer == null)
+                return -1;
 
-            IQueryable<HeadGL> childHeads = _db.HeadGLs.Where(x => x.ParentId == ParentId && x.IsActive);
+            // Compare the existing SubZoneId with the new one.
+            // This removes the separate AnyAsync() query.
+            bool subZoneChanged = customer.SubZoneId != model.SubZoneId;
 
-            if (childHeads.Count() > 0)
+            string newAccountCode = null;
+            int parentId = 0;
+
+            if (subZoneChanged)
             {
-                string lastAccCode = childHeads.OrderByDescending(x => x.AccCode).FirstOrDefault().AccCode;
-                string parentPart = lastAccCode.Substring(0, 10);
-                string childPart = lastAccCode.Substring(10, 3);
-                newAccountCode = parentPart + (Convert.ToInt32(childPart) + 1).ToString().PadLeft(3, '0');
-                orderNo = childHeads.Count();
-            }
-            else
-            {
-                newAccountCode = parentHead.AccCode + "001";
-                orderNo = orderNo + 1;
-            }
+                var subZone = await _db.SubZones
+                    .AsNoTracking()
+                    .Where(x => x.SubZoneId == model.SubZoneId)
+                    .Select(x => new
+                    {
+                        x.AccountHeadId
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
 
+                if (subZone == null)
+                    throw new InvalidOperationException("The selected sub-zone was not found.");
 
+                parentId = subZone.AccountHeadId;
 
-            Vendor commonCustomer = _db.Vendors.Find(vmCommonCustomer.ID);
-            commonCustomer.SalesOfficerEmpId = vmCommonCustomer.SalesOfficerEmpId;
-            commonCustomer.Name = vmCommonCustomer.Name;
-            commonCustomer.UpazilaId = vmCommonCustomer.Common_UpazilasFk;
-            commonCustomer.Address = vmCommonCustomer.Address;
-            commonCustomer.Phone = vmCommonCustomer.Phone;
-            commonCustomer.SubZoneId = vmCommonCustomer.SubZoneId;
-            commonCustomer.NID = vmCommonCustomer.NID;
-            commonCustomer.CreditLimit = vmCommonCustomer.CreditLimit;
-            commonCustomer.Email = vmCommonCustomer.Email;
-            commonCustomer.Remarks = vmCommonCustomer.Remarks;
-            commonCustomer.CompanyId = vmCommonCustomer.CompanyFK.Value;
-            commonCustomer.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
-            commonCustomer.ModifiedDate = DateTime.Now;
-            commonCustomer.ContactName = vmCommonCustomer.ContactPerson;
-            commonCustomer.CustomerTypeFK = vmCommonCustomer.CustomerTypeFk;
-            commonCustomer.SecurityAmount = vmCommonCustomer.SecurityAmount;
-            commonCustomer.CustomerStatus = vmCommonCustomer.CustomerStatus;
-            commonCustomer.Propietor = vmCommonCustomer.Propietor;
-            commonCustomer.NomineeName = vmCommonCustomer.NomineeName;
-            commonCustomer.NomineePhone = vmCommonCustomer.NomineePhone;
-            commonCustomer.ZoneId = vmCommonCustomer.ZoneId;
-            commonCustomer.BusinessAddress = vmCommonCustomer.BusinessAddress;
-            commonCustomer.NomineeNID = vmCommonCustomer.NomineeNID;
-            commonCustomer.NomineeRelation = vmCommonCustomer.NomineeRelation;
-            commonCustomer.CustomerType = vmCommonCustomer.PaymentType;
-            commonCustomer.DepotCarrying = vmCommonCustomer.DepotCarrying;
-            commonCustomer.IsIncentiveInInvoice = vmCommonCustomer.IsIncentiveInInvoice;
-            commonCustomer.FactoryCarrying = vmCommonCustomer.FactoryCarrying;
-            commonCustomer.FixedIncentive = vmCommonCustomer.FixedIncentive;
-            commonCustomer.IsPoultry = vmCommonCustomer.IsPoultry;
-            commonCustomer.IsFish = vmCommonCustomer.IsFish;
-            commonCustomer.IsCattle = vmCommonCustomer.IsCattle;
-            commonCustomer.CashCommissionPoultry = vmCommonCustomer.CashCommissionPoultry;
-            commonCustomer.CashCommissionFish = vmCommonCustomer.CashCommissionFish;
-            commonCustomer.CashCommissionCattle = vmCommonCustomer.CashCommissionCattle;
-            commonCustomer.YearlyTarget = vmCommonCustomer.YearlyTarget;
-            commonCustomer.CreditRatioFrom = vmCommonCustomer.CreditRatioFrom;
-            commonCustomer.MonthlyTarget = vmCommonCustomer.MonthlyTarget;
-            commonCustomer.CreditRatioTo = vmCommonCustomer.CreditRatioTo;
-            commonCustomer.MonthlyIncentive = vmCommonCustomer.MonthlyIncentive;
-            commonCustomer.YearlyIncentive = vmCommonCustomer.YearlyIncentive;
-            commonCustomer.FixedCommissionCattle = vmCommonCustomer.FixedCommissionCattle;
-            commonCustomer.FixedCommissionFish = vmCommonCustomer.FixedCommissionFish;
-            commonCustomer.FixedCommissionPoultry = vmCommonCustomer.FixedCommissionPoultry;
-            commonCustomer.CheckDetailId = vmCommonCustomer.CheckDetailId;
-            commonCustomer.CheckTypeId = vmCommonCustomer.CheckTypeId;
-            commonCustomer.CheckNo = vmCommonCustomer.CheckNo;
-            commonCustomer.ACName = vmCommonCustomer.ACName;
-            commonCustomer.ACNo = vmCommonCustomer.ACNo;
-            commonCustomer.BranchName = vmCommonCustomer.BranchName;
-            commonCustomer.BankName = vmCommonCustomer.BankName;
-            commonCustomer.Code = newAccountCode;
+                var parentAccountCode = await _db.Head5
+                            .AsNoTracking()
+                            .Where(x => x.Id == parentId)
+                            .Select(x => x.AccCode)
+                            .FirstOrDefaultAsync(cancellationToken);
 
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                result = commonCustomer.VendorId;
-                //if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited)
-                //{
-                //    _db.Database.ExecuteSqlCommand("exec spUpdateCustomerCommission {0},{1},{2}", commonCustomer.CompanyId, commonCustomer.VendorId, commonCustomer.CreatedBy);
+                if (string.IsNullOrWhiteSpace(parentAccountCode))
+                    throw new InvalidOperationException("The parent account head was not found.");
 
-                //}
+                // Do not use Count() only to determine whether rows exist.
+                var lastChildCode = await _db.HeadGLs
+                    .AsNoTracking()
+                    .Where(x => x.ParentId == parentId && x.IsActive)
+                    .OrderByDescending(x => x.AccCode)
+                    .Select(x => x.AccCode)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (string.IsNullOrWhiteSpace(lastChildCode))
+                {
+                    newAccountCode = parentAccountCode + "001";
+                }
+                else
+                {
+                    if (lastChildCode.Length < 3)
+                        throw new InvalidOperationException(
+                            $"Invalid account code: {lastChildCode}");
+
+                    var prefix = lastChildCode.Substring(0, lastChildCode.Length - 3);
+                    var numericPart = lastChildCode.Substring(lastChildCode.Length - 3);
+
+                    if (!int.TryParse(numericPart, out int lastNumber))
+                        throw new InvalidOperationException(
+                            $"Invalid account code suffix: {lastChildCode}");
+
+                    if (lastNumber >= 999)
+                        throw new InvalidOperationException(
+                            "The account-code sequence has reached its limit.");
+
+                    newAccountCode = prefix + (lastNumber + 1).ToString("D3");
+                }
             }
 
-            await IntegratedAccountsHeadEditCustomer(commonCustomer.Name, commonCustomer.HeadGLId.Value, ParentId, newAccountCode);
+            // Apply customer changes
+            customer.SalesOfficerEmpId = model.SalesOfficerEmpId;
+            customer.Name = model.Name;
+            customer.UpazilaId = model.Common_UpazilasFk;
+            customer.Address = model.Address;
+            customer.Phone = model.Phone;
+            customer.SubZoneId = model.SubZoneId;
+            customer.NID = model.NID;
+            customer.CreditLimit = model.CreditLimit;
+            customer.Email = model.Email;
+            customer.Remarks = model.Remarks;
+            customer.CompanyId = model.CompanyFK.Value;
+            customer.ModifiedBy = HttpContext.Current?.User?.Identity?.Name;
+            customer.ModifiedDate = DateTime.UtcNow;
+            customer.ContactName = model.ContactPerson;
+            customer.CustomerTypeFK = model.CustomerTypeFk;
+            customer.SecurityAmount = model.SecurityAmount;
+            customer.CustomerStatus = model.CustomerStatus;
+            customer.Propietor = model.Propietor;
+            customer.NomineeName = model.NomineeName;
+            customer.NomineePhone = model.NomineePhone;
+            customer.ZoneId = model.ZoneId;
+            customer.BusinessAddress = model.BusinessAddress;
+            customer.NomineeNID = model.NomineeNID;
+            customer.NomineeRelation = model.NomineeRelation;
+            customer.CustomerType = model.PaymentType;
+            customer.DepotCarrying = model.DepotCarrying;
+            customer.IsIncentiveInInvoice = model.IsIncentiveInInvoice;
+            customer.FactoryCarrying = model.FactoryCarrying;
+            customer.FixedIncentive = model.FixedIncentive;
+            customer.IsPoultry = model.IsPoultry;
+            customer.IsFish = model.IsFish;
+            customer.IsCattle = model.IsCattle;
+            customer.CashCommissionPoultry = model.CashCommissionPoultry;
+            customer.CashCommissionFish = model.CashCommissionFish;
+            customer.CashCommissionCattle = model.CashCommissionCattle;
+            customer.YearlyTarget = model.YearlyTarget;
+            customer.CreditRatioFrom = model.CreditRatioFrom;
+            customer.MonthlyTarget = model.MonthlyTarget;
+            customer.CreditRatioTo = model.CreditRatioTo;
+            customer.MonthlyIncentive = model.MonthlyIncentive;
+            customer.YearlyIncentive = model.YearlyIncentive;
+            customer.FixedCommissionCattle = model.FixedCommissionCattle;
+            customer.FixedCommissionFish = model.FixedCommissionFish;
+            customer.FixedCommissionPoultry = model.FixedCommissionPoultry;
+            customer.CheckDetailId = model.CheckDetailId;
+            customer.CheckTypeId = model.CheckTypeId;
+            customer.CheckNo = model.CheckNo;
+            customer.ACName = model.ACName;
+            customer.ACNo = model.ACNo;
+            customer.BranchName = model.BranchName;
+            customer.BankName = model.BankName;
 
-            return result;
+            if (subZoneChanged)
+            {
+                customer.Code = newAccountCode;
+
+                if (!customer.HeadGLId.HasValue)
+                    throw new InvalidOperationException(
+                        "The customer has no associated GL head.");
+            }
+
+            // Save customer and related account update atomically
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                try
+                {
+                    await _db.SaveChangesAsync();
+
+                    if (subZoneChanged)
+                    {
+                        await IntegratedAccountsHeadEditCustomer(
+                            customer.Name,
+                            customer.HeadGLId.Value,
+                            parentId,
+                            newAccountCode);
+                    }
+
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+
+
+            return customer.VendorId;
         }
+
+        //public async Task<int> CustomerEdit(VMCommonSupplier vmCommonCustomer)
+        //{
+        //    bool IsMatchSubZone = await _db.Vendors.AnyAsync(x => x.VendorId == vmCommonCustomer.ID && x.SubZoneId == vmCommonCustomer.SubZoneId);
+        //    var result = -1;
+        //    string newAccountCode = "";
+        //    int ParentId = 0;
+
+        //    if (!IsMatchSubZone)
+        //    {
+        //        var subZones = _db.SubZones.Find(vmCommonCustomer.SubZoneId);
+        //        ParentId = subZones.AccountHeadId;
+
+
+        //        int orderNo = 0;
+        //        Head5 parentHead = _db.Head5.Where(x => x.Id == ParentId).FirstOrDefault();
+
+        //        IQueryable<HeadGL> childHeads = _db.HeadGLs.Where(x => x.ParentId == ParentId);
+
+        //        if (childHeads.Count() > 0)
+        //        {
+        //            string lastAccCode = childHeads.OrderByDescending(x => x.AccCode).FirstOrDefault().AccCode;
+        //            string parentPart = lastAccCode.Substring(0, 10);
+        //            string childPart = lastAccCode.Substring(10, 3);
+        //            newAccountCode = parentPart + (Convert.ToInt32(childPart) + 1).ToString().PadLeft(3, '0');
+        //            orderNo = childHeads.Count();
+        //        }
+        //        else
+        //        {
+        //            newAccountCode = parentHead.AccCode + "001";
+        //            orderNo = orderNo + 1;
+        //        }
+
+        //    }
+
+        //    Vendor commonCustomer = _db.Vendors.Find(vmCommonCustomer.ID);
+        //    commonCustomer.SalesOfficerEmpId = vmCommonCustomer.SalesOfficerEmpId;
+        //    commonCustomer.Name = vmCommonCustomer.Name;
+        //    commonCustomer.UpazilaId = vmCommonCustomer.Common_UpazilasFk;
+        //    commonCustomer.Address = vmCommonCustomer.Address;
+        //    commonCustomer.Phone = vmCommonCustomer.Phone;
+        //    commonCustomer.SubZoneId = vmCommonCustomer.SubZoneId;
+        //    commonCustomer.NID = vmCommonCustomer.NID;
+        //    commonCustomer.CreditLimit = vmCommonCustomer.CreditLimit;
+        //    commonCustomer.Email = vmCommonCustomer.Email;
+        //    commonCustomer.Remarks = vmCommonCustomer.Remarks;
+        //    commonCustomer.CompanyId = vmCommonCustomer.CompanyFK.Value;
+        //    commonCustomer.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
+        //    commonCustomer.ModifiedDate = DateTime.Now;
+        //    commonCustomer.ContactName = vmCommonCustomer.ContactPerson;
+        //    commonCustomer.CustomerTypeFK = vmCommonCustomer.CustomerTypeFk;
+        //    commonCustomer.SecurityAmount = vmCommonCustomer.SecurityAmount;
+        //    commonCustomer.CustomerStatus = vmCommonCustomer.CustomerStatus;
+        //    commonCustomer.Propietor = vmCommonCustomer.Propietor;
+        //    commonCustomer.NomineeName = vmCommonCustomer.NomineeName;
+        //    commonCustomer.NomineePhone = vmCommonCustomer.NomineePhone;
+        //    commonCustomer.ZoneId = vmCommonCustomer.ZoneId;
+        //    commonCustomer.BusinessAddress = vmCommonCustomer.BusinessAddress;
+        //    commonCustomer.NomineeNID = vmCommonCustomer.NomineeNID;
+        //    commonCustomer.NomineeRelation = vmCommonCustomer.NomineeRelation;
+        //    commonCustomer.CustomerType = vmCommonCustomer.PaymentType;
+        //    commonCustomer.DepotCarrying = vmCommonCustomer.DepotCarrying;
+        //    commonCustomer.IsIncentiveInInvoice = vmCommonCustomer.IsIncentiveInInvoice;
+        //    commonCustomer.FactoryCarrying = vmCommonCustomer.FactoryCarrying;
+        //    commonCustomer.FixedIncentive = vmCommonCustomer.FixedIncentive;
+        //    commonCustomer.IsPoultry = vmCommonCustomer.IsPoultry;
+        //    commonCustomer.IsFish = vmCommonCustomer.IsFish;
+        //    commonCustomer.IsCattle = vmCommonCustomer.IsCattle;
+        //    commonCustomer.CashCommissionPoultry = vmCommonCustomer.CashCommissionPoultry;
+        //    commonCustomer.CashCommissionFish = vmCommonCustomer.CashCommissionFish;
+        //    commonCustomer.CashCommissionCattle = vmCommonCustomer.CashCommissionCattle;
+        //    commonCustomer.YearlyTarget = vmCommonCustomer.YearlyTarget;
+        //    commonCustomer.CreditRatioFrom = vmCommonCustomer.CreditRatioFrom;
+        //    commonCustomer.MonthlyTarget = vmCommonCustomer.MonthlyTarget;
+        //    commonCustomer.CreditRatioTo = vmCommonCustomer.CreditRatioTo;
+        //    commonCustomer.MonthlyIncentive = vmCommonCustomer.MonthlyIncentive;
+        //    commonCustomer.YearlyIncentive = vmCommonCustomer.YearlyIncentive;
+        //    commonCustomer.FixedCommissionCattle = vmCommonCustomer.FixedCommissionCattle;
+        //    commonCustomer.FixedCommissionFish = vmCommonCustomer.FixedCommissionFish;
+        //    commonCustomer.FixedCommissionPoultry = vmCommonCustomer.FixedCommissionPoultry;
+        //    commonCustomer.CheckDetailId = vmCommonCustomer.CheckDetailId;
+        //    commonCustomer.CheckTypeId = vmCommonCustomer.CheckTypeId;
+        //    commonCustomer.CheckNo = vmCommonCustomer.CheckNo;
+        //    commonCustomer.ACName = vmCommonCustomer.ACName;
+        //    commonCustomer.ACNo = vmCommonCustomer.ACNo;
+        //    commonCustomer.BranchName = vmCommonCustomer.BranchName;
+        //    commonCustomer.BankName = vmCommonCustomer.BankName;
+        //    if (!IsMatchSubZone)
+        //    {
+        //        commonCustomer.Code = newAccountCode;
+        //    }
+
+
+        //    if (await _db.SaveChangesAsync() > 0)
+        //    {
+        //        result = commonCustomer.VendorId;
+        //        //if (commonCustomer.CompanyId == (int)CompanyName.KrishibidFeedLimited)
+        //        //{
+        //        //    _db.Database.ExecuteSqlCommand("exec spUpdateCustomerCommission {0},{1},{2}", commonCustomer.CompanyId, commonCustomer.VendorId, commonCustomer.CreatedBy);
+
+        //        //}
+        //        if (!IsMatchSubZone)
+        //        {
+        //            await IntegratedAccountsHeadEditCustomer(commonCustomer.Name, commonCustomer.HeadGLId.Value, ParentId, newAccountCode);
+        //        }
+
+
+        //    }
+
+
+
+        //    return result;
+        //}
 
         public async Task<int> KfmalCustomerEdit(VMCommonSupplier vmCommonCustomer)
         {
