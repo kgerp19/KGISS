@@ -2729,7 +2729,23 @@ namespace KGERP.Controllers
             };
             return View(cm);
         }
-
+        public ActionResult VendorCreditLimitOutstandingReport(int companyId)
+        {
+            Session["CompanyId"] = companyId;
+            ReportCustomModel cm = new ReportCustomModel()
+            {
+                CompanyId = companyId,
+                FromDate = DateTime.Now,
+                ToDate = DateTime.Now,
+                StrFromDate = DateTime.Now.ToShortDateString(),
+                StrToDate = DateTime.Now.ToShortDateString(),
+                ZoneListList = new SelectList(_configrationService.CommonZonesDropDownList(companyId), "Value", "Text"),
+                TerritoryList = new SelectList(_configrationService.CommonSubZonesDropDownList(companyId), "Value", "Text"),
+                ProductCategoryObjList = new SelectList(_configrationService.CommonProductCategoryDropDownList(companyId), "Value", "Text"),
+                PaymentTypeList = new SelectList(_configrationService.CommonPaymentTypeDropDownList(), "Value", "Text"),
+            };
+            return View(cm);
+        }
 
         [HttpGet]
 
@@ -2800,7 +2816,32 @@ namespace KGERP.Controllers
         }
 
 
-
+        [HttpGet]
+        public ActionResult VendorCreditLimitOutstandingReportView(ReportCustomModel model)
+        {
+            NetworkCredential nwc = new NetworkCredential(admin, password);
+            WebClient client = new WebClient();
+            int zoneid = model.ZoneId??0;
+            int SubZoneid = model.SubZoneId??0;
+            int productCategoryId = model.ProductCategoryId ?? 0;
+            int paymentMethodTypeId = model.PaymentMethodTypeId ?? 0;
+            client.Credentials = nwc;
+            model.ReportName = "ISSVendorCreditLimitOutstandingReport";
+            string reportURL = string.Format(url + "{0}&rs:Command=Render&rs:Format={1}&CompanyId={2}&StrFromDate={3}&StrToDate={4}&ZoneId={5}&SubZoneId={6}&PaymentTypeId={7}&ProductCategoryId={8}", model.ReportName, model.ReportType, model.CompanyId, model.StrFromDate, model.StrToDate,zoneid, SubZoneid, paymentMethodTypeId, productCategoryId);
+            if (model.ReportType.Equals(ReportType.EXCEL))
+            {
+                return File(client.DownloadData(reportURL), "application/vnd.ms-excel", model.ReportName + ".xls");
+            }
+            if (model.ReportType.Equals(ReportType.PDF))
+            {
+                return File(client.DownloadData(reportURL), "application/pdf");
+            }
+            if (model.ReportType.Equals(ReportType.WORD))
+            {
+                return File(client.DownloadData(reportURL), "application/msword", model.ReportName + ".doc");
+            }
+            return View();
+        }
 
         [HttpGet]
 

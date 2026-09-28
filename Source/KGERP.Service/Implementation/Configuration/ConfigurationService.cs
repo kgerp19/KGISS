@@ -2982,6 +2982,24 @@ namespace KGERP.Service.Implementation
             }
             return list;
         }
+        public List<object> CommonProductCategoryDropDownList(int companyId)
+        {
+            var list = new List<object>();
+            var v = _db.ProductCategories.Where(x => x.IsActive && x.CompanyId == companyId && x.IsActive).ToList();
+            foreach (var x in v)
+            {
+                list.Add(new { Text = x.Name, Value = x.ProductCategoryId });
+            }
+            return list;
+        }
+        public List<object> CommonPaymentTypeDropDownList()
+        {
+            return new List<object>
+            {
+                new { Text = "Credit", Value = 1 },
+                new { Text = "Cash", Value = 2 }
+            };
+        }
 
         public List<object> ChekdetailList()
         {
@@ -5720,7 +5738,7 @@ namespace KGERP.Service.Implementation
 
             return result;
         }
-        public async Task<int> CustomerEdit(VMCommonSupplier model,CancellationToken cancellationToken = default)
+        public async Task<int> CustomerEdit(VMCommonSupplier model, CancellationToken cancellationToken = default)
         {
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
