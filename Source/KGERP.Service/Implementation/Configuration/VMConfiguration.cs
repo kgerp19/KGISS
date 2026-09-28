@@ -90,6 +90,7 @@ namespace KGERP.Service.Configuration
         public IEnumerable<VMUserMenu> DataList { get; set; }
         public int? LayerNo { get; set; }
         public string ShortName { get; set; }
+        public bool IsAdmin { get; set; }
         public SelectList CompanyList { get; set; } = new SelectList(new List<object>());
 
     }
@@ -132,6 +133,7 @@ namespace KGERP.Service.Configuration
         public int Priority { get; set; }
         public string Controller { get; set; }
         public string Action { get; set; }
+        public bool IsAdmin { get; set; }
         public int? LayerNo { get; set; }
         public string ShortName { get; set; }
         public string Param { get; set; }

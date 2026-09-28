@@ -45,7 +45,10 @@ namespace KGERP.Service.Implementation
         //#region User role Menuitem
         public async Task<VMUserMenuAssignment> UserMenuAssignmentGet(VMUserMenuAssignment vmUserMenuAssignment)
         {
+
             VMUserMenuAssignment vmMenuAssignment = new VMUserMenuAssignment();
+            
+
             vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
             var companySubMenus = await _db.CompanySubMenus.Where(x => x.CompanyId == vmUserMenuAssignment.CompanyFK).ToListAsync();
             var companySubMenusId = companySubMenus.Select(x => x.CompanySubMenuId).ToList();
@@ -88,114 +91,82 @@ namespace KGERP.Service.Implementation
 
 
             }
-            vmMenuAssignment.DataList = await Task.Run(() => CompanyUserMenuDataLoad(vmUserMenuAssignment));
+            vmMenuAssignment.DataList = await CompanyUserMenuDataLoadAsync(vmUserMenuAssignment);
             vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
             vmMenuAssignment.UserId = vmUserMenuAssignment.UserId;
             vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(vmMenuAssignment.CompanyFK ?? 0), "Value", "Text");
 
             return vmMenuAssignment;
         }
-        //public async Task<VMUserMenuAssignment> UserMenuAssignmentGet(VMUserMenuAssignment vmUserMenuAssignment)
+        
+
+        //public IEnumerable<VMUserMenuAssignment> CompanyUserMenuDataLoad(VMUserMenuAssignment vmMenuAssignment)
         //{
-        //    VMUserMenuAssignment vmMenuAssignment = new VMUserMenuAssignment();
-        //    vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
-        //    var companySubMenus = await _db.CompanySubMenus.Where(x => x.CompanyId == vmUserMenuAssignment.CompanyFK).ToListAsync();
-        //    var companySubMenusId = companySubMenus.Select(x => x.CompanySubMenuId).ToList();
+        //    string currentUser = System.Web.HttpContext.Current.User.Identity.Name;
+        //    bool userRollChk = _db.Employees.Any(x => x.EmployeeId == currentUser && x.ShortName == "superadmin");
+        //    var v = (from t1 in _db.CompanyUserMenus
+        //             join t2 in _db.CompanySubMenus on t1.CompanySubMenuId equals t2.CompanySubMenuId
+        //             join t3 in _db.CompanyMenus on t1.CompanyMenuId equals t3.CompanyMenuId
+        //             join t4 in _db.Companies on t2.CompanyId equals t4.CompanyId
+        //             where t1.UserId == vmMenuAssignment.UserId && t1.CompanyId == vmMenuAssignment.CompanyFK
+        //             select new VMUserMenuAssignment
+        //             {
+        //                 CompanyName = t4.Name,
+        //                 MenuName = t3.Name,
+        //                 SubmenuName = t2.Name,
+        //                 Method = t2.Action + "/" + t2.Controller,
 
-        //    var companyUserMenus =await _db.CompanyUserMenus.Where(x => x.CompanyId == vmUserMenuAssignment.CompanyFK && x.UserId == vmUserMenuAssignment.UserId).ToListAsync();
-        //    var companyUserMenus_SubMenuId = companyUserMenus.Select(x => x.CompanySubMenuId).ToList();
-
-        //    var companySubMenusNotExistsOnUserMenus = companySubMenusId.Where(CompanySubMenuId => !companyUserMenus_SubMenuId.Contains(CompanySubMenuId)).ToList();
-
-        //    var filteredCompanySubMenus = companySubMenus.Where(x => companySubMenusNotExistsOnUserMenus.Contains(x.CompanySubMenuId)).ToList();
-        //    if (filteredCompanySubMenus.Count() > 0)
-        //    {
-        //        List<CompanyUserMenu> userMenuList = new List<CompanyUserMenu>();
-        //        foreach (var subMenus in filteredCompanySubMenus)
-        //        {
-        //            CompanyUserMenu userMenu = new CompanyUserMenu
-        //            {
-        //                CompanyMenuId = subMenus.CompanyMenuId.Value,
-        //                CompanySubMenuId = subMenus.CompanySubMenuId,
-        //                IsActive = false,
-        //                IsView = true,
-        //                CompanyId = vmUserMenuAssignment.CompanyFK,
-        //                UserId = vmUserMenuAssignment.UserId,
-        //                CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-        //                CreatedDate = DateTime.Now
-        //            };
-
-        //            userMenuList.Add(userMenu);
-        //        }
-
-        //        _db.CompanyUserMenus.AddRange(userMenuList);
-        //        try
-        //        {
-        //            await _db.SaveChangesAsync();
-        //        }
-        //        catch(Exception ex)
-        //        {
-        //            var x = ex.Message;
-        //        }
+        //                 SubmenuID = t2.CompanySubMenuId,
+        //                 IsActive = t1.IsActive,
+        //                 MenuPriority = t2.OrderNo,
 
 
-        //    }
-        //    vmMenuAssignment.DataList = await Task.Run(() => CompanyUserMenuDataLoad(vmUserMenuAssignment));
-        //    vmMenuAssignment.CompanyFK = vmUserMenuAssignment.CompanyFK;
-        //    vmMenuAssignment.UserId = vmUserMenuAssignment.UserId;
-        //    vmMenuAssignment.CompanyList = new SelectList(CompaniesDropDownList(), "Value", "Text");
-
-        //    return vmMenuAssignment;
+        //                 MenuID = t3.CompanyMenuId,
+        //                 CompanyUserMenusId = t1.CompanyUserMenuId,
+        //                 UserId = t1.UserId,
+        //                 CompanyFK = t1.CompanyId,
+        //             }).OrderBy(x => x.MenuPriority).AsEnumerable();
+        //    return v;
         //}
-
-
-
-        public IEnumerable<VMUserMenuAssignment> CompanyUserMenuDataLoad(VMUserMenuAssignment vmMenuAssignment)
+        public async Task<IEnumerable<VMUserMenuAssignment>> CompanyUserMenuDataLoadAsync(VMUserMenuAssignment vmMenuAssignment)
         {
-            var v = (from t1 in _db.CompanyUserMenus
-                     join t2 in _db.CompanySubMenus on t1.CompanySubMenuId equals t2.CompanySubMenuId
-                     join t3 in _db.CompanyMenus on t1.CompanyMenuId equals t3.CompanyMenuId
-                     join t4 in _db.Companies on t2.CompanyId equals t4.CompanyId
-                     where t1.UserId == vmMenuAssignment.UserId && t1.CompanyId == vmMenuAssignment.CompanyFK
-                     select new VMUserMenuAssignment
-                     {
-                         CompanyName = t4.Name,
-                         MenuName = t3.Name,
-                         SubmenuName = t2.Name,
-                         Method = t2.Action + "/" + t2.Controller,
+            string currentUser = System.Web.HttpContext.Current.User.Identity.Name;
+            bool userRollChk = !string.IsNullOrEmpty(currentUser) &&
+                               await _db.Employees.AnyAsync(x => x.EmployeeId == currentUser && x.ShortName == "superadmin");
 
-                         SubmenuID = t2.CompanySubMenuId,
-                         IsActive = t1.IsActive,
-                         MenuPriority = t2.OrderNo,
+            var query = from t1 in _db.CompanyUserMenus
+                        join t2 in _db.CompanySubMenus on t1.CompanySubMenuId equals t2.CompanySubMenuId
+                        join t3 in _db.CompanyMenus on t1.CompanyMenuId equals t3.CompanyMenuId
+                        join t4 in _db.Companies on t2.CompanyId equals t4.CompanyId
+                        where t1.UserId == vmMenuAssignment.UserId
+                              && t1.CompanyId == vmMenuAssignment.CompanyFK
+                        select new { t1, t2, t3, t4 };
 
+            if (!userRollChk)
+            {
+                query = query.Where(x => x.t3.IsAdmin == false && x.t2.IsAdmin == false);
+            }
 
-                         MenuID = t3.CompanyMenuId,
-                         CompanyUserMenusId = t1.CompanyUserMenuId,
-                         UserId = t1.UserId,
-                         CompanyFK = t1.CompanyId,
-                     }).OrderBy(x => x.MenuPriority).AsEnumerable();
-            return v;
+            return await query
+                .Select(x => new VMUserMenuAssignment
+                {
+                    CompanyName = x.t4.Name,
+                    MenuName = x.t3.Name,
+                    SubmenuName = x.t2.Name,
+                    Method = x.t2.Action + "/" + x.t2.Controller,
+                    SubmenuID = x.t2.CompanySubMenuId,
+                    IsActive = x.t1.IsActive,
+                    MenuPriority = x.t2.OrderNo,
+                    MenuID = x.t3.CompanyMenuId,
+                    CompanyUserMenusId = x.t1.CompanyUserMenuId,
+                    UserId = x.t1.UserId,
+                    CompanyFK = x.t1.CompanyId,
+                })
+                .OrderBy(x => x.MenuPriority)
+                .ToListAsync();
         }
 
-
-        //public async Task<int> UserRoleMenuItemAdd(VMUserRoleMenuItem vmUserRoleMenuItem)
-        //{
-        //    var result = -1;
-        //    User_RoleMenuItem userRoleMenuItem = new User_RoleMenuItem
-        //    {
-        //        IsAllowed = vmUserRoleMenuItem.IsAllowed,
-        //        User_MenuItemFk = vmUserRoleMenuItem.ID,
-        //        User_RoleFK = vmUserRoleMenuItem.ID,
-        //        User = vmUserRoleMenuItem.User,
-        //        UserID = vmUserRoleMenuItem.UserID
-        //    };
-        //    _db.User_RoleMenuItem.Add(userRoleMenuItem);
-        //    if (await _db.SaveChangesAsync() > 0)
-        //    {
-        //        result = userRoleMenuItem.ID;
-        //    }
-        //    return result;
-        //}
+       
         public CompanyUserMenu CompanyUserMenuEdit(VMUserMenuAssignment vmUserMenuAssignment)
         {
             long result = -1;
@@ -211,37 +182,7 @@ namespace KGERP.Service.Implementation
             }
             return companyUserMenus;
         }
-        ////public async (Task<int>, Task<bool>) UserRoleMenuItemEdit(VMUserRoleMenuItem vmUserRoleMenuItem)
-        ////{
-        ////    var result = -1;
-        ////    //to select Accountining_Chart_Two data.....
-        ////    User_RoleMenuItem userRoleMenuItem = _db.User_RoleMenuItem.Find(vmUserRoleMenuItem.ID);
-        ////    userRoleMenuItem.IsAllowed = vmUserRoleMenuItem.IsAllowed;
-        ////    userRoleMenuItem.User = vmUserRoleMenuItem.User;
-
-        ////    if (await _db.SaveChangesAsync() > 0)
-        ////    {
-        ////        result = userRoleMenuItem.ID;
-        ////    }
-        ////    return result, false;
-        ////}
-        //public async Task<int> UserRoleMenuItemDelete(int id)
-        //{
-        //    int result = -1;
-
-        //    if (id != 0)
-        //    {
-        //        User_RoleMenuItem userRoleMenuItem = _db.User_RoleMenuItem.Find(id);
-        //        userRoleMenuItem.Active = false;
-
-        //        if (await _db.SaveChangesAsync() > 0)
-        //        {
-        //            result = userRoleMenuItem.ID;
-        //        }
-        //    }
-        //    return result;
-        //}
-        //#endregion
+        
         public async Task<VMUserMenu> AccountingCostCenterGet(int companyId)
         {
             VMUserMenu vmUserMenu = new VMUserMenu();
@@ -339,7 +280,8 @@ namespace KGERP.Service.Implementation
                          ShortName = t1.ShortName,
                          Priority = t1.OrderNo,
                          IsActive = t1.IsActive,
-                         CompanyFK = t1.CompanyId
+                         CompanyFK = t1.CompanyId,
+                         IsAdmin=t1.IsAdmin
                      }).OrderByDescending(x => x.ID).AsEnumerable();
             return v;
         }
@@ -357,7 +299,8 @@ namespace KGERP.Service.Implementation
                          ShortName = t1.ShortName,
                          Priority = t1.OrderNo,
                          IsActive = t1.IsActive,
-                         CompanyFK = t1.CompanyId
+                         CompanyFK = t1.CompanyId,
+                         IsAdmin=t1.IsAdmin
                      }).OrderByDescending(x => x.ID).AsEnumerable();
             return v;
         }
@@ -379,7 +322,8 @@ namespace KGERP.Service.Implementation
                 CompanyId = vmUserMenu.CompanyFK,
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                IsAdmin= vmUserMenu.IsAdmin
             };
             _db.CompanyMenus.Add(userMenu);
             if (await _db.SaveChangesAsync() > 0)
@@ -409,6 +353,7 @@ namespace KGERP.Service.Implementation
                     userMenu.ShortName = vmUserMenu.ShortName;
                     userMenu.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
                     userMenu.ModifiedDate = DateTime.Now;
+                    userMenu.IsAdmin = vmUserMenu.IsAdmin;
                     await _db.SaveChangesAsync();
                     result = userMenu.CompanyMenuId;
                     dbTran.Commit();
@@ -520,7 +465,8 @@ namespace KGERP.Service.Implementation
                          Action = t1.Action,
                          UserMenuName = t2.Name,
                          User_MenuFk = t2.CompanyMenuId,
-                         Priority = t1.OrderNo
+                         Priority = t1.OrderNo,
+                         IsAdmin=t1.IsAdmin
 
                      }).OrderByDescending(x => x.ID).AsEnumerable();
             return v;
@@ -561,7 +507,8 @@ namespace KGERP.Service.Implementation
                     ShortName = vmUserSubMenu.ShortName,
                     Param = vmUserSubMenu.Param,
                     CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    IsAdmin=vmUserSubMenu.IsAdmin
 
 
 
@@ -605,6 +552,8 @@ namespace KGERP.Service.Implementation
                     userSubMenu.CompanyId = vmUserSubMenu.CompanyFK;
                     userSubMenu.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
                     userSubMenu.ModifiedDate = DateTime.Now;
+                    userSubMenu.IsAdmin = vmUserSubMenu.IsAdmin;
+
                     _db.Entry(userSubMenu).State = EntityState.Modified;
                     await _db.SaveChangesAsync();
                     result = userSubMenu.CompanySubMenuId;
