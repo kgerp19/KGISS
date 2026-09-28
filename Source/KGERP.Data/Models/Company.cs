@@ -22,7 +22,6 @@ namespace KGERP.Data.Models
             this.AssetTrackingFinals = new HashSet<AssetTrackingFinal>();
             this.AttendancePolicies = new HashSet<AttendancePolicy>();
             this.BookingCostHeads = new HashSet<BookingCostHead>();
-            this.CompanyMenus = new HashSet<CompanyMenu>();
             this.CustomerGroupInfoes = new HashSet<CustomerGroupInfo>();
             this.FileAttachments = new HashSet<FileAttachment>();
             this.MonthlyTargets = new HashSet<MonthlyTarget>();
@@ -32,6 +31,7 @@ namespace KGERP.Data.Models
             this.LCInfoes = new HashSet<LCInfo>();
             this.Employees = new HashSet<Employee>();
             this.OrderMasters = new HashSet<OrderMaster>();
+            this.CompanyMenus = new HashSet<CompanyMenu>();
             this.CompanySubMenus = new HashSet<CompanySubMenu>();
         }
     
@@ -71,8 +71,6 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BookingCostHead> BookingCostHeads { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CompanyMenu> CompanyMenus { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CustomerGroupInfo> CustomerGroupInfoes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<FileAttachment> FileAttachments { get; set; }
@@ -90,6 +88,8 @@ namespace KGERP.Data.Models
         public virtual ICollection<Employee> Employees { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderMaster> OrderMasters { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CompanyMenu> CompanyMenus { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CompanySubMenu> CompanySubMenus { get; set; }
     }

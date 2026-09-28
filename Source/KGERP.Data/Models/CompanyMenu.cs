@@ -39,6 +39,7 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
         public Nullable<System.DateTime> ModifiedDate { get; set; }
+        public bool IsAdmin { get; set; }
         public bool IsActive { get; set; }
         public bool IsWeb { get; set; }
     
