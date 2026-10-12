@@ -6027,7 +6027,7 @@ namespace KGERP.Service.Implementation
                         IsActive = true,
                         otp = otpCode,
                         IntegrationFrom = vmOrderDeliverDetail.IntegratedFrom,
-                        IntegrationId = vmOrderDeliverDetail.OrderDetailId,
+                        IntegrationId = vmOrderDeliverDetail.OrderDeliverId,
                     };
 
                     try
