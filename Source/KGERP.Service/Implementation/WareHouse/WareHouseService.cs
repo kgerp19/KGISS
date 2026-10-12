@@ -5185,7 +5185,7 @@ namespace KGERP.Services.WareHouse
                                                             join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
                                                             join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
                                                             join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
-                                                            where t1.CompanyId == companyId && t1.IsActive
+                                                            where t1.CompanyId == companyId && t1.IsActive 
                                                             select new VMOrderDeliver
                                                             {
                                                                 CustomerPhone = t3.Phone,
@@ -5212,6 +5212,95 @@ namespace KGERP.Services.WareHouse
 
 
 
+
+            return vmOrderDeliver;
+        }
+        public async Task<VMOrderDeliver> OrderDeliverConfirmGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
+            vmOrderDeliver.CompanyFK = companyId;
+
+
+            vmOrderDeliver.DataList = await Task.Run(() => (from t1 in _db.OrderDelivers.Where(x => x.DeliveryDate >= fromDate && x.DeliveryDate <= toDate)
+                                                            join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                                                            join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
+                                                            join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                                                            join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
+                                                            join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
+                                                            where t1.CompanyId == companyId && t1.IsActive && t1.IsSubmitted
+                                                            select new VMOrderDeliver
+                                                            {
+                                                                CustomerPhone = t3.Phone,
+                                                                CustomerAddress = t3.Address,
+                                                                CustomerEmail = t3.Email,
+                                                                ContactPerson = t3.ContactName,
+                                                                ZoneName = t5.Name,
+                                                                ZoneIncharge = t5.ZoneIncharge,
+                                                                OrderDeliverId = t1.OrderDeliverId,
+                                                                OrderMasterId = t2.OrderMasterId,
+                                                                CompanyFK = t1.CompanyId,
+                                                                DeliveryDate = t1.DeliveryDate,
+                                                                ChallanNo = t1.ChallanNo,
+                                                                DriverName = t1.DriverName,
+                                                                VehicleNo = t1.VehicleNo,
+                                                                InvoiceNo = t1.InvoiceNo,
+                                                                OrderNo = t2.OrderNo,
+                                                                CustomerName = t3.Name,
+                                                                CompanyName = t4.Name,
+                                                                CompanyAddress = t4.Address,
+                                                                OrderDate = t2.OrderDate,
+                                                                IsDelivered = t1.IsDelivered
+                                                            }).OrderByDescending(x => x.OrderDeliverId).AsEnumerable());
+
+
+
+
+            return vmOrderDeliver;
+        }
+        public async Task<VMOrderDeliver> OrderDeliverConfirmOtp(VMOrderDeliver vmOrderDeliver)
+        {
+            string currentUser = Common.GetUserId();
+
+            if (string.IsNullOrEmpty(currentUser))
+            {
+                vmOrderDeliver.Messages = "Unauthorized user.";
+                return vmOrderDeliver;
+            }
+
+            // Check if the OTP is valid for the given order delivery
+            var chkOtp = await _db.ErpSMS.AnyAsync(x =>
+                x.IntegrationFrom == "OrderDelivery" &&
+                x.IntegrationId == vmOrderDeliver.OrderDeliverId &&
+                x.otp == vmOrderDeliver.Otp);
+
+            if (chkOtp)
+            {
+                // Find the order delivery record
+                var orderDelivery = await _db.OrderDelivers
+                    .FirstOrDefaultAsync(x => x.OrderDeliverId == vmOrderDeliver.OrderDeliverId);
+
+                if (orderDelivery != null)
+                {
+                    // Update the fields
+                    orderDelivery.IsDelivered = 1;
+                    orderDelivery.ModifedDate = DateTime.Now;
+                    orderDelivery.ModifiedBy = currentUser;
+
+                    // Append success message (assuming Messages is a string field/property)
+                    vmOrderDeliver.Messages =  "Order delivered successfully.";
+
+                    // Save changes to the database
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    vmOrderDeliver.Messages = "Order delivery record not found.";
+                }
+            }
+            else
+            {
+                vmOrderDeliver.Messages = "Invalid OTP.";
+            }
 
             return vmOrderDeliver;
         }
@@ -5800,7 +5889,12 @@ namespace KGERP.Services.WareHouse
 
             VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
             AccData.IntegratedFrom = "MaterialReceive";
-            await _accountingService.AccountingSalesPushISS(AccData);
+           var resultAccounting= await _accountingService.AccountingSalesPushISS(AccData);
+            if (resultAccounting > 0 && model.IsSubmitted==true)
+            {
+                AccData.IntegratedFrom = "OrderDelivery";
+                await _accountingService.OrderDeliverySMSPush(AccData);
+            }
             return result;
         }
 

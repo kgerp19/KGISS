@@ -27,12 +27,12 @@ namespace KGERP.Data.Models
             this.MonthlyTargets = new HashSet<MonthlyTarget>();
             this.Stores = new HashSet<Store>();
             this.Units = new HashSet<Unit>();
-            this.ErpSMS = new HashSet<ErpSMS>();
             this.LCInfoes = new HashSet<LCInfo>();
             this.Employees = new HashSet<Employee>();
             this.OrderMasters = new HashSet<OrderMaster>();
             this.CompanyMenus = new HashSet<CompanyMenu>();
             this.CompanySubMenus = new HashSet<CompanySubMenu>();
+            this.ErpSMS = new HashSet<ErpSMS>();
         }
     
         public int CompanyId { get; set; }
@@ -81,8 +81,6 @@ namespace KGERP.Data.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Unit> Units { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ErpSMS> ErpSMS { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<LCInfo> LCInfoes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Employee> Employees { get; set; }
@@ -92,5 +90,7 @@ namespace KGERP.Data.Models
         public virtual ICollection<CompanyMenu> CompanyMenus { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CompanySubMenu> CompanySubMenus { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ErpSMS> ErpSMS { get; set; }
     }
 }

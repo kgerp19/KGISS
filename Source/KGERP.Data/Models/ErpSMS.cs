@@ -25,6 +25,14 @@ namespace KGERP.Data.Models
         public System.DateTime RowTime { get; set; }
         public string Remarks { get; set; }
         public int SmsType { get; set; }
+        public string IntegrationFrom { get; set; }
+        public Nullable<long> IntegrationId { get; set; }
+        public Nullable<int> otp { get; set; }
+        public bool IsActive { get; set; }
+        public string ModifiedBy { get; set; }
+        public Nullable<System.DateTime> ModifedDate { get; set; }
+        public string CreatedBy { get; set; }
+        public Nullable<System.DateTime> CreatedDate { get; set; }
     
         public virtual Company Company { get; set; }
         public virtual SmsType SmsType1 { get; set; }

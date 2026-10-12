@@ -20,7 +20,7 @@ namespace KGERP.Service.SMS_Service_Implementation
             try
             {
                 var lstSms = await _db.ErpSMS.Where(e => (e.Status == (int)EnumSmSStatus.Pending || e.Status == (int)EnumSmSStatus.Failed)
-                    && e.TryCount < 3 && e.Date <= DateTime.Now && e.CompanyId == 21).Take(20).ToListAsync();
+                    && e.TryCount < 3 && e.Date <= DateTime.Now && e.CompanyId == 2).Take(20).ToListAsync();
 
                 HttpClient _client = new HttpClient();
                 _client.BaseAddress = new Uri("https://portal.adnsms.com");
@@ -64,19 +64,19 @@ namespace KGERP.Service.SMS_Service_Implementation
                     smsScheduleLog.Remarks = "Successfully Send Massage " + countsms + " and Failed " + logcount + " of Total " + lstSms.Count() + "";
                     smsScheduleLog.LogTime = DateTime.Now;
                     smsScheduleLog.Status = "Success";
-                    smsScheduleLog.CompanyId = 21;
+                    smsScheduleLog.CompanyId = 2;
                     _db.SMSScheduleLogs.Add(smsScheduleLog);
                     _db.SaveChanges();
                     return 1;
                 }
-                SMSScheduleLog smsScheduleLog2 = new SMSScheduleLog();
+                //SMSScheduleLog smsScheduleLog2 = new SMSScheduleLog();
 
-                smsScheduleLog2.Remarks = "No Count Meassages";
-                smsScheduleLog2.LogTime = DateTime.Now;
-                smsScheduleLog2.Status = "Failed";
-                smsScheduleLog2.CompanyId = 21;
-                _db.SMSScheduleLogs.Add(smsScheduleLog2);
-                _db.SaveChanges();
+                //smsScheduleLog2.Remarks = "No Count Meassages";
+                //smsScheduleLog2.LogTime = DateTime.Now;
+                //smsScheduleLog2.Status = "Failed";
+                //smsScheduleLog2.CompanyId = 2;
+                //_db.SMSScheduleLogs.Add(smsScheduleLog2);
+                //_db.SaveChanges();
                 return 0;
             }
             catch (Exception ex)

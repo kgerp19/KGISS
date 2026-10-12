@@ -467,6 +467,7 @@ namespace KGERP.Services.WareHouse
         public long OrderDeliverId { get; set; }
         public long? OrderMasterId { get; set; }
         public int? TransportTypeId { get; set; }
+        public int? Otp { get; set; }
         public string CourierName { get; set; }
         public string ProductType { get; set; }
         public int StockInfoId { get; set; }
@@ -494,6 +495,7 @@ namespace KGERP.Services.WareHouse
         public decimal? InvoiceDiscountRate { get; set; }
         public string DepoInvoiceNo { get; set; }
         public string CustomerName { get; set; }
+        public string Messages { get; set; }
 
         public IEnumerable<VMOrderDeliver> DataList { get; set; }
         public string CompanyAddress { get; set; }
@@ -508,6 +510,7 @@ namespace KGERP.Services.WareHouse
 
         public string ContactPerson { get; set; }
         public bool IsSubmitted { get; set; }
+        public int? IsDelivered { get; set; }
         public string StrFromDate { get; set; }
         public string StrToDate { get; set; }
         public DateTime FromDate { get; set; }

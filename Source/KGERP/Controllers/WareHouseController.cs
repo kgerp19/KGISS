@@ -1038,6 +1038,23 @@ namespace KGERP.Controllers
         }
 
         [HttpGet]
+        public async Task<ActionResult> OrderDeliverConfirmList(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (!fromDate.HasValue) fromDate = firstDayOfMonth;
+            if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
+            VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
+            vmOrderDeliver = await _service.OrderDeliverConfirmGet(companyId, fromDate, toDate);
+
+
+            vmOrderDeliver.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
+            vmOrderDeliver.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+
+
+            return View(vmOrderDeliver);
+        }
+
+        [HttpGet]
         public async Task<ActionResult> SalestransferList(int companyId, DateTime? fromDate, DateTime? toDate)
         {
             DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
@@ -1063,11 +1080,26 @@ namespace KGERP.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> WareHouseOrderDeliverList(VMOrderDeliver vmOrderDeliver)
+        public ActionResult WareHouseOrderDeliverList(VMOrderDeliver vmOrderDeliver)
         {
             vmOrderDeliver.FromDate = Convert.ToDateTime(vmOrderDeliver.StrFromDate);
             vmOrderDeliver.ToDate = Convert.ToDateTime(vmOrderDeliver.StrToDate);
             return RedirectToAction(nameof(WareHouseOrderDeliverList), new { companyId = vmOrderDeliver.CompanyFK, fromDate = vmOrderDeliver.FromDate, toDate = vmOrderDeliver.ToDate });
+        }
+
+        [HttpPost]
+        public ActionResult OrderDeliverConfirmList(VMOrderDeliver vmOrderDeliver)
+        {
+            vmOrderDeliver.FromDate = Convert.ToDateTime(vmOrderDeliver.StrFromDate);
+            vmOrderDeliver.ToDate = Convert.ToDateTime(vmOrderDeliver.StrToDate);
+            return RedirectToAction(nameof(OrderDeliverConfirmList), new { companyId = vmOrderDeliver.CompanyFK, fromDate = vmOrderDeliver.FromDate, toDate = vmOrderDeliver.ToDate });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> OrderDeliverConfirmOtp(VMOrderDeliver vmOrderDeliver)
+        {
+            var vmOrderDelivers =await _service.OrderDeliverConfirmOtp(vmOrderDeliver);
+            return RedirectToAction(nameof(OrderDeliverConfirmList), new { companyId = vmOrderDeliver.CompanyFK});
         }
 
         [HttpGet]

@@ -267,7 +267,7 @@ namespace KGERP
         {
             var res = ConfigurationManager.AppSettings["SeedMessagesKey"];
            
-            if ((Convert.ToInt32(res)) == 2)
+            if ((Convert.ToInt32(res)) == 1)
             {
                 var timer = new System.Timers.Timer();
                 timer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;

@@ -47,6 +47,7 @@ namespace KGERP.Data.Models
         public Nullable<System.DateTime> ModifedDate { get; set; }
         public bool IsSubmitted { get; set; }
         public bool IsSeen { get; set; }
+        public Nullable<int> IsDelivered { get; set; }
         public string Remark { get; set; }
     
         public virtual OrderMaster OrderMaster { get; set; }

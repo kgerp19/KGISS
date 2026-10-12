@@ -1689,6 +1689,14 @@ warning 6002: The table/view 'KGISSDB.dbo.EmployeeLeaveDetail' does not have a p
           <Property Name="RowTime" Type="datetime" Nullable="false" />
           <Property Name="Remarks" Type="nvarchar(max)" Nullable="false" />
           <Property Name="SmsType" Type="int" Nullable="false" />
+          <Property Name="IntegrationFrom" Type="nvarchar" MaxLength="100" />
+          <Property Name="IntegrationId" Type="bigint" />
+          <Property Name="otp" Type="int" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" />
+          <Property Name="ModifedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="varchar" MaxLength="50" />
+          <Property Name="CreatedDate" Type="datetime" />
         </EntityType>
         <EntityType Name="ExitInterview">
           <Key>
@@ -5327,6 +5335,7 @@ warning 6002: The table/view 'KGISSDB.Erp.FormulaHistory' does not have a primar
           <Property Name="ModifedDate" Type="datetime" />
           <Property Name="IsSubmitted" Type="bit" Nullable="false" />
           <Property Name="IsSeen" Type="bit" Nullable="false" />
+          <Property Name="IsDelivered" Type="int" />
           <Property Name="Remark" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="OrderDeliverDetail">
@@ -10550,16 +10559,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="AspNetRole" EntitySet="AspNetRoles" />
             <End Role="AspNetUser" EntitySet="AspNetUsers" />
           </AssociationSet>
-          <EntitySet Name="ErpSMS" EntityType="ERPModel.ErpSMS" />
           <EntitySet Name="PurchaseOrderTemplate" EntityType="ERPModel.PurchaseOrderTemplate" />
-          <AssociationSet Name="FK_ErpSMS_Company" Association="ERPModel.FK_ErpSMS_Company">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="ErpSMS" EntitySet="ErpSMS" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ErpSMS_SmsType" Association="ERPModel.FK_ErpSMS_SmsType">
-            <End Role="SmsType" EntitySet="SmsTypes" />
-            <End Role="ErpSMS" EntitySet="ErpSMS" />
-          </AssociationSet>
           <EntitySet Name="vwFTPFileInfoes" EntityType="ERPModel.vwFTPFileInfo" />
           <EntitySet Name="vwSMSLists" EntityType="ERPModel.vwSMSList" />
           <EntitySet Name="vwTeamInfoLists" EntityType="ERPModel.vwTeamInfoList" />
@@ -10940,22 +10940,9 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             <End Role="Employee" EntitySet="Employees" />
           </AssociationSet>
           <EntitySet Name="Grades" EntityType="ERPModel.Grade" />
-          <EntitySet Name="OrderDelivers" EntityType="ERPModel.OrderDeliver" />
           <AssociationSet Name="FK_Employee_Grade" Association="ERPModel.FK_Employee_Grade">
             <End Role="Grade" EntitySet="Grades" />
             <End Role="Employee" EntitySet="Employees" />
-          </AssociationSet>
-          <AssociationSet Name="FK_OrderDeliver_OrderMaster" Association="ERPModel.FK_OrderDeliver_OrderMaster">
-            <End Role="OrderMaster" EntitySet="OrderMasters" />
-            <End Role="OrderDeliver" EntitySet="OrderDelivers" />
-          </AssociationSet>
-          <AssociationSet Name="FK_OrderDeliverDetail_OrderDeliver" Association="ERPModel.FK_OrderDeliverDetail_OrderDeliver">
-            <End Role="OrderDeliver" EntitySet="OrderDelivers" />
-            <End Role="OrderDeliverDetail" EntitySet="OrderDeliverDetails" />
-          </AssociationSet>
-          <AssociationSet Name="FK_SaleReturn_OrderDeliver" Association="ERPModel.FK_SaleReturn_OrderDeliver">
-            <End Role="OrderDeliver" EntitySet="OrderDelivers" />
-            <End Role="SaleReturn" EntitySet="SaleReturns" />
           </AssociationSet>
           <EntitySet Name="Departments" EntityType="ERPModel.Department" />
           <AssociationSet Name="FK_Employee_Department" Association="ERPModel.FK_Employee_Department">
@@ -11044,6 +11031,28 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <AssociationSet Name="FK_CompanySubMenu_CompanyMenu" Association="ERPModel.FK_CompanySubMenu_CompanyMenu">
             <End Role="CompanyMenu" EntitySet="CompanyMenus" />
             <End Role="CompanySubMenu" EntitySet="CompanySubMenus" />
+          </AssociationSet>
+          <EntitySet Name="OrderDelivers" EntityType="ERPModel.OrderDeliver" />
+          <AssociationSet Name="FK_OrderDeliver_OrderMaster" Association="ERPModel.FK_OrderDeliver_OrderMaster">
+            <End Role="OrderMaster" EntitySet="OrderMasters" />
+            <End Role="OrderDeliver" EntitySet="OrderDelivers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderDeliverDetail_OrderDeliver" Association="ERPModel.FK_OrderDeliverDetail_OrderDeliver">
+            <End Role="OrderDeliver" EntitySet="OrderDelivers" />
+            <End Role="OrderDeliverDetail" EntitySet="OrderDeliverDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SaleReturn_OrderDeliver" Association="ERPModel.FK_SaleReturn_OrderDeliver">
+            <End Role="OrderDeliver" EntitySet="OrderDelivers" />
+            <End Role="SaleReturn" EntitySet="SaleReturns" />
+          </AssociationSet>
+          <EntitySet Name="ErpSMS" EntityType="ERPModel.ErpSMS" />
+          <AssociationSet Name="FK_ErpSMS_Company" Association="ERPModel.FK_ErpSMS_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="ErpSMS" EntitySet="ErpSMS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ErpSMS_SmsType" Association="ERPModel.FK_ErpSMS_SmsType">
+            <End Role="SmsType" EntitySet="SmsTypes" />
+            <End Role="ErpSMS" EntitySet="ErpSMS" />
           </AssociationSet>
           </EntityContainer>
         <ComplexType Name="GetEmployeeListForTeam_Result">
@@ -11843,12 +11852,12 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="MonthlyTargets" Relationship="ERPModel.FK_MonthyTarget_Company" FromRole="Company" ToRole="MonthlyTarget" />
           <NavigationProperty Name="Stores" Relationship="ERPModel.FK_Store_Company1" FromRole="Company" ToRole="Store" />
           <NavigationProperty Name="Units" Relationship="ERPModel.FK_Unit_Company" FromRole="Company" ToRole="Unit" />
-          <NavigationProperty Name="ErpSMS" Relationship="ERPModel.FK_ErpSMS_Company" FromRole="Company" ToRole="ErpSMS" />
           <NavigationProperty Name="LCInfoes" Relationship="ERPModel.FK_LCInfo_Company" FromRole="Company" ToRole="LCInfo" />
           <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Company" FromRole="Company" ToRole="Employee" />
           <NavigationProperty Name="OrderMasters" Relationship="ERPModel.FK_OrderMaster_Company" FromRole="Company" ToRole="OrderMaster" />
           <NavigationProperty Name="CompanyMenus" Relationship="ERPModel.FK_CompanyMenu_Company" FromRole="Company" ToRole="CompanyMenu" />
           <NavigationProperty Name="CompanySubMenus" Relationship="ERPModel.FK_CompanySubMenu_Company" FromRole="Company" ToRole="CompanySubMenu" />
+          <NavigationProperty Name="ErpSMS" Relationship="ERPModel.FK_ErpSMS_Company" FromRole="Company" ToRole="ErpSMS" />
         </EntityType>
         <EntityType Name="CompanyUserMenu">
           <Key>
@@ -16261,24 +16270,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <End Type="ERPModel.AspNetRole" Role="AspNetRole" Multiplicity="*" />
           <End Type="ERPModel.AspNetUser" Role="AspNetUser" Multiplicity="*" />
         </Association>
-        <EntityType Name="ErpSMS">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Subject" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="PhoneNo" Type="String" Nullable="false" MaxLength="11" FixedLength="false" Unicode="true" />
-          <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="CompanyId" Type="Int32" Nullable="false" />
-          <Property Name="Status" Type="Int32" />
-          <Property Name="TryCount" Type="Int32" Nullable="false" />
-          <Property Name="RowTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Remarks" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="SmsType" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Company" Relationship="ERPModel.FK_ErpSMS_Company" FromRole="ErpSMS" ToRole="Company" />
-          <NavigationProperty Name="SmsType1" Relationship="ERPModel.FK_ErpSMS_SmsType" FromRole="ErpSMS" ToRole="SmsType" />
-        </EntityType>
         <EntityType Name="PurchaseOrderTemplate">
           <Key>
             <PropertyRef Name="PurchaseOrderTemplateId" />
@@ -16288,30 +16279,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="ColumnName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Name="ColumnValue" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
         </EntityType>
-        <Association Name="FK_ErpSMS_Company">
-          <End Type="ERPModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="ERPModel.ErpSMS" Role="ErpSMS" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="CompanyId" />
-            </Principal>
-            <Dependent Role="ErpSMS">
-              <PropertyRef Name="CompanyId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ErpSMS_SmsType">
-          <End Type="ERPModel.SmsType" Role="SmsType" Multiplicity="1" />
-          <End Type="ERPModel.ErpSMS" Role="ErpSMS" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="SmsType">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="ErpSMS">
-              <PropertyRef Name="SmsType" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="vwFTPFileInfo">
           <Key>
             <PropertyRef Name="docid" />
@@ -18296,8 +18263,8 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="NetWeight" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
           <Property Name="NoofReels" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
           <Property Name="NoofBags" Type="Decimal" Nullable="false" Precision="18" Scale="3" />
-          <NavigationProperty Name="OrderDeliver" Relationship="ERPModel.FK_OrderDeliverDetail_OrderDeliver" FromRole="OrderDeliverDetail" ToRole="OrderDeliver" />
           <Property Name="LotNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="OrderDeliver" Relationship="ERPModel.FK_OrderDeliverDetail_OrderDeliver" FromRole="OrderDeliverDetail" ToRole="OrderDeliver" />
         </EntityType>
         <EntityType Name="QualityExceptionComplaintMap">
           <Key>
@@ -18769,8 +18736,8 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <NavigationProperty Name="Company" Relationship="ERPModel.FK_OrderMaster_Company" FromRole="OrderMaster" ToRole="Company" />
           <NavigationProperty Name="EMIs" Relationship="ERPModel.FK_EMI_OrderMaster" FromRole="OrderMaster" ToRole="EMI" />
           <NavigationProperty Name="Vendor" Relationship="ERPModel.FK_OrderMaster_Supplier" FromRole="OrderMaster" ToRole="Vendor" />
-          <NavigationProperty Name="OrderDelivers" Relationship="ERPModel.FK_OrderDeliver_OrderMaster" FromRole="OrderMaster" ToRole="OrderDeliver" />
           <NavigationProperty Name="OrderDetails" Relationship="ERPModel.FK_OrderDetail_OrderMaster" FromRole="OrderMaster" ToRole="OrderDetail" />
+          <NavigationProperty Name="OrderDelivers" Relationship="ERPModel.FK_OrderDeliver_OrderMaster" FromRole="OrderMaster" ToRole="OrderDeliver" />
         </EntityType>
         <Association Name="FK_OrderMaster_Company">
           <End Type="ERPModel.Company" Role="Company" Multiplicity="0..1" />
@@ -19468,41 +19435,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Employees" Relationship="ERPModel.FK_Employee_Grade" FromRole="Grade" ToRole="Employee" />
         </EntityType>
-        <EntityType Name="OrderDeliver">
-          <Key>
-            <PropertyRef Name="OrderDeliverId" />
-          </Key>
-          <Property Name="OrderDeliverId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="OrderMasterId" Type="Int64" />
-          <Property Name="ProductType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
-          <Property Name="StockInfoId" Type="Int32" Nullable="false" />
-          <Property Name="DeliveryDate" Type="DateTime" Precision="0" />
-          <Property Name="ChallanNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="InvoiceNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="TransportTypeId" Type="Int32" />
-          <Property Name="DriverName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="VehicleNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="MobileNo" Type="String" MaxLength="20" FixedLength="true" Unicode="true" />
-          <Property Name="Carrying" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="TotalAmount" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="Commission" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="SpecialDiscount" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Discount" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="DiscountRate" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="CompanyId" Type="Int32" />
-          <Property Name="DepoInvoiceNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsSubmitted" Type="Boolean" Nullable="false" />
-          <Property Name="IsSeen" Type="Boolean" Nullable="false" />
-          <Property Name="Remark" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="OrderMaster" Relationship="ERPModel.FK_OrderDeliver_OrderMaster" FromRole="OrderDeliver" ToRole="OrderMaster" />
-          <NavigationProperty Name="OrderDeliverDetails" Relationship="ERPModel.FK_OrderDeliverDetail_OrderDeliver" FromRole="OrderDeliver" ToRole="OrderDeliverDetail" />
-          <NavigationProperty Name="SaleReturns" Relationship="ERPModel.FK_SaleReturn_OrderDeliver" FromRole="OrderDeliver" ToRole="SaleReturn" />
-        </EntityType>
         <Association Name="FK_Employee_Grade">
           <End Type="ERPModel.Grade" Role="Grade" Multiplicity="0..1" />
           <End Type="ERPModel.Employee" Role="Employee" Multiplicity="*" />
@@ -19512,42 +19444,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="Employee">
               <PropertyRef Name="GradeId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_OrderDeliver_OrderMaster">
-          <End Type="ERPModel.OrderMaster" Role="OrderMaster" Multiplicity="0..1" />
-          <End Type="ERPModel.OrderDeliver" Role="OrderDeliver" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderMaster">
-              <PropertyRef Name="OrderMasterId" />
-            </Principal>
-            <Dependent Role="OrderDeliver">
-              <PropertyRef Name="OrderMasterId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_OrderDeliverDetail_OrderDeliver">
-          <End Type="ERPModel.OrderDeliver" Role="OrderDeliver" Multiplicity="0..1" />
-          <End Type="ERPModel.OrderDeliverDetail" Role="OrderDeliverDetail" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderDeliver">
-              <PropertyRef Name="OrderDeliverId" />
-            </Principal>
-            <Dependent Role="OrderDeliverDetail">
-              <PropertyRef Name="OrderDeliverId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_SaleReturn_OrderDeliver">
-          <End Type="ERPModel.OrderDeliver" Role="OrderDeliver" Multiplicity="0..1" />
-          <End Type="ERPModel.SaleReturn" Role="SaleReturn" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderDeliver">
-              <PropertyRef Name="OrderDeliverId" />
-            </Principal>
-            <Dependent Role="SaleReturn">
-              <PropertyRef Name="OrderDeliverId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -20323,6 +20219,128 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
             </Principal>
             <Dependent Role="CompanySubMenu">
               <PropertyRef Name="CompanyMenuId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="OrderDeliver">
+          <Key>
+            <PropertyRef Name="OrderDeliverId" />
+          </Key>
+          <Property Name="OrderDeliverId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OrderMasterId" Type="Int64" />
+          <Property Name="ProductType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="StockInfoId" Type="Int32" Nullable="false" />
+          <Property Name="DeliveryDate" Type="DateTime" Precision="0" />
+          <Property Name="ChallanNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="InvoiceNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TransportTypeId" Type="Int32" />
+          <Property Name="DriverName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="VehicleNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MobileNo" Type="String" MaxLength="20" FixedLength="true" Unicode="true" />
+          <Property Name="Carrying" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="TotalAmount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="Commission" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="SpecialDiscount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Discount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="DiscountRate" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CompanyId" Type="Int32" />
+          <Property Name="DepoInvoiceNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsSubmitted" Type="Boolean" Nullable="false" />
+          <Property Name="IsSeen" Type="Boolean" Nullable="false" />
+          <Property Name="IsDelivered" Type="Int32" />
+          <Property Name="Remark" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="OrderMaster" Relationship="ERPModel.FK_OrderDeliver_OrderMaster" FromRole="OrderDeliver" ToRole="OrderMaster" />
+          <NavigationProperty Name="OrderDeliverDetails" Relationship="ERPModel.FK_OrderDeliverDetail_OrderDeliver" FromRole="OrderDeliver" ToRole="OrderDeliverDetail" />
+          <NavigationProperty Name="SaleReturns" Relationship="ERPModel.FK_SaleReturn_OrderDeliver" FromRole="OrderDeliver" ToRole="SaleReturn" />
+        </EntityType>
+        <Association Name="FK_OrderDeliver_OrderMaster">
+          <End Type="ERPModel.OrderMaster" Role="OrderMaster" Multiplicity="0..1" />
+          <End Type="ERPModel.OrderDeliver" Role="OrderDeliver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderMaster">
+              <PropertyRef Name="OrderMasterId" />
+            </Principal>
+            <Dependent Role="OrderDeliver">
+              <PropertyRef Name="OrderMasterId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderDeliverDetail_OrderDeliver">
+          <End Type="ERPModel.OrderDeliver" Role="OrderDeliver" Multiplicity="0..1" />
+          <End Type="ERPModel.OrderDeliverDetail" Role="OrderDeliverDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderDeliver">
+              <PropertyRef Name="OrderDeliverId" />
+            </Principal>
+            <Dependent Role="OrderDeliverDetail">
+              <PropertyRef Name="OrderDeliverId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SaleReturn_OrderDeliver">
+          <End Type="ERPModel.OrderDeliver" Role="OrderDeliver" Multiplicity="0..1" />
+          <End Type="ERPModel.SaleReturn" Role="SaleReturn" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderDeliver">
+              <PropertyRef Name="OrderDeliverId" />
+            </Principal>
+            <Dependent Role="SaleReturn">
+              <PropertyRef Name="OrderDeliverId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="ErpSMS">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Subject" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNo" Type="String" Nullable="false" MaxLength="11" FixedLength="false" Unicode="true" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="TryCount" Type="Int32" Nullable="false" />
+          <Property Name="RowTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Remarks" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="SmsType" Type="Int32" Nullable="false" />
+          <Property Name="IntegrationFrom" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IntegrationId" Type="Int64" />
+          <Property Name="otp" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Company" Relationship="ERPModel.FK_ErpSMS_Company" FromRole="ErpSMS" ToRole="Company" />
+          <NavigationProperty Name="SmsType1" Relationship="ERPModel.FK_ErpSMS_SmsType" FromRole="ErpSMS" ToRole="SmsType" />
+        </EntityType>
+        <Association Name="FK_ErpSMS_Company">
+          <End Type="ERPModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="ERPModel.ErpSMS" Role="ErpSMS" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyId" />
+            </Principal>
+            <Dependent Role="ErpSMS">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ErpSMS_SmsType">
+          <End Type="ERPModel.SmsType" Role="SmsType" Multiplicity="1" />
+          <End Type="ERPModel.ErpSMS" Role="ErpSMS" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SmsType">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ErpSMS">
+              <PropertyRef Name="SmsType" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -24507,23 +24525,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               <ScalarProperty Name="Id" ColumnName="RoleId" />
             </EndProperty>
           </AssociationSetMapping>
-          <EntitySetMapping Name="ErpSMS">
-            <EntityTypeMapping TypeName="ERPModel.ErpSMS">
-              <MappingFragment StoreEntitySet="ErpSMS">
-                <ScalarProperty Name="SmsType" ColumnName="SmsType" />
-                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
-                <ScalarProperty Name="RowTime" ColumnName="RowTime" />
-                <ScalarProperty Name="TryCount" ColumnName="TryCount" />
-                <ScalarProperty Name="Status" ColumnName="Status" />
-                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
-                <ScalarProperty Name="Message" ColumnName="Message" />
-                <ScalarProperty Name="PhoneNo" ColumnName="PhoneNo" />
-                <ScalarProperty Name="Subject" ColumnName="Subject" />
-                <ScalarProperty Name="Date" ColumnName="Date" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="PurchaseOrderTemplate">
             <EntityTypeMapping TypeName="ERPModel.PurchaseOrderTemplate">
               <MappingFragment StoreEntitySet="PurchaseOrderTemplate">
@@ -26778,39 +26779,6 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="OrderDelivers">
-            <EntityTypeMapping TypeName="ERPModel.OrderDeliver">
-              <MappingFragment StoreEntitySet="OrderDeliver">
-                <ScalarProperty Name="Remark" ColumnName="Remark" />
-                <ScalarProperty Name="IsSeen" ColumnName="IsSeen" />
-                <ScalarProperty Name="IsSubmitted" ColumnName="IsSubmitted" />
-                <ScalarProperty Name="ModifedDate" ColumnName="ModifedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="DepoInvoiceNo" ColumnName="DepoInvoiceNo" />
-                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
-                <ScalarProperty Name="DiscountRate" ColumnName="DiscountRate" />
-                <ScalarProperty Name="Discount" ColumnName="Discount" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
-                <ScalarProperty Name="SpecialDiscount" ColumnName="SpecialDiscount" />
-                <ScalarProperty Name="Commission" ColumnName="Commission" />
-                <ScalarProperty Name="TotalAmount" ColumnName="TotalAmount" />
-                <ScalarProperty Name="Carrying" ColumnName="Carrying" />
-                <ScalarProperty Name="MobileNo" ColumnName="MobileNo" />
-                <ScalarProperty Name="VehicleNo" ColumnName="VehicleNo" />
-                <ScalarProperty Name="DriverName" ColumnName="DriverName" />
-                <ScalarProperty Name="TransportTypeId" ColumnName="TransportTypeId" />
-                <ScalarProperty Name="InvoiceNo" ColumnName="InvoiceNo" />
-                <ScalarProperty Name="ChallanNo" ColumnName="ChallanNo" />
-                <ScalarProperty Name="DeliveryDate" ColumnName="DeliveryDate" />
-                <ScalarProperty Name="StockInfoId" ColumnName="StockInfoId" />
-                <ScalarProperty Name="ProductType" ColumnName="ProductType" />
-                <ScalarProperty Name="OrderMasterId" ColumnName="OrderMasterId" />
-                <ScalarProperty Name="OrderDeliverId" ColumnName="OrderDeliverId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Departments">
             <EntityTypeMapping TypeName="ERPModel.Department">
               <MappingFragment StoreEntitySet="Department">
@@ -27413,6 +27381,65 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="OrderDelivers">
+            <EntityTypeMapping TypeName="ERPModel.OrderDeliver">
+              <MappingFragment StoreEntitySet="OrderDeliver">
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="IsDelivered" ColumnName="IsDelivered" />
+                <ScalarProperty Name="IsSeen" ColumnName="IsSeen" />
+                <ScalarProperty Name="IsSubmitted" ColumnName="IsSubmitted" />
+                <ScalarProperty Name="ModifedDate" ColumnName="ModifedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="DepoInvoiceNo" ColumnName="DepoInvoiceNo" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="DiscountRate" ColumnName="DiscountRate" />
+                <ScalarProperty Name="Discount" ColumnName="Discount" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="SpecialDiscount" ColumnName="SpecialDiscount" />
+                <ScalarProperty Name="Commission" ColumnName="Commission" />
+                <ScalarProperty Name="TotalAmount" ColumnName="TotalAmount" />
+                <ScalarProperty Name="Carrying" ColumnName="Carrying" />
+                <ScalarProperty Name="MobileNo" ColumnName="MobileNo" />
+                <ScalarProperty Name="VehicleNo" ColumnName="VehicleNo" />
+                <ScalarProperty Name="DriverName" ColumnName="DriverName" />
+                <ScalarProperty Name="TransportTypeId" ColumnName="TransportTypeId" />
+                <ScalarProperty Name="InvoiceNo" ColumnName="InvoiceNo" />
+                <ScalarProperty Name="ChallanNo" ColumnName="ChallanNo" />
+                <ScalarProperty Name="DeliveryDate" ColumnName="DeliveryDate" />
+                <ScalarProperty Name="StockInfoId" ColumnName="StockInfoId" />
+                <ScalarProperty Name="ProductType" ColumnName="ProductType" />
+                <ScalarProperty Name="OrderMasterId" ColumnName="OrderMasterId" />
+                <ScalarProperty Name="OrderDeliverId" ColumnName="OrderDeliverId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ErpSMS">
+            <EntityTypeMapping TypeName="ERPModel.ErpSMS">
+              <MappingFragment StoreEntitySet="ErpSMS">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifedDate" ColumnName="ModifedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="otp" ColumnName="otp" />
+                <ScalarProperty Name="IntegrationId" ColumnName="IntegrationId" />
+                <ScalarProperty Name="IntegrationFrom" ColumnName="IntegrationFrom" />
+                <ScalarProperty Name="SmsType" ColumnName="SmsType" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="RowTime" ColumnName="RowTime" />
+                <ScalarProperty Name="TryCount" ColumnName="TryCount" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="PhoneNo" ColumnName="PhoneNo" />
+                <ScalarProperty Name="Subject" ColumnName="Subject" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
@@ -27427,7 +27454,7 @@ warning 6002: The table/view 'KGISSDB.dbo.vwTeamLeaderList' does not have a prim
     <Options>
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
-        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
         <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="None" />

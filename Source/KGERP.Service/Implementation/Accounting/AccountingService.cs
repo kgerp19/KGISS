@@ -2715,7 +2715,9 @@ namespace KGERP.Service.Implementation
                         SmsType = 1,
                         Status = (int)EnumSmSStatus.Pending,
                         Remarks = item.VoucherNo,
-                        RowTime = DateTime.Now
+                        RowTime = DateTime.Now,
+                        IsActive=true,
+                        CreatedDate=DateTime.Now
 
                     };
                     erpSmsList.Add(erpSms);
@@ -5968,7 +5970,7 @@ namespace KGERP.Service.Implementation
 
         public async Task<int> OrderDeliverySMSPush(VMOrderDeliverDetail vmOrderDeliverDetail)
         {
-            if (vmOrderDeliverDetail.CompanyFK == (int)CompanyName.KrishibidSeedLimited)
+            if (vmOrderDeliverDetail.CompanyFK == (int)CompanyName.BondhonGeneticsLtd)
             {
                 List<string> strList = new List<string>();
                 double qty = 0;
@@ -5980,30 +5982,52 @@ namespace KGERP.Service.Implementation
                 string items = String.Join(", ", strList.ToArray());
                 if (vmOrderDeliverDetail.CustomerPhone != null)
                 {
+                    // Generate a 6-digit random OTP code
+                    int otpCode = new Random().Next(100000, 999999);
+
                     ErpSMS erpSMS = new ErpSMS
                     {
+                        //Message = "Dear Valued Customer - " + vmOrderDeliverDetail.CustomerName + ", your order has been successfully delivered from Krishibid Seed Ltd. " +
+                        //       "\r\n\r\n" +
+                        //      " Challan No: " + vmOrderDeliverDetail.ChallanNo +
+                        //      " Invoice No: " + vmOrderDeliverDetail.OrderNo +
+                        //      " Date : " + vmOrderDeliverDetail.DeliveryDate.Value.ToShortDateString() +
+                        //      " Qty: " + qty + "kg." +
+                        //      " Amount: " + (vmOrderDeliverDetail.DataListDetail.Any() ? Convert.ToDouble(vmOrderDeliverDetail.DataListDetail.Sum(item => (item.DeliveredQty * item.UnitPrice))) : 0).ToString() +
+                        //      " Delivered from: " + vmOrderDeliverDetail.Warehouse +
+                        //      "\r\n\r\n" +
+                        //      " For any query - Please contact 01700729665.",
+                        //CompanyId = vmOrderDeliverDetail.CompanyFK.Value,
+                        //Date = vmOrderDeliverDetail.DeliveryDate.Value,
+                        //Status = (int)EnumSmSStatus.Pending,
+                        //PhoneNo = vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
+                        //SmsType = 3,
+                        //Remarks = vmOrderDeliverDetail.OrderNo,
+                        //TryCount = 0,
+                        //RowTime = DateTime.Now,
+                        //Subject = "Order Delivery Notification"
 
-
-                        Message = "Dear Valued Customer - " + vmOrderDeliverDetail.CustomerName + ", your order has been successfully delivered from Krishibid Seed Ltd. " +
-                               "\r\n\r\n" +
-                              " Challan No: " + vmOrderDeliverDetail.ChallanNo +
-                              " Invoice No: " + vmOrderDeliverDetail.OrderNo +
-                              " Date : " + vmOrderDeliverDetail.DeliveryDate.Value.ToShortDateString() +
-                              " Qty: " + qty + "kg." +
-                              " Amount: " + (vmOrderDeliverDetail.DataListDetail.Any() ? Convert.ToDouble(vmOrderDeliverDetail.DataListDetail.Sum(item => (item.DeliveredQty * item.UnitPrice))) : 0).ToString() +
-                              " Delivered from: " + vmOrderDeliverDetail.Warehouse +
-                              "\r\n\r\n" +
-                              " For any query - Please contact 01700729665.",
+                        Message = "Dear Valued Customer - " + vmOrderDeliverDetail.CustomerName + ", your order has been dispatched from Bondhon Genetics Ltd. " +
+                        "\r\n\r\n" +
+                        "Challan No: " + vmOrderDeliverDetail.ChallanNo + "\r\n" +
+                        "Invoice No: " + vmOrderDeliverDetail.OrderNo + "\r\n" +
+                        "Delivery OTP: " + otpCode + "\r\n\r\n" +
+                        "Please share this OTP with the delivery executive upon receiving your items to confirm delivery." + "\r\n\r\n" +
+                        "For any query - Please contact 01700729665.",
                         CompanyId = vmOrderDeliverDetail.CompanyFK.Value,
-                        Date = vmOrderDeliverDetail.DeliveryDate.Value,
+                        Date = DateTime.Now, // Set to dispatch/current time when OTP is sent
                         Status = (int)EnumSmSStatus.Pending,
                         PhoneNo = vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
                         SmsType = 3,
                         Remarks = vmOrderDeliverDetail.OrderNo,
                         TryCount = 0,
                         RowTime = DateTime.Now,
-                        Subject = "Order Delivery Notification"
-
+                        Subject = "Delivery Confirmation OTP",
+                        CreatedDate = DateTime.Now,
+                        IsActive = true,
+                        otp = otpCode,
+                        IntegrationFrom = vmOrderDeliverDetail.IntegratedFrom,
+                        IntegrationId = vmOrderDeliverDetail.OrderDetailId,
                     };
 
                     try
@@ -6021,58 +6045,58 @@ namespace KGERP.Service.Implementation
 
             }
 
-            if (vmOrderDeliverDetail.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
-            {
-                List<string> strList = new List<string>();
-                double qty = 0;
-                foreach (var item in vmOrderDeliverDetail.DataListDetail)
-                {
-                    qty += item.DeliveredQty;
-                    strList.Add(item.ProductCategory + " " + item.ProductSubCategory + " " + item.ProductName + " Delivered Qty " + item.DeliveredQty + " Unit Price: " + item.UnitPrice);
-                }
-                string items = String.Join(", ", strList.ToArray());
-                if (vmOrderDeliverDetail.CustomerPhone != null)
-                {
-                    ErpSMS erpSMS = new ErpSMS
-                    {
+            //if (vmOrderDeliverDetail.CompanyFK == (int)CompanyName.KrishibidFeedLimited)
+            //{
+            //    List<string> strList = new List<string>();
+            //    double qty = 0;
+            //    foreach (var item in vmOrderDeliverDetail.DataListDetail)
+            //    {
+            //        qty += item.DeliveredQty;
+            //        strList.Add(item.ProductCategory + " " + item.ProductSubCategory + " " + item.ProductName + " Delivered Qty " + item.DeliveredQty + " Unit Price: " + item.UnitPrice);
+            //    }
+            //    string items = String.Join(", ", strList.ToArray());
+            //    if (vmOrderDeliverDetail.CustomerPhone != null)
+            //    {
+            //        ErpSMS erpSMS = new ErpSMS
+            //        {
 
 
-                        Message = "Dear Valued Customer - " + vmOrderDeliverDetail.CustomerName + ", your order has been successfully delivered from Krishibid Feed Ltd. " +
-                               "\r\n\r\n" +
-                              " Challan No: " + vmOrderDeliverDetail.ChallanNo +
-                              " Invoice No: " + vmOrderDeliverDetail.OrderNo +
-                              " Date : " + vmOrderDeliverDetail.DeliveryDate.Value.ToShortDateString() +
-                              " Qty: " + qty + "kg." +
-                              " Amount: " + (vmOrderDeliverDetail.DataListDetail.Any() ? Convert.ToDouble(vmOrderDeliverDetail.DataListDetail.Sum(item => (item.DeliveredQty * (item.UnitPrice + Convert.ToDouble(item.AdditionPrice))) - (item.DeliveredQty * Convert.ToDouble(item.EBaseCommission) + item.DeliveredQty * Convert.ToDouble(item.ECarryingCommission) + item.DeliveredQty * Convert.ToDouble(item.ECashCommission) + item.DeliveredQty * Convert.ToDouble(item.SpecialDiscount)))) : 0).ToString() +
-                              " Delivered from: " + vmOrderDeliverDetail.Warehouse +
-                              "\r\n\r\n" +
-                              " For any query - Please contact 01700729172.",
-                        CompanyId = vmOrderDeliverDetail.CompanyFK.Value,
-                        Date = vmOrderDeliverDetail.DeliveryDate.Value,
-                        Status = (int)EnumSmSStatus.Pending,
-                        PhoneNo = vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
-                        SmsType = 3,
-                        Remarks = vmOrderDeliverDetail.OrderNo,
-                        TryCount = 0,
-                        RowTime = DateTime.Now,
-                        Subject = "Order Delivery Notification"
+            //            Message = "Dear Valued Customer - " + vmOrderDeliverDetail.CustomerName + ", your order has been successfully delivered from Krishibid Feed Ltd. " +
+            //                   "\r\n\r\n" +
+            //                  " Challan No: " + vmOrderDeliverDetail.ChallanNo +
+            //                  " Invoice No: " + vmOrderDeliverDetail.OrderNo +
+            //                  " Date : " + vmOrderDeliverDetail.DeliveryDate.Value.ToShortDateString() +
+            //                  " Qty: " + qty + "kg." +
+            //                  " Amount: " + (vmOrderDeliverDetail.DataListDetail.Any() ? Convert.ToDouble(vmOrderDeliverDetail.DataListDetail.Sum(item => (item.DeliveredQty * (item.UnitPrice + Convert.ToDouble(item.AdditionPrice))) - (item.DeliveredQty * Convert.ToDouble(item.EBaseCommission) + item.DeliveredQty * Convert.ToDouble(item.ECarryingCommission) + item.DeliveredQty * Convert.ToDouble(item.ECashCommission) + item.DeliveredQty * Convert.ToDouble(item.SpecialDiscount)))) : 0).ToString() +
+            //                  " Delivered from: " + vmOrderDeliverDetail.Warehouse +
+            //                  "\r\n\r\n" +
+            //                  " For any query - Please contact 01700729172.",
+            //            CompanyId = vmOrderDeliverDetail.CompanyFK.Value,
+            //            Date = vmOrderDeliverDetail.DeliveryDate.Value,
+            //            Status = (int)EnumSmSStatus.Pending,
+            //            PhoneNo = vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
+            //            SmsType = 3,
+            //            Remarks = vmOrderDeliverDetail.OrderNo,
+            //            TryCount = 0,
+            //            RowTime = DateTime.Now,
+            //            Subject = "Order Delivery Notification"
 
-                    };
+            //        };
 
-                    try
-                    {
-                        _db.ErpSMS.Add(erpSMS);
-                        await _db.SaveChangesAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        var x = ex.Message;
-                    }
-                }
+            //        try
+            //        {
+            //            _db.ErpSMS.Add(erpSMS);
+            //            await _db.SaveChangesAsync();
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            var x = ex.Message;
+            //        }
+            //    }
 
 
 
-            }
+            //}
             return 1;
         }
         public async Task<int> GCCLOrderDeliverySMSPush(VMOrderDeliverDetail vmOrderDeliverDetail)

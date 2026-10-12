@@ -238,7 +238,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<ServerConfig> ServerConfigs { get; set; }
         public virtual DbSet<ConvertedProductDetail> ConvertedProductDetails { get; set; }
         public virtual DbSet<FormulaHistory> FormulaHistories { get; set; }
-        public virtual DbSet<ErpSMS> ErpSMS { get; set; }
         public virtual DbSet<PurchaseOrderTemplate> PurchaseOrderTemplate { get; set; }
         public virtual DbSet<vwFTPFileInfo> vwFTPFileInfoes { get; set; }
         public virtual DbSet<vwSMSList> vwSMSLists { get; set; }
@@ -340,7 +339,6 @@ namespace KGERP.Data.Models
         public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public virtual DbSet<Designation> Designations { get; set; }
         public virtual DbSet<Grade> Grades { get; set; }
-        public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<Shift> Shifts { get; set; }
         public virtual DbSet<HeadGL> HeadGLs { get; set; }
@@ -369,6 +367,8 @@ namespace KGERP.Data.Models
         public virtual DbSet<ApplicationManage> ApplicationManages { get; set; }
         public virtual DbSet<CompanyMenu> CompanyMenus { get; set; }
         public virtual DbSet<CompanySubMenu> CompanySubMenus { get; set; }
+        public virtual DbSet<OrderDeliver> OrderDelivers { get; set; }
+        public virtual DbSet<ErpSMS> ErpSMS { get; set; }
     
         public virtual ObjectResult<GetEmployeeListForTeam_Result> GetEmployeeListForTeam(Nullable<int> companyId)
         {
