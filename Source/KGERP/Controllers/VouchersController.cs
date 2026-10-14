@@ -691,6 +691,11 @@ namespace KGERP.Controllers
             var products = _accountingService.GetAutoCompleteHeadGLForCollectionVoucherAsync(prefix, companyId);
             return Json(products, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult GetAutoCompleteHeadGLForCollectionVoucherCorporate(string prefix, int companyId)
+        {
+            var products = _accountingService.GetAutoCompleteHeadGLForCollectionVoucherCorporateAsync(prefix, companyId);
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
 
         public JsonResult GetAutoCompleteHeadGLForSeedProcessingGet(string prefix, int companyId)
         {
@@ -826,6 +831,32 @@ namespace KGERP.Controllers
             return View(vmJournalSlave);
         }
 
+        [HttpGet]
+        public async Task<ActionResult> CustomerCollectionVoucherCorporate(int companyId = 0, int voucherId = 0)
+        {
+            VMJournalSlave vmJournalSlave = new VMJournalSlave();
+
+            if (voucherId == 0)
+            {
+                vmJournalSlave = await Task.Run(() => _accountingService.GetCompaniesDetails(companyId));
+
+            }
+            else if (voucherId > 0)
+            {
+                vmJournalSlave = await Task.Run(() => _accountingService.GetVoucherDetails(companyId, voucherId));
+            }
+            vmJournalSlave.CostCenterList = new SelectList(_accountingService.CostCenterDropDownList(companyId), "Value", "Text");
+            vmJournalSlave.ProductCategoryList = new SelectList(_accountingService.ProductCategoryDropDownList(companyId), "Value", "Text");
+            vmJournalSlave.VoucherTypesList = new SelectList(_accountingService.CRVVoucherTypesDownList(companyId), "Value", "Text");
+
+            var voucherTypes = _accountingService.CRVVoucherTypesDownList(companyId);
+            var selectedVoucherTypeId = voucherTypes.FirstOrDefault()?.GetType().GetProperty("Value")?.GetValue(voucherTypes.FirstOrDefault()) ?? 0;
+            vmJournalSlave.VoucherTypesList = new SelectList(voucherTypes, "Value", "Text", selectedVoucherTypeId);
+            vmJournalSlave.VoucherTypeId = (int)selectedVoucherTypeId;
+
+            return View(vmJournalSlave);
+        }
+
 
         [HttpPost]
 
@@ -857,6 +888,37 @@ namespace KGERP.Controllers
             }
 
             return RedirectToAction(nameof(CustomerCollectionVoucher), new { companyId = vmJournalSlave.CompanyFK, voucherId = vmJournalSlave.VoucherId });
+        }
+        [HttpPost]
+
+        public async Task<ActionResult> CustomerCollectionVoucherCorporate(VMJournalSlave vmJournalSlave)
+        {
+
+            if (vmJournalSlave.ActionEum == ActionEnum.Add)
+            {
+                if (vmJournalSlave.VoucherId == 0)
+                {
+                    vmJournalSlave.IsStock = false;
+                    // it is important / dont delete
+                    var voucherNo = voucherService.GetVoucherNo(vmJournalSlave.VoucherTypeId, vmJournalSlave.CompanyFK.Value, vmJournalSlave.Date.Value);
+                    vmJournalSlave.VoucherNo = voucherNo;
+                    vmJournalSlave.VoucherId = await _accountingService.VoucherAdd(vmJournalSlave);
+
+                }
+                await _accountingService.VoucherDetailAdd(vmJournalSlave);
+            }
+            else if (vmJournalSlave.ActionEum == ActionEnum.Edit)
+            {
+                //Edit
+                await _accountingService.VoucherDetailsEdit(vmJournalSlave);
+            }
+            else if (vmJournalSlave.ActionEum == ActionEnum.Delete)
+            {
+                //Delete
+                await _accountingService.VoucherDetailsDelete(vmJournalSlave.VoucherDetailId.Value);
+            }
+
+            return RedirectToAction(nameof(CustomerCollectionVoucherCorporate), new { companyId = vmJournalSlave.CompanyFK, voucherId = vmJournalSlave.VoucherId });
         }
 
         [HttpGet]

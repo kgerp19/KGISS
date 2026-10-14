@@ -47,7 +47,7 @@ namespace KGERP.Service.Implementation
                     await context.SaveChangesAsync();
 
                     var signatories = await context.RequisitionSignatories
-                        .Where(x => x.IntegrateWith == "OrderCreditLimit" && x.EmployeeId== employeeId && x.IsActive)
+                        .Where(x => x.IntegrateWith == "OrderCreditLimit" && x.EmployeeId == employeeId && x.IsActive)
                         .OrderBy(x => x.OrderBy)
                         .ToListAsync();
 
@@ -183,10 +183,10 @@ namespace KGERP.Service.Implementation
                                               Reason = a.Reason,
                                               ApplicationDate = a.ApplicationDate,
                                               Status = a.Status,
-                                              StartDate=a.StartDate,
-                                              EndDate=a.EndDate,
-                                              DayCounts=a.DayCounts,
-                                              CreditLimitAmount=a.CreditLimitAmount
+                                              StartDate = a.StartDate,
+                                              EndDate = a.EndDate,
+                                              DayCounts = a.DayCounts,
+                                              CreditLimitAmount = a.CreditLimitAmount
                                           }).ToListAsync();
 
             // Fetch the specific signatory approval ID for the user to act upon
@@ -247,7 +247,7 @@ namespace KGERP.Service.Implementation
             return true;
         }
 
-        public async Task<ApplicationManageModel> GetOrderCreditLimitManageList(int companyId, int? searchStatus, DateTime? fromDate, DateTime? toDate)
+        public async Task<ApplicationManageModel> GetOrderCreditLimitManageList(int companyId, int? searchStatus, DateTime? fromDate, DateTime? toDate, int subZoneId)
         {
             var model = new ApplicationManageModel();
             model.CompanyId = companyId;
@@ -255,7 +255,9 @@ namespace KGERP.Service.Implementation
 
             var applicationsQuery = from a in context.ApplicationManages
                                     join v in context.Vendors on a.ApplicantId equals v.VendorId
+                                    join h in context.HeadGLs on v.HeadGLId equals h.Id
                                     join e in context.Employees on a.ManagerId equals e.Id
+                                    join sj in context.SubZones on v.SubZoneId equals sj.SubZoneId
                                     where a.IsActive
                                     select new ApplicationManageModel
                                     {
@@ -270,7 +272,10 @@ namespace KGERP.Service.Implementation
                                         EndDate = a.EndDate,
                                         DayCounts = a.DayCounts,
                                         Status = a.Status,
-                                        CreditLimitAmount=a.CreditLimitAmount
+                                        CreditLimitAmount = a.CreditLimitAmount,
+                                        CustomerCode = h.AccCode,
+                                        SubZoneName = sj.Name,
+                                        SubZoneId=v.SubZoneId??0
                                     };
 
             if (searchStatus.HasValue)
@@ -285,8 +290,11 @@ namespace KGERP.Service.Implementation
 
             if (toDate.HasValue)
             {
-                // Ensure toDate includes the entire day
                 applicationsQuery = applicationsQuery.Where(x => x.ApplicationDate <= toDate.Value);
+            }
+            if (subZoneId>0)
+            {
+                applicationsQuery = applicationsQuery.Where(x => x.SubZoneId==subZoneId);
             }
 
             var applicationsList = await applicationsQuery.OrderByDescending(x => x.ApplicationId).ToListAsync();

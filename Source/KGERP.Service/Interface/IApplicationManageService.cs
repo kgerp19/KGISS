@@ -10,7 +10,7 @@ namespace KGERP.Service.Interface
         Task<ApplicationManageModel> GetOrderCreditLimitApplications(int companyId, long applicationId = 0);
         Task<ApplicationManageModel> GetPendingApprovals(int companyId, long employeeId);
         Task<bool> UpdateApprovalStatus(long approvalId, int status, string comment, string username);
-        Task<ApplicationManageModel> GetOrderCreditLimitManageList(int companyId, int? searchStatus, DateTime? fromDate, DateTime? toDate);
+        Task<ApplicationManageModel> GetOrderCreditLimitManageList(int companyId, int? searchStatus, DateTime? fromDate, DateTime? toDate,int subZoneId);
         Task<QuickCreditLimitVm> GetQuickChangeCreditLimitList(int companyId);
         Task<bool> UpdateVendorCreditLimit(int vendorId, decimal creditLimit, string username);
     }

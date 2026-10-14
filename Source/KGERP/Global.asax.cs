@@ -5,15 +5,16 @@ using KGERP.Service.SMS_Service_Implementation;
 using KGERP.Service.Utility;
 using KGERP.Utility;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
+using System.Web.Hosting;
+using System.Web.Mvc;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using System.Web.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 namespace KGERP
 {
@@ -179,9 +180,9 @@ namespace KGERP
             SetUpTimer();
             LeaveCalculationTimer();
            // Application_StartAllSMS();
-            HappyAnniversaryMail();
+            //HappyAnniversaryMail();
             SeedSMSStart();
-            FeedSMSStart();
+            //FeedSMSStart();
         }
         private static System.Threading.Timer _timer;
         private static System.Threading.Timer _timerLeave;
@@ -265,15 +266,26 @@ namespace KGERP
 
         protected void SeedSMSStart()
         {
-            var res = ConfigurationManager.AppSettings["SeedMessagesKey"];
-           
-            if ((Convert.ToInt32(res)) == 1)
+            try
             {
-                var timer = new System.Timers.Timer();
-                timer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
-                timer.Elapsed += SeedSMSSend;
-                timer.Start();
+                 var res = ConfigurationManager.AppSettings["SeedMessagesKey"];
+
+                if ((Convert.ToInt32(res)) == 2)
+                {
+                    var timer = new System.Timers.Timer();
+                    timer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
+                    timer.Elapsed += SeedSMSSend;
+                    timer.Start();
+                }
             }
+            catch (Exception ex)
+            {
+                // এখানে ফাইলে বা ডাটাবেসে log করুন, যাতে অ্যাপ ক্র্যাশ না করে
+                System.IO.File.AppendAllText(
+                    HostingEnvironment.MapPath("~/App_Data/sms_error.log"),
+                    DateTime.Now + " : " + ex + Environment.NewLine);
+            }
+            
 
         }
 

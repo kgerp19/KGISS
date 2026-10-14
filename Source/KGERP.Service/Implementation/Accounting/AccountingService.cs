@@ -1546,6 +1546,33 @@ namespace KGERP.Service.Implementation
 
             return v;
         }
+        public object GetAutoCompleteHeadGLForCollectionVoucherCorporateAsync(string prefix, int companyId)
+        {
+            var allowedHead2Ids = new HashSet<int> {
+                50613417, 50613418, 50613419, 50613420
+            };
+
+            // Use async execution to prevent blocking
+            var v = (from hgl in _db.HeadGLs
+                     join h5 in _db.Head5 on hgl.ParentId equals h5.Id
+                     join h4 in _db.Head4 on h5.ParentId equals h4.Id
+                     join h3 in _db.Head3 on h4.ParentId equals h3.Id
+
+                     where hgl.CompanyId == companyId
+                     && hgl.IsActive
+                     && h5.IsActive
+                     && h4.IsActive
+                     && (h3.AccCode == "1314" || h4.AccCode == "1301001" || (h3.ParentId.HasValue && allowedHead2Ids.Contains(h3.ParentId.Value)))
+                     && (hgl.AccName.Contains(prefix) || hgl.AccCode.Contains(prefix))
+                     select new
+                     {
+                         label = "[" + hgl.AccCode + "] " + (h4.AccName == h5.AccName ? h5.AccName : h4.AccName + " " + h5.AccName) + " " + hgl.AccName,
+                         val = hgl.Id
+                     }).OrderBy(x => x.label).Take(100).ToList();
+
+
+            return v;
+        }
 
         public object GetAutoCompleteHeadGLForSeedProcessingGet(string prefix, int companyId)
         {

@@ -795,6 +795,53 @@
             flex-direction: column;
             align-items: flex-start;
         }
+
+
+        .aml-export-group {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .aml-btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border-radius: var(--radius-sm);
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+            .aml-btn-export:hover {
+                transform: translateY(-1px);
+                text-decoration: none;
+            }
+
+        .aml-btn-excel {
+            background: var(--success-light);
+            color: #065f46;
+            border: 1.5px solid rgba(44,182,125,0.4);
+        }
+
+            .aml-btn-excel:hover {
+                background: var(--success);
+                color: #fff;
+            }
+
+        .aml-btn-pdf {
+            background: var(--danger-light);
+            color: #991b1b;
+            border: 1.5px solid rgba(229,62,62,0.3);
+        }
+
+            .aml-btn-pdf:hover {
+                background: var(--danger);
+                color: #fff;
+            }
     }
 </style>
 
@@ -844,6 +891,16 @@
                         <option value="2" @(Model.SearchStatus == 2 ? "selected" : "")>Rejected</option>
                     </select>
                 </div>
+                <div class="aml-filter-group" style="min-width:160px;">
+                    <label><i class="fa fa-filter"></i> Territory</label>
+                    <select name="subZoneId" class="form-control">
+                        <option value="">--Select Territory--</option>
+                        @foreach (var item in Model.TerritoryList)
+                        {
+                            <option value="@item.Value" @(item.Value == Model.SubZoneId.ToString() ? "selected" : "")>@item.Text</option>
+                        }
+                    </select>
+                </div>
 
                 <div class="aml-filter-actions">
                     <button type="submit" class="aml-btn-search">
@@ -866,12 +923,33 @@
             var approvedCount = Model.ApplicationList?.Count(x => x.Status == 1) ?? 0;
             var rejectedCount = Model.ApplicationList?.Count(x => x.Status == 2) ?? 0;
         }
-        <div class="aml-stats-bar">
-            <span class="aml-stat-chip aml-stat-all"><span class="dot"></span> All &mdash; @allCount</span>
-            <span class="aml-stat-chip aml-stat-pending"><span class="dot"></span> Pending &mdash; @pendingCount</span>
-            <span class="aml-stat-chip aml-stat-approved"><span class="dot"></span> Approved &mdash; @approvedCount</span>
-            <span class="aml-stat-chip aml-stat-rejected"><span class="dot"></span> Rejected &mdash; @rejectedCount</span>
-        </div>
+    <div class="aml-stats-bar">
+        <span class="aml-stat-chip aml-stat-all"><span class="dot"></span> All &mdash; @allCount</span>
+        <span class="aml-stat-chip aml-stat-pending"><span class="dot"></span> Pending &mdash; @pendingCount</span>
+        <span class="aml-stat-chip aml-stat-approved"><span class="dot"></span> Approved &mdash; @approvedCount</span>
+        <span class="aml-stat-chip aml-stat-rejected"><span class="dot"></span> Rejected &mdash; @rejectedCount</span>
+
+        @if (allCount > 0)
+        {
+            var exportParams = new
+            {
+                companyId = Model.CompanyId,
+                searchStatus = Model.SearchStatus,
+                strFromDate = Model.StrFromDate,
+                strToDate = Model.StrToDate,
+                subZoneId = Model.SubZoneId
+            };
+
+            <div class="aml-export-group">
+                <a href="@Url.Action("ExportOrderCreditLimitExcel", "ApplicationManage", exportParams)" class="aml-btn-export aml-btn-excel">
+                    <i class="fa fa-file-excel-o"></i> Excel
+                </a>
+                @*<a href="@Url.Action("ExportOrderCreditLimitPdf", "ApplicationManage", exportParams)" class="aml-btn-export aml-btn-pdf">
+                    <i class="fa fa-file-pdf-o"></i> PDF
+                </a>*@
+            </div>
+        }
+    </div>
 
         <!-- Table -->
         <div class="aml-table-wrapper">
@@ -882,6 +960,8 @@
                         <th>Apply date</th>
                         <th>Credit Limit Amount</th>
                         <th>Validity period</th>
+                        <th>Territory</th>
+                        <th>Customer Code</th>
                         <th>Applicant</th>
                         <th>Manager</th>
                         <th>Reason</th>
@@ -910,6 +990,14 @@
                                         </div>
                                         <span class="aml-day-pill"><i class="fa fa-clock-o" style="font-size:10px"></i> @item.DayCounts days</span>
                                     </div>
+                                </td>
+                                <td>
+                                    <div class="aml-person-primary">@item.SubZoneName</div>
+                                    <div class="aml-person-sub">Territory Name</div>
+                                </td>
+                                <td>
+                                    <div class="aml-person-primary">@item.CustomerCode</div>
+                                    <div class="aml-person-sub">Customer Code</div>
                                 </td>
                                 <td>
                                     <div class="aml-person-primary">@item.ApplicantName</div>
@@ -954,7 +1042,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="8">
+                            <td colspan="11">
                                 <div class="aml-empty">
                                     <div class="aml-empty-icon"><i class="fa fa-folder-open-o"></i></div>
                                     <h5>No applications found</h5>

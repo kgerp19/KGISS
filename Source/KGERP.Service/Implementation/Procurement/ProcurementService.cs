@@ -4087,7 +4087,8 @@ namespace KGERP.Services.Procurement
 
                 decimal receivableAmount = receivableResult;
                 decimal creditLimit = customerInfo.CreditLimit ?? 0m;
-                decimal currentBalance = creditLimit - receivableAmount;
+
+                decimal currentBalance = creditLimit - Math.Abs(receivableAmount);
 
                 rResult.decimalValue = receivableAmount;
 

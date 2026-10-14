@@ -1062,57 +1062,67 @@ namespace KG.App.Controllers
             }
 
             RResult rResult = await _service.CustomerLedgerBalanceAsync(vmSalesOrderSlave.CompanyFK.Value, customerId, orderDate);
+            decimal currentBalance = rResult?.datas?.currentBalance ?? 0m;
+            decimal creditLimit = rResult?.datas?.creditLimitApplicationBlance ?? 0m;
+
+            decimal previousAmount = 0m;
+
+            if (vmSalesOrderSlave.OrderMasterId > 0)
+            {
+                var raw = await _db.OrderDetails
+                    .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
+                    .SumAsync(x => (double?)x.Amount) ?? 0d;
+
+                previousAmount = Convert.ToDecimal(raw);
+            }
+
+            decimal qty = (decimal)(vmSalesOrderSlave?.Qty ?? 0);
+            decimal unitPrice = (decimal)(vmSalesOrderSlave?.UnitPrice ?? 0);
+            decimal currentOrderTotal = qty * unitPrice;
 
 
-            var previousAmount = await _db.OrderDetails
-                .Where(x => x.OrderMasterId == vmSalesOrderSlave.OrderMasterId && x.IsActive)
-                .Select(x => x.Amount)
-                .DefaultIfEmpty(0)
-                .SumAsync();
-
-            var receivableAmount = Math.Abs(rResult.datas.currentBalance - ((decimal)(vmSalesOrderSlave.Qty * vmSalesOrderSlave.UnitPrice) + (decimal)previousAmount));
-
-            bool isCustomerEligibleForOrder = (rResult.result == 1) ? (receivableAmount <= rResult.datas.creditLimitApplicationBlance) : (receivableAmount > 0);
+            var currentBlanceValue = (currentBalance + creditLimit) - (currentOrderTotal + previousAmount);
 
 
-            if (!isCustomerEligibleForOrder)
+
+            if (currentBlanceValue<=0)
             {
                 // Added TempData so the user actually knows WHY it failed when the page reloads
-                message = $"Customer is not eligible for this order due to insufficient balance (Credit Limit amount: {rResult.datas.creditLimitApplicationBlance})";
+                message = $"Customer is not eligible for this order due to insufficient balance (Total Limit amount: {currentBalance + creditLimit})";
                 return vmSalesOrderSlave.OrderMasterId <= 0 ? RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message }) :
                     RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId, message = message });
             }
             #endregion
 
-            var productStock = _service.ProductStockByProductGet(vmSalesOrderSlave.CompanyFK.Value, vmSalesOrderSlave.FProductId);
+            //var productStock = _service.ProductStockByProductGet(vmSalesOrderSlave.CompanyFK.Value, vmSalesOrderSlave.FProductId);
 
-            if (productStock is null || productStock.CurrentStock <= 0)
-            {
-                message = $"Stock Is {productStock.CurrentStock}!";
-                return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message });
-            }
+            //if (productStock is null || productStock.CurrentStock <= 0)
+            //{
+            //    message = $"Stock Is {productStock.CurrentStock}!";
+            //    return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message });
+            //}
 
-            if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
-            {
+            //if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
+            //{
 
 
-                if (vmSalesOrderSlave.OrderMasterId == 0)
-                {
+            //    if (vmSalesOrderSlave.OrderMasterId == 0)
+            //    {
 
-                    vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterAdd(vmSalesOrderSlave);
+            //        vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterAdd(vmSalesOrderSlave);
 
-                }
-                await _service.OrderDetailAdd(vmSalesOrderSlave);
-            }
-            if (vmSalesOrderSlave.PromotionalOfferId > 0)
-            {
-                await _service.PromtionalOfferIntegration(vmSalesOrderSlave);
-            }
-            else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
-            {
-                //Delete
-                await _service.OrderDetailEdit(vmSalesOrderSlave);
-            }
+            //    }
+            //    await _service.OrderDetailAdd(vmSalesOrderSlave);
+            //}
+            //if (vmSalesOrderSlave.PromotionalOfferId > 0)
+            //{
+            //    await _service.PromtionalOfferIntegration(vmSalesOrderSlave);
+            //}
+            //else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
+            //{
+            //    //Delete
+            //    await _service.OrderDetailEdit(vmSalesOrderSlave);
+            //}
             return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
         }
 

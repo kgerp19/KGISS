@@ -78,11 +78,18 @@ namespace KGERP.Service.ServiceModel
         [DisplayName("To Date")]
         public string StrToDate { get; set; }
 
+        [DisplayName("Customer Code")]
+        public string CustomerCode { get; set; }
+        public string SubZoneName { get; set; }
+        public int SubZoneId { get; set; }
+
         // Data Lists
+        public SelectList TerritoryList { get; set; } = new SelectList(new List<object>());
         public IEnumerable<ApplicationManageModel> ApplicationList { get; set; }
 
         // Navigation properties for UI
         public List<SignatoryApprovalModel> SignatoryApprovals { get; set; } = new List<SignatoryApprovalModel>();
+        
     }
 
     public class SignatoryApprovalModel

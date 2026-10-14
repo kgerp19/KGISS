@@ -5890,11 +5890,11 @@ namespace KGERP.Services.WareHouse
             VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
             AccData.IntegratedFrom = "MaterialReceive";
            var resultAccounting= await _accountingService.AccountingSalesPushISS(AccData);
-            if (resultAccounting > 0 && model.IsSubmitted==true)
-            {
-                AccData.IntegratedFrom = "OrderDelivery";
-                await _accountingService.OrderDeliverySMSPush(AccData);
-            }
+            //if (resultAccounting > 0 && model.IsSubmitted==true)
+            //{
+            //    AccData.IntegratedFrom = "OrderDelivery";
+            //    await _accountingService.OrderDeliverySMSPush(AccData);
+            //}
             return result;
         }
 
