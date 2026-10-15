@@ -1094,35 +1094,35 @@ namespace KG.App.Controllers
             }
             #endregion
 
-            //var productStock = _service.ProductStockByProductGet(vmSalesOrderSlave.CompanyFK.Value, vmSalesOrderSlave.FProductId);
+            var productStock = _service.ProductStockByProductGet(vmSalesOrderSlave.CompanyFK.Value, vmSalesOrderSlave.FProductId);
 
-            //if (productStock is null || productStock.CurrentStock <= 0)
-            //{
-            //    message = $"Stock Is {productStock.CurrentStock}!";
-            //    return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message });
-            //}
+            if (productStock is null || productStock.CurrentStock <= 0)
+            {
+                message = $"Stock Is {productStock.CurrentStock}!";
+                return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, message = message });
+            }
 
-            //if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
-            //{
+            if (vmSalesOrderSlave.ActionEum == ActionEnum.Add)
+            {
 
 
-            //    if (vmSalesOrderSlave.OrderMasterId == 0)
-            //    {
+                if (vmSalesOrderSlave.OrderMasterId == 0)
+                {
 
-            //        vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterAdd(vmSalesOrderSlave);
+                    vmSalesOrderSlave.OrderMasterId = await _service.OrderMasterAdd(vmSalesOrderSlave);
 
-            //    }
-            //    await _service.OrderDetailAdd(vmSalesOrderSlave);
-            //}
-            //if (vmSalesOrderSlave.PromotionalOfferId > 0)
-            //{
-            //    await _service.PromtionalOfferIntegration(vmSalesOrderSlave);
-            //}
-            //else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
-            //{
-            //    //Delete
-            //    await _service.OrderDetailEdit(vmSalesOrderSlave);
-            //}
+                }
+                await _service.OrderDetailAdd(vmSalesOrderSlave);
+            }
+            if (vmSalesOrderSlave.PromotionalOfferId > 0)
+            {
+                await _service.PromtionalOfferIntegration(vmSalesOrderSlave);
+            }
+            else if (vmSalesOrderSlave.ActionEum == ActionEnum.Edit)
+            {
+                //Delete
+                await _service.OrderDetailEdit(vmSalesOrderSlave);
+            }
             return RedirectToAction(nameof(ProcurementSalesOrderSlave), new { companyId = vmSalesOrderSlave.CompanyFK, orderMasterId = vmSalesOrderSlave.OrderMasterId });
         }
 
