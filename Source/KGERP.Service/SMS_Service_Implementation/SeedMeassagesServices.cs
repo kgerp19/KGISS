@@ -32,8 +32,8 @@ namespace KGERP.Service.SMS_Service_Implementation
 
                         var requestBody = new
                         {
-                            api_key = "KEY-6lzz74ag2mvluy02iaugrj5ht6ffngvd",
-                            api_secret = "1NsH1erN5Hz$2RRe",
+                            api_key = "KEY-ex24rgydjgzj0mhrsoad0cd3yaawrhox",
+                            api_secret = "OJCGr4nzwtDdxPeQ",
                             request_type = "SINGLE_SMS",
                             message_type = "TEXT",
                             campaign_title = "Test",

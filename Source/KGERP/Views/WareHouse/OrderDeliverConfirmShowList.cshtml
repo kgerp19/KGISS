@@ -1,0 +1,260 @@
+﻿@model KGERP.Services.WareHouse.VMOrderDeliver
+@using KGERP.Utility;
+
+@{
+    ViewData["Title"] = "Delivery Challan List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int sl = 0;
+}
+<style type="text/css">
+
+    input, select, textarea {
+        max-width: 100%;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        <span>
+            Delivery Confirm List
+        </span>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Delivery Confirm</li>
+        <li class="active">
+            <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetail?companyId=@Model.CompanyFK">New Deliver</a>
+
+        </li>
+    </ol>
+</section>
+@using (Html.BeginForm("OrderDeliverConfirmShowList", "WareHouse", FormMethod.Post, new { id = "wareHouseOrderDeliverListFormId", @class = "formValidator" }))
+{
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-danger">
+                    <div class="box-header">
+                        @Html.HiddenFor(model => model.CompanyFK, new { id = "CompanyId" })
+                        <div class="row">
+                            <div class="col-md-3">
+
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrFromDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrFromDate, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                                    <br />
+                                    @Html.EditorFor(model => model.StrToDate, new { htmlAttributes = new { @class = "datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.StrToDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding: 0px 2px 0px 8px;">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="btnSave" class="btn btn-primary btn-block">Show</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive col-md-12  text-nowrap">
+                            <table id="KgErpDataTable" class="table table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Challan NO</th>
+                                        <th>Invoice No</th>
+                                        <th>Delivery Date</th>
+                                        <th>Order No</th>
+                                        <th>Order Date</th>
+
+                                        <th>Customer</th>
+                                        <th>Phone No</th>
+                                        <th>Status</th>
+                                        @*<th class="text-center">Action</th>*@
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.DataList)
+                                    {
+
+
+                                        <tr>
+                                            <th>@(++sl)</th>
+                                            <td>
+
+                                                <a href="@Url.Action("GetDeliveryChallanReport","Report", new {orderDeliverId=item.OrderDeliverId,companyId=item.CompanyFK})" title="Challan Copy" target="_blank"> @item.ChallanNo </a>
+
+
+                                            </td>
+                                            <td>@item.InvoiceNo</td>
+
+                                            <td>@item.DeliveryDate.Value.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.OrderNo</td>
+                                            <td>@item.OrderDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@item.CustomerName</td>
+                                            <td>@item.CustomerPhone</td>
+                                            <td>
+                                                @if (item.IsDelivered.HasValue && item.IsDelivered == 1)
+                                                {
+                                                    <span class="btn btn-success btn-xs">Delivered</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="btn btn-info btn-xs">Pending</span>
+                                                }
+                                            </td>
+                                            @*<td class="text-center">
+                                                @if (item.IsDelivered.HasValue && item.IsDelivered == 1)
+                                                {
+                                                    <span class="btn btn-success btn-xs">OTP Success</span>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-primary btn-xs" type="button" onclick="OtpSubmit('@item.OrderDeliverId');">OTP Push</button>
+                                                    if (item.IsAdmin)
+                                                    {
+                                                        <span>&nbsp;</span>
+                                                        <button class="btn btn-warning btn-xs" type="button" onclick="OtpReSend('@item.OrderDeliverId');">OTP Resend</button>
+                                                    }
+
+                                                }
+
+                                                &nbsp;
+                                                <a href="~/WareHouse/WareHouseOrderDeliverDetail?companyId=@item.CompanyFK&orderDeliverId=@item.OrderDeliverId" title="Details"><i class="glyphicon glyphicon-new-window"></i></a>
+
+                                            </td>*@
+
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@*@using (Html.BeginForm("OrderDeliverConfirmOtp", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OtpSubmitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">OTP Verify</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor(model => model.CompanyFK)
+                    @Html.HiddenFor(model => model.OrderDeliverId, new { @id = "hdnOrderDeliverIdUpdate" })
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="label">OTP</label>
+                            @Html.EditorFor(model => model.Otp, new { htmlAttributes = new { @class = "form-control", type = "number" } })
+                            @Html.ValidationMessageFor(model => model.Otp, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger no-dblclick">Otp Push</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginForm("OrderDeliverConfirmOtpresend", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OtpReSubmitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        @Html.HiddenFor(model => model.CompanyFK)
+        @Html.HiddenFor(model => model.OrderDeliverId, new { @id = "hdnOrderDeliverOtpResend" })
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Are You Sure to OTP Resend!</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger no-dblclick">OTP Resend</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}*@
+
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+@section scripts {
+
+    <script type="text/javascript">
+        const OtpSubmit = (OrderDeliverId) => {
+
+            $('#hdnOrderDeliverIdUpdate').val(OrderDeliverId);
+            $("#OtpSubmitModal").modal('toggle');
+        }
+
+        const OtpReSend = (OrderDeliverId) => {
+
+            $('#hdnOrderDeliverOtpResend').val(OrderDeliverId);
+            $("#OtpReSubmitModal").modal('toggle');
+        }
+
+        $(document).ready(function () {
+
+
+
+        })
+            $('.datepicker').datepicker({
+                dateFormat: "dd/mm/yy",
+                showOn: 'both',
+                buttonText: "<i class='fa fa-calendar'></i>",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2001:+50"
+            });
+
+            function makeDeletale(rowId) {
+                $('#hidProcurementPurchaseOrderId').val(rowId);
+                $('#deleteActionId').val(3);
+            }
+            function resetProcurementPurchaseOrderForm() {
+              $('#procurementPurchaseOrderListFormId')[0].reset();
+              $('#ActionId').val(1);
+        }
+        function DateCustom(orderDate) {
+            var dateString = orderDate.substr(6);
+            var currentTime = new Date(parseInt(dateString));
+            var month = currentTime.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            var day = currentTime.getDate();
+            var year = currentTime.getFullYear();
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+    </script>
+}
+

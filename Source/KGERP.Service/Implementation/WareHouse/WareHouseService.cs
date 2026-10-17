@@ -410,7 +410,7 @@ namespace KGERP.Services.WareHouse
                 AdditionPrice = 0,
                 CarryingCommission = 0,
                 IsActive = true,
-                LotNumber=vmSaleReturnDetail.LotNumber
+                LotNumber = vmSaleReturnDetail.LotNumber
 
             };
 
@@ -528,7 +528,7 @@ namespace KGERP.Services.WareHouse
             long result = -1;
             var dataList = vmSaleReturnDetailPartial.DataToList.Where(x => x.Qty > 0).ToList();
             List<SaleReturnDetail> saleReturnList = new List<SaleReturnDetail>();
-            
+
             foreach (var item in dataList)
             {
                 //var lotNo = string.IsNullOrEmpty(item.LotNumber) ? "xyzz" : item.LotNumber;
@@ -581,7 +581,7 @@ namespace KGERP.Services.WareHouse
                     };
                     saleReturnList.Add(saleReturnDetail);
                 }
-                
+
             }
 
             // GCCL Spetial Requirment : Recevable convert to COGS.
@@ -601,7 +601,7 @@ namespace KGERP.Services.WareHouse
             return result;
         }
 
-        public bool ValidateProductCOGS(VMSaleReturnDetailPartial vmSaleReturnDetailPartial,VMSaleReturnDetail vmSaleReturnDetail)
+        public bool ValidateProductCOGS(VMSaleReturnDetailPartial vmSaleReturnDetailPartial, VMSaleReturnDetail vmSaleReturnDetail)
         {
             var dataList = vmSaleReturnDetailPartial.DataToList
                 .Where(x => x.Qty > 0)
@@ -1111,7 +1111,7 @@ namespace KGERP.Services.WareHouse
                         CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                         CreatedDate = DateTime.Now,
                         IsActive = true,
-                        LotNumber= dataListSlavePartial[i].LotNumber,
+                        LotNumber = dataListSlavePartial[i].LotNumber,
                     };
                     _db.MaterialReceiveDetails.Add(materialReceiveDetail);
                     if (await _db.SaveChangesAsync() > 0)
@@ -1119,7 +1119,7 @@ namespace KGERP.Services.WareHouse
 
                         result = materialReceiveDetail.MaterialReceiveDetailId;
                     }
-                    
+
 
                 }
             }
@@ -1570,7 +1570,7 @@ namespace KGERP.Services.WareHouse
                         IsActive = true,
                         COGS = vMProductStock.ClosingRate,
                         Rate = item.UnitPrice,
-                        LotNumber=item.LotNumber
+                        LotNumber = item.LotNumber
 
 
                     };
@@ -1647,7 +1647,7 @@ namespace KGERP.Services.WareHouse
                                           where t1.OrderMasterId == id
                                           select new VMOrderMaster
                                           {
-                                              CustonerAddress=t2.Address,
+                                              CustonerAddress = t2.Address,
                                               CustomerName = t2.Name,
                                               CustomerId = t1.CustomerId,
                                               OrderDate = t1.OrderDate,
@@ -1758,7 +1758,7 @@ namespace KGERP.Services.WareHouse
                             //                 join y in _db.MaterialReceives on x.MaterialReceiveId equals y.MaterialReceiveId
                             //                 where x.MaterialReceiveId == poReceivingId
                             //                 select x.LotNumber).ToList()
-                            LotNumber =t1.LotNumber
+                            LotNumber = t1.LotNumber
 
 
                         }).ToList();
@@ -1799,7 +1799,7 @@ namespace KGERP.Services.WareHouse
                             DiscountUnit = t1.BaseCommission,
                             DiscountRate = t1.CashCommission,
                             SpecialDiscount = t1.SpecialDiscount,
-                            LotNumber=t1.LotNumber,
+                            LotNumber = t1.LotNumber,
 
 
                             PriviousReturnQuantity = (_db.SaleReturnDetails.Where(x => x.OrderDeliverDetailsId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.Qty).DefaultIfEmpty(0).Sum()),
@@ -1876,10 +1876,10 @@ namespace KGERP.Services.WareHouse
                             PurchasingPrice = t1.PurchaseRate,
                             TotalPrice = t1.PurchaseQty * t1.PurchaseRate,
                             Procurement_PurchaseOrderSlaveFk = t1.PurchaseOrderDetailId,
-                            PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive ).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
+                            PriviousReceivedQuantity = (_db.MaterialReceiveDetails.Where(x => x.PurchaseOrderDetailFk == t1.PurchaseOrderDetailId && x.IsActive).Select(x => x.ReceiveQty).DefaultIfEmpty(0).Sum()),
                             UnitName = t8.Name,
                             PODate = (DateTime)t2.PurchaseDate,
-                            IsVATIncluded=t1.IsVATIncluded,
+                            IsVATIncluded = t1.IsVATIncluded,
                             //ProductDiscount = t1.ProductDiscount,
                             //VATAddition = t1.VATAddition,
 
@@ -1917,7 +1917,7 @@ namespace KGERP.Services.WareHouse
                             PackSize = t5.PackSize,
                             FormulaQty = t5.FormulaQty,
                             DeliveredQtyMsg = t1.DeliveredQty,
-                            DeliveredQty = t1.DeliveredQty- (double)(_db.SalesTransferDetails.Where(x => x.OrderDeliverDetailId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.TransferQuantity).DefaultIfEmpty(0).Sum()),
+                            DeliveredQty = t1.DeliveredQty - (double)(_db.SalesTransferDetails.Where(x => x.OrderDeliverDetailId == t1.OrderDeliverDetailId && x.IsActive).Select(x => x.TransferQuantity).DefaultIfEmpty(0).Sum()),
                             COGSPrice = t1.COGSPrice,
                             DiscountUnit = t1.BaseCommission,
                             SpecialDiscount = t1.SpecialDiscount,
@@ -1928,7 +1928,7 @@ namespace KGERP.Services.WareHouse
                             UnitPrice = t1.UnitPrice,
                             Amount = t1.DeliveredQty * t1.UnitPrice,
                             LotNunmber = t1.LotNumber,
-                            ProductId=t5.ProductId
+                            ProductId = t5.ProductId
 
                         }).ToList();
 
@@ -1958,11 +1958,11 @@ namespace KGERP.Services.WareHouse
                             DiscountUnit = t1.DiscountUnit,
                             SpecialDiscount = t1.SpecialBaseCommission,
                             CompanyFK = t2.CompanyId,
-                            ProductType=t2.ProductType,
+                            ProductType = t2.ProductType,
                             LotNumbers = (from pr in _db.Prod_ReferenceSlave
-                                          
+
                                           where pr.IsActive
-                                                && pr.FProductId==t1.ProductId
+                                                && pr.FProductId == t1.ProductId
                                                 && pr.CompanyId == t1.CompanyId
                                           select pr.LotNumber)
 
@@ -1982,23 +1982,23 @@ namespace KGERP.Services.WareHouse
             {
                 VMProductStock vmProductStock = new VMProductStock();
 
-                if (item.ProductType=="F")
+                if (item.ProductType == "F")
                 {
                     var lotNoR = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
                     vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC SeedFinishedGoodsStockByProductForDeliver {0}, {1}, {2}", item.ProductId, item.CompanyFK, lotNoR).FirstOrDefault();
                 }
-                else if (item.ProductType=="R")
+                else if (item.ProductType == "R")
                 {
                     var lotNoF = string.IsNullOrEmpty(item.LotNumber) ? "xyz" : item.LotNumber;
                     vmProductStock = _db.Database.SqlQuery<VMProductStock>("EXEC GetSeedRMStockByProductId {0}, {1}, {2}", item.ProductId, item.CompanyFK, lotNoF).FirstOrDefault();
                 }
-                
+
                 item.CurrentStock = vmProductStock.ClosingQty;
                 item.ClosingRate = vmProductStock.ClosingRate;
 
             }
 
-            
+
 
 
             return list;
@@ -2577,8 +2577,8 @@ namespace KGERP.Services.WareHouse
                                                                                   AccountingExpenseHeadId = t7.AccountingExpenseHeadId,
                                                                                   SubTotalInBDT = (t1.ReceiveQty * t1.UnitPrice),
                                                                                   IsReturn = t1.IsReturn,
-                                                                                  LotNumber=t1.LotNumber
-                                                                                  
+                                                                                  LotNumber = t1.LotNumber
+
                                                                               }).OrderByDescending(x => x.MaterialReceiveDetailId).ToList());
 
 
@@ -3114,47 +3114,47 @@ namespace KGERP.Services.WareHouse
         {
             VMSaleReturnDetail vmSaleReturnDetail = new VMSaleReturnDetail();
             vmSaleReturnDetail = await (from t1 in _db.SaleReturns.Where(x => x.CompanyId == companyId)
-                                                       join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId into t2_Join
-                                                       from t2 in t2_Join.DefaultIfEmpty()
-                                                       join t4 in _db.OrderMasters on t2.OrderMasterId equals t4.OrderMasterId into t4_Join
-                                                       from t4 in t4_Join.DefaultIfEmpty()
+                                        join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId into t2_Join
+                                        from t2 in t2_Join.DefaultIfEmpty()
+                                        join t4 in _db.OrderMasters on t2.OrderMasterId equals t4.OrderMasterId into t4_Join
+                                        from t4 in t4_Join.DefaultIfEmpty()
 
-                                                       join t3 in _db.Vendors on t1.CustomerId equals t3.VendorId
-                                                       join t5 in _db.Companies on t1.CompanyId equals t5.CompanyId
-                                                       join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
-                                                       join t7 in _db.Zones on t6.ZoneId equals t7.ZoneId
-                                                       where t1.IsActive && t1.SaleReturnId == saleReturnId
-                                                       select new VMSaleReturnDetail
-                                                       {
-                                                           SaleReturnNo = t1.SaleReturnNo,
+                                        join t3 in _db.Vendors on t1.CustomerId equals t3.VendorId
+                                        join t5 in _db.Companies on t1.CompanyId equals t5.CompanyId
+                                        join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
+                                        join t7 in _db.Zones on t6.ZoneId equals t7.ZoneId
+                                        where t1.IsActive && t1.SaleReturnId == saleReturnId
+                                        select new VMSaleReturnDetail
+                                        {
+                                            SaleReturnNo = t1.SaleReturnNo,
 
-                                                           ReturnDate = t1.ReturnDate,
-                                                           Reason = t1.Reason,
-                                                           ChallanNo = t2.ChallanNo,
-                                                           OrderNo = t4.OrderNo,
-                                                           CustomerName = t3.Name,
-                                                           SaleReturnId = t1.SaleReturnId,
-                                                           CompanyFK = t1.CompanyId,
-                                                           CompanyName = t5.Name,
-                                                           CompanyAddress = t5.Address,
-                                                           CompanyEmail = t5.Email,
-                                                           CompanyPhone = t5.Phone,
-                                                           ZoneName = t5.Name,
-                                                           ZoneIncharge = t7.ZoneIncharge,
-                                                           SubZonesName = t6.Name,
-                                                           SubZoneIncharge = t6.SalesOfficerName,
-                                                           SubZoneInchargeMobile = t6.MobileOffice,
-                                                           CommonCustomerName = t3.Name,
-                                                           CommonCustomerCode = t3.Code,
-                                                           AccountingHeadId = t3.HeadGLId,
-                                                           IsFinalized = t1.IsFinalized,
-                                                           ComLogo = t5.CompanyLogo,
-                                                           IsUnitAsCost = t1.IsUnitAsCost,
-                                                           //CreatedBy = t1.CreatedBy,
-                                                           IntegratedFrom = "SaleReturn"
-                                                       
-                                                           //ProcurementPurchaseOrderList = new SelectList(PODropDownList(), "Value", "Text")
-                                                       }).FirstAsync();
+                                            ReturnDate = t1.ReturnDate,
+                                            Reason = t1.Reason,
+                                            ChallanNo = t2.ChallanNo,
+                                            OrderNo = t4.OrderNo,
+                                            CustomerName = t3.Name,
+                                            SaleReturnId = t1.SaleReturnId,
+                                            CompanyFK = t1.CompanyId,
+                                            CompanyName = t5.Name,
+                                            CompanyAddress = t5.Address,
+                                            CompanyEmail = t5.Email,
+                                            CompanyPhone = t5.Phone,
+                                            ZoneName = t5.Name,
+                                            ZoneIncharge = t7.ZoneIncharge,
+                                            SubZonesName = t6.Name,
+                                            SubZoneIncharge = t6.SalesOfficerName,
+                                            SubZoneInchargeMobile = t6.MobileOffice,
+                                            CommonCustomerName = t3.Name,
+                                            CommonCustomerCode = t3.Code,
+                                            AccountingHeadId = t3.HeadGLId,
+                                            IsFinalized = t1.IsFinalized,
+                                            ComLogo = t5.CompanyLogo,
+                                            IsUnitAsCost = t1.IsUnitAsCost,
+                                            //CreatedBy = t1.CreatedBy,
+                                            IntegratedFrom = "SaleReturn"
+
+                                            //ProcurementPurchaseOrderList = new SelectList(PODropDownList(), "Value", "Text")
+                                        }).FirstAsync();
 
 
 
@@ -3174,7 +3174,7 @@ namespace KGERP.Services.WareHouse
                                                                       && t1.SaleReturnId == saleReturnId
                                                                       select new VMSaleReturnDetail
                                                                       {
-                                                                          
+
                                                                           AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
                                                                           AccountingHeadId = t7.AccountingHeadId,
                                                                           SaleReturnDetailId = t1.SaleReturnDetailId,
@@ -3191,7 +3191,7 @@ namespace KGERP.Services.WareHouse
                                                                           DiscountUnit = t1.BaseCommission,
                                                                           DiscountRate = t1.CashCommission,
                                                                           SpecialDiscount = t1.SpecialDiscount,
-                                                                          LotNumber=t1.LotNumber
+                                                                          LotNumber = t1.LotNumber
                                                                       }).OrderByDescending(x => x.SaleReturnDetailId).AsEnumerable());
 
             return vmSaleReturnDetail;
@@ -3665,7 +3665,7 @@ namespace KGERP.Services.WareHouse
         //Feed RMAdjustmentad Starts - Hridoy 17 May 2022
         public async Task<int> FeedStockAdjustAdd(VMStockAdjustDetail vmStockAdjustDetail)
         {
-           
+
             int result = -1;
             #region Genarate Store-In ID
             int deliverDetailCount = _db.StockAdjusts.Where(x => x.CompanyId == vmStockAdjustDetail.CompanyFK).Count();
@@ -3726,7 +3726,7 @@ namespace KGERP.Services.WareHouse
             #endregion
             StockAdjust stockAdjust = new StockAdjust
 
-             
+
             {
 
                 InvoiceNo = deliverDetailCID,
@@ -3819,7 +3819,7 @@ namespace KGERP.Services.WareHouse
 
 
             #endregion
-            var orderType =await _db.OrderMasters.FirstOrDefaultAsync(x=>x.OrderMasterId== vmOrderDeliverDetail.OrderMasterId);
+            var orderType = await _db.OrderMasters.FirstOrDefaultAsync(x => x.OrderMasterId == vmOrderDeliverDetail.OrderMasterId);
             OrderDeliver orderDeliver = new OrderDeliver
             {
 
@@ -3898,10 +3898,10 @@ namespace KGERP.Services.WareHouse
                         OrderMasterId = salesTransferDetailVM.OrderMasterId,
                         SalesTransferNo = salesTransfersID,
                         OrderDeliverId = salesTransferDetailVM.OrderDeliverId,
-                        CompanyId= salesTransferDetailVM.CompanyFK??0,
+                        CompanyId = salesTransferDetailVM.CompanyFK ?? 0,
                         CreateDate = DateTime.Now,
-                        FromVendorId= salesTransferDetailVM.FromCustomerId,
-                        ToVendoerId= salesTransferDetailVM.ToCustomerId,
+                        FromVendorId = salesTransferDetailVM.FromCustomerId,
+                        ToVendoerId = salesTransferDetailVM.ToCustomerId,
                         CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
                         IsActive = true
                     };
@@ -3937,10 +3937,10 @@ namespace KGERP.Services.WareHouse
                                 OrderDeliverDetailId = item.OrderDeliverDetailId,
                                 ProductId = item.ProductId,
                                 LotNumber = item.LotNunmber,
-                                TransferQuantity = (decimal?)item.DeliveredQty??0,
+                                TransferQuantity = (decimal?)item.DeliveredQty ?? 0,
                                 CreatedBy = System.Web.HttpContext.Current?.Session["UserName"]?.ToString() ?? "Unknown",
                                 CreateDate = DateTime.Now,
-                                UnitPrice= (decimal)item.UnitPrice,
+                                UnitPrice = (decimal)item.UnitPrice,
                                 IsActive = true
                             };
 
@@ -4017,7 +4017,7 @@ namespace KGERP.Services.WareHouse
                         IsActive = true,
                         LotNumber = dataListSlavePartial[i].LotNumber
                         //ani
-                        
+
 
                     };
                     orderDeliverDetails.Add(orderDeliverDetail);
@@ -4141,7 +4141,7 @@ namespace KGERP.Services.WareHouse
             int result = -1;
             int stockInfoId = 2;
             string lotNo;
-            if (string.IsNullOrEmpty(vmModel.LotNumber) || vmModel.LotNumber=="nolot")
+            if (string.IsNullOrEmpty(vmModel.LotNumber) || vmModel.LotNumber == "nolot")
             {
                 lotNo = null;
             }
@@ -4160,7 +4160,7 @@ namespace KGERP.Services.WareHouse
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                LotNumber= lotNo
+                LotNumber = lotNo
             };
             _db.StockAdjustDetails.Add(stockAdjustDetail);
             if (await _db.SaveChangesAsync() > 0)
@@ -4185,7 +4185,7 @@ namespace KGERP.Services.WareHouse
             {
                 LotNo = vmModel.LotNumber;
             }
-            
+
             StockAdjustDetail stockAdjustDetail = new StockAdjustDetail
             {
                 StockAdjustId = vmModel.StockAdjustId,
@@ -4197,7 +4197,7 @@ namespace KGERP.Services.WareHouse
                 CreatedBy = System.Web.HttpContext.Current.User.Identity.Name,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
-                LotNumber= LotNo
+                LotNumber = LotNo
             };
             _db.StockAdjustDetails.Add(stockAdjustDetail);
             if (await _db.SaveChangesAsync() > 0)
@@ -4323,95 +4323,95 @@ namespace KGERP.Services.WareHouse
         public async Task<VMOrderDeliverDetail> WareHouseOrderDeliverDetailGet(int companyId, int orderDeliverId)
         {
             VMOrderDeliverDetail vmOrderDeliverDetail = new VMOrderDeliverDetail();
-            vmOrderDeliverDetail = await  (from t1 in _db.OrderDelivers
-                                                         join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
-                                                         join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
-                                                         join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
-                                                         join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
-                                                         join t7 in _db.StockInfoes on t2.StockInfoId equals t7.StockInfoId into t7_Join
-                                                         from t7 in t7_Join.DefaultIfEmpty()
-                                                         where t1.CompanyId == companyId && t1.OrderDeliverId == orderDeliverId
-                                                         select new VMOrderDeliverDetail
-                                                         {
-                                                             OrderNo = t2.OrderNo,
-                                                             OrderDate = t2.OrderDate,
-                                                             
-                                                             ChallanNo = t1.ChallanNo,
-                                                             DeliveryDate = t1.DeliveryDate,
-                                                             InvoiceNo = t1.InvoiceNo,
+            vmOrderDeliverDetail = await (from t1 in _db.OrderDelivers
+                                          join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                                          join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
+                                          join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
+                                          join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
+                                          join t7 in _db.StockInfoes on t2.StockInfoId equals t7.StockInfoId into t7_Join
+                                          from t7 in t7_Join.DefaultIfEmpty()
+                                          where t1.CompanyId == companyId && t1.OrderDeliverId == orderDeliverId
+                                          select new VMOrderDeliverDetail
+                                          {
+                                              OrderNo = t2.OrderNo,
+                                              OrderDate = t2.OrderDate,
 
-                                                             CustomerName = t3.Name,
-                                                             CustomerPhone = t3.Phone,
-                                                             CustomerAddress = t3.Address,
-                                                             CustomerEmail = t3.Email,
+                                              ChallanNo = t1.ChallanNo,
+                                              DeliveryDate = t1.DeliveryDate,
+                                              InvoiceNo = t1.InvoiceNo,
 
-                                                             ContactPerson = t3.ContactName,
-                                                             ZoneName = t5.Name,
-                                                             ZoneIncharge = t5.ZoneIncharge,
+                                              CustomerName = t3.Name,
+                                              CustomerPhone = t3.Phone,
+                                              CustomerAddress = t3.Address,
+                                              CustomerEmail = t3.Email,
 
-                                                             TransportTypeId = t1.TransportTypeId,
+                                              ContactPerson = t3.ContactName,
+                                              ZoneName = t5.Name,
+                                              ZoneIncharge = t5.ZoneIncharge,
 
-                                                             DriverName = t1.DriverName,
-                                                             VehicleNo = t1.VehicleNo,
-                                                             DriverMobileNo = t1.MobileNo,
-                                                             Carrying = t1.Carrying,
+                                              TransportTypeId = t1.TransportTypeId,
+
+                                              DriverName = t1.DriverName,
+                                              VehicleNo = t1.VehicleNo,
+                                              DriverMobileNo = t1.MobileNo,
+                                              Carrying = t1.Carrying,
 
 
-                                                             OrderDeliverId = t1.OrderDeliverId,
-                                                             CompanyFK = t1.CompanyId,
-                                                             OrderMasterId = t2.OrderMasterId,
+                                              OrderDeliverId = t1.OrderDeliverId,
+                                              CompanyFK = t1.CompanyId,
+                                              OrderMasterId = t2.OrderMasterId,
 
-                                                             AcCostCenterId = t6.CostCenterId,
-                                                             CreatedBy = t1.CreatedBy,
-                                                             CreatedDate = t1.CreatedDate,
-                                                             IsSubmitted = t1.IsSubmitted,
-                                                             PaymentMethod = t2.PaymentMethod,
-                                                             AccountingHeadId = t3.HeadGLId,
+                                              AcCostCenterId = t6.CostCenterId,
+                                              CreatedBy = t1.CreatedBy,
+                                              CreatedDate = t1.CreatedDate,
+                                              IsSubmitted = t1.IsSubmitted,
+                                              PaymentMethod = t2.PaymentMethod,
+                                              AccountingHeadId = t3.HeadGLId,
 
-                                                             Warehouse = (t7 == null ? "" : t7.Name),
-                                                             SubZoneMobilePersonal = t5.MobilePersonal,
-                                                             ZoneMobileOffice = t5.MobileOffice,
-                                                             TerritoryIncharge = t6.SalesOfficerName,
-                                                             Territory = t6.Name,
-                                                             Remarks = t2.Remarks
+                                              Warehouse = (t7 == null ? "" : t7.Name),
+                                              SubZoneMobilePersonal = t5.MobilePersonal,
+                                              ZoneMobileOffice = t5.MobileOffice,
+                                              TerritoryIncharge = t6.SalesOfficerName,
+                                              Territory = t6.Name,
+                                              Remarks = t2.Remarks
 
-                                                         }).FirstOrDefaultAsync();
+                                          }).FirstOrDefaultAsync();
 
             /// hggfgfhf
 
             vmOrderDeliverDetail.DataListDetail = await (from t1 in _db.OrderDeliverDetails
-                                                                        join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId
-                                                                        join t3 in _db.OrderDetails on t1.OrderDetailId equals t3.OrderDetailId
-                                                                        join t5 in _db.Products on t3.ProductId equals t5.ProductId
-                                                                        join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
-                                                                        join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
-                                                                        join t8 in _db.Units on t5.UnitId equals t8.UnitId
+                                                         join t2 in _db.OrderDelivers on t1.OrderDeliverId equals t2.OrderDeliverId
+                                                         join t3 in _db.OrderDetails on t1.OrderDetailId equals t3.OrderDetailId
+                                                         join t5 in _db.Products on t3.ProductId equals t5.ProductId
+                                                         join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
+                                                         join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
+                                                         join t8 in _db.Units on t5.UnitId equals t8.UnitId
 
-                                                                        where t1.OrderDeliverId == orderDeliverId && t1.IsActive && t2.IsActive
-                                                                        && t3.IsActive && !t1.IsReturn
+                                                         where t1.OrderDeliverId == orderDeliverId && t1.IsActive && t2.IsActive
+                                                         && t3.IsActive && !t1.IsReturn
 
-                                                                        select new VMOrderDeliverDetail
-                                                                        {
-                                                                            OrderDeliverDetailId = t1.OrderDeliverDetailId,
-                                                                            ProductSubCategory = t6.Name,
-                                                                            ProductName = t5.ProductName,
-                                                                            ProductCategory = t7.Name,
-                                                                            OrderQty = t3.Qty,
-                                                                            PackSize = t5.PackSize,
-                                                                            FormulaQty = t5.FormulaQty,
-                                                                            DeliveredQty = t1.DeliveredQty,
-                                                                            COGSPrice = t1.COGSPrice,
-                                                                            DiscountUnit = t1.BaseCommission,
-                                                                            SpecialDiscount = t1.SpecialDiscount,
-                                                                            AccountingHeadId = t7.AccountingHeadId,
-                                                                            AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
-                                                                            PromotionalOfferId=t3.PromotionalOfferId,
-                                                                            UnitName = t8.Name,
-                                                                            UnitPrice = t1.UnitPrice,
-                                                                            Amount = t1.DeliveredQty * t1.UnitPrice,
-                                                                            LotNunmber =t1.LotNumber
-                                                                           
-                                                                        }).ToListAsync();
+                                                         select new VMOrderDeliverDetail
+                                                         {
+                                                             OrderDeliverDetailId = t1.OrderDeliverDetailId,
+                                                             ProductSubCategory = t6.Name,
+                                                             ProductName = t5.ProductName,
+                                                             ProductCategory = t7.Name,
+                                                             OrderQty = t3.Qty,
+                                                             PackSize = t5.PackSize,
+                                                             FormulaQty = t5.FormulaQty,
+                                                             DeliveredQty = t1.DeliveredQty,
+                                                             COGSPrice = t1.COGSPrice,
+                                                             DiscountUnit = t1.BaseCommission,
+                                                             SpecialDiscount = t1.SpecialDiscount,
+                                                             AccountingHeadId = t7.AccountingHeadId,
+                                                             AccountingIncomeHeadId = t7.AccountingIncomeHeadId,
+                                                             PromotionalOfferId = t3.PromotionalOfferId,
+                                                             UnitName = t8.Name,
+                                                             UnitPrice = t1.UnitPrice,
+                                                             Amount = t1.DeliveredQty * t1.UnitPrice,
+                                                             LotNunmber = t1.LotNumber
+
+                                                         }).ToListAsync();
 
 
 
@@ -4424,27 +4424,27 @@ namespace KGERP.Services.WareHouse
             vmOrderDeliverDetail = await Task.Run(() => (from t1 in _db.SalesTransfers
                                                          join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
                                                          join t3 in _db.OrderDelivers on t1.OrderDeliverId equals t3.OrderDeliverId
-                                                         join t7 in _db.Vendors on t1.FromVendorId equals t7.VendorId 
-                                                         join t8 in _db.Vendors on t1.ToVendoerId equals t8.VendorId 
-                                                         where  t1.SalesTransferId == salesTransfer
+                                                         join t7 in _db.Vendors on t1.FromVendorId equals t7.VendorId
+                                                         join t8 in _db.Vendors on t1.ToVendoerId equals t8.VendorId
+                                                         where t1.SalesTransferId == salesTransfer
                                                          select new SalesTransferDetailVM
                                                          {
 
                                                              OrderDeliverId = t1.OrderDeliverId,
                                                              OrderMasterId = t2.OrderMasterId,
-                                                             SalesTransferId=t1.SalesTransferId,
-                                                             SalesTransferNo=t1.SalesTransferNo,
-                                                             SalesTransferDate=t1.SalesTransferDate,
-                                                             OrderNoMsg=t2.OrderNo,
-                                                             ChallanNo=t3.ChallanNo,
+                                                             SalesTransferId = t1.SalesTransferId,
+                                                             SalesTransferNo = t1.SalesTransferNo,
+                                                             SalesTransferDate = t1.SalesTransferDate,
+                                                             OrderNoMsg = t2.OrderNo,
+                                                             ChallanNo = t3.ChallanNo,
                                                              FromCustomerName = t7.Name,
                                                              ToCustomerName = t8.Name,
-                                                             FromVenderHeadGLId=t7.HeadGLId,
-                                                             ToVenderHeadGLId=t8.HeadGLId,
-                                                             CompanyFK=t1.CompanyId,
-                                                             CreatedBy=t1.CreatedBy,
-                                                             CreatedDate=t1.CreateDate,
-                                                             IsSubmitted=t1.IsSubmited,
+                                                             FromVenderHeadGLId = t7.HeadGLId,
+                                                             ToVenderHeadGLId = t8.HeadGLId,
+                                                             CompanyFK = t1.CompanyId,
+                                                             CreatedBy = t1.CreatedBy,
+                                                             CreatedDate = t1.CreateDate,
+                                                             IsSubmitted = t1.IsSubmited,
 
 
                                                          }).FirstOrDefault());
@@ -4456,8 +4456,8 @@ namespace KGERP.Services.WareHouse
                                                                         join t6 in _db.ProductSubCategories on t5.ProductSubCategoryId equals t6.ProductSubCategoryId
                                                                         join t7 in _db.ProductCategories on t6.ProductCategoryId equals t7.ProductCategoryId
                                                                         join t8 in _db.Units on t5.UnitId equals t8.UnitId
-                                                                        where t1.SalesTransferId == salesTransfer && t1.IsActive 
-                                                                        
+                                                                        where t1.SalesTransferId == salesTransfer && t1.IsActive
+
                                                                         select new SalesTransferDetailVM
                                                                         {
                                                                             OrderDeliverDetailId = t1.OrderDeliverDetailId,
@@ -4468,8 +4468,8 @@ namespace KGERP.Services.WareHouse
                                                                             FormulaQty = t5.FormulaQty,
                                                                             DeliveredQty = t1.TransferQuantity,
                                                                             LotNumber = t1.LotNumber,
-                                                                            UnitPrice=t1.UnitPrice,
-                                                                            SalesTransferDetailsId=t1.SalesTransferDetailsId
+                                                                            UnitPrice = t1.UnitPrice,
+                                                                            SalesTransferDetailsId = t1.SalesTransferDetailsId
 
                                                                         }).OrderByDescending(x => x.OrderDeliverDetailId).ToListAsync());
 
@@ -4938,7 +4938,7 @@ namespace KGERP.Services.WareHouse
                                                                           OverAmount = (t1.ExcessQty * t1.UnitPrice),
                                                                           AccountingHeadId = t7.AccountingHeadId,
                                                                           UnitName = t8.Name,
-                                                                          LotNumber=t1.LotNumber
+                                                                          LotNumber = t1.LotNumber
                                                                       }).OrderByDescending(x => x.StockAdjustDetailId).AsEnumerable());
 
 
@@ -5165,7 +5165,7 @@ namespace KGERP.Services.WareHouse
                                                                           OverAmount = (t1.ExcessQty * t1.UnitPrice),
                                                                           AccountingHeadId = t5.AccountingHeadId,
                                                                           UnitName = t8.Name,
-                                                                          LotNumber=t1.LotNumber
+                                                                          LotNumber = t1.LotNumber
                                                                       }).OrderByDescending(x => x.StockAdjustDetailId).AsEnumerable());
 
 
@@ -5185,7 +5185,7 @@ namespace KGERP.Services.WareHouse
                                                             join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
                                                             join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
                                                             join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
-                                                            where t1.CompanyId == companyId && t1.IsActive 
+                                                            where t1.CompanyId == companyId && t1.IsActive
                                                             select new VMOrderDeliver
                                                             {
                                                                 CustomerPhone = t3.Phone,
@@ -5217,45 +5217,178 @@ namespace KGERP.Services.WareHouse
         }
         public async Task<VMOrderDeliver> OrderDeliverConfirmGet(int companyId, DateTime? fromDate, DateTime? toDate)
         {
-            VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
-            vmOrderDeliver.CompanyFK = companyId;
+            var vmOrderDeliver = new VMOrderDeliver { CompanyFK = companyId };
+
+            try
+            {
+                // Validate input
+                if (companyId <= 0)
+                    return Fail(vmOrderDeliver, "Invalid company.");
+
+                if (!fromDate.HasValue || !toDate.HasValue)
+                    return Fail(vmOrderDeliver, "Please select both from date and to date.");
+
+                // Validate current user (GetIntUserId can throw if the claim is missing)
+                long currentUser = Common.GetIntUserId();
+                if (currentUser <= 0)
+                    return Fail(vmOrderDeliver, "Your session has expired. Please log in again.");
+
+                var shortName = await _db.Employees
+                    .AsNoTracking()
+                    .Where(x => x.Id == currentUser)
+                    .Select(x => x.ShortName)
+                    .FirstOrDefaultAsync();
 
 
-            vmOrderDeliver.DataList = await Task.Run(() => (from t1 in _db.OrderDelivers.Where(x => x.DeliveryDate >= fromDate && x.DeliveryDate <= toDate)
-                                                            join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
-                                                            join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
-                                                            join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
-                                                            join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
-                                                            join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
-                                                            where t1.CompanyId == companyId && t1.IsActive && t1.IsSubmitted
-                                                            select new VMOrderDeliver
-                                                            {
-                                                                CustomerPhone = t3.Phone,
-                                                                CustomerAddress = t3.Address,
-                                                                CustomerEmail = t3.Email,
-                                                                ContactPerson = t3.ContactName,
-                                                                ZoneName = t5.Name,
-                                                                ZoneIncharge = t5.ZoneIncharge,
-                                                                OrderDeliverId = t1.OrderDeliverId,
-                                                                OrderMasterId = t2.OrderMasterId,
-                                                                CompanyFK = t1.CompanyId,
-                                                                DeliveryDate = t1.DeliveryDate,
-                                                                ChallanNo = t1.ChallanNo,
-                                                                DriverName = t1.DriverName,
-                                                                VehicleNo = t1.VehicleNo,
-                                                                InvoiceNo = t1.InvoiceNo,
-                                                                OrderNo = t2.OrderNo,
-                                                                CustomerName = t3.Name,
-                                                                CompanyName = t4.Name,
-                                                                CompanyAddress = t4.Address,
-                                                                OrderDate = t2.OrderDate,
-                                                                IsDelivered = t1.IsDelivered
-                                                            }).OrderByDescending(x => x.OrderDeliverId).AsEnumerable());
+                bool isAllAccess = shortName == UserRoll.SupperAdmin || shortName == UserRoll.Admin || shortName== UserRoll.Otp;
+
+                var query =
+                    from t1 in _db.OrderDelivers.AsNoTracking()
+                    join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                    join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
+                    join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                    join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
+                    join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId
+                    where t1.CompanyId == companyId
+                          && t1.IsActive
+                          && t1.IsSubmitted
+                          && t1.DeliveryDate >= fromDate
+                          && t1.DeliveryDate <= toDate
+                    select new { t1, t2, t3, t4, t5, t6 };
+
+                if (!isAllAccess)
+                {
+                    query = query.Where(x => x.t6.SalesOfficerId == currentUser);
+                }
+
+                vmOrderDeliver.DataList = await query
+                    .OrderByDescending(x => x.t1.OrderDeliverId)
+                    .Select(x => new VMOrderDeliver
+                    {
+                        CustomerPhone = x.t3.Phone,
+                        CustomerAddress = x.t3.Address,
+                        CustomerEmail = x.t3.Email,
+                        ContactPerson = x.t3.ContactName,
+                        ZoneName = x.t5.Name,
+                        ZoneIncharge = x.t5.ZoneIncharge,
+                        OrderDeliverId = x.t1.OrderDeliverId,
+                        OrderMasterId = x.t2.OrderMasterId,
+                        CompanyFK = x.t1.CompanyId,
+                        DeliveryDate = x.t1.DeliveryDate,
+                        ChallanNo = x.t1.ChallanNo,
+                        DriverName = x.t1.DriverName,
+                        VehicleNo = x.t1.VehicleNo,
+                        InvoiceNo = x.t1.InvoiceNo,
+                        OrderNo = x.t2.OrderNo,
+                        CustomerName = x.t3.Name,
+                        CompanyName = x.t4.Name,
+                        CompanyAddress = x.t4.Address,
+                        OrderDate = x.t2.OrderDate,
+                        IsDelivered = x.t1.IsDelivered,
+                        SalesOfficerId = x.t6.SalesOfficerId ?? 0,
+                        IsAdmin= isAllAccess
+                    })
+                    .ToListAsync();
+
+                return vmOrderDeliver;
+            }
+            catch (Exception ex)
+            {
+
+                return Fail(vmOrderDeliver, "Something went wrong while loading deliveries. Please try again.");
+            }
+        }
+
+        public async Task<VMOrderDeliver> OrderDeliverConfirmShowGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        {
+            var vmOrderDeliver = new VMOrderDeliver { CompanyFK = companyId };
+
+            try
+            {
+                // Validate input
+                if (companyId <= 0)
+                    return Fail(vmOrderDeliver, "Invalid company.");
+
+                if (!fromDate.HasValue || !toDate.HasValue)
+                    return Fail(vmOrderDeliver, "Please select both from date and to date.");
+
+                // Validate current user (GetIntUserId can throw if the claim is missing)
+                long currentUser = Common.GetIntUserId();
+                if (currentUser <= 0)
+                    return Fail(vmOrderDeliver, "Your session has expired. Please log in again.");
+
+                //var shortName = await _db.Employees
+                //    .AsNoTracking()
+                //    .Where(x => x.Id == currentUser)
+                //    .Select(x => x.ShortName)
+                //    .FirstOrDefaultAsync();
 
 
+                //bool isAllAccess = shortName == UserRoll.SupperAdmin || shortName == UserRoll.Admin || shortName== UserRoll.Otp;
 
+                var query =
+                    from t1 in _db.OrderDelivers.AsNoTracking()
+                    join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                    join t3 in _db.Vendors on t2.CustomerId equals t3.VendorId
+                    join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                    join t6 in _db.SubZones on t3.SubZoneId equals t6.SubZoneId
+                    join t5 in _db.Zones on t6.ZoneId equals t5.ZoneId 
+                    where t1.CompanyId == companyId
+                          && t1.IsActive
+                          && t1.IsSubmitted
+                          && t1.DeliveryDate >= fromDate
+                          && t1.DeliveryDate <= toDate
+                    select new { t1, t2, t3, t4, t5, t6 };
 
-            return vmOrderDeliver;
+                //if (!isAllAccess)
+                //{
+                //    query = query.Where(x => x.t6.SalesOfficerId == currentUser);
+                //}
+
+                vmOrderDeliver.DataList = await query
+                    .OrderByDescending(x => x.t1.OrderDeliverId)
+                    .Select(x => new VMOrderDeliver
+                    {
+                        CustomerPhone = x.t3.Phone,
+                        CustomerAddress = x.t3.Address,
+                        CustomerEmail = x.t3.Email,
+                        ContactPerson = x.t3.ContactName,
+                        ZoneName = x.t5.Name,
+                        ZoneIncharge = x.t5.ZoneIncharge,
+                        OrderDeliverId = x.t1.OrderDeliverId,
+                        OrderMasterId = x.t2.OrderMasterId,
+                        CompanyFK = x.t1.CompanyId,
+                        DeliveryDate = x.t1.DeliveryDate,
+                        ChallanNo = x.t1.ChallanNo,
+                        DriverName = x.t1.DriverName,
+                        VehicleNo = x.t1.VehicleNo,
+                        InvoiceNo = x.t1.InvoiceNo,
+                        OrderNo = x.t2.OrderNo,
+                        CustomerName = x.t3.Name,
+                        CompanyName = x.t4.Name,
+                        CompanyAddress = x.t4.Address,
+                        OrderDate = x.t2.OrderDate,
+                        IsDelivered = x.t1.IsDelivered,
+                        SalesOfficerId = x.t6.SalesOfficerId ?? 0,
+                        //IsAdmin= isAllAccess
+                    })
+                    .ToListAsync();
+
+                return vmOrderDeliver;
+            }
+            catch (Exception ex)
+            {
+
+                return Fail(vmOrderDeliver, "Something went wrong while loading deliveries. Please try again.");
+            }
+        }
+
+        private static VMOrderDeliver Fail(VMOrderDeliver vm, string message)
+        {
+            vm.IsSuccess = false;
+            vm.ErrorMessage = message;
+            vm.DataList = new List<VMOrderDeliver>();
+            return vm;
         }
         public async Task<VMOrderDeliver> OrderDeliverConfirmOtp(VMOrderDeliver vmOrderDeliver)
         {
@@ -5287,7 +5420,7 @@ namespace KGERP.Services.WareHouse
                     orderDelivery.ModifiedBy = currentUser;
 
                     // Append success message (assuming Messages is a string field/property)
-                    vmOrderDeliver.Messages =  "Order delivered successfully.";
+                    vmOrderDeliver.Messages = "Order delivered successfully.";
 
                     // Save changes to the database
                     await _db.SaveChangesAsync();
@@ -5313,27 +5446,27 @@ namespace KGERP.Services.WareHouse
 
 
             vmOrderDeliver.DataListDetail = await Task.Run(() => (from t1 in _db.SalesTransfers.Where(x => x.SalesTransferDate >= fromDate && x.SalesTransferDate <= toDate)
-                                                            join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
-                                                            join t6 in _db.OrderDelivers on t1.OrderDeliverId equals t6.OrderDeliverId
+                                                                  join t2 in _db.OrderMasters on t1.OrderMasterId equals t2.OrderMasterId
+                                                                  join t6 in _db.OrderDelivers on t1.OrderDeliverId equals t6.OrderDeliverId
                                                                   join t3 in _db.Vendors on t1.FromVendorId equals t3.VendorId
-                                                            join t5 in _db.Vendors on t1.ToVendoerId equals t5.VendorId
-                                                            join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
-                                                            where t1.CompanyId == companyId && t1.IsActive
-                                                            select new SalesTransferDetailVM
-                                                            {
-                                                                SalesTransferId=t1.SalesTransferId,
-                                                                OrderNoMsg=t2.OrderNo,
-                                                                ChallanNo=t6.ChallanNo,
-                                                                OrderDeliverId = t1.OrderDeliverId,
-                                                                OrderMasterId = t2.OrderMasterId,
-                                                                CompanyFK = t1.CompanyId,
-                                                                CompanyName = t4.Name,
-                                                                SalesTransferNo=t1.SalesTransferNo,
-                                                                SalesTransferDate=t1.SalesTransferDate,
-                                                                FromCustomerName=t3.Name,
-                                                                ToCustomerName=t5.Name,
-                                                                IsSubmitted = t1.IsSubmited
-                                                            }).OrderByDescending(x => x.SalesTransferId).ToListAsync());
+                                                                  join t5 in _db.Vendors on t1.ToVendoerId equals t5.VendorId
+                                                                  join t4 in _db.Companies on t1.CompanyId equals t4.CompanyId
+                                                                  where t1.CompanyId == companyId && t1.IsActive
+                                                                  select new SalesTransferDetailVM
+                                                                  {
+                                                                      SalesTransferId = t1.SalesTransferId,
+                                                                      OrderNoMsg = t2.OrderNo,
+                                                                      ChallanNo = t6.ChallanNo,
+                                                                      OrderDeliverId = t1.OrderDeliverId,
+                                                                      OrderMasterId = t2.OrderMasterId,
+                                                                      CompanyFK = t1.CompanyId,
+                                                                      CompanyName = t4.Name,
+                                                                      SalesTransferNo = t1.SalesTransferNo,
+                                                                      SalesTransferDate = t1.SalesTransferDate,
+                                                                      FromCustomerName = t3.Name,
+                                                                      ToCustomerName = t5.Name,
+                                                                      IsSubmitted = t1.IsSubmited
+                                                                  }).OrderByDescending(x => x.SalesTransferId).ToListAsync());
 
 
 
@@ -5889,12 +6022,41 @@ namespace KGERP.Services.WareHouse
 
             VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
             AccData.IntegratedFrom = "MaterialReceive";
-           var resultAccounting= await _accountingService.AccountingSalesPushISS(AccData);
-            //if (resultAccounting > 0 && model.IsSubmitted==true)
-            //{
-            //    AccData.IntegratedFrom = "OrderDelivery";
-            //    await _accountingService.OrderDeliverySMSPush(AccData);
-            //}
+            var resultAccounting = await _accountingService.AccountingSalesPushISS(AccData);
+
+            if (vmModel.CompanyFK == (int)CompanyName.BondhonGeneticsLtd)
+            {
+                if (resultAccounting > 0 && model.IsSubmitted)
+                {
+                    AccData.IntegratedFrom = "OrderDelivery";
+                    await _accountingService.OrderDeliverySMSPush(AccData);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<string> OTPResubmite(long integrationId, int companyId)
+        {
+            string result = "";
+            if (integrationId <= 0 || companyId <= 0)
+            {
+                return result = "Delivery or Company Can't Found!";
+            }
+
+
+            VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(companyId, Convert.ToInt32(integrationId));
+
+
+            if (companyId == (int)CompanyName.BondhonGeneticsLtd)
+            {
+                if (AccData.IsSubmitted)
+                {
+                    AccData.IntegratedFrom = "OrderDelivery";
+                    await _accountingService.OrderDeliverySMSPush(AccData);
+                }
+            }
+
             return result;
         }
 
@@ -5909,11 +6071,11 @@ namespace KGERP.Services.WareHouse
             model.ModifiedDate = DateTime.Now;
 
             SalesTransferDetailVM AccData = await WareHouseSalesTranserDetailGet(vmModel.CompanyFK.Value, vmModel.SalesTransferId);
-            if (AccData.FromVenderHeadGLId>0 && AccData.ToVenderHeadGLId>0 && AccData.CompanyFK>0)
+            if (AccData.FromVenderHeadGLId > 0 && AccData.ToVenderHeadGLId > 0 && AccData.CompanyFK > 0)
             {
                 await _accountingService.SalesTranserVoucherPush(AccData);
             }
-            
+
             return result;
         }
 
@@ -5979,7 +6141,7 @@ namespace KGERP.Services.WareHouse
             if (EntityModel != null)
             {
                 EntityModel.TransferQuantity = (decimal)deliveryQty;
-                EntityModel.ModifiedDate =DateTime.Now;
+                EntityModel.ModifiedDate = DateTime.Now;
                 EntityModel.ModifiedBy = Common.GetUserId();
                 _db.Entry(EntityModel).State = EntityState.Modified;
                 if (await _db.SaveChangesAsync() > 0)
@@ -6007,7 +6169,7 @@ namespace KGERP.Services.WareHouse
             {
                 result = model.OrderDeliverId;
             }
-            if (result > 0 )
+            if (result > 0)
             {
                 #region Ready To Account Integration
                 VMOrderDeliverDetail AccData = await PackagingWareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, vmModel.OrderDeliverId);
@@ -6208,8 +6370,8 @@ namespace KGERP.Services.WareHouse
             {
                 #region Ready To Account Integration
                 VMSaleReturnDetail AccData = await WareHouseSalesReturnSlaveGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.SaleReturnId));
-                var getVoucherType=await _db.VoucherTypes.FirstAsync(x=>x.IsActive && x.Code== "SRV" && x.CompanyId== AccData.CompanyFK.Value);
-                if (getVoucherType is null || getVoucherType.VoucherTypeId<=0)
+                var getVoucherType = await _db.VoucherTypes.FirstAsync(x => x.IsActive && x.Code == "SRV" && x.CompanyId == AccData.CompanyFK.Value);
+                if (getVoucherType is null || getVoucherType.VoucherTypeId <= 0)
                 {
                     return result;
                 }

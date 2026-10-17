@@ -11,6 +11,12 @@ namespace KGERP.Utility
         Active = 1,
         Deleted = 2
     }
+    public static class UserRoll
+    {
+        public const string SupperAdmin = "superadmin";
+        public const string Admin = "admin";
+        public const string Otp = "otp";
+    }
     public enum LeaveStatusNewEnum
     {
         Pending ,

@@ -16,12 +16,12 @@
 <section class="content-header">
     <h1>
         <span>
-            Delivery Confirm List
+            OTP Submission List
         </span>
     </h1>
     <ol class="breadcrumb">
         <li><a href="~/Home/Index"><i class="fa fa-dashboard"></i>Dashboard</a></li>
-        <li class="active">Delivery Confirm</li>
+        <li class="active">OTP Submission</li>
         <li class="active">
             <a class="btn-link btn btn-primary btn-xs" target="_blank" href="~/WareHouse/WareHouseOrderDeliverDetail?companyId=@Model.CompanyFK">New Deliver</a>
 
@@ -81,8 +81,9 @@
                                         <th>Order Date</th>
 
                                         <th>Customer</th>
+                                        <th>Phone No</th>
                                         <th>Status</th>
-                                        <th>Detail</th>
+                                        <th class="text-center">Action</th>
 
                                     </tr>
                                 </thead>
@@ -105,6 +106,7 @@
                                             <td>@item.OrderNo</td>
                                             <td>@item.OrderDate.ToString("dd-MM-yyyy")</td>
                                             <td>@item.CustomerName</td>
+                                            <td>@item.CustomerPhone</td>
                                             <td>
                                                 @if (item.IsDelivered.HasValue && item.IsDelivered == 1)
                                                 {
@@ -112,17 +114,23 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="btn btn-warning btn-xs">Pending</span>
+                                                    <span class="btn btn-info btn-xs">Pending</span>
                                                 }
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 @if (item.IsDelivered.HasValue && item.IsDelivered == 1)
                                                 {
-
+                                                    <span class="btn btn-success btn-xs">OTP Success</span>
                                                 }
                                                 else
                                                 {
-                                                    <button class="btn btn-primary btn-sm" type="button" onclick="OtpSubmit('@item.OrderDeliverId');">OTP Push</button>
+                                                    <button class="btn btn-primary btn-xs" type="button" onclick="OtpSubmit('@item.OrderDeliverId');">OTP Push</button>
+                                                    if (item.IsAdmin)
+                                                    {
+                                                        <span>&nbsp;</span>
+                                                        <button class="btn btn-warning btn-xs" type="button" onclick="OtpReSend('@item.OrderDeliverId');">OTP Resend</button>
+                                                    }
+
                                                 }
 
                                                 &nbsp;
@@ -174,6 +182,25 @@
         </div>
     </div>
 }
+@using (Html.BeginForm("OrderDeliverConfirmOtpresend", "WareHouse", FormMethod.Post))
+{
+    <div class="modal fade" id="OtpReSubmitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        @Html.HiddenFor(model => model.CompanyFK)
+        @Html.HiddenFor(model => model.OrderDeliverId, new { @id = "hdnOrderDeliverOtpResend" })
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Are You Sure to OTP Resend!</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger no-dblclick">OTP Resend</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 
 @Scripts.Render("~/bundles/jqueryui")
@@ -185,6 +212,12 @@
 
             $('#hdnOrderDeliverIdUpdate').val(OrderDeliverId);
             $("#OtpSubmitModal").modal('toggle');
+        }
+
+        const OtpReSend = (OrderDeliverId) => {
+
+            $('#hdnOrderDeliverOtpResend').val(OrderDeliverId);
+            $("#OtpReSubmitModal").modal('toggle');
         }
 
         $(document).ready(function () {

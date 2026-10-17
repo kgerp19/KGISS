@@ -6034,17 +6034,28 @@ namespace KGERP.Service.Implementation
                         //RowTime = DateTime.Now,
                         //Subject = "Order Delivery Notification"
 
-                        Message = "Dear Valued Customer - " + vmOrderDeliverDetail.CustomerName + ", your order has been dispatched from Bondhon Genetics Ltd. " +
-                        "\r\n\r\n" +
-                        "Challan No: " + vmOrderDeliverDetail.ChallanNo + "\r\n" +
-                        "Invoice No: " + vmOrderDeliverDetail.OrderNo + "\r\n" +
-                        "Delivery OTP: " + otpCode + "\r\n\r\n" +
-                        "Please share this OTP with the delivery executive upon receiving your items to confirm delivery." + "\r\n\r\n" +
-                        "For any query - Please contact 01700729665.",
+                        //Message = "প্রিয় গ্রাহক, " + vmOrderDeliverDetail.CustomerName + "।" +
+                        //"\r\n\r\n" +
+                        //"আপনার অর্ডারটি বন্ধন জেনেটিকস্ লিমিটেড থেকে ডেলিভারির জন্য পাঠানো হয়েছে।" +
+                        //"\r\n\r\n" +
+                        //"চালান নং: " + vmOrderDeliverDetail.ChallanNo + "\r\n" +
+                        //"ইনভয়েস নং: " + vmOrderDeliverDetail.OrderNo + "\r\n" +
+                        //"ডেলিভারি OTP: " + otpCode + "\r\n\r\n" +
+                        //"অনুগ্রহ করে পণ্য সঠিকভাবে বুঝে পাওয়ার পর কোম্পানির প্রতিনিধিকে OTP প্রদান করে ডেলিভারি নিশ্চিত করুন।" +
+                        //"\r\n\r\n" +
+                        //"ধন্যবাদ।" + "\r\n" +
+                        //"বন্ধন জেনেটিকস্ লিমিটেড।",
+
+                        //Message = vmOrderDeliverDetail.CustomerName + ", order " + vmOrderDeliverDetail.OrderNo + " (Challan " + vmOrderDeliverDetail.ChallanNo + ") dispatched by Bondhon Genetics. Delivery OTP: " + otpCode + ". Share OTP on receipt.",
+
+                        Message = "প্রিয় " + vmOrderDeliverDetail.CustomerName + ", আপনার অর্ডার " + vmOrderDeliverDetail.OrderNo +
+                        " (চালান: " + vmOrderDeliverDetail.ChallanNo + ") বন্ধন জেনেটিক্স থেকে পাঠানো হয়েছে। ডেলিভারি OTP: " +
+                        otpCode + "। পণ্য গ্রহণের সময় OTP দিন।",
+
                         CompanyId = vmOrderDeliverDetail.CompanyFK.Value,
                         Date = DateTime.Now, // Set to dispatch/current time when OTP is sent
                         Status = (int)EnumSmSStatus.Pending,
-                        PhoneNo = vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
+                        PhoneNo =vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
                         SmsType = 3,
                         Remarks = vmOrderDeliverDetail.OrderNo,
                         TryCount = 0,

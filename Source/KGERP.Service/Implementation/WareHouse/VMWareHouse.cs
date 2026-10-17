@@ -473,7 +473,8 @@ namespace KGERP.Services.WareHouse
         public int StockInfoId { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public DateTime OrderDate { get; set; }
-
+        public bool IsSuccess { get; set; } = true;
+        public string ErrorMessage { get; set; }
         public string ChallanNo { get; set; }
         public string OrderNo { get; set; }
         public string InvoiceNo { get; set; }
@@ -507,7 +508,7 @@ namespace KGERP.Services.WareHouse
         public string CustomerPhone { get; set; }
         public string CustomerAddress { get; set; }
         public string CustomerEmail { get; set; }
-
+        public long SalesOfficerId { get; set; }
         public string ContactPerson { get; set; }
         public bool IsSubmitted { get; set; }
         public int? IsDelivered { get; set; }
@@ -515,8 +516,10 @@ namespace KGERP.Services.WareHouse
         public string StrToDate { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
-
+        public bool IsAdmin { get; set; }
         public SelectList TransportTypeList { get { return new SelectList(BaseFunctionalities.GetEnumList<TransportTypeEnum>(), "Value", "Text"); } }
+
+        
     }
 
     public partial class VMOrderDeliverDetail : VMOrderDeliver
