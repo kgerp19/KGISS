@@ -4095,6 +4095,8 @@ namespace KGERP.Services.Procurement
                 // ── 4. Permission check - ASYNC ───
                 string permissionNote = string.Empty;
 
+               
+
 
                 var latestPermission = await _db.ApplicationManages
                     .Where(x => x.IsActive
@@ -4103,10 +4105,17 @@ namespace KGERP.Services.Procurement
                               && x.Status == (int)SignatoryStatusEnum.Approved
                               && x.EndDate >= effectiveDate
                               )
-                              
+
                     .OrderByDescending(x => x.ApplicationId)
-                    .Select(x => new { x.EndDate,x.CreditLimitAmount })
+                    .Select(x => new { x.EndDate, x.CreditLimitAmount })
                     .FirstOrDefaultAsync();
+
+                var conditionalLimit = latestPermission?.CreditLimitAmount ?? 0;
+
+                var conditionalBalance = conditionalLimit != 0
+                    ? conditionalLimit - Math.Abs(receivableAmount)
+                    : 0;
+
 
                 permissionNote = latestPermission != null
                     ? $"This customer has permission for over-credit-limit usage;" +
@@ -4123,19 +4132,21 @@ namespace KGERP.Services.Procurement
 
                 // ── 5. Build result ──────────────────────────────────────
                 rResult.message = string.Format(
-                    "Receivable Amount: {0:N2} | Credit Limit: {1:N2} | " +
-                    "Current Balance: {2:N2}। {3}",
-                    receivableAmount,
-                    creditLimit,
-                    currentBalance,
-                    permissionNote).TrimEnd();
-                ;
+                "Receivable Amount: {0:N2} | Credit Limit: {1:N2} | Credit Limit Conditional: {2:N2} | " +
+                "Current Balance: {3:N2} | Conditional Current Balance: {4:N2} | {5}",
+                receivableAmount,
+                creditLimit,
+                conditionalLimit,
+                currentBalance,
+                conditionalBalance,
+                permissionNote).TrimEnd();
+
                 rResult.datas = new CustomerBalanceDto
                 {
                     receivableAmount = receivableAmount,
                     creditLimit = creditLimit,
                     currentBalance = currentBalance,
-                    creditLimitApplicationBlance = latestPermission==null? 0 : latestPermission.CreditLimitAmount
+                    creditLimitApplicationBlance = latestPermission == null ? 0 : latestPermission.CreditLimitAmount
                 };
             }
             catch (Exception ex)
