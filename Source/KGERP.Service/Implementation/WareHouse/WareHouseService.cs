@@ -5215,7 +5215,7 @@ namespace KGERP.Services.WareHouse
 
             return vmOrderDeliver;
         }
-        public async Task<VMOrderDeliver> OrderDeliverConfirmGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        public async Task<VMOrderDeliver> OrderDeliverConfirmGet(int companyId, DateTime? fromDate, DateTime? toDate, int subZoneId = 0)
         {
             var vmOrderDeliver = new VMOrderDeliver { CompanyFK = companyId };
 
@@ -5259,6 +5259,11 @@ namespace KGERP.Services.WareHouse
                 if (!isAllAccess)
                 {
                     query = query.Where(x => x.t6.SalesOfficerId == currentUser);
+                }
+
+                if (subZoneId>0)
+                {
+                    query = query.Where(x => x.t6.SubZoneId == subZoneId);
                 }
 
                 vmOrderDeliver.DataList = await query
@@ -6911,6 +6916,16 @@ namespace KGERP.Services.WareHouse
             return 0;
         }
 
+        public List<object> SubZonesDropDownList(int companyId, int zoneId = 0)
+        {
+            var list = new List<object>();
+            var v = _db.SubZones.Where(x => x.IsActive && x.CompanyId == companyId && x.SubZoneId != 104 && x.SubZoneId != 105 && (zoneId > 0 ? x.ZoneId == zoneId : x.SubZoneId > 0)).ToList();
+            foreach (var x in v)
+            {
+                list.Add(new { Text = x.Name, Value = x.SubZoneId });
+            }
+            return list;
+        }
 
     }
 }

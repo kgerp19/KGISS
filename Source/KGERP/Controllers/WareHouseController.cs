@@ -1,4 +1,5 @@
-﻿using KGERP.Data.Models;
+﻿using DocumentFormat.OpenXml.EMMA;
+using KGERP.Data.Models;
 using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
 using KGERP.Service.Implementation.Marketing;
@@ -10,6 +11,7 @@ using KGERP.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -1038,19 +1040,21 @@ namespace KGERP.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> OrderDeliverConfirmList(int companyId, DateTime? fromDate, DateTime? toDate)
+        public async Task<ActionResult> OrderDeliverConfirmList(int companyId, DateTime? fromDate, DateTime? toDate,int subZoneId=0)
         {
             DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             if (!fromDate.HasValue) fromDate = firstDayOfMonth;
             if (!toDate.HasValue) toDate = firstDayOfMonth.AddMonths(1).AddDays(-1);
             VMOrderDeliver vmOrderDeliver = new VMOrderDeliver();
-            vmOrderDeliver = await _service.OrderDeliverConfirmGet(companyId, fromDate, toDate);
+            vmOrderDeliver = await _service.OrderDeliverConfirmGet(companyId, fromDate, toDate, subZoneId);
 
 
             vmOrderDeliver.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
             vmOrderDeliver.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
+            vmOrderDeliver.TerritoryList = new SelectList(
+                _service.SubZonesDropDownList(companyId), "Value", "Text", 0);
 
-
+            vmOrderDeliver.SubZoneId = subZoneId;
             return View(vmOrderDeliver);
         }
 
@@ -1109,7 +1113,7 @@ namespace KGERP.Controllers
         {
             vmOrderDeliver.FromDate = Convert.ToDateTime(vmOrderDeliver.StrFromDate);
             vmOrderDeliver.ToDate = Convert.ToDateTime(vmOrderDeliver.StrToDate);
-            return RedirectToAction(nameof(OrderDeliverConfirmList), new { companyId = vmOrderDeliver.CompanyFK, fromDate = vmOrderDeliver.FromDate, toDate = vmOrderDeliver.ToDate });
+            return RedirectToAction(nameof(OrderDeliverConfirmList), new { companyId = vmOrderDeliver.CompanyFK, fromDate = vmOrderDeliver.FromDate, toDate = vmOrderDeliver.ToDate, subZoneId=vmOrderDeliver.SubZoneId });
         }
         [HttpPost]
         public ActionResult OrderDeliverConfirmShowList(VMOrderDeliver vmOrderDeliver)

@@ -514,6 +514,8 @@ namespace KGERP.Services.WareHouse
         public int? IsDelivered { get; set; }
         public string StrFromDate { get; set; }
         public string StrToDate { get; set; }
+        public int SubZoneId { get; set; }
+        public SelectList TerritoryList { get; set; } = new SelectList(new List<object>());
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
         public bool IsAdmin { get; set; }
