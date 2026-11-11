@@ -1314,7 +1314,7 @@ namespace KGERP.Service.Implementation
         {
             VMAccountHead vmAccountHead = new VMAccountHead();
             vmAccountHead.CompanyId = companyId;
-            vmAccountHead.DataList = await Task.Run(() => (from t1 in context.HeadGLs
+            vmAccountHead.DataList = await (from t1 in context.HeadGLs
                                                            join t2 in context.Head5 on t1.ParentId equals t2.Id
                                                            join t3 in context.Head4 on t2.ParentId equals t3.Id
                                                            join t4 in context.Head3 on t3.ParentId equals t4.Id
@@ -1332,7 +1332,7 @@ namespace KGERP.Service.Implementation
                                                                Head2Name = t5.AccCode + "-" + t5.AccName,
                                                                Head1Name = t6.AccCode + "-" + t6.AccName,
                                                                CompanyId = t1.CompanyId
-                                                           }).OrderByDescending(x => x.Id).AsEnumerable());
+                                                           }).OrderByDescending(x => x.Id).ToListAsync();
             return vmAccountHead;
         }
     }

@@ -5304,7 +5304,7 @@ namespace KGERP.Services.WareHouse
             }
         }
 
-        public async Task<VMOrderDeliver> OrderDeliverConfirmShowGet(int companyId, DateTime? fromDate, DateTime? toDate)
+        public async Task<VMOrderDeliver> OrderDeliverConfirmShowGet(int companyId, DateTime? fromDate, DateTime? toDate, int subZoneId = 0)
         {
             var vmOrderDeliver = new VMOrderDeliver { CompanyFK = companyId };
 
@@ -5350,6 +5350,10 @@ namespace KGERP.Services.WareHouse
                 //    query = query.Where(x => x.t6.SalesOfficerId == currentUser);
                 //}
 
+                if (subZoneId > 0)
+                {
+                    query = query.Where(x => x.t6.SubZoneId == subZoneId);
+                }
                 vmOrderDeliver.DataList = await query
                     .OrderByDescending(x => x.t1.OrderDeliverId)
                     .Select(x => new VMOrderDeliver
