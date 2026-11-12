@@ -109,80 +109,189 @@ namespace KGERP.Service.Implementation
             return resultData.VoucherId;
         }
 
+        //public async Task<Voucher> AccountingJournalMasterPush(VMJournalSlave vmJournalSlave)
+        //{
+        //    long result = -1;
+        //    string VoucherBy = GlobalValues.UserId;
+        //    var C = Common.GetUserId();
+        //    Accounting_CostCenter _CostCenter = new Accounting_CostCenter();
+
+        //    if (vmJournalSlave.CompanyFK == 2)
+        //    {
+        //        if (vmJournalSlave.Accounting_CostCenterFK != null)
+        //        {
+        //            _CostCenter.CostCenterId = (int)vmJournalSlave.Accounting_CostCenterFK; //for Sales Voucher
+        //        }
+        //        else
+        //        {
+        //            _CostCenter = _db.Accounting_CostCenter.Where(x => x.CompanyId == vmJournalSlave.CompanyFK).FirstOrDefault();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        _CostCenter = _db.Accounting_CostCenter.Where(x => x.CompanyId == vmJournalSlave.CompanyFK).FirstOrDefault();
+        //    }
+        //    string voucherNo = GetNewVoucherNo(vmJournalSlave.JournalType, vmJournalSlave.CompanyFK.Value, vmJournalSlave.Date.Value);
+
+        //    var data = (from t1 in _db.ReportApprovalDetails
+        //                join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
+        //                where t2.CompanyId == vmJournalSlave.CompanyFK &&
+        //                t2.Month == vmJournalSlave.Date.Value.Month &&
+        //                t2.Year == vmJournalSlave.Date.Value.Year &&
+        //                t1.ApprovalStatus == 3
+        //                select new
+        //                {
+        //                    ReportApprovalId = t2.ReportApprovalId,
+        //                    Month = t2.Month,
+        //                    Year = t2.Year,
+        //                    ReportApprovalDetailId = t1.ReportApprovalDetail1
+        //                }).OrderByDescending(x => x.ReportApprovalDetailId).FirstOrDefault();
+
+
+
+        //    Voucher voucher = new Voucher
+        //    {
+        //        VoucherTypeId = vmJournalSlave.JournalType,
+        //        VoucherNo = voucherNo,
+        //        Accounting_CostCenterFk = _CostCenter.CostCenterId,
+        //        VoucherStatus = (data == null ? "A" : null),
+
+        //        VoucherDate = vmJournalSlave.Date,
+        //        Narration = vmJournalSlave.Title + " " + vmJournalSlave.Narration,
+        //        ChqDate = vmJournalSlave.ChqDate,
+        //        ChqName = vmJournalSlave.ChqName,
+        //        ChqNo = vmJournalSlave.ChqNo,
+        //        CompanyId = vmJournalSlave.CompanyFK,
+        //        CreatedBy = VoucherBy != null ? VoucherBy : System.Web.HttpContext.Current.User.Identity.Name,// vmJournalSlave.CreatedBy, // 
+        //        CreateDate = DateTime.Now,
+        //        IsActive = true,
+        //        IsSubmit = (data == null ? vmJournalSlave.IsSubmit : false),
+        //        IsIntegrated = true
+        //    };
+
+
+
+        //    using (var scope = _db.Database.BeginTransaction())
+        //    {
+        //        try
+        //        {
+        //            _db.Vouchers.Add(voucher);
+        //            _db.SaveChanges();
+        //            List<VoucherDetail> voucherDetailList = new List<VoucherDetail>();
+        //            voucherDetailList = vmJournalSlave.DataListSlave.Select(x => new VoucherDetail
+        //            {
+        //                Particular = x.Particular,
+        //                DebitAmount = Convert.ToDouble(x.Debit),
+        //                CreditAmount = Convert.ToDouble(x.Credit),
+        //                AccountHeadId = x.Accounting_HeadFK,
+        //                IsActive = true,
+        //                VoucherId = voucher.VoucherId,
+        //                TransactionDate = voucher.VoucherDate,
+        //                IsVirtual = x.IsVirtual
+        //            }).ToList();
+
+        //            _db.VoucherDetails.AddRange(voucherDetailList);
+        //            scope.Commit();
+        //            if (_db.SaveChanges() > 0)
+        //            {
+        //                result = voucher.VoucherId;
+        //            }
+        //            if (result > 0)
+        //            {
+        //                var v = _db.Vouchers.Find(voucher.VoucherId);
+        //                v.TotalAmount = voucherDetailList
+        //                    .Where(x => x.IsActive == true && x.IsVirtual == false)
+        //                    .Select(x => x.CreditAmount).DefaultIfEmpty(0).Sum();
+        //                _db.SaveChanges();
+        //            }
+        //            return voucher;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            scope.Rollback();
+        //            return voucher;
+        //        }
+        //    }
+
+
+        //}
+
         public async Task<Voucher> AccountingJournalMasterPush(VMJournalSlave vmJournalSlave)
         {
-            long result = -1;
-            string VoucherBy = GlobalValues.UserId;
-            var C = Common.GetUserId();
-            Accounting_CostCenter _CostCenter = new Accounting_CostCenter();
+            // 1. HARD VALIDATION: if debit != credit, nothing is generated or saved
+            decimal totalAmount = ValidateDoubleEntry(vmJournalSlave);
 
-            if (vmJournalSlave.CompanyFK == 2)
+            string voucherBy = GlobalValues.UserId;
+            Accounting_CostCenter _CostCenter;
+
+            if (vmJournalSlave.CompanyFK == 2 && vmJournalSlave.Accounting_CostCenterFK != null)
             {
-                if (vmJournalSlave.Accounting_CostCenterFK != null)
+                _CostCenter = new Accounting_CostCenter
                 {
-                    _CostCenter.CostCenterId = (int)vmJournalSlave.Accounting_CostCenterFK; //for Sales Voucher
-                }
-                else
-                {
-                    _CostCenter = _db.Accounting_CostCenter.Where(x => x.CompanyId == vmJournalSlave.CompanyFK).FirstOrDefault();
-                }
+                    CostCenterId = (int)vmJournalSlave.Accounting_CostCenterFK // for Sales Voucher
+                };
             }
             else
             {
-                _CostCenter = _db.Accounting_CostCenter.Where(x => x.CompanyId == vmJournalSlave.CompanyFK).FirstOrDefault();
+                _CostCenter = _db.Accounting_CostCenter
+                    .FirstOrDefault(x => x.CompanyId == vmJournalSlave.CompanyFK);
             }
-            string voucherNo = GetNewVoucherNo(vmJournalSlave.JournalType, vmJournalSlave.CompanyFK.Value, vmJournalSlave.Date.Value);
 
-            var data = (from t1 in _db.ReportApprovalDetails
-                        join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
-                        where t2.CompanyId == vmJournalSlave.CompanyFK &&
-                        t2.Month == vmJournalSlave.Date.Value.Month &&
-                        t2.Year == vmJournalSlave.Date.Value.Year &&
-                        t1.ApprovalStatus == 3
-                        select new
-                        {
-                            ReportApprovalId = t2.ReportApprovalId,
-                            Month = t2.Month,
-                            Year = t2.Year,
-                            ReportApprovalDetailId = t1.ReportApprovalDetail1
-                        }).OrderByDescending(x => x.ReportApprovalDetailId).FirstOrDefault();
-
-
-
-            Voucher voucher = new Voucher
-            {
-                VoucherTypeId = vmJournalSlave.JournalType,
-                VoucherNo = voucherNo,
-                Accounting_CostCenterFk = _CostCenter.CostCenterId,
-                VoucherStatus = (data == null ? "A" : null),
-
-                VoucherDate = vmJournalSlave.Date,
-                Narration = vmJournalSlave.Title + " " + vmJournalSlave.Narration,
-                ChqDate = vmJournalSlave.ChqDate,
-                ChqName = vmJournalSlave.ChqName,
-                ChqNo = vmJournalSlave.ChqNo,
-                CompanyId = vmJournalSlave.CompanyFK,
-                CreatedBy = VoucherBy != null ? VoucherBy : System.Web.HttpContext.Current.User.Identity.Name,// vmJournalSlave.CreatedBy, // 
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                IsSubmit = (data == null ? vmJournalSlave.IsSubmit : false),
-                IsIntegrated = true
-            };
-
-
+            if (_CostCenter == null)
+                throw new InvalidOperationException("Cost center not found for this company.");
 
             using (var scope = _db.Database.BeginTransaction())
             {
                 try
                 {
+                    // 2. Voucher number generated inside the transaction
+                    string voucherNo = GetNewVoucherNo(
+                        vmJournalSlave.JournalType,
+                        vmJournalSlave.CompanyFK.Value,
+                        vmJournalSlave.Date.Value);
+
+                    var data = (from t1 in _db.ReportApprovalDetails
+                                join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
+                                where t2.CompanyId == vmJournalSlave.CompanyFK &&
+                                      t2.Month == vmJournalSlave.Date.Value.Month &&
+                                      t2.Year == vmJournalSlave.Date.Value.Year &&
+                                      t1.ApprovalStatus == 3
+                                select new
+                                {
+                                    ReportApprovalId = t2.ReportApprovalId,
+                                    Month = t2.Month,
+                                    Year = t2.Year,
+                                    ReportApprovalDetailId = t1.ReportApprovalDetail1
+                                }).OrderByDescending(x => x.ReportApprovalDetailId).FirstOrDefault();
+
+                    Voucher voucher = new Voucher
+                    {
+                        VoucherTypeId = vmJournalSlave.JournalType,
+                        VoucherNo = voucherNo,
+                        Accounting_CostCenterFk = _CostCenter.CostCenterId,
+                        VoucherStatus = (data == null ? "A" : null),
+                        VoucherDate = vmJournalSlave.Date,
+                        Narration = vmJournalSlave.Title + " " + vmJournalSlave.Narration,
+                        ChqDate = vmJournalSlave.ChqDate,
+                        ChqName = vmJournalSlave.ChqName,
+                        ChqNo = vmJournalSlave.ChqNo,
+                        CompanyId = vmJournalSlave.CompanyFK,
+                        CreatedBy = voucherBy != null ? voucherBy : System.Web.HttpContext.Current.User.Identity.Name,
+                        CreateDate = DateTime.Now,
+                        IsActive = true,
+                        IsSubmit = (data == null ? vmJournalSlave.IsSubmit : false),
+                        IsIntegrated = true,
+                        TotalAmount = (double)totalAmount   // set once, no second update needed
+                    };
+
                     _db.Vouchers.Add(voucher);
-                    _db.SaveChanges();
-                    List<VoucherDetail> voucherDetailList = new List<VoucherDetail>();
-                    voucherDetailList = vmJournalSlave.DataListSlave.Select(x => new VoucherDetail
+                    await _db.SaveChangesAsync();   // get VoucherId
+
+                    var voucherDetailList = vmJournalSlave.DataListSlave.Select(x => new VoucherDetail
                     {
                         Particular = x.Particular,
-                        DebitAmount = Convert.ToDouble(x.Debit),
-                        CreditAmount = Convert.ToDouble(x.Credit),
+                        DebitAmount = (double)Math.Round(Convert.ToDecimal(x.Debit), 2),
+                        CreditAmount = (double)Math.Round(Convert.ToDecimal(x.Credit), 2),
                         AccountHeadId = x.Accounting_HeadFK,
                         IsActive = true,
                         VoucherId = voucher.VoucherId,
@@ -191,30 +300,87 @@ namespace KGERP.Service.Implementation
                     }).ToList();
 
                     _db.VoucherDetails.AddRange(voucherDetailList);
-                    scope.Commit();
-                    if (_db.SaveChanges() > 0)
-                    {
-                        result = voucher.VoucherId;
-                    }
-                    if (result > 0)
-                    {
-                        var v = _db.Vouchers.Find(voucher.VoucherId);
-                        v.TotalAmount = voucherDetailList
-                            .Where(x => x.IsActive == true && x.IsVirtual == false)
-                            .Select(x => x.CreditAmount).DefaultIfEmpty(0).Sum();
-                        _db.SaveChanges();
-                    }
+                    if (await _db.SaveChangesAsync() <= 0)
+                        throw new InvalidOperationException("Voucher details could not be saved.");
+
+                    // 3. Final check against what is actually in the database (virtual included)
+                    var saved = await _db.VoucherDetails
+                        .Where(x => x.VoucherId == voucher.VoucherId && x.IsActive == true)
+                        .Select(x => new { x.DebitAmount, x.CreditAmount })
+                        .ToListAsync();
+
+                    decimal dbDebit = saved.Sum(x => Math.Round(Convert.ToDecimal(x.DebitAmount), 2));
+                    decimal dbCredit = saved.Sum(x => Math.Round(Convert.ToDecimal(x.CreditAmount), 2));
+
+                    if (dbDebit != dbCredit)
+                        throw new InvalidOperationException(
+                            $"Saved debit ({dbDebit:N2}) and credit ({dbCredit:N2}) do not match. Voucher rolled back.");
+
+                    scope.Commit();   // commit only after everything succeeded
                     return voucher;
                 }
-                catch (Exception ex)
+                catch
                 {
                     scope.Rollback();
-                    return voucher;
+                    throw;            // never hide the failure from the caller
                 }
             }
-            return voucher;
+        }
 
+        /// <summary>
+        /// Double-entry validation (virtual lines included).
+        /// Throws if the voucher is not balanced.
+        /// Returns the non-virtual credit total, used for Voucher.TotalAmount.
+        /// </summary>
+        private static decimal ValidateDoubleEntry(VMJournalSlave vm)
+        {
+            if (vm == null)
+                throw new ArgumentNullException(nameof(vm));
+            if (!vm.CompanyFK.HasValue)
+                throw new InvalidOperationException("Company is required.");
+            if (!vm.Date.HasValue)
+                throw new InvalidOperationException("Voucher date is required.");
+            if (vm.DataListSlave == null || !vm.DataListSlave.Any())
+                throw new InvalidOperationException("Voucher has no detail lines.");
 
+            // ALL lines are checked, virtual included
+            var lines = vm.DataListSlave.ToList();
+
+            if (lines.Count < 2)
+                throw new InvalidOperationException("A double-entry voucher needs at least 2 lines.");
+
+            decimal totalDebit = 0, totalCredit = 0;
+            decimal nonVirtualCredit = 0;   // used only for Voucher.TotalAmount
+            int lineNo = 0;
+
+            foreach (var line in lines)
+            {
+                lineNo++;
+                decimal debit = Math.Round(Convert.ToDecimal(line.Debit), 2);
+                decimal credit = Math.Round(Convert.ToDecimal(line.Credit), 2);
+
+                if (debit < 0 || credit < 0)
+                    throw new InvalidOperationException($"Line {lineNo}: negative amounts are not allowed.");
+                if (debit > 0 && credit > 0)
+                    throw new InvalidOperationException($"Line {lineNo}: a line cannot have both debit and credit.");
+                //if (debit == 0 && credit == 0)
+                //    throw new InvalidOperationException($"Line {lineNo}: debit and credit are both zero.");
+
+                totalDebit += debit;
+                totalCredit += credit;
+
+                if (line.IsVirtual != true)
+                    nonVirtualCredit += credit;
+            }
+
+            if (totalDebit <= 0)
+                throw new InvalidOperationException("Voucher total must be greater than zero.");
+
+            if (totalDebit != totalCredit)
+                throw new InvalidOperationException(
+                    $"Voucher is not balanced. Debit = {totalDebit:N2}, Credit = {totalCredit:N2}, Difference = {Math.Abs(totalDebit - totalCredit):N2}.");
+
+            return nonVirtualCredit;   // goes to Voucher.TotalAmount
         }
 
         public string GetNewVoucherNo(int voucherTypeId, int companyId, DateTime voucherDate)
@@ -2577,91 +2743,136 @@ namespace KGERP.Service.Implementation
 
         }
 
+
         public async Task<long> UpdateVoucherStatus(int voucherId)
         {
             long result = -1;
+
             Voucher voucher = await _db.Vouchers.FindAsync(voucherId);
+            if (voucher == null)
+                return result;
 
-
-            //var data = (from t1 in _db.ReportApprovalDetails
-            //            join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
-            //            where t2.CompanyId == voucher.CompanyId &&
-            //                  t2.Month == voucher.VoucherDate.Value.Month &&
-            //                  t2.Year == voucher.VoucherDate.Value.Year &&
-            //                  t1.ApprovalStatus == 3 && t2.IsActive == true
-            //            orderby t1.ReportApprovalDetail1 descending
-            //            select new
-            //            {
-            //                ReportApprovalId = t2.ReportApprovalId,
-            //                Month = t2.Month,
-            //                Year = t2.Year,
-            //                ReportApprovalDetailId = t1.ReportApprovalDetail1,
-            //                Status = t1.ApprovalStatus,
-            //            }).FirstOrDefault();
-
-
-
-            //List<dynamic> data;
-            //var query = (from t1 in _db.ReportApprovalDetails
-            //             join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
-            //             where t2.CompanyId == voucher.CompanyId &&
-            //                   t2.Month == voucher.VoucherDate.Value.Month &&
-            //                   t2.Year == voucher.VoucherDate.Value.Year &&
-            //                   (t1.ApprovalStatus == 3 || t1.ApprovalStatus == 4)
-            //             orderby t1.ReportApprovalDetail1 descending
-            //             select new
-            //             {
-            //                 ReportApprovalId = t2.ReportApprovalId,
-            //                 Month = t2.Month,
-            //                 Year = t2.Year,
-            //                 ReportApprovalDetailId = t1.ReportApprovalDetail1,
-            //                 Status = t1.ApprovalStatus,
-            //             });
-
-            //var res = await query.ToListAsync();
-
-            //if (res.Any(item => item.Status == 4))
-            //{
-            //    data = null; 
-            //}
-            //else
-            //{
-            //    data = res.Cast<dynamic>().ToList(); 
-            //}
-
-
-            var totalAmount = _db.VoucherDetails
+            // Get debit, credit and row count in a single query
+            var totals = await _db.VoucherDetails
                 .Where(x => x.VoucherId == voucherId && x.IsActive == true && x.IsVirtual == false)
-                .Select(x => x.CreditAmount)
-                .DefaultIfEmpty(0)
-                .Sum();
+                .GroupBy(x => 1)
+                .Select(g => new
+                {
+                    Count = g.Count(),
+                    TotalDebit = g.Sum(x => x.DebitAmount),
+                    TotalCredit = g.Sum(x => x.CreditAmount)
+                })
+                .FirstOrDefaultAsync();
+
+            // No detail rows -> cannot approve
+            if (totals == null || totals.Count == 0)
+                return result;
+
+            // Strict check: debit and credit must match (rounded to 2 decimals to avoid double precision noise)
+            if (Math.Round(totals.TotalDebit, 2) != Math.Round(totals.TotalCredit, 2))
+                return result;
+
+            // Optional: reject zero-value vouchers
+            if (totals.TotalCredit <= 0)
+                return result;
 
             voucher.VoucherStatus = "A";
             voucher.IsSubmit = true;
-            voucher.TotalAmount = totalAmount;
-
-
-
+            voucher.TotalAmount = totals.TotalCredit;
 
             if (await _db.SaveChangesAsync() > 0)
             {
                 result = voucher.VoucherId;
-
             }
-            //if (data == null)
-            //{
-
-            //    //int erpSM = await SMSPush(voucher);
-            //}
-            //else
-            //{
-            //    result = -1;
-            //}
-
 
             return result;
-
         }
+
+        //public async Task<long> UpdateVoucherStatus(int voucherId)
+        //{
+        //    long result = -1;
+        //    Voucher voucher = await _db.Vouchers.FindAsync(voucherId);
+
+
+        //    //var data = (from t1 in _db.ReportApprovalDetails
+        //    //            join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
+        //    //            where t2.CompanyId == voucher.CompanyId &&
+        //    //                  t2.Month == voucher.VoucherDate.Value.Month &&
+        //    //                  t2.Year == voucher.VoucherDate.Value.Year &&
+        //    //                  t1.ApprovalStatus == 3 && t2.IsActive == true
+        //    //            orderby t1.ReportApprovalDetail1 descending
+        //    //            select new
+        //    //            {
+        //    //                ReportApprovalId = t2.ReportApprovalId,
+        //    //                Month = t2.Month,
+        //    //                Year = t2.Year,
+        //    //                ReportApprovalDetailId = t1.ReportApprovalDetail1,
+        //    //                Status = t1.ApprovalStatus,
+        //    //            }).FirstOrDefault();
+
+
+
+        //    //List<dynamic> data;
+        //    //var query = (from t1 in _db.ReportApprovalDetails
+        //    //             join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
+        //    //             where t2.CompanyId == voucher.CompanyId &&
+        //    //                   t2.Month == voucher.VoucherDate.Value.Month &&
+        //    //                   t2.Year == voucher.VoucherDate.Value.Year &&
+        //    //                   (t1.ApprovalStatus == 3 || t1.ApprovalStatus == 4)
+        //    //             orderby t1.ReportApprovalDetail1 descending
+        //    //             select new
+        //    //             {
+        //    //                 ReportApprovalId = t2.ReportApprovalId,
+        //    //                 Month = t2.Month,
+        //    //                 Year = t2.Year,
+        //    //                 ReportApprovalDetailId = t1.ReportApprovalDetail1,
+        //    //                 Status = t1.ApprovalStatus,
+        //    //             });
+
+        //    //var res = await query.ToListAsync();
+
+        //    //if (res.Any(item => item.Status == 4))
+        //    //{
+        //    //    data = null; 
+        //    //}
+        //    //else
+        //    //{
+        //    //    data = res.Cast<dynamic>().ToList(); 
+        //    //}
+
+
+        //    var totalAmount = _db.VoucherDetails
+        //        .Where(x => x.VoucherId == voucherId && x.IsActive == true && x.IsVirtual == false)
+        //        .Select(x => x.CreditAmount)
+        //        .DefaultIfEmpty(0)
+        //        .Sum();
+
+        //    voucher.VoucherStatus = "A";
+        //    voucher.IsSubmit = true;
+        //    voucher.TotalAmount = totalAmount;
+
+
+
+
+        //    if (await _db.SaveChangesAsync() > 0)
+        //    {
+        //        result = voucher.VoucherId;
+
+        //    }
+        //    //if (data == null)
+        //    //{
+
+        //    //    //int erpSM = await SMSPush(voucher);
+        //    //}
+        //    //else
+        //    //{
+        //    //    result = -1;
+        //    //}
+
+
+        //    return result;
+
+        //}
 
 
         public async Task<long> DraftVoucherStatusSubmit(int voucherId)

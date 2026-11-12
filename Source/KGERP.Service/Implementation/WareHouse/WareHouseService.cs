@@ -1319,7 +1319,7 @@ namespace KGERP.Services.WareHouse
             }
             #region Ready To Account Integration
             VMWareHousePOReceivingSlave AccData = await ISSPOReceivingGet(vmModel.CompanyFK.Value, (int)vmModel.MaterialReceiveId);
-            await _accountingService.ISSMRPush(vmModel.CompanyFK.Value, AccData);
+           var results= await _accountingService.ISSMRPush(vmModel.CompanyFK.Value, AccData);
 
 
             #endregion
