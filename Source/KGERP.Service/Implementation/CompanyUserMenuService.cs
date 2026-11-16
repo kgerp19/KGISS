@@ -26,18 +26,60 @@ namespace KGERP.Service.Implementation
 
             else
             {
+                // Query returns all columns needed for the Index list, including action flags
                 IQueryable<CompanyUserMenuModel> queryable = context.Database.SqlQuery<CompanyUserMenuModel>(@"
                                                              select 
                                                              CompanyUserMenuId,
                                                              (select Name from Company where CompanyId=CompanyUserMenu.CompanyId) as CompanyName,
                                                              (select Name from CompanyMenu where CompanyMenuId=CompanyUserMenu.CompanyMenuId) as CompanyMenuName,
                                                              (select Name from CompanySubMenu where CompanySubMenuId=CompanyUserMenu.CompanySubMenuId) as CompanySubMenuName,
-                                                             UserId,IsActive
+                                                             UserId, IsView, IsAdd, IsUpdate, IsDelete, IsActive
                                                               from CompanyUserMenu where UserId={0}", searchText.ToUpper()).AsQueryable();
                 return queryable.Where(x => x.UserId.ToLower().Contains(searchText.ToLower())).ToList();
             }
 
         }
+
+        // Filtered search: supports userId, companyId, menuId, subMenuId filters
+        public List<CompanyUserMenuModel> GetCompanyUserMenus(string userId, int? companyId, int? menuId, int? subMenuId)
+        {
+            var query = from um in context.CompanyUserMenus
+                        join c in context.Companies on um.CompanyId equals c.CompanyId into cJoin
+                        from c in cJoin.DefaultIfEmpty()
+                        join m in context.CompanyMenus on um.CompanyMenuId equals m.CompanyMenuId into mJoin
+                        from m in mJoin.DefaultIfEmpty()
+                        join sm in context.CompanySubMenus on um.CompanySubMenuId equals sm.CompanySubMenuId into smJoin
+                        from sm in smJoin.DefaultIfEmpty()
+                        select new CompanyUserMenuModel
+                        {
+                            CompanyUserMenuId = um.CompanyUserMenuId,
+                            CompanyId = um.CompanyId ?? 0,
+                            CompanyMenuId = um.CompanyMenuId,
+                            CompanySubMenuId = um.CompanySubMenuId,
+                            UserId = um.UserId,
+                            CompanyName = c != null ? c.Name : "",
+                            CompanyMenuName = m != null ? m.Name : "",
+                            CompanySubMenuName = sm != null ? sm.Name : "",
+                            IsView = um.IsView,
+                            IsAdd = um.IsAdd,
+                            IsUpdate = um.IsUpdate,
+                            IsDelete = um.IsDelete,
+                            IsActive = um.IsActive
+                        };
+
+            // Apply filters only if provided
+            if (!string.IsNullOrEmpty(userId))
+                query = query.Where(x => x.UserId.Contains(userId));
+            if (companyId.HasValue && companyId > 0)
+                query = query.Where(x => x.CompanyId == companyId.Value);
+            if (menuId.HasValue && menuId > 0)
+                query = query.Where(x => x.CompanyMenuId == menuId.Value);
+            if (subMenuId.HasValue && subMenuId > 0)
+                query = query.Where(x => x.CompanySubMenuId == subMenuId.Value);
+
+            return query.OrderBy(x => x.UserId).ThenBy(x => x.CompanyName).ToList();
+        }
+
         public CompanyUserMenuModel GetCompanyUserMenu(int id)
         {
             if (id <= 0)
@@ -87,6 +129,15 @@ namespace KGERP.Service.Implementation
             companyUserMenu.CompanyMenuId = model.CompanyMenuId;
             companyUserMenu.CompanySubMenuId = model.CompanySubMenuId;
             companyUserMenu.UserId = model.UserId;
+
+            // Business rule: if View is not allowed, Add/Update/Delete make no sense
+            if (!model.IsView)
+            {
+                model.IsAdd = false;
+                model.IsUpdate = false;
+                model.IsDelete = false;
+            }
+
             companyUserMenu.IsView = model.IsView;
             companyUserMenu.IsAdd = model.IsAdd;
             companyUserMenu.IsUpdate = model.IsUpdate;

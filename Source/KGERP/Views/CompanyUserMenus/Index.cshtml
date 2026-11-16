@@ -2,123 +2,446 @@
 @model PagedList.IPagedList<KGERP.Service.ServiceModel.CompanyUserMenuModel>
 @using PagedList;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "User Menu Permission";
     var message = TempData["message"];
+    var messageType = TempData["messageType"] as string ?? "info";
+    var companies = ViewBag.Companies as List<KGERP.Utility.SelectModel> ?? new List<KGERP.Utility.SelectModel>();
+    string searchText = ViewBag.SearchText as string ?? "";
+    int? filterCompanyId = ViewBag.CompanyId as int?;
+    int? filterMenuId = ViewBag.MenuId as int?;
+    int? filterSubMenuId = ViewBag.SubMenuId as int?;
 }
-<link href="~/Content/CustomCss/search-form.css" rel="stylesheet" />
 
-@using (Html.BeginForm("Index", "CompanyUserMenus", FormMethod.Get, new { @class = "example" }))
-{
+<style>
+    .badge-permission {
+        display: inline-block;
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        text-align: center;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #fff;
+    }
+
+    .badge-yes {
+        background: #27ae60;
+    }
+
+    .badge-no {
+        background: #c0392b;
+    }
+
+    .filter-panel {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 15px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+        .filter-panel label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .filter-panel .form-control {
+            font-size: 13px;
+            height: 34px;
+        }
+
+    .tbl-perm {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .tbl-perm thead th {
+            background: #34495e;
+            color: #ecf0f1;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 10px 8px;
+            border-bottom: 3px solid #2980b9;
+            white-space: nowrap;
+        }
+
+            .tbl-perm thead th:first-child {
+                border-radius: 6px 0 0 0;
+            }
+
+            .tbl-perm thead th:last-child {
+                border-radius: 0 6px 0 0;
+            }
+
+        .tbl-perm tbody td {
+            font-size: 13px;
+            padding: 8px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tbl-perm tbody tr:hover {
+            background: #f5faff;
+        }
+
+        .tbl-perm tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+            .tbl-perm tbody tr:nth-child(even):hover {
+                background: #f5faff;
+            }
+
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .btn-add-new {
+        background: #27ae60;
+        border: none;
+        color: #fff;
+        padding: 8px 18px;
+        border-radius: 5px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+        .btn-add-new:hover {
+            background: #219a52;
+            color: #fff;
+        }
+
+    .info-bar {
+        background: #eaf6ff;
+        border-left: 4px solid #3498db;
+        padding: 8px 15px;
+        margin-bottom: 10px;
+        border-radius: 0 4px 4px 0;
+        font-size: 13px;
+        color: #2c3e50;
+    }
+
+    /* Autocomplete dropdown */
+    .ac-list {
+        display: none;
+        position: absolute;
+        z-index: 1050;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 220px;
+        overflow-y: auto;
+        width: 100%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+        .ac-list .ac-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+            .ac-list .ac-item:hover {
+                background: #eaf6ff;
+            }
+
+    .select2-container .select2-selection--single {
+        height: 34px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 34px !important;
+        font-size: 13px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 34px !important;
+    }
+</style>
+
+@* ---- Header ---- *@
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+    <h3 class="page-title"><i class="fa fa-shield"></i> User Menu Permission</h3>
+    <a href="@Url.Action("CreateOrEdit", new { id = 0 })" class="btn btn-add-new">
+        <i class="fa fa-plus"></i> Assign New
+    </a>
+</div>
+<hr style="border-color:#ddd; margin:5px 0 10px 0;" />
+
+@* ---- Filter Panel ---- *@
+<div class="filter-panel">
     <div class="row">
-        <div class="col-md-6">
-            <span style="font-size:20px;font-weight:bold">
-                User Menus
-            </span>
+        <div class="col-md-3">
+            <label><i class="fa fa-building"></i> Company</label>
+            <select id="ddlFilterCompany" class="form-control searchingDropdown">
+                <option value="">-- All Companies --</option>
+                @foreach (var item in companies)
+                {
+                    <option value="@item.Value" @(filterCompanyId.HasValue && filterCompanyId.ToString() == item.Value ? "selected" : "")>@item.Text</option>
+                }
+            </select>
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                @Html.Editor("searchText", new { htmlAttributes = new { @autocomplete = "off", value = "", @placeholder = "Search..." } })
-                <button type="submit"><i class="fa fa-search "></i></button>
-            </div>
+        <div class="col-md-3">
+            <label><i class="fa fa-bars"></i> Menu</label>
+            <select id="ddlFilterMenu" class="form-control">
+                <option value="">-- All Menus --</option>
+            </select>
         </div>
-        <div class="col-md-2 pull-right">
-            <div class="form-group">
-                <a href="@Url.Action("CreateOrEdit", new { id = 0})" class="btn btn-primary pull-right">
-                    <span class="glyphicon glyphicon-plus"></span> Add
-                </a>
+        <div class="col-md-2">
+            <label><i class="fa fa-list"></i> Sub Menu</label>
+            <select id="ddlFilterSubMenu" class="form-control">
+                <option value="">-- All Sub Menus --</option>
+            </select>
+        </div>
+        <div class="col-md-2" style="position:relative;">
+            <label><i class="fa fa-user"></i> User ID</label>
+            <input type="text" id="txtSearchUser" class="form-control" placeholder="Type ID or Name..." value="@searchText" autocomplete="off" />
+            <div id="acListIndex" class="ac-list"></div>
+        </div>
+        <div class="col-md-2">
+            <label>&nbsp;</label>
+            <div>
+                <button type="button" id="btnSearch" class="btn btn-primary btn-sm" style="height:34px;">
+                    <i class="fa fa-search"></i> Search
+                </button>
+                <button type="button" id="btnClear" class="btn btn-default btn-sm" style="height:34px; margin-left:3px;">
+                    <i class="fa fa-refresh"></i> Clear
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+@* ---- Result Info ---- *@
+@if (Model.TotalItemCount > 0)
+{
+    <div class="info-bar">
+        <i class="fa fa-info-circle"></i>
+        Showing <strong>@Model.FirstItemOnPage - @Model.LastItemOnPage</strong>
+        of <strong>@Model.TotalItemCount</strong> records
+        @if (!string.IsNullOrEmpty(searchText))
+        {
+            <span> | User: <strong>@searchText</strong></span>
+        }
+    </div>
+}
+else if (!string.IsNullOrEmpty(searchText) || filterCompanyId > 0)
+{
+    <div class="info-bar" style="border-left-color:#e74c3c;">
+        <i class="fa fa-exclamation-circle"></i> No records found for this criteria.
+    </div>
 }
 
-<div class="row">
-    <hr style="border-color:#32527B; padding:0px;margin-top: 5px;margin-bottom: 5px; border-width: 2px;" />
-    <table class="table table-striped table-condensed">
-        <tr style="background-color:#3c8dbc;color:#ffffff">
-            <th>
-                SL.
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().CompanyId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().CompanyMenuId)
-            </th>
-
-            <th>
-                @Html.DisplayNameFor(model => model.First().CompanySubMenuId)
-            </th>
-
-            <th>
-                @Html.DisplayNameFor(model => model.First().UserId)
-            </th>
-
-            <th>
-                @Html.DisplayNameFor(model => model.First().IsActive)
-            </th>
-
-            <th class="text-center">Action</th>
+@* ---- Data Table ---- *@
+<table class="tbl-perm">
+    <thead>
+        <tr>
+            <th style="width:35px;">SL</th>
+            <th>Company</th>
+            <th>Menu</th>
+            <th>Sub Menu</th>
+            <th>User ID</th>
+            <th class="text-center" style="width:55px;">View</th>
+            <th class="text-center" style="width:55px;">Add</th>
+            <th class="text-center" style="width:55px;">Update</th>
+            <th class="text-center" style="width:55px;">Delete</th>
+            <th class="text-center" style="width:55px;">Active</th>
+            <th class="text-center" style="width:70px;">Action</th>
         </tr>
-
-        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+    </thead>
+    <tbody>
+        @if (Model.Count == 0)
         {
             <tr>
-                <td>
-                    @((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Data.CompanyName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Data.CompanyMenuName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Data.CompanySubMenuName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Data.UserId)
-                </td>
-
-                <td>
-                    @Html.DisplayFor(modelItem => item.Data.IsActive)
-                </td>
-
-
-                <td class="text-center">
-                    <a href="@Url.Action("CreateOrEdit", new { id = item.Data.CompanyUserMenuId })" title="Edit" class="btn btn-info btn-xs">
-                        <i class="fa fa-edit" style="font-size:15px;" aria-hidden="true"></i>
-                    </a>
-
-                    <a href="@Url.Action("Delete", new { id = item.Data.CompanyUserMenuId})" title="Delete" onclick="return confirm('Are you sure to delete this?');" class="btn btn-danger btn-xs">
-                        <i class="fa fa-trash" style="font-size:15px;" aria-hidden="true"></i>
-                    </a>
-
-
+                <td colspan="11" class="text-center" style="padding:40px; color:#aaa;">
+                    <i class="fa fa-search" style="font-size:28px; display:block; margin-bottom:8px;"></i>
+                    Search by User ID or use filters to load records
                 </td>
             </tr>
         }
+        @foreach (var item in Model.Select((x, i) => new { Data = x, Index = i }))
+        {
+            <tr>
+                <td>@((item.Index + 1) + (Model.PageNumber - 1) * Model.PageSize)</td>
+                <td>@item.Data.CompanyName</td>
+                <td>@item.Data.CompanyMenuName</td>
+                <td>@item.Data.CompanySubMenuName</td>
+                <td><strong>@item.Data.UserId</strong></td>
+                <td class="text-center">
+                    <span class="badge-permission @(item.Data.IsView ? "badge-yes" : "badge-no")">
+                        <i class="fa @(item.Data.IsView ? "fa-check" : "fa-times")"></i>
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge-permission @(item.Data.IsAdd ? "badge-yes" : "badge-no")">
+                        <i class="fa @(item.Data.IsAdd ? "fa-check" : "fa-times")"></i>
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge-permission @(item.Data.IsUpdate ? "badge-yes" : "badge-no")">
+                        <i class="fa @(item.Data.IsUpdate ? "fa-check" : "fa-times")"></i>
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge-permission @(item.Data.IsDelete ? "badge-yes" : "badge-no")">
+                        <i class="fa @(item.Data.IsDelete ? "fa-check" : "fa-times")"></i>
+                    </span>
+                </td>
+                <td class="text-center">
+                    @if (item.Data.IsActive)
+                    {
+                        <span class="label label-success" style="font-size:11px;">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="label label-default" style="font-size:11px;">No</span>
+                    }
+                </td>
+                <td class="text-center" style="white-space:nowrap;">
+                    <a href="@Url.Action("CreateOrEdit", new { id = item.Data.CompanyUserMenuId })" title="Edit" class="btn btn-info btn-xs">
+                        <i class="fa fa-edit" style="font-size:13px;"></i>
+                    </a>
+                    <a href="@Url.Action("Delete", new { id = item.Data.CompanyUserMenuId })" title="Delete"
+                       onclick="return confirm('Are you sure to delete this?');" class="btn btn-danger btn-xs">
+                        <i class="fa fa-trash" style="font-size:13px;"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-    </table>
-    @if (Model.PageCount > 1)
-    {
-        <span class="btn btn-success">
+@if (Model.PageCount > 1)
+{
+    <div class="text-center" style="margin-top:10px;">
+        <span class="btn btn-success btn-xs">
             Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
         </span>
         <span class="checkbox">
             @Html.PagedListPager(Model, Page_No => Url.Action("Index", "CompanyUserMenus",
-                                              new { Page_No, SearchText = Request.QueryString["searchText"] }))
+                new { Page_No, searchText, companyId = filterCompanyId, menuId = filterMenuId, subMenuId = filterSubMenuId }))
         </span>
-    }
-
-</div>
-
+    </div>
+}
 
 @section Scripts{
     <script type="text/javascript">
+        $(document).ready(function () {
 
-        var message = '@message';
-    if(message){
-        alert(message);
-    }
+            // --- Toast message ---
+            var message = '@message';
+            var msgType = '@messageType';
+            if (message) {
+                var bg = msgType === 'success' ? '#27ae60' : '#e74c3c';
+                var ic = msgType === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                var $t = $('<div style="position:fixed;top:20px;right:20px;z-index:9999;background:' + bg + ';color:#fff;padding:12px 20px;border-radius:6px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.2);"><i class="fa ' + ic + '"></i> ' + message + '</div>');
+                $('body').append($t);
+                setTimeout(function () { $t.fadeOut(400, function () { $(this).remove(); }); }, 3000);
+            }
+
+            // --- User ID Autocomplete ---
+            var acTimer = null;
+            $('#txtSearchUser').on('input', function () {
+                var prefix = $(this).val().trim();
+                clearTimeout(acTimer);
+                if (prefix.length < 2) { $('#acListIndex').hide().empty(); return; }
+                acTimer = setTimeout(function () {
+                    $.ajax({
+                        url: '/AutoComplete/GetAllEmployeeAutoComplete',
+                        data: { prefix: prefix },
+                        datatype: 'json',
+                        success: function (data) {
+                            var $list = $('#acListIndex').empty();
+                            if (data && data.length > 0) {
+                                for (var i = 0; i < Math.min(data.length, 12); i++) {
+                                    var $item = $('<div class="ac-item"><i class="fa fa-user" style="color:#3498db;margin-right:5px;"></i><strong>' + data[i].EmployeeId + '</strong> - ' + data[i].Name + '</div>');
+                                    $item.data('eid', data[i].EmployeeId);
+                                    $item.on('click', function () {
+                                        $('#txtSearchUser').val($(this).data('eid'));
+                                        $('#acListIndex').hide().empty();
+                                    });
+                                    $list.append($item);
+                                }
+                                $list.show();
+                            } else {
+                                $list.html('<div class="ac-item" style="color:#999;text-align:center;">No match found</div>').show();
+                            }
+                        }
+                    });
+                }, 300);
+            });
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#txtSearchUser,#acListIndex').length) $('#acListIndex').hide();
+            });
+
+            // --- Cascade filters ---
+            var savedMenuId = '@(filterMenuId ?? 0)';
+            var savedSubMenuId = '@(filterSubMenuId ?? 0)';
+            var initCompany = $('#ddlFilterCompany').val();
+            if (initCompany) loadMenus(initCompany, savedMenuId);
+
+            $('#ddlFilterCompany').change(function () {
+                $('#ddlFilterSubMenu').html('<option value="">-- All Sub Menus --</option>');
+                var cid = $(this).val();
+                if (cid) loadMenus(cid, '0');
+                else $('#ddlFilterMenu').html('<option value="">-- All Menus --</option>');
+            });
+            $('#ddlFilterMenu').change(function () {
+                var mid = $(this).val();
+                if (mid) loadSubMenus(mid, '0');
+                else $('#ddlFilterSubMenu').html('<option value="">-- All Sub Menus --</option>');
+            });
+
+            function loadMenus(companyId, selId) {
+                $.post('/CompanyMenus/GetCompanyMenuSelectModelsByCompany', { companyId: companyId }, function (data) {
+                    var h = '<option value="">-- All Menus --</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        h += '<option value="' + data[i].Value + '"' + (data[i].Value == selId ? ' selected' : '') + '>' + data[i].Text + '</option>';
+                    }
+                    $('#ddlFilterMenu').html(h);
+                    if (selId && selId !== '0') loadSubMenus(selId, savedSubMenuId);
+                });
+            }
+            function loadSubMenus(menuId, selId) {
+                $.post('/CompanySubMenus/GetCompanySubMenuSelectModelsByCompanyMenu', { menuId: menuId }, function (data) {
+                    var h = '<option value="">-- All Sub Menus --</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        h += '<option value="' + data[i].Value + '"' + (data[i].Value == selId ? ' selected' : '') + '>' + data[i].Text + '</option>';
+                    }
+                    $('#ddlFilterSubMenu').html(h);
+                });
+            }
+
+            // --- Search ---
+            $('#btnSearch').click(doSearch);
+            $('#txtSearchUser').keypress(function (e) { if (e.which === 13) { e.preventDefault(); doSearch(); } });
+
+            function doSearch() {
+                var p = [];
+                var u = $('#txtSearchUser').val().trim();
+                var c = $('#ddlFilterCompany').val();
+                var m = $('#ddlFilterMenu').val();
+                var s = $('#ddlFilterSubMenu').val();
+                if (u) p.push('searchText=' + encodeURIComponent(u));
+                if (c) p.push('companyId=' + c);
+                if (m) p.push('menuId=' + m);
+                if (s) p.push('subMenuId=' + s);
+                window.location.href = '@Url.Action("Index", "CompanyUserMenus")' + (p.length ? '?' + p.join('&') : '');
+            }
+
+            $('#btnClear').click(function () {
+                window.location.href = '@Url.Action("Index", "CompanyUserMenus")';
+            });
+        });
     </script>
 }

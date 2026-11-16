@@ -233,6 +233,7 @@ namespace KGERP.Controllers
 
                                              select new CompanyMenuVM
                                              {
+                                                 CompanyUserMenuId = t1.CompanyUserMenuId,
                                                  CompanyId = t2.CompanyId.Value,
                                                  Name = t2.Name,
                                                  CompanyShortName = t4.ShortName,
@@ -250,6 +251,9 @@ namespace KGERP.Controllers
 
                     string str = "";
                     string Menu = "", SubMenu = "", Menuitem = "", Method = "";
+
+                    // Permission map: "Controller|Action|CompanyId" → CompanyUserMenuId
+                    var permMap = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
 
                     foreach (var item in companyModel.DataList)
                     {
@@ -270,7 +274,18 @@ namespace KGERP.Controllers
                         Menuitem = item.SubmenuShortName;
                         Method = item.Controller + "/" + item.Action + "?companyId=" + item.CompanyId + item.Parameter + "&";
                         str += "#" + Menuitem + "|" + Method + "^";
+
+                        // Map route to its CompanyUserMenuId (hidden from URL)
+                        string permKey = item.Controller + "|" + item.Action + "|" + item.CompanyId;
+                        if (!permMap.ContainsKey(permKey))
+                        {
+                            permMap[permKey] = item.CompanyUserMenuId;
+                        }
                     }
+
+                    // Store map in session — attribute reads from here, not from URL
+                    Session["MenuPermissionMap"] = permMap;
+
                     string organizeStr = str + "=";
 
                     int tml = organizeStr.Length / 10;

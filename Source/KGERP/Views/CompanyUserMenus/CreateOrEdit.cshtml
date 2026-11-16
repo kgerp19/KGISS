@@ -1,123 +1,454 @@
 ﻿@model KGERP.ViewModel.CompanyUserMenuViewModel
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "User Menu Permission";
+    bool isEdit = Model.CompanyUserMenu.CompanyUserMenuId > 0;
 }
 
+<style>
+    .perm-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
 
-@using (Html.BeginForm("CreateOrEdit", "CompanyUserMenus", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.AntiForgeryToken()
+    .perm-card-header {
+        background: #34495e;
+        color: #ecf0f1;
+        padding: 14px 20px;
+        font-size: 17px;
+        font-weight: 700;
+    }
 
-    <div class="row">
-        <span style="font-size:25px">Company User Menu</span>
-        <hr style="border-color:#32527B; padding:0px;margin-top: 10px;margin-bottom: 10px; border-width: 2px;" />
+        .perm-card-header i {
+            margin-right: 8px;
+        }
+
+    .perm-card-body {
+        padding: 25px;
+    }
+
+    .section-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #2c3e50;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #3498db;
+    }
+
+        .section-label i {
+            color: #3498db;
+            margin-right: 4px;
+        }
+
+    .perm-box {
+        background: #f0f7ff;
+        border: 1px solid #c8e0f4;
+        border-radius: 6px;
+        padding: 12px 18px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+        .perm-box label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+            .perm-box label:hover {
+                background: #d4e8f7;
+            }
+
+        .perm-box input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+    .lbl-selall {
+        background: #34495e;
+        color: #fff;
+        border-radius: 4px;
+        padding: 5px 12px;
+        margin-right: 10px;
+    }
+
+        .lbl-selall:hover {
+            background: #2c3e50;
+        }
+
+    .btn-save {
+        background: #27ae60;
+        border: none;
+        color: #fff;
+        padding: 9px 28px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 5px;
+    }
+
+        .btn-save:hover {
+            background: #219a52;
+            color: #fff;
+        }
+
+    .btn-close-f {
+        background: #e74c3c;
+        border: none;
+        color: #fff;
+        padding: 9px 22px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 5px;
+        margin-right: 8px;
+    }
+
+        .btn-close-f:hover {
+            background: #c0392b;
+            color: #fff;
+        }
+
+    .ac-list {
+        display: none;
+        position: absolute;
+        z-index: 1050;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 220px;
+        overflow-y: auto;
+        width: calc(100% - 30px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+        .ac-list .ac-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+            .ac-list .ac-item:hover {
+                background: #eaf6ff;
+            }
+
+    /* Existing record info banner */
+    .existing-banner {
+        display: none;
+        background: #fef9e7;
+        border: 1px solid #f1c40f;
+        border-radius: 5px;
+        padding: 10px 15px;
+        margin-top: 15px;
+        font-size: 13px;
+        color: #7d6608;
+    }
+
+        .existing-banner i {
+            color: #f39c12;
+            margin-right: 5px;
+        }
+
+    .select2-container .select2-selection--single {
+        height: 36px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+</style>
+
+<div class="perm-card">
+    <div class="perm-card-header">
+        <i class="fa @(isEdit ? "fa-edit" : "fa-plus-circle")"></i>
+        @(isEdit ? "Edit User Menu Permission" : "Assign New User Menu Permission")
     </div>
 
-    <div class="form-horizontal">
-        <div class="row">
+    <div class="perm-card-body">
+        @using (Html.BeginForm("CreateOrEdit", "CompanyUserMenus", FormMethod.Post, new { enctype = "multipart/form-data", id = "permissionForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.CompanyUserMenu.CompanyUserMenuId, new { id = "hdnId" })
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-            @Html.HiddenFor(model => model.CompanyUserMenu.CompanyUserMenuId)
-            <div class="col-md-6">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CompanyUserMenu.CompanyId, htmlAttributes: new { @class = "control-label col-md-4" })
-                    <div class="col-md-8">
-                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanyId, new SelectList(Model.Companies, "Value", "Text"), "---Select---", new { @class = "dropdownsize form-control", @id = "ddlCompany" })
-                        @Html.ValidationMessageFor(model => model.CompanyUserMenu.CompanyId, "", new { @class = "text-danger" })
+
+            @* ---- Section 1: Menu Selection ---- *@
+            <div class="section-label"><i class="fa fa-cog"></i> Menu Configuration</div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.CompanyUserMenu.CompanyId, htmlAttributes: new { @class = "control-label" })
+                        <span class="text-danger">*</span>
+                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanyId,
+                            new SelectList(Model.Companies, "Value", "Text"), "--- Select Company ---",
+                            new { @class = "form-control searchingDropdown", @id = "ddlCompany" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.CompanyUserMenu.CompanyMenuId, htmlAttributes: new { @class = "control-label" })
+                        <span class="text-danger">*</span>
+                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanyMenuId,
+                            new SelectList(Model.CompanyMenus, "Value", "Text"), "--- Select Menu ---",
+                            new { @class = "form-control searchingDropdown", @id = "ddlCompanyMenu" })
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CompanyUserMenu.CompanyMenuId, htmlAttributes: new { @class = "control-label col-md-4" })
-                    <div class="col-md-8">
-                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanyMenuId, new SelectList(Model.CompanyMenus, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlCompanyMenu" })
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.CompanyUserMenu.CompanySubMenuId, htmlAttributes: new { @class = "control-label" })
+                        <span class="text-danger">*</span>
+                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanySubMenuId,
+                            new SelectList(Model.CompanySubMenus, "Value", "Text"), "--- Select Sub Menu ---",
+                            new { @class = "form-control searchingDropdown", @id = "ddlCompanySubMenu" })
+                    </div>
+                </div>
+                <div class="col-md-6" style="position:relative;">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.CompanyUserMenu.UserId, htmlAttributes: new { @class = "control-label" })
+                        <span class="text-danger">*</span>
+                        @Html.EditorFor(model => model.CompanyUserMenu.UserId, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "form-control",
+                                @id = "txtUserId",
+                            @placeholder = "Type Employee ID or Name...",
+                                @autocomplete = "off"
+                            }
+                        })
+                        <div id="acListUser" class="ac-list"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CompanyUserMenu.CompanySubMenuId, htmlAttributes: new { @class = "control-label col-md-4" })
-                    <div class="col-md-8">
-                        @Html.DropDownListFor(model => model.CompanyUserMenu.CompanySubMenuId, new SelectList(Model.CompanySubMenus, "Value", "Text"), "--Select--", new { @class = "dropdownsize form-control", @id = "ddlCompanySubMenu" })
-                    </div>
-                </div>
+            @* ---- Existing record banner ---- *@
+            <div id="existingBanner" class="existing-banner">
+                <i class="fa fa-info-circle"></i>
+                <span id="bannerText">This permission already exists. Current values loaded — you can update them below.</span>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CompanyUserMenu.UserId, htmlAttributes: new { @class = "control-label col-md-4" })
-                    <div class="col-md-8">
-                        @Html.EditorFor(model => model.CompanyUserMenu.UserId, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.CompanyUserMenu.UserId, "", new { @class = "text-danger" })
-                    </div>
+
+            @* ---- Section 2: Permission Checkboxes ---- *@
+            <div class="section-label" style="margin-top:20px;"><i class="fa fa-shield"></i> Action Permissions</div>
+
+            <div class="perm-box">
+                <label class="lbl-selall">
+                    <input type="checkbox" id="chkSelectAll" /> <strong>Select All</strong>
+                </label>
+                <label>
+                    @Html.CheckBoxFor(model => model.CompanyUserMenu.IsView, new { @class = "action-permission-checkbox" })
+                    <i class="fa fa-eye" style="color:#3498db;"></i> View
+                </label>
+                <label>
+                    @Html.CheckBoxFor(model => model.CompanyUserMenu.IsAdd, new { @class = "action-permission-checkbox" })
+                    <i class="fa fa-plus-circle" style="color:#27ae60;"></i> Add
+                </label>
+                <label>
+                    @Html.CheckBoxFor(model => model.CompanyUserMenu.IsUpdate, new { @class = "action-permission-checkbox" })
+                    <i class="fa fa-pencil" style="color:#f39c12;"></i> Update
+                </label>
+                <label>
+                    @Html.CheckBoxFor(model => model.CompanyUserMenu.IsDelete, new { @class = "action-permission-checkbox" })
+                    <i class="fa fa-trash" style="color:#e74c3c;"></i> Delete
+                </label>
+            </div>
+
+            @* ---- Section 3: Status ---- *@
+            <div class="section-label" style="margin-top:20px;"><i class="fa fa-toggle-on"></i> Status</div>
+            <div class="row">
+                <div class="col-md-3">
+                    <label style="font-size:14px;">
+                        @Html.CheckBoxFor(model => model.CompanyUserMenu.IsActive, new { style = "width:16px;height:16px;" })
+                        Active
+                    </label>
                 </div>
             </div>
 
-
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CompanyUserMenu.IsActive, htmlAttributes: new { @class = "control-label col-md-4" })
-                    <div class="col-md-8">
-                        @Html.EditorFor(model => model.CompanyUserMenu.IsActive)
-                    </div>
-                </div>
+            <hr />
+            <div class="text-right">
+                <a href="@Url.Action("Index")" class="btn btn-close-f"><i class="fa fa-times"></i> Close</a>
+                <button type="submit" id="btnSave" class="btn btn-save"><i class="fa fa-save"></i> @Model.CompanyUserMenu.ButtonName</button>
             </div>
-            <div class="col-md-5">
-                <div class="form-group">
-                    <input type="submit" value="@Model.CompanyUserMenu.ButtonName" id="apply" class="btn btn-primary pull-right" />
-                    <a href="@Url.Action("Index")" class="btn btn-danger pull-right" style="margin-right:8px">
-                        Close <i class="fa fa-close" aria-hidden="true"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+        }
     </div>
-}
+</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryui")
     @Styles.Render("~/Content/cssjqryUi")
 
     <script type="text/javascript">
+        $(document).ready(function () {
 
-        $('#ddlCompany').change(function () {
-            $.ajax({
-                type: "post",
-                url: "/CompanyMenus/GetCompanyMenuSelectModelsByCompany",
-                data: { companyId: $('#ddlCompany').val() },
-                datatype: "json",
-                traditional: true,
-                success: function (data) {
-                    var companyMenu = "<select>";
-                    companyMenu = companyMenu + '<option value="">--Select--</option>';
-                    for (var i = 0; i < data.length; i++) {
-                        companyMenu = companyMenu + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
+            // --- Cascade: Company -> Menu ---
+            $('#ddlCompany').change(function () {
+                $.post('/CompanyMenus/GetCompanyMenuSelectModelsByCompany', { companyId: $(this).val() }, function (data) {
+                    var h = '<option value="">--- Select Menu ---</option>';
+                    for (var i = 0; i < data.length; i++) h += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                    $('#ddlCompanyMenu').html(h);
+                    $('#ddlCompanySubMenu').html('<option value="">--- Select Sub Menu ---</option>');
+                    clearExistingBanner();
+                });
+            });
+
+            // --- Cascade: Menu -> SubMenu ---
+            $('#ddlCompanyMenu').change(function () {
+                $.post('/CompanySubMenus/GetCompanySubMenuSelectModelsByCompanyMenu', { menuId: $(this).val() }, function (data) {
+                    var h = '<option value="">--- Select Sub Menu ---</option>';
+                    for (var i = 0; i < data.length; i++) h += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                    $('#ddlCompanySubMenu').html(h);
+                    clearExistingBanner();
+                });
+            });
+
+            // --- SubMenu change → check existing ---
+            $('#ddlCompanySubMenu').change(function () { checkExisting(); });
+
+            // --- User ID Autocomplete ---
+            var acTimer = null;
+            $('#txtUserId').on('input', function () {
+                var prefix = $(this).val().trim();
+                clearTimeout(acTimer);
+                if (prefix.length < 2) { $('#acListUser').hide().empty(); return; }
+                acTimer = setTimeout(function () {
+                    $.ajax({
+                        url: '/AutoComplete/GetAllEmployeeAutoComplete',
+                        data: { prefix: prefix },
+                        datatype: 'json',
+                        success: function (data) {
+                            var $list = $('#acListUser').empty();
+                            if (data && data.length > 0) {
+                                for (var i = 0; i < Math.min(data.length, 12); i++) {
+                                    var $item = $('<div class="ac-item"><i class="fa fa-user" style="color:#3498db;margin-right:5px;"></i><strong>' + data[i].EmployeeId + '</strong> - ' + data[i].Name + '</div>');
+                                    $item.data('eid', data[i].EmployeeId);
+                                    $item.on('click', function () {
+                                        $('#txtUserId').val($(this).data('eid'));
+                                        $('#acListUser').hide().empty();
+                                        checkExisting(); // check if record exists for this user
+                                    });
+                                    $list.append($item);
+                                }
+                                $list.show();
+                            } else {
+                                $list.html('<div class="ac-item" style="color:#999;text-align:center;">No employee found</div>').show();
+                            }
+                        }
+                    });
+                }, 300);
+            });
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#txtUserId,#acListUser').length) $('#acListUser').hide();
+            });
+
+            // --- Check if permission already exists ---
+            function checkExisting() {
+                var companyId = $('#ddlCompany').val();
+                var menuId = $('#ddlCompanyMenu').val();
+                var subMenuId = $('#ddlCompanySubMenu').val();
+                var userId = $('#txtUserId').val().trim();
+
+                // Only check when all 4 fields are filled
+                if (!companyId || !menuId || !subMenuId || !userId) {
+                    clearExistingBanner();
+                    return;
+                }
+
+                $.post('@Url.Action("GetExistingPermission", "CompanyUserMenus")', {
+                    companyId: companyId,
+                    menuId: menuId,
+                    subMenuId: subMenuId,
+                    userId: userId
+                }, function (res) {
+                    if (res.found) {
+                        // Load existing permission values into the form
+                        $('#hdnId').val(res.companyUserMenuId);
+                        $('#CompanyUserMenu_IsView').prop('checked', res.isView);
+                        $('#CompanyUserMenu_IsAdd').prop('checked', res.isAdd);
+                        $('#CompanyUserMenu_IsUpdate').prop('checked', res.isUpdate);
+                        $('#CompanyUserMenu_IsDelete').prop('checked', res.isDelete);
+                        $('#CompanyUserMenu_IsActive').prop('checked', res.isActive);
+                        updateSelectAll();
+
+                        // Show info banner
+                        $('#bannerText').html('This permission <strong>already exists</strong>. Current values loaded &mdash; you can update them below.');
+                        $('#existingBanner').slideDown(200);
+
+                        // Change button to "Update"
+                        $('#btnSave').html('<i class="fa fa-save"></i> Update');
+                        showToast('Existing permission loaded. Modify and save to update.', 'info');
+                    } else {
+                        // New record
+                        $('#hdnId').val('0');
+                        clearExistingBanner();
+                        $('#btnSave').html('<i class="fa fa-save"></i> Create');
                     }
-                    companyMenu = companyMenu + '</select>';
-                    $('#ddlCompanyMenu').html(companyMenu);
+                });
+            }
+
+            function clearExistingBanner() {
+                $('#existingBanner').slideUp(200);
+            }
+
+            // --- Select All toggle ---
+            var selAllEl = document.getElementById('chkSelectAll');
+            var cbs = document.querySelectorAll('.action-permission-checkbox');
+
+            updateSelectAll();
+
+            selAllEl.addEventListener('change', function () {
+                cbs.forEach(function (cb) { cb.checked = selAllEl.checked; });
+            });
+            cbs.forEach(function (cb) {
+                cb.addEventListener('change', function () { updateSelectAll(); });
+            });
+
+            function updateSelectAll() {
+                var all = true;
+                cbs.forEach(function (c) { if (!c.checked) all = false; });
+                selAllEl.checked = all;
+            }
+
+            // --- Form validation ---
+            $('#permissionForm').on('submit', function (e) {
+                var c = $('#ddlCompany').val();
+                var m = $('#ddlCompanyMenu').val();
+                var s = $('#ddlCompanySubMenu').val();
+                var u = $('#txtUserId').val().trim();
+                if (!c || !m || !s || !u) {
+                    e.preventDefault();
+                    showToast('Please fill all required fields: Company, Menu, Sub Menu, User ID.', 'error');
+                    return false;
                 }
             });
         });
 
-        $('#ddlCompanyMenu').change(function () {
-            $.ajax({
-                type: "post",
-                url: "/CompanySubMenus/GetCompanySubMenuSelectModelsByCompanyMenu",
-                data: { menuId: $('#ddlCompanyMenu').val() },
-                datatype: "json",
-                traditional: true,
-                success: function (data) {
-                    var companySubMenu = "<select>";
-                    companySubMenu = companySubMenu + '<option value="">--Select--</option>';
-                    for (var i = 0; i < data.length; i++) {
-                        companySubMenu = companySubMenu + '<option value=' + data[i].Value + '>' + data[i].Text + '</option>';
-                    }
-                    companySubMenu = companySubMenu + '</select>';
-                    $('#ddlCompanySubMenu').html(companySubMenu);
-                }
-            });
-        });
+        function showToast(msg, type) {
+            var colors = { success: '#27ae60', error: '#e74c3c', info: '#3498db' };
+            var icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            var bg = colors[type] || colors.info;
+            var ic = icons[type] || icons.info;
+            var $t = $('<div style="position:fixed;top:20px;right:20px;z-index:9999;background:' + bg + ';color:#fff;padding:12px 20px;border-radius:6px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.2);max-width:420px;"><i class="fa ' + ic + '" style="margin-right:6px;"></i>' + msg + '</div>');
+            $('body').append($t);
+            setTimeout(function () { $t.fadeOut(400, function () { $(this).remove(); }); }, 4000);
+        }
     </script>
-
 }

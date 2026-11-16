@@ -62,7 +62,7 @@ namespace KGERP.Service.ServiceModel
 
     public class CompanyMenuVM
     {
-       
+        public long CompanyUserMenuId { get; set; }
         public string Name { get; set; }
         [DisplayName("Short Name")]
 

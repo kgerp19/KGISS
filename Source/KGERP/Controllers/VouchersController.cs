@@ -36,9 +36,10 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-        
+
         [ParentAuthorizedAttribute]
-        public async Task<ActionResult> Index(int companyId, DateTime? fromDate, DateTime? toDate, bool? vStatus, int? voucherTypeId )
+        [MenuActionPermission(MenuAction.View)]
+        public async Task<ActionResult> Index(int companyId, DateTime? fromDate, DateTime? toDate, bool? vStatus, int? voucherTypeId)
         {
             if (companyId > 0)
             {
@@ -53,13 +54,13 @@ namespace KGERP.Controllers
             {
                 toDate = DateTime.Now;
             }
-            if (vStatus==null)
+            if (vStatus == null)
             {
                 vStatus = true;
             }
-                      
+
             VoucherModel voucherModel = new VoucherModel();
-            voucherModel = await voucherService.GetVouchersList(companyId, fromDate, toDate,vStatus, voucherTypeId);
+            voucherModel = await voucherService.GetVouchersList(companyId, fromDate, toDate, vStatus, voucherTypeId);
             voucherModel.VoucherTypesList = new SelectList(_accountingService.VoucherTypesDownList(companyId), "Value", "Text");
             voucherModel.StrFromDate = fromDate.Value.ToString("yyyy-MM-dd");
             voucherModel.StrToDate = toDate.Value.ToString("yyyy-MM-dd");
