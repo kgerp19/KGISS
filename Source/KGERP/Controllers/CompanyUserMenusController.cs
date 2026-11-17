@@ -42,7 +42,7 @@ namespace KGERP.Controllers
             List<CompanyUserMenuModel> models;
 
             // Use filtered search if any filter is applied
-            if (!string.IsNullOrEmpty(searchText) || companyId > 0 || menuId > 0 || subMenuId > 0)
+            if (!string.IsNullOrEmpty(searchText) || (companyId > 0 && menuId > 0) || subMenuId > 0)
             {
                 models = companyUserMenuService.GetCompanyUserMenus(searchText, companyId, menuId, subMenuId);
             }

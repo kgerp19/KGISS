@@ -50,6 +50,7 @@ namespace KGERP.Service.Implementation
                         from m in mJoin.DefaultIfEmpty()
                         join sm in context.CompanySubMenus on um.CompanySubMenuId equals sm.CompanySubMenuId into smJoin
                         from sm in smJoin.DefaultIfEmpty()
+                        where m.IsWeb && sm.IsWeb && um.IsActive && c.IsActive && m.IsActive && sm.IsActive
                         select new CompanyUserMenuModel
                         {
                             CompanyUserMenuId = um.CompanyUserMenuId,

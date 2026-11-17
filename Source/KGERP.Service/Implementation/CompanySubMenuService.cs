@@ -95,6 +95,12 @@ namespace KGERP.Service.Implementation
 
             return companySubMenus.Select(x => new SelectModel { Text = x.Name, Value = x.CompanySubMenuId }).ToList();
         }
+        public List<SelectModel> GetCompanySubMenuSelectModelsByCompanyMenuForWeb(int menuId)
+        {
+            List<CompanySubMenu> companySubMenus = context.CompanySubMenus.Where(x => x.CompanyMenuId == menuId && x.IsWeb).ToList();
+
+            return companySubMenus.Select(x => new SelectModel { Text = x.Name, Value = x.CompanySubMenuId }).ToList();
+        }
 
         public bool DeleteCompanySubMenu(int? id)
         {

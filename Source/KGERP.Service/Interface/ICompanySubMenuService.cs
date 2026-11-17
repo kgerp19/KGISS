@@ -10,6 +10,7 @@ namespace KGERP.Service.Interface
         List<CompanySubMenuModel> GetCompanySubMenus(string searchText);
         bool SaveCompanySubMenu(int id, CompanySubMenuModel companySubMenu);
         List<SelectModel> GetCompanySubMenuSelectModelsByCompanyMenu(int menuId);
+        List<SelectModel> GetCompanySubMenuSelectModelsByCompanyMenuForWeb(int menuId);
         bool DeleteCompanySubMenu(int? id);
     }
 }

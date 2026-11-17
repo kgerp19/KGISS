@@ -91,6 +91,11 @@ namespace KGERP.Service.Implementation
             IQueryable<CompanyMenu> queryable = context.CompanyMenus.Where(x => x.CompanyId == companyId);
             return queryable.ToList().Select(x => new SelectModel { Text = x.Name, Value = x.CompanyMenuId }).OrderBy(x => x.Text).ToList();
         }
+        public List<SelectModel> GetCompanyMenuSelectModelsByCompanyForWeb(int companyId)
+        {
+            IQueryable<CompanyMenu> queryable = context.CompanyMenus.Where(x => x.CompanyId == companyId && x.IsWeb);
+            return queryable.ToList().Select(x => new SelectModel { Text = x.Name, Value = x.CompanyMenuId }).OrderBy(x => x.Text).ToList();
+        }
 
 
 

@@ -84,6 +84,14 @@ namespace KGERP.Controllers
             return Json(companySubMenus, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost]
+        
+        public JsonResult GetCompanySubMenuSelectModelsByCompanyMenuForWeb(int menuId)
+        {
+            List<SelectModel> companySubMenus = companySubMenuService.GetCompanySubMenuSelectModelsByCompanyMenuForWeb(menuId);
+            return Json(companySubMenus, JsonRequestBehavior.AllowGet);
+        }
+
 
 
         // GET: SubMenus/Delete/5

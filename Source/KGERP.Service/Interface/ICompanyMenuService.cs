@@ -12,6 +12,7 @@ namespace KGERP.Service.Interface
         bool SaveCompanyMenu(int id, CompanyMenuModel companyMenu);
         List<SelectModel> GetCompanyMenuSelectModelsByCompanyId(int? companyId);
         List<SelectModel> GetCompanyMenuSelectModelsByCompany(int companyId);
+        List<SelectModel> GetCompanyMenuSelectModelsByCompanyForWeb(int companyId);
         //ProductSubCategoryModel GetProductSubCategory(int id);
         //bool SaveProductSubCategory(int id, ProductSubCategoryModel model);
         //bool DeleteProductSubCategory(int id);

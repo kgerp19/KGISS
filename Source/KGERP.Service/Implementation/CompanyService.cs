@@ -74,7 +74,7 @@ namespace KGERP.Service.Implementation
 
         public List<SelectModel> GetAllCompanySelectModels()
         {
-            return context.Companies.OrderBy(x => x.Name).ToList().Select(x => new SelectModel()
+            return context.Companies.Where(x =>x.IsActive).OrderBy(x => x.Name).ToList().Select(x => new SelectModel()
             {
                 Text = x.Name.ToString(),
                 Value = x.CompanyId
