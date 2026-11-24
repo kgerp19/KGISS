@@ -243,6 +243,14 @@ namespace KGERP.Service.ServiceModel
         public string value { get; set; }
      
     }
+    public class VMFinancialReportSubmission
+    {
+        public long ReportApprovalId { get; set; }
+        public int Month { get; set; }
+        public int Year { get; set; }
+        public long ReportApprovalDetail { get; set; }
+
+    }
     public class EmployeeVm
     {
         public long Id { get; set; }

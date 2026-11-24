@@ -1309,6 +1309,22 @@ namespace KGERP.Services.WareHouse
         {
             long result = -1;
             MaterialReceive model = await _db.MaterialReceives.FindAsync(vmModel.MaterialReceiveId);
+
+            // Get month & year only once
+            int month = model.ReceivedDate.Value.Month;
+            int year = model.ReceivedDate.Value.Year;
+
+            bool isReportSubmitted = await FinancialReportSubmissionService.GetFinancialReportSubmission(
+                _db,
+                model.CompanyId,
+                month,
+                year
+            );
+
+            // Already acknowledged OR report submitted – nothing to do
+            if (isReportSubmitted || model.IsSubmitted)
+                return result;
+
             model.IsSubmitted = true;
 
             model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
@@ -6019,16 +6035,34 @@ namespace KGERP.Services.WareHouse
 
 
 
-        public async Task<long> SubmitOrderDeliver(VMOrderDeliverDetail vmModel)
+        public async Task<(long, string)> SubmitOrderDeliver(VMOrderDeliverDetail vmModel)
         {
 
             long result = -1;
             OrderDeliver model = await _db.OrderDelivers.FindAsync(vmModel.OrderDeliverId);
+
+            // Get month & year only once
+            int month = model.DeliveryDate.Value.Month;
+            int year = model.DeliveryDate.Value.Year;
+
+            bool isReportSubmitted = await FinancialReportSubmissionService.GetFinancialReportSubmission(
+                _db,
+                model.CompanyId.Value,
+                month,
+                year
+            );
+
+            // Already acknowledged OR report submitted – nothing to do
+            if (isReportSubmitted || model.IsSubmitted)
+                return (result, model.ChallanNo + " Unable to submit Due to -- Your financial report or this Order Deliver has already been submitted.");
+
+
+
             model.IsSubmitted = true;
 
             model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;
             model.ModifedDate = DateTime.Now;
-
+           
             VMOrderDeliverDetail AccData = await WareHouseOrderDeliverDetailGet(vmModel.CompanyFK.Value, Convert.ToInt32(vmModel.OrderDeliverId));
             AccData.IntegratedFrom = "MaterialReceive";
             var resultAccounting = await _accountingService.AccountingSalesPushISS(AccData);
@@ -6042,7 +6076,7 @@ namespace KGERP.Services.WareHouse
                 }
             }
 
-            return result;
+            return (AccData.OrderDeliverId, model.ChallanNo + " This  Order Deliver has been successfully submitted and an accounting voucher has been generated.");
         }
 
         public async Task<string> OTPResubmite(long integrationId, int companyId)
@@ -6222,6 +6256,23 @@ namespace KGERP.Services.WareHouse
         {
             long result = -1;
             StockAdjust model = await _db.StockAdjusts.FindAsync(vmModel.StockAdjustId);
+
+            // Get month & year only once
+            int month = model.AdjustDate.Month;
+            int year = model.AdjustDate.Year;
+
+            bool isReportSubmitted = await FinancialReportSubmissionService.GetFinancialReportSubmission(
+                _db,
+                model.CompanyId,
+                month,
+                year
+            );
+
+            // Already acknowledged OR report submitted – nothing to do
+            if (isReportSubmitted || model.IsFinalized)
+                return result;
+
+
             model.IsFinalized = true;
 
             model.ModifiedBy = System.Web.HttpContext.Current.User.Identity.Name;

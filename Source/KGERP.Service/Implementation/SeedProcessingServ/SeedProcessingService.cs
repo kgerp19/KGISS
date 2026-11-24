@@ -225,6 +225,23 @@ namespace KGERP.Service.Implementation.SeedProcessingServ
             long result = -1;
             bool SeedProcessingSubAndUnSub = !detailsVM.IsSumitted;
             var SeedProdessingData = await _db.SeedProcessings.FirstOrDefaultAsync(x => x.SeedProcessingId == detailsVM.SeedProcessingId);
+
+            // Get month & year only once
+            int month = SeedProdessingData.SeedProcessDate.Value.Month;
+            int year = SeedProdessingData.SeedProcessDate.Value.Year;
+
+            bool isReportSubmitted = await FinancialReportSubmissionService.GetFinancialReportSubmission(
+                _db,
+                SeedProdessingData.CompanyId.Value,
+                month,
+                year
+            );
+
+            // Already acknowledged OR report submitted – nothing to do
+            if (isReportSubmitted || SeedProdessingData.IsSubmitted)
+                return result;
+
+
             if (SeedProdessingData.SeedProcessingId > 0)
             {
                 SeedProdessingData.IsSubmitted = SeedProcessingSubAndUnSub;

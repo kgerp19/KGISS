@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.EMMA;
 using KGERP.Data.Models;
+using KGERP.Service.CommonModels.Model;
 using KGERP.Service.Configuration;
 using KGERP.Service.Implementation;
 using KGERP.Service.Implementation.Marketing;
@@ -839,6 +840,7 @@ namespace KGERP.Controllers
         [HttpPost]
         public async Task<ActionResult> WareHouseOrderDeliverDetail(VMOrderDeliverDetail vmModel, VMOrderDeliverDetailPartial vmModelList)
         {
+            string messages = string.Empty;
             if (vmModel.ActionEum == ActionEnum.Add)
             {
                 if (vmModel.OrderDeliverId == 0)
@@ -876,14 +878,15 @@ namespace KGERP.Controllers
             //}
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
-                await _service.SubmitOrderDeliver(vmModel);
+                var (result, message) = await _service.SubmitOrderDeliver(vmModel);
+                messages = message;
             }
             else
             {
                 return RedirectToAction("Error", "Home");
             }
 
-            return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId });
+            return RedirectToAction(nameof(WareHouseOrderDeliverDetail), new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId, message= messages });
         }
 
 
@@ -1610,7 +1613,9 @@ namespace KGERP.Controllers
 
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
-                vmModel.OrderDeliverId = await _service.SubmitOrderDeliver(vmModel);
+                 var(result, message)  = await _service.SubmitOrderDeliver(vmModel);
+
+                vmModel.OrderDeliverId = result;
             }
             else
             {
@@ -1662,9 +1667,9 @@ namespace KGERP.Controllers
 
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
-                vmModel.OrderDeliverId = await _service.SubmitOrderDeliver(vmModel);
+                 var(result, message) = await _service.SubmitOrderDeliver(vmModel);
 
-
+                vmModel.OrderDeliverId = result;
             }
             else
             {
@@ -1677,7 +1682,9 @@ namespace KGERP.Controllers
         [HttpPost]
         public async Task<ActionResult> FeedOrderDeliverSubmit(VMOrderDeliverDetail vmModel)
         {
-            vmModel.OrderDeliverId = await _service.SubmitOrderDeliver(vmModel);
+            var (result, message) = await _service.SubmitOrderDeliver(vmModel);
+
+            vmModel.OrderDeliverId = result;
             //vmModel.OrderDeliverId = await _service.SubmitMultiOrderDeliver(vmModel);
             return RedirectToAction("FeedOrderDeliverDetail", "WareHouse", new { companyId = vmModel.CompanyFK, orderDeliverId = vmModel.OrderDeliverId });
         }
@@ -1868,7 +1875,9 @@ namespace KGERP.Controllers
 
             else if (vmModel.ActionEum == ActionEnum.Finalize)
             {
-                vmModel.OrderDeliverId = await _service.SubmitOrderDeliver(vmModel);
+                var (result, message) = await _service.SubmitOrderDeliver(vmModel);
+
+                vmModel.OrderDeliverId = result;
                 //vmModel.OrderDeliverId = await _service.KFMALSubmitMultiOrderDeliver(vmModel);
 
             }

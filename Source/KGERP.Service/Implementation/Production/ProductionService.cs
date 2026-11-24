@@ -2276,6 +2276,22 @@ namespace KGERP.Services.Production
             int result = -1;
             Prod_Reference prodReference = await _db.Prod_Reference.FindAsync(id);
 
+            // Get month & year only once
+            int month = prodReference.ReferenceDate.Month;
+            int year = prodReference.ReferenceDate.Year;
+
+            bool isReportSubmitted = await FinancialReportSubmissionService.GetFinancialReportSubmission(
+                _db,
+                prodReference.CompanyId.Value,
+                month,
+                year
+            );
+
+            // Already acknowledged OR report submitted – nothing to do
+            if (isReportSubmitted || prodReference.IsSubmitted)
+                return result;
+
+
 
             if (prodReference != null)
             {

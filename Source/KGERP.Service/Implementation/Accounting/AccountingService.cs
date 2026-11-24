@@ -25,6 +25,24 @@ using System.Threading.Tasks;
 namespace KGERP.Service.Implementation
 
 {
+    public static class FinancialReportSubmissionService
+    {
+
+        public static async Task<bool> GetFinancialReportSubmission(ERPEntities db, int CompanyID, int Month, int Year)
+        {
+            bool IsSubmitted = false;
+            List<VMFinancialReportSubmission> vmFinancialReportSubmissionList = await db.Database
+                            .SqlQuery<VMFinancialReportSubmission>("exec FinancialReportSubmissionGet {0}, {1}, {2}", CompanyID, Month, Year)
+                            .ToListAsync();
+            if (vmFinancialReportSubmissionList.Any())
+            {
+                IsSubmitted = true;
+            }
+            return IsSubmitted;
+        }
+
+
+    }
     public class AccountingService
     {
         private readonly ERPEntities _db;
@@ -2752,6 +2770,22 @@ namespace KGERP.Service.Implementation
             if (voucher == null)
                 return result;
 
+            var data = (from t1 in _db.ReportApprovalDetails
+                        join t2 in _db.ReportApprovals on t1.ReportApprovalId equals t2.ReportApprovalId
+                        where t2.CompanyId == voucher.CompanyId &&
+                              t2.Month == voucher.VoucherDate.Value.Month &&
+                              t2.Year == voucher.VoucherDate.Value.Year &&
+                              t1.ApprovalStatus == 3 && t2.IsActive == true
+                        orderby t1.ReportApprovalDetail1 descending
+                        select new
+                        {
+                            ReportApprovalId = t2.ReportApprovalId,
+                            Month = t2.Month,
+                            Year = t2.Year,
+                            ReportApprovalDetailId = t1.ReportApprovalDetail1,
+                            Status = t1.ApprovalStatus,
+                        }).FirstOrDefault();
+
             // Get debit, credit and row count in a single query
             var totals = await _db.VoucherDetails
                 .Where(x => x.VoucherId == voucherId && x.IsActive == true && x.IsVirtual == false)
@@ -2780,11 +2814,18 @@ namespace KGERP.Service.Implementation
             voucher.IsSubmit = true;
             voucher.TotalAmount = totals.TotalCredit;
 
-            if (await _db.SaveChangesAsync() > 0)
+            if (data == null)
             {
-                result = voucher.VoucherId;
-            }
+                if (await _db.SaveChangesAsync() > 0)
+                {
+                    result = voucher.VoucherId;
 
+                }
+            }
+            else
+            {
+                result = -1;
+            }
             return result;
         }
 
@@ -2954,8 +2995,8 @@ namespace KGERP.Service.Implementation
                         Status = (int)EnumSmSStatus.Pending,
                         Remarks = item.VoucherNo,
                         RowTime = DateTime.Now,
-                        IsActive=true,
-                        CreatedDate=DateTime.Now
+                        IsActive = true,
+                        CreatedDate = DateTime.Now
 
                     };
                     erpSmsList.Add(erpSms);
@@ -6266,7 +6307,7 @@ namespace KGERP.Service.Implementation
                         CompanyId = vmOrderDeliverDetail.CompanyFK.Value,
                         Date = DateTime.Now, // Set to dispatch/current time when OTP is sent
                         Status = (int)EnumSmSStatus.Pending,
-                        PhoneNo =vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
+                        PhoneNo = vmOrderDeliverDetail.CustomerPhone.Replace(" ", "").Replace("-", ""),
                         SmsType = 3,
                         Remarks = vmOrderDeliverDetail.OrderNo,
                         TryCount = 0,
