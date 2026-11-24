@@ -81,7 +81,7 @@ namespace KGERP.Service.Implementation
             return query.OrderBy(x => x.UserId).ThenBy(x => x.CompanyName).ToList();
         }
 
-        public CompanyUserMenuModel GetCompanyUserMenu(int id)
+        public CompanyUserMenuModel GetCompanyUserMenu(int id=0)
         {
             if (id <= 0)
             {

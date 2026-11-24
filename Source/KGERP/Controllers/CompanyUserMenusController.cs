@@ -58,7 +58,7 @@ namespace KGERP.Controllers
 
 
         [HttpGet]
-        public ActionResult CreateOrEdit(int id)
+        public ActionResult CreateOrEdit(int id=0)
         {
             CompanyUserMenuViewModel vm = new CompanyUserMenuViewModel();
             vm.CompanyUserMenu = companyUserMenuService.GetCompanyUserMenu(id);
